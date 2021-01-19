@@ -1,0 +1,14 @@
+<div class="media-size" [ngSwitch]="type" (click)="play()" (mouseover)="playVideo()" (mouseleave)="stopVideo()">
+  <ng-template [ngSwitchCase]="'video'">
+    <video #videoElement class="media-size">
+      <source src="{{mediaURI}}" type="{{mediaType}}">
+    </video>
+  </ng-template>
+  <ng-template [ngSwitchCase]="'image'">
+    <img src="{{mediaURI}}" class="media-size" alt="">
+  </ng-template>
+  <ng-template ngSwitchDefault>
+    <a href="{{mediaURI}}" target="_blank">Download</a>
+  </ng-template>
+</div>
+

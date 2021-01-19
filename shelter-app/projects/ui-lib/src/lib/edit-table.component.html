@@ -1,0 +1,72 @@
+<div class="table-tool-menu" *ngIf="showMenu">
+  <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Table menu">
+    <mat-icon>more_vert</mat-icon>
+  </button>
+  <span>{{title}}</span>
+  <mat-form-field appearance="standard" [floatLabel]="'always'">
+    <mat-label>Search input</mat-label>
+    <input matInput type="text" (keyup)="applyDataFilter($event)" placeholder="Enter search phrase...">
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+</div>
+<mat-menu #menu="matMenu">
+  <button mat-menu-item (click)="add()" *ngIf="canAdd">
+    <mat-icon>add</mat-icon>
+    <span>Add</span>
+  </button>
+  <button mat-menu-item (click)="view()" *ngIf="canView">
+    <mat-icon>pageview</mat-icon>
+    <span>View</span>
+  </button>
+  <button mat-menu-item (click)="edit()" *ngIf="canEdit">
+    <mat-icon>edit</mat-icon>
+    <span>Edit</span>
+  </button>
+  <button mat-menu-item (click)="delete()" *ngIf="canDelete">
+    <mat-icon>delete</mat-icon>
+    <span>Delete</span>
+  </button>
+  <button mat-menu-item (click)="refresh()">
+    <mat-icon>refresh</mat-icon>
+    <span>Refresh</span>
+  </button>
+  <button mat-menu-item (click)="columnEditor()">
+    <mat-icon>tune</mat-icon>
+    <span>Column config</span>
+  </button>
+  <button mat-menu-item *ngFor="let command of extendCommands" (click)="customMenu(command.commandName)">
+    <mat-icon>{{command.iconName}}</mat-icon>
+    <span>{{command.menuName}}</span>
+  </button>
+</mat-menu>
+<div class="table-container">
+  <table mat-table [dataSource]="dataSource" class="edit-table"
+         matSort matSortDisableClear matSortDirection="desc">
+    <ng-container matColumnDef="#select">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox (change)="$event ? selection.masterToggle(dataSource) : null"
+                      [checked]="selection.hasValue() && selection.isAllSelected(dataSource)"
+                      [indeterminate]="selection.hasValue() && !selection.isAllSelected(dataSource)">
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let row">
+        <mat-checkbox (click)="$event.stopPropagation()"
+                      (change)="$event ? selection.toggle(row) : null"
+                      [checked]="selection.isSelected(row)">
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <ng-container [matColumnDef]="column.columnId" *ngFor="let column of columns">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> {{column.columnName}} </th>
+      <td mat-cell *matCellDef="let element">
+        <lib-show-value class="restrict-height" [value]="getColumnValue(element, column.columnId)" [row]="getColumnMedia(element, column.columnId)" *ngIf="column.isMedia && getColumnMedia(element, column.columnId); else simpleString"></lib-show-value>
+        <ng-template #simpleString>{{getColumnValue(element, column.columnId)}}</ng-template>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columnsWithSelect"></tr>
+    <tr mat-row class="row-restrict" *matRowDef="let row; columns: columnsWithSelect;" (click)="rowClick(row)" [ngClass]="{'highlight': selectionHighlighted.isSelected(row)}"></tr>
+  </table>
+  <mat-paginator [length]="resultsLength" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+</div>

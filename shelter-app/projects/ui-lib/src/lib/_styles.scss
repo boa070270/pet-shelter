@@ -1,0 +1,19 @@
+ul.gmat-list {
+  list-style: none;
+  li.gmat-icon-baseline::before {
+    font-family: 'Material Icons';
+  }
+  li.gmat-icon-outline::before {
+    font-family: 'Material Icons Outlined';
+  }
+  li.gmat-icon-round::before {
+    font-family: 'Material Icons Round';
+  }
+  li.gmat-icon-sharp::before {
+    font-family: 'Material Icons Sharp';
+  }
+  li.gmat-icon-twotone::before {
+    font-family: 'Material Icons Two Tone';
+  }
+}
+

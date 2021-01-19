@@ -1,0 +1,11 @@
+<mat-card *ngIf="data">
+  <mat-card-content class="tablet-content">
+    <img src="{{imgSrc}}" alt="The photo" class="tablet" *ngIf="imgSrc">
+    <table>
+      <tr *ngFor="let fld of fields"><th>{{fld.name}}</th><td>{{fld.value}}</td></tr>
+    </table>
+  </mat-card-content>
+  <mat-card-actions>
+    <a [routerLink]="['/pet', data.id]">Read...</a>
+  </mat-card-actions>
+</mat-card>

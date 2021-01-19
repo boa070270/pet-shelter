@@ -1,0 +1,13 @@
+<div class="pet-show" *ngIf="data">
+  <div class="pet-info">
+    <table>
+      <tr *ngFor="let item of petsData"><th>{{item.name}}</th><td>{{item.value}}</td></tr>
+    </table>
+    <lib-carousel [datasource]="datasource" *ngIf="datasource" [itemTemplate]="tmplCarousel"
+                    [showNumberItems]="2"></lib-carousel>
+  </div>
+</div>
+<ng-template #tmplCarousel let-ctx>
+  <lib-show-value class="restrict-height" [row]="ctx" ></lib-show-value>
+</ng-template>
+<ng-content></ng-content>

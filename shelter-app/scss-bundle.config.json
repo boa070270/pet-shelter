@@ -1,0 +1,6 @@
+{
+  "bundlerOptions": {
+    "entryFile": "./projects/ui-lib/src/lib/_styles.scss",
+    "outFile": "./dist/ui-lib/_ui-lib.styles.scss"
+  }
+}

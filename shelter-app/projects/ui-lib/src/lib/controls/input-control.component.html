@@ -1,0 +1,23 @@
+<div class="ui-input">
+  <label>
+    {{title}}
+    <input [type]="type" (blur)="touch()" [dir]="dir"
+           [accessKey]="accessKey"
+           [dir]="dir"
+           [id]="id"
+           [value]="value"
+           [hidden]="hidden"
+           [type]="type"
+           [disabled]="disabled"
+           [name]="name"
+           [formTarget]="formTarget"
+           [formAction]="formAction"
+           [formNoValidate]="formNoValidate"
+           [formMethod]="formMethod"
+           [formEnctype]="formEnctype"
+           [autofocus]="autofocus"
+           [tabIndex]="tabIndex"
+           (change)="onChange($event)"
+    >
+  </label>
+</div>

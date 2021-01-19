@@ -1,0 +1,14 @@
+<mat-card *ngIf="data">
+  <mat-card-header>
+    <mat-card-title>{{data.title}}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="tablet-content">
+    <img src="{{imgSrc}}" alt="The first photo" class="tablet" *ngIf="imgSrc">
+    <div>
+      <p>{{data.summary}}</p>
+      <p>{{data.body | plainHtml: 512}}</p>
+      <a [routerLink]="['/page', data.id]">Read more...</a>
+      <p>Date: {{data.created}}</p>
+    </div>
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,12 @@
+<div *ngFor="let items of searchResult" class="result-block">
+    <ul class="list-masonry" [style.column-count]="displayAs === 'tablet'? 1 : null">
+      <li class="list-item" *ngFor="let item of items">
+        <app-search-type [searchType]="item" [displayAs]="displayAs"></app-search-type>
+      </li>
+    </ul>
+</div>
+<div libIsVisible>
+  <div class="spinner" [style.display]="canBeLoaded?'none':'block'">
+    <mat-spinner></mat-spinner>
+  </div>
+</div>

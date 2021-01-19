@@ -1,0 +1,25 @@
+<ng-container [ngSwitch]="key">
+  <div class="card-item mat-elevation-z4" *ngSwitchCase="'asset'" >
+    <mat-card >
+      <img mat-card-image src="/api/v1/assets/{{searchType.id}}" alt="">
+      <mat-card-content>
+        {{searchType.comment}}
+      </mat-card-content>
+      <mat-card-footer>
+        <span>Date: {{searchType.created}}</span>
+      </mat-card-footer>
+    </mat-card>
+  </div>
+  <div class="card-item mat-elevation-z4" *ngSwitchCase="'card_page'" >
+    <app-card-page [data]="searchType" [animate]="false"></app-card-page>
+  </div>
+  <div class="card-item mat-elevation-z4" *ngSwitchCase="'card_pet'" >
+    <app-card-pet [data]="searchType" [animate]="false"></app-card-pet>
+  </div>
+  <div class="tablet-item mat-elevation-z4" *ngSwitchCase="'tablet_page'" >
+  <app-tablet-page [data]="searchType" [animate]="false"></app-tablet-page>
+  </div>
+  <div class="tablet-item mat-elevation-z4" *ngSwitchCase="'tablet_pet'"  >
+  <app-tablet-pet [data]="searchType" [animate]="false"></app-tablet-pet>
+  </div>
+</ng-container>

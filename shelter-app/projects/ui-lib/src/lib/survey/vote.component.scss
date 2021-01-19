@@ -1,0 +1,79 @@
+:host {
+  display: block;
+  margin: 0;
+  padding: {
+    top: 0.2em;
+    bottom: 0.2em;
+  }
+}
+ul {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+li {
+  position: relative;
+  padding: {
+    top: 0.5em;
+    bottom: 0.4em;
+    left: 0;
+    right: 0;
+  }
+  &::before {
+    border-radius: 1em;
+    -moz-border-radius: 1em;
+    -webkit-border-radius: 1em;
+    padding: 0.4em;
+  }
+  &.is-checked::before {
+    background: #007BFF;
+  }
+}
+ul.vertical {
+  li {
+    display: block;
+    background: #F8F6F6;
+    span {
+      margin-left: 10px;
+    }
+
+    &.is-checked {
+      background: #b1bfbf;
+    }
+  }
+}
+ul.horizontal {
+  li {
+    display: inline;
+    padding: 0;
+    span {
+      visibility: hidden;
+      position: absolute;
+      z-index: 1;
+      bottom: 100%;
+      left: 10px;
+      background-color: black;
+      color: #fff;
+      text-align: center;
+      font-size: smaller;
+      border-radius: 6px;
+      padding: 5px;
+    }
+    &:hover, &:active {
+      span {
+        visibility: visible;
+        display: block;
+      }
+    }
+  }
+}
+
+.never {
+  display: none;
+}
+.always {
+  visibility: visible;
+}
+.oncomplete {
+  visibility: hidden;
+}

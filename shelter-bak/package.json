@@ -1,0 +1,39 @@
+{
+    "name": "shelter-pets-api",
+    "version": "1.0.0",
+    "description": "This API provides main functionality to pets shelter",
+    "main": "src/app.js",
+    "scripts": {
+        "dev": "docker-compose -f devops/docker-compose.yml up --build -d",
+        "dev-stop": "docker-compose -f devops/docker-compose.yml down",
+        "start": "nodemon --inspect src/app.js",
+        "test-functional": "mocha --timeout 15000 ./tests/functional/*.js",
+        "test-integration": "mocha --timeout 15000 ./tests/integration/*.js"
+    },
+    "author": {
+        "email": "boa070270@gmail.com"
+    },
+    "license": "MIT",
+    "dependencies": {
+        "aws-sdk": "^2.825.0",
+        "connect": "^3.7.0",
+        "elasticsearch": "^16.7.1",
+        "lodash": "^4.17.20",
+        "pg": "^8.3.3",
+        "pg-large-object": "^2.0.0",
+        "pino": "^6.6.1",
+        "stream-chain": "^2.2.3",
+        "swagger-tools": "^0.10.4",
+        "uuid": "^8.3.2",
+        "uuid-random": "^1.3.2",
+        "yaml": "^1.10.0"
+    },
+    "devDependencies": {
+        "@hapi/code": "^8.0.1",
+        "axios": "^0.21.1",
+        "eslint": "^7.11.0",
+        "form-data": "^3.0.0",
+        "mocha": "^7.1.1",
+        "nodemon": "^2.0.2"
+    }
+}

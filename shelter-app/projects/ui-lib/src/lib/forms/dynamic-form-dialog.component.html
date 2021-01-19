@@ -1,0 +1,7 @@
+<form [formGroup]="formGroup">
+  <lib-form-fields [formGroup]="formGroup" [formConfiguration]="formConfiguration"></lib-form-fields>
+</form>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()" style="width: 30%">Cancel</button>
+  <button mat-button (click)="finish()" cdkFocusInitial style="width: 30%">Finish</button>
+</div>

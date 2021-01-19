@@ -1,0 +1,7 @@
+<div class="carousel-container">
+  <div class="carousel-items-holder">
+    <div class="carousel-item" *ngFor="let item of items" >
+      <ng-template [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{$implicit:item}"></ng-template>
+    </div>
+  </div>
+</div>

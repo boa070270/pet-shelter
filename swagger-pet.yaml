@@ -1,0 +1,1793 @@
+swagger: '2.0'
+info:
+    description:
+        This API provides main functionality to pets shelter
+    version: 1.0.0
+    title: Shelter Pets API
+    contact:
+        email: boa070270@gmail.com
+
+    license:
+        name: Apache 2.0
+        url: http://www.apache.org/licenses/LICENSE-2.0.html
+securityDefinitions:
+    BasicAuth:
+        type: basic
+    ApiKeyAuth:
+        type: apiKey
+        in: header
+        name: X-API-Key
+    OAuth2:
+        type: oauth2
+        flow: accessCode
+        authorizationUrl: https://example.com/oauth/authorize
+        tokenUrl: https://example.com/oauth/token
+        scopes:
+            writer: Grants write access
+            admin: Grants read and write access to administrative information
+tags:
+    -   name: public
+        description: Everything to display public resources of this site
+    -   name: maintain
+        description: Everything to maintain this site
+
+basePath: /api/v1
+schemes:
+    - http
+    - https
+
+paths:
+    /lang:
+        x-swagger-router-controller: lang
+        get:
+            x-query: 'select lang, display_name as "displayName", rate from shelter_lang'
+            summary: Get all available languages
+            operationId: getLangs
+            produces:
+                - application/json
+            tags:
+                - public
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: all available languages
+                    schema:
+                        $ref: '#/definitions/LanguagesResponse'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        post:
+            summary: add or update language
+            operationId: upsetLang
+            x-query: >
+              with data as (
+                  select
+                  cast(:lang.lang as varchar) as lang,
+                  cast(:lang.displayName as varchar) as display_name,
+                  cast(:lang.rate as integer) as rate
+              ), upd as (
+                  update shelter_lang l
+                  set display_name = d.display_name,
+                      rate = d.rate
+                  from data d
+                  where l.lang = d.lang
+                  returning l.lang
+              )
+              insert into shelter_lang(lang, display_name, rate)
+              select lang, display_name, rate from data d2
+              where not exists(select from upd)
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin]
+            produces:
+                - application/json
+            tags:
+                - maintain
+            parameters:
+                -   in: body
+                    name: lang
+                    description: language info
+                    schema:
+                        $ref: '#/definitions/LanguageType'
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /lang/{lang}:
+        x-swagger-router-controller: lang
+        delete:
+            x-query: 'delete from shelter_lang where lang = :lang'
+            summary: delete language
+            operationId: deleteLang
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin]
+            produces:
+                - application/json
+            parameters:
+                -   in: path
+                    name: lang
+                    required: true
+                    type: string
+                    description: language id
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /menu:
+        x-swagger-router-controller: menu
+        get:
+            x-query:
+              - select id as "path", component, role, position, parent_id as "parentId" from menu
+              - select id, lang, title from menu_titles
+            summary: Get all menu
+            operationId: getMenus
+            produces:
+                - application/json
+            tags:
+                - public
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: all menu
+                    schema:
+                        $ref: '#/definitions/MenusResponse'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        post:
+            x-query:
+              - with data as (select
+                          cast(:menu.path as varchar) as id,
+                          cast(:menu.position as integer) as position,
+                          cast(:menu.parentId as varchar) as parent_id,
+                          cast(:menu.component as varchar) as component,
+                          cast(:menu.role as varchar) as role
+                ), upd as (
+                   update menu m
+                   set position = d.position,
+                       parent_id = d.parent_id,
+                       component = d.component,
+                       role = d.role
+                   from data d
+                   where m.id = d.id
+                   returning m.id
+                ), ins as (
+                  insert into menu (id, position, parent_id, component, role)
+                  select id, position, parent_id, component, role from data
+                  where not exists (select * from upd)
+                )
+                update updates set last_updated = now() where entity_id = 'Menu'
+              -
+                with data as (select
+                    cast(:titles.id as varchar) as id,
+                    cast(:titles.lang as varchar) as lang,
+                    cast(:titles.title as varchar) as title
+                ), upd as (
+                update menu_titles m
+                  set id = d.id,
+                      lang = d.lang,
+                      title = d.title
+                  from data d
+                  where m.id = d.id and m.lang = d.lang
+                  returning m.id, m.lang
+                ), ins as (
+                  insert into menu_titles(id, lang, title)
+                  select id, lang, title from data
+                  where not exists(select * from upd)
+                )
+                update updates set last_updated = now() where entity_id = 'Menu'
+            summary: upset menu
+            operationId: upsetMenu
+            produces:
+                - application/json
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin]
+            parameters:
+                -   in: body
+                    name: menu
+                    required: true
+                    schema:
+                        type: object
+                        required:
+                            - menu
+                            - titles
+                        properties:
+                            menu:
+                                $ref: '#/definitions/MenuType'
+                            titles:
+                                type: array
+                                items:
+                                    $ref: '#/definitions/TitleType'
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: the path
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                401:
+                    description: Unauthorized
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /menu/{path}:
+        x-swagger-router-controller: menu
+        get:
+            x-query:
+                - select id as "path", component, role, position, parent_id as "parentId" from menu where id = :path
+                - select id, lang, title from menu_titles  where id = :path
+            summary: Get menu
+            operationId: getMenu
+            produces:
+                - application/json
+            tags:
+                - public
+            parameters:
+                -   in: path
+                    name: path
+                    required: true
+                    type: string
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: all menu
+                    schema:
+                        $ref: '#/definitions/MenuResponse'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        delete:
+            x-query:
+                - delete from menu_titles where id = :path
+                - delete from menu where id = :path
+            summary: delete menu
+            operationId: deleteMenu
+            produces:
+                - application/json
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin]
+            parameters:
+                -   in: path
+                    name: path
+                    required: true
+                    type: string
+                -   in: query
+                    name: force
+                    required: false
+                    type: boolean
+                    default: false
+                    description: to delete children menu
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: the path
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                401:
+                    description: Unauthorized
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                404:
+                    description: the path now found
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /fields:
+        x-swagger-router-controller: pets
+        get:
+            x-query:
+                - select name, type, subtype from pets_fields
+                - select name, lang, title from field_titles
+            summary: Get fields
+            operationId: getFields
+            tags:
+                - public
+            produces:
+                - application/json
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: fields
+                    schema:
+                        $ref: '#/definitions/FieldsResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        post:
+            x-query:
+              - WITH data as (
+                    SELECT
+                    CAST(:fields.name as VARCHAR) as name,
+                    CAST(:fields.type as VARCHAR) as type,
+                    CAST(:fields.subtype as VARCHAR) as subtype,
+                    CAST(:fields.enumValues as VARCHAR) as enum_values
+                ), upd as (
+                    UPDATE pets_fields f
+                    SET type = d.type, subtype = d.subtype, enum_values = d.enum_values
+                    FROM data d
+                    WHERE f.name = d.name
+                    RETURNING f.*
+                )
+                INSERT INTO pets_fields(name, type, subtype)
+                SELECT name, type, subtype, enum_values FROM data WHERE NOT EXISTS (SELECT * FROM upd)
+              - DELETE FROM field_titles WHERE name = :fields.name
+              - INSERT INTO field_titles(name, lang, title)
+                VALUES(:titles[0].name, :titles[0].lang, :titles[0].title)
+            summary: add field
+            operationId: addField
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: body
+                    name: field
+                    description: field info
+                    schema:
+                        type: object
+                        required:
+                            - field
+                            - titles
+                        properties:
+                            field:
+                                $ref: '#/definitions/FieldType'
+                            titles:
+                                type: array
+                                items:
+                                    $ref: '#/definitions/TitleType'
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /fields/{id}:
+        x-swagger-router-controller: pets
+        delete:
+            x-query: >
+                WITH data as (
+                    SELECT CAST(:id as VARCHAR) as name
+                ) del1 as (
+                    DELETE FROM pets_fields WHERE name in (SELECT name FROM data)
+                )
+                DELETE FROM field_titles WHERE name in (SELECT name FROM data)
+            summary: delete a field
+            operationId: deleteField
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: path
+                    name: id
+                    format: uuid
+                    required: true
+                    type: string
+                    description: field id
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /assets/{id}:
+        x-swagger-router-controller: large-objects
+        get:
+            summary: Get stored resource by id
+            operationId: read
+            tags:
+                - public
+            produces:
+                - image/png
+                - image/gif
+                - image/jpeg
+                - video/mp4
+                - application/pdf
+            parameters:
+                -   in: path
+                    name: id
+                    type: string
+                    required: true
+                    description: id of resource
+            responses:
+                200:
+                    description: assets
+                404:
+                    description: Not found
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /files:
+        x-swagger-router-controller: large-objects
+        post:
+            summary: Upload file
+            operationId: upload
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            consumes:
+                - multipart/form-data
+            parameters:
+                -   in: formData
+                    name: upfile
+                    type: file
+                    description: The file to upload.
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        get:
+            x-query: >
+                SELECT
+                     s.id, original_name as "originalName", encoding, mimetype as "mimeType", size, created,
+                     COALESCE(n.num, 0) as "numberOfReferences"
+                FROM storage_lob s
+                          left join (
+                     SELECT id, SUM(num) as num FROM (
+                         SELECT '' as id, 0 as num
+                         UNION
+                         SELECT id_asset as id, COUNT(*) as num FROM page_attachment group by id_asset
+                         UNION
+                         SELECT id_asset as id, COUNT(*) as num FROM banner group by id_asset
+                         UNION
+                         SELECT id_asset as id, COUNT(*) as num FROM pet_asset group by id_asset
+                     ) c
+                     GROUP BY id
+                ) n on s.id = n.id
+            summary: Get all info about stored resources
+            operationId: getFiles
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: banners available
+                    schema:
+                        $ref: '#/definitions/FilesResponse'
+                404:
+                    description: Not found
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /files/{id}:
+        x-swagger-router-controller: large-objects
+        get:
+            x-query:
+              -  >
+                  WITH data as (SELECT CAST(:id as VARCHAR) as id)
+                  SELECT
+                      s.id, original_name as "originalName", encoding, mimetype as "mimeType", size, created,
+                      n.num as "numberOfReferences"
+                  FROM storage_lob s, data d,
+                       (
+                           SELECT SUM(num) as num FROM
+                               (
+                                   SELECT COUNT(*) as num FROM page_attachment WHERE id_asset in (SELECT id FROM data)
+                                   UNION
+                                   SELECT COUNT(*) as num FROM banner WHERE id_asset in (SELECT id FROM data)
+                                   UNION
+                                   SELECT COUNT(*) as num FROM pet_asset WHERE id_asset in (SELECT id FROM data)
+                               ) c
+                       ) n
+                  WHERE s.id = d.id
+
+              - >
+                  WITH data as (SELECT CAST(:id as VARCHAR) as id)
+                  SELECT 'page' as "refType", id_page as "refId", tooltip as "refName" FROM page_attachment, data d WHERE id_asset = d.id
+                  UNION
+                  SELECT 'banner' as "refType", banner.id as "refId", tooltip as "refName" FROM banner, data d WHERE id_asset = d.id
+                  UNION
+                  SELECT 'pet' as "refType", id_pet as "refId", tooltip as "refName" FROM pet_asset, data d WHERE id_asset = d.id
+
+            summary: Get info about stored resource by id
+            operationId: getFile
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: path
+                    name: id
+                    format: uuid
+                    type: string
+                    required: true
+                    description: id of resource
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: banners available
+                    schema:
+                        $ref: '#/definitions/FileResponse'
+                404:
+                    description: Not found
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        delete:
+            x-query: 'DELETE FROM storage_lob WHERE id = :id'
+            summary: Delete lerge object by id
+            operationId: deleteFile
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: path
+                    name: id
+                    format: uuid
+                    type: string
+                    required: true
+                    description: id of resource
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: id resource
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                404:
+                    description: Not found
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /carousel/{resource}:
+        x-swagger-router-controller: banner
+        get:
+            x-query:
+              -  >
+                  SELECT 'banner' as resource, b.id_asset as "assetId", b.target_url as "targetUrl", b.tooltip, s.mimetype as "mimeType"
+                  FROM banner b, storage_lob s
+                  WHERE b.id_asset = s.id and (b.lang = coalesce(:lang,b.lang) or b.lang is null)
+                  ORDER BY b.score OFFSET :offset ROWS FETCH NEXT :count ROWS ONLY
+              - >
+                  SELECT 'page' as resource, a.id_asset as "assetId", a.id_page as "targetUrl", a.tooltip, s.mimetype as "mimeType"
+                  FROM page_attachment a, storage_lob s, pages p
+                  WHERE a.id_asset = s.id and p.id = a.id_page and (p.lang = coalesce(:lang,p.lang) or p.lang is null)
+                  ORDER BY p.score, p.created desc OFFSET :offset ROWS FETCH NEXT :count ROWS ONLY
+              - >
+                  SELECT 'pet' as resource, p.id_asset as "assetId", p.id_pet as "targetUrl", p.tooltip, s.mimetype as "mimeType"
+                  FROM pet_asset p, storage_lob s
+                  WHERE p.id_asset = s.id OFFSET :offset ROWS FETCH NEXT :count ROWS ONLY
+            summary: Get ids of images/media to carousel as banner
+            operationId: getCarousel
+            produces:
+                - application/json
+            tags:
+                - public
+            parameters:
+                -   in: path
+                    name: resource
+                    type: string
+                    enum:
+                        - banner
+                        - page
+                        - pet
+                    required: true
+                -   in: query
+                    name: lang
+                    required: false
+                    type: string
+                    default: uk
+                -   in: query
+                    required: false
+                    name: count
+                    type: integer
+                    default: 3
+                -   in: query
+                    type: integer
+                    name: offset
+                    required: false
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: banners available
+                    schema:
+                        $ref: '#/definitions/CarouselResponse'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /pets:
+        x-swagger-router-controller: pets
+        get:
+            x-query:
+               - SELECT id_pet as id, name, value FROM pets_info ORDER BY id_pet
+               - SELECT s.id as refId, id_pet as "targetUrl", s.mimetype as "mimeType", p.tooltip FROM pet_asset p, storage_lob s ORDER BY id_pet
+            summary: Get all pets
+            operationId: getPets
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: pet available
+                    schema:
+                        $ref: '#/definitions/PetTypeResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        post:
+            x-query:
+              - INSERT INTO pets(id) VALUES(:pet.id)
+              - DELETE FROM pets_info WHERE id_pet = :pet.id
+              - insert into pets_info(id_pet, name, value)
+                VALUES(:pet.id, :pet.fields[0].name, :pet.fields[0].value)
+              - DELETE FROM pet_asset WHERE id_pet = :pet.id
+              - insert into pet_asset(id_pet, id_asset, tooltip)
+                VALUES(:pet.id, :pet.ref[0].id_asset, :pet.ref[0].tooltip)
+            summary: add pet
+            operationId: addPet
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: body
+                    name: pet
+                    description: pet info
+                    schema:
+                        $ref: '#/definitions/PetType'
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        put:
+            x-query:
+                - UPDATE pets SET modified = now() WHERE id = :pet.id
+                - DELETE FROM pets_info WHERE id_pet = :pet.id
+                - insert into pets_info(id_pet, name, value) VALUES(:pet.id, :name, :value)
+                - DELETE FROM pet_asset WHERE id_pet = :pet.id
+                - insert into pet_asset(id_pet, id_asset, tooltip) VALUES(:pet.id, :refId, :tooltip)
+            summary: update pet
+            operationId: updatePet
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: body
+                    name: pet
+                    description: pet info
+                    schema:
+                        $ref: '#/definitions/PetType'
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /pets/{id}:
+        x-swagger-router-controller: pets
+        get:
+            x-query:
+               - SELECT id_pet, name, value FROM pets_info WHERE id_pet = :id
+               - SELECT s.id as "refId", id_pet as "targetUrl", s.mimetype as "mimeType", p.tooltip FROM pet_asset p, storage_lob s WHERE id_pet = :id
+            summary: Get one pet
+            operationId: getPet
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: path
+                    name: id
+                    required: true
+                    type: string
+                    format: uuid
+                    description: 'returns pet'
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: pet available
+                    schema:
+                        $ref: '#/definitions/PetTypeResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        delete:
+            x-query: 'delete from pets where id = :id'
+            summary: delete a pet
+            operationId: deletePet
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: path
+                    name: id
+                    required: true
+                    type: string
+                    format: uuid
+                    description: pet id
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /search:
+        x-swagger-router-controller: search
+        get:
+            summary: Search by all site
+            operationId: search
+            produces:
+                - application/json
+            tags:
+                - public
+            parameters:
+                -   in: query
+                    name: lang
+                    required: false
+                    type: string
+                    default: uk
+                -   in: query
+                    name: query
+                    required: false
+                    type: string
+                    description: the query to search
+                -   in: query
+                    type: string
+                    name: tag
+                    required: false
+                    description: this parameter restrict to return only pages with the same tag
+                -   in: query
+                    required: false
+                    name: count
+                    type: integer
+                    default: 10
+                -   in: query
+                    type: string
+                    name: scrollId
+                    required: false
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: result of search
+                    schema:
+                        $ref: '#/definitions/SearchResponse'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /search-pet:
+        x-swagger-router-controller: search
+        post:
+            summary: Search by all site
+            operationId: search-pet
+            produces:
+                - application/json
+            tags:
+                - public
+            parameters:
+                -   in: body
+                    name: query
+                    required: true
+                    schema:
+                        $ref: '#/definitions/QueryType'
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: result of search
+                    schema:
+                        $ref: '#/definitions/SearchResponse'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /banners:
+        x-swagger-router-controller: banner
+        get:
+            x-query: >
+                SELECT b.id, score, lang, s.id as "refId", target_url as "targetUrl", s.mimetype as "mimeType", tooltip
+                FROM banner b, storage_lob s WHERE b.id_asset = s.id
+            summary: Get banners
+            operationId: getBanners
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: banners available
+                    schema:
+                        $ref: '#/definitions/BannersResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        post:
+            x-query: >
+                INSERT INTO banner(id, id_asset, target_url, tooltip, score, lang)
+                VALUES(:banner.id, :banner.ref.refId, :banner.targetUrl, :banner.ref.tooltip, :banner.score, :banner.lang);
+            summary: add banner
+            operationId: addBanner
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: body
+                    name: banner
+                    description: banner info
+                    schema:
+                        $ref: '#/definitions/BannerType'
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        put:
+            x-query: >
+                UPDATE banner SET
+                    id_asset = :banner.ref.refId,
+                    target_url = :banner.ref.targetUrl,
+                    tooltip= :banner.ref.tooltip,
+                    score = :banner.score,
+                    lang = :banner.lang
+                WHERE id = :banner.id
+            summary: update banner
+            operationId: updateBanner
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: body
+                    name: banner
+                    description: banner info
+                    schema:
+                        $ref: '#/definitions/BannerType'
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /banners/{id}:
+        x-swagger-router-controller: banner
+        delete:
+            x-query: 'DELETE FROM banner WHERE id = :id'
+            summary: delete banner
+            operationId: deleteBanner
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: path
+                    name: id
+                    required: true
+                    type: string
+                    description: banner id
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /page:
+        x-swagger-router-controller: pages
+        get:
+            x-query: >
+                select id, lang, title, summary, body, created, score, draft, tags, restriction,
+                             a.id_asset as "refId", a.tooltip, s.mimetype as "mimeType"
+                from pages p, page_attachment a, storage_lob s
+                WHERE p.id = a.id_page and a.id_asset = s.id
+                ORDER BY p.id
+            summary: Get pages
+            operationId: getPages
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: all pages
+                    schema:
+                        $ref: '#/definitions/PagesResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        post:
+            x-query:
+              - insert into pages(id, lang, title, summary, body, score, draft, tags, restriction)
+                values(:page.id, :page.lang,:page.title, :page.summary, :page.body, :page.score, :page.draft, :page.tags, :page.restriction)
+              - insert into page_attachment(id_page, id_asset, tooltip)
+                values(:page.id, :page.ref.refId, :page.ref.tooltip)
+            summary: add page
+            operationId: addPage
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: body
+                    name: page
+                    description: page
+                    schema:
+                        $ref: '#/definitions/PageType'
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        put:
+            x-query:
+              - UPDATE pages SET
+                modified = now(), title = :page.title, summary = :page.summary, body = :page.body, score = :page.score,
+                draft = :page.draft, tags := :page.tags, restriction = :page.restriction, lang = :page.lang
+                WHERE id = :page.id
+              - DELETE from page_attachment WHERE id_page = :page.id
+              - insert into page_attachment(id_page, id_asset, tooltip)
+                        values(:page.id, :page.ref.refId, :page.ref.tooltip)
+            summary: update page
+            operationId: updatePage
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: body
+                    name: page
+                    description: page
+                    schema:
+                        $ref: '#/definitions/PageType'
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /page/{id}:
+        x-swagger-router-controller: pages
+        delete:
+            x-query: "delete from pages where id = :id"
+            summary: delete page
+            operationId: deletePage
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: path
+                    name: id
+                    required: true
+                    type: string
+                    description: page id
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /user:
+        x-swagger-router-controller: users
+        get:
+            summary: Get users
+            operationId: getUsers
+            x-query: 'select login,authType as "authType",''******'' as password,enabled,role from users'
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin]
+            produces:
+                - application/json
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: all pages
+                    schema:
+                        $ref: '#/definitions/UsersResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        post:
+            summary: add user
+            operationId: addUser
+            x-query: >
+                insert into users(login,authType,password_hash,enabled,role)
+                values(:user.login,:user.authType,crypt(':user.password', gen_salt('md5')),:user.enabled,:user.role)
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin]
+            produces:
+                - application/json
+            parameters:
+                -   in: body
+                    name: user
+                    description: user
+                    schema:
+                        $ref: '#/definitions/UserType'
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        put:
+            summary: update user
+            operationId: updateUser
+            x-query: >
+                update users
+                set authType = :user.authType,
+                    password_hash = crypt(':user.password', gen_salt('md5')),
+                    role = :user.role, enabled = :user.enabled
+                where login = :user.login
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin]
+            produces:
+                - application/json
+            parameters:
+                -   in: body
+                    name: user
+                    description: user
+                    schema:
+                        $ref: '#/definitions/UserType'
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /user/{login}:
+        x-swagger-router-controller: users
+        delete:
+            summary: delete user
+            operationId: deleteUser
+            x-query: 'delete from users where login = :login'
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin]
+            produces:
+                - application/json
+            parameters:
+                -   in: path
+                    name: login
+                    required: true
+                    type: string
+                    description: user login
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+definitions:
+    StatusType:
+        type: object
+        required:
+            - code
+            - message
+        properties:
+            code:
+                type: integer
+                example: 0
+            detail:
+                type: object
+            message:
+                type: string
+                example: successful
+    LanguageType:
+        type: object
+        required:
+            - lang
+            - displayName
+        properties:
+            lang:
+                type: string
+                example: 'en'
+            displayName:
+                type: string
+                example: 'English'
+            rate:
+                type: integer
+                example: 1
+                minimum: 0
+                maximum: 99
+    LanguagesResponse:
+        type: object
+        properties:
+            data:
+                type: array
+                items:
+                    $ref: '#/definitions/LanguageType'
+            status:
+                $ref: '#/definitions/StatusType'
+    IdResponse:
+        properties:
+            data:
+                type: object
+                properties:
+                    id:
+                        type: string
+            status:
+                $ref: '#/definitions/StatusType'
+    MenuType:
+        type: object
+        required:
+            - path
+            - component
+        properties:
+            path:
+                type: string
+                example: about
+            component:
+                type: string
+                example: TopPage
+            role:
+                type: string
+                example: public
+            position:
+                type: number
+            parentId:
+                type: string
+    TitleType:
+        type: object
+        required:
+            - id
+            - lang
+            - title
+        properties:
+            id:
+                type: string
+                example: about
+            lang:
+                type: string
+                example: en
+            title:
+                type: string
+                example: 'About us'
+    MenuResponse:
+        type: object
+        properties:
+            data:
+                type: object
+                required:
+                    - menu
+                    - titles
+                properties:
+                    menu:
+                        $ref: '#/definitions/MenuType'
+                    titles:
+                        type: array
+                        items:
+                            $ref: '#/definitions/TitleType'
+            status:
+                $ref: '#/definitions/StatusType'
+    MenusResponse:
+        type: object
+        properties:
+            data:
+                type: object
+                required:
+                    - menu
+                    - titles
+                properties:
+                    menus:
+                        type: array
+                        items:
+                            $ref: '#/definitions/MenuType'
+                    titles:
+                        type: array
+                        items:
+                            $ref: '#/definitions/TitleType'
+            status:
+                $ref: '#/definitions/StatusType'
+    FieldType:
+        required:
+            - name
+            - type
+        properties:
+            name:
+                type: string
+                example: sex
+            type:
+                type: string
+                enum:
+                    - number
+                    - string
+                    - enum
+                    - date
+                example: 'string'
+            subtype:
+                type: string
+                example: 'textarea'
+            enumValues:
+                type: string
+                description: input an enum definition as words separated by a comma
+                example: one, two, three
+    FieldsResponse:
+        properties:
+            data:
+                type: object
+                required:
+                    - fields
+                    - titles
+                properties:
+                    fields:
+                        type: array
+                        items:
+                            $ref: '#/definitions/FieldType'
+                    titles:
+                        type: array
+                        items:
+                            $ref: '#/definitions/TitleType'
+            status:
+                $ref: '#/definitions/StatusType'
+    PageType:
+        type: object
+        properties:
+            id:
+                type: string
+            lang:
+                type: string
+                description: page locale
+            title:
+                type: string
+                description: page's title
+            summary:
+                type: string
+                description: a summary of this page
+            body:
+                type: string
+                description: page's body
+            score:
+                type: integer
+                description: can be use as position/order
+            draft:
+                type: boolean
+                description: mark page as a draft
+            tags:
+                type: string
+                description: set of tags separated by comma defines what menu will expose this page
+            restriction:
+                type: string
+                enum:
+                    - admin
+                    - writer
+                    - public
+                description: you can restrict the access to this page
+                example: admin, writer
+            ref:
+                type: array
+                items:
+                  $ref: '#/definitions/ReferenceType'
+    PagesResponse:
+        type: object
+        properties:
+            data:
+                type: array
+                items:
+                    $ref: '#/definitions/PageType'
+            status:
+                $ref: '#/definitions/StatusType'
+    FileType:
+        properties:
+            id:
+                type: string
+            originalName:
+                type: string
+            encoding:
+                type: string
+            mimeType:
+                type: string
+            size:
+                type: string
+            created:
+                type: string
+            numberOfReferences:
+                type: number
+    FileResponse:
+        properties:
+            data:
+                type: object
+                properties:
+                    file:
+                        $ref: '#/definitions/FileType'
+                    references:
+                        type: object
+                        properties:
+                            refId:
+                                type: string
+                            refType:
+                                type: string
+                                enum:
+                                    - banner
+                                    - page
+                                    - pet
+                            refName:
+                                type: string
+            status:
+                $ref: '#/definitions/StatusType'
+    FilesResponse:
+        properties:
+            data:
+                type: array
+                items:
+                    $ref: '#/definitions/FileType'
+            status:
+                $ref: '#/definitions/StatusType'
+    ReferenceType:
+        description: expose file as reference
+        type: object
+        required:
+            - refId
+        properties:
+            refId:
+                type: string
+                description: file id
+            targetUrl:
+                type: string
+                description: the URL that was used as href in anchor tag
+            mimeType:
+                type: string
+            tooltip:
+                type: string
+                description: descriptions of resource
+    CarouselType:
+        description: expose references of banners, pets, pages
+        type: object
+        properties:
+            assetId:
+                type: string
+            targetUrl:
+                type: string
+                description: can be url to external resource or id of internal resource
+            mimeType:
+                type: string
+            tooltip:
+                type: string
+                description: descriptions of resource
+            resource:
+                type: string
+                enum:
+                    - banner
+                    - page
+                    - pet
+    CarouselResponse:
+        type: object
+        properties:
+            data:
+                type: array
+                items:
+                    $ref: '#/definitions/CarouselType'
+            status:
+                $ref: '#/definitions/StatusType'
+    BannerType:
+        required:
+            - score
+        properties:
+            id:
+                type: string
+            score:
+                type: integer
+                description: can be use as position/order
+                default: 1
+            lang:
+                type: string
+                description: locales are sequenced in line by comma
+                example: uk
+            ref:
+                $ref: '#/definitions/ReferenceType'
+    BannersResponse:
+        properties:
+            data:
+                type: array
+                items:
+                    $ref: '#/definitions/BannerType'
+            status:
+                $ref: '#/definitions/StatusType'
+    FieldValueType:
+        description: to transport the value of predefined FieldType. The value is encoded to string before transport and back after receive
+        required:
+            - name
+            - value
+        properties:
+            name:
+                type: string
+            value:
+                type: string
+    PetType:
+        properties:
+            id:
+                type: string
+            fields:
+                type: array
+                items:
+                    $ref: '#/definitions/FieldValueType'
+            ref:
+                type: array
+                items:
+                    $ref: '#/definitions/ReferenceType'
+    PetTypeResponse:
+        properties:
+            data:
+                type: array
+                items:
+                    $ref: '#/definitions/PetType'
+            status:
+                $ref: '#/definitions/StatusType'
+    SearchType:
+        type: object
+        properties:
+            id:
+                type: string
+                description: resource id (page or pet)
+            assertId:
+                type: string
+                description: id of image
+            title:
+                type: string
+            subtitle:
+                type: string
+            content:
+                type: string
+            author:
+                type: string
+            created:
+                type: string
+    SearchResponse:
+        type: object
+        properties:
+            data:
+                type: array
+                items:
+                    $ref: '#/definitions/SearchType'
+            status:
+                $ref: '#/definitions/StatusType'
+    QueryType:
+        type: object
+        properties:
+            operator:
+                type: string
+                enum:
+                    - and
+                    - or
+                default: and
+            fields:
+                type: array
+                items:
+                    $ref: '#/definitions/FieldValueType'
+    UserType:
+        type: object
+        required:
+            - login
+            - authType
+        properties:
+            login:
+                type: string
+            authType:
+                type: string
+                enum:
+                    - basic
+                    - apiKey
+                    - oauth2
+            password:
+                type: string
+            role:
+                type: string
+                enum:
+                    - admin
+                    - writer
+                    - public
+            created:
+                type: string
+            enabled:
+                type: boolean
+    UsersResponse:
+        type: object
+        properties:
+            data:
+                type: array
+                items:
+                    $ref: '#/definitions/UserType'
+            status:
+                $ref: '#/definitions/StatusType'

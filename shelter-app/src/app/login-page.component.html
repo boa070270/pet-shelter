@@ -1,0 +1,25 @@
+<div class="login-box mat-elevation-z4">
+  <mat-form-field floatPlaceholder="auto" class="input-field">
+    <mat-label>{{i18n.userLabel}}</mat-label>
+    <input matInput [(ngModel)]="userName"
+           type="text"
+           required
+           placeholder="">
+    <mat-hint>{{i18n.userHint}}</mat-hint>
+  </mat-form-field>
+  <mat-form-field floatPlaceholder="auto" class="input-field">
+    <mat-label>{{i18n.pwdLabel}}</mat-label>
+    <input matInput [(ngModel)]="password"
+           type="password"
+           required
+           placeholder="">
+    <mat-hint>{{i18n.pwdHint}}</mat-hint>
+  </mat-form-field>
+  <div class="login-action">
+  <button mat-button (click)="onClickLogin()" [disabled]="!(userName && password)">{{i18n.btnLogin}}</button>
+  <button mat-button (click)="onClickCancel()">{{i18n.btnCancel}}</button>
+  </div>
+  <div class="login-error">
+    <span>{{text}}</span>
+  </div>
+</div>

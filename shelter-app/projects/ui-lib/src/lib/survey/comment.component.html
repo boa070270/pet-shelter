@@ -1,0 +1,31 @@
+<ul>
+  <div class="comment">
+    <div class="comment-head">
+      <span class="nick">{{nickName}}</span><span class="time">{{comment.created}}</span>
+    </div>
+    <div #commentText class="comment-body" (click)="cutText = !cutText">
+      {{text}}
+    </div>
+    <div class="comment-vote" *ngIf="voteOptions && voteOptions.length > 0">
+      <lib-vote [options]="voteOptions" showResult="always" [results]="voteResult" direction="row"></lib-vote>
+    </div>
+    <div class="comment-foot">
+      <a (click)="showForm = !showForm && enableAdd" [ngClass]="{inactive:!enableAdd}"><span>Add comment</span></a>
+      <a (click)="edit()" [ngClass]="{inactive: !(enableEdit && isMy)}"><span>Edit comment</span></a>
+      <a (click)="expanded = !expanded"><span>Comments: {{totalNumber}}</span></a>
+    </div>
+    <div [ngClass]="{'comment-form':showForm}" [hidden]="!showForm">
+      <input type="text" [(ngModel)]="whoami" *ngIf="enableEditNick" placeholder="Your nick">
+      <textarea [(ngModel)]="newComment" (keydown.alt.enter)="send()" (keydown.escape)="showForm = !showForm"></textarea>
+      <div class="form-action">
+        <span>Press Alt-Enter to complete, Esc to cancel</span>
+        <span (click)="send()">{{actionUpdate}}</span>
+        <span (click)="cancel()">Cancel</span>
+      </div>
+    </div>
+  </div>
+  <ul *ngIf="expanded">
+    <lib-comment *ngFor="let o of responses" [comment]="o"></lib-comment>
+  </ul>
+  <span (click)="read()">Read next ...</span>
+</ul>

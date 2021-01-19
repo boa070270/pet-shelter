@@ -1,0 +1,190 @@
+<ng-template #input let-appearance="appearance" let-title="title" let-type="type" let-placeholder="placeholder" let-controlName="controlName"
+             let-iconName="iconName" let-prefix="prefix" let-suffix="suffix" let-hint="hint" let-required="required"
+             let-validationMessages="validationMessages"
+>
+  <div [hidden]="controlsView[controlName]" >
+    <mat-form-field [appearance]="appearance" >
+      <mat-label>{{title}}</mat-label>
+      <input matInput [type]="type" [placeholder]="placeholder" [formControl]="controls[controlName]" [required]="required">
+      <span *ngIf="prefix" matPrefix>$&nbsp;</span>
+      <span *ngIf="suffix" matSuffix>.00</span>
+      <mat-icon *ngIf="iconName" matSuffix>{{iconName}}</mat-icon>
+      <mat-hint>{{hint}}</mat-hint>
+      <mat-error *ngFor="let validation of validationMessages">
+        <mat-error class="error-message" *ngIf="controls[controlName].hasError(validation.type) && (controls[controlName].dirty || controls[controlName].touched)">
+          {{validation.message(controls[controlName].getError(validation.type))}}
+        </mat-error>
+      </mat-error>
+    </mat-form-field>
+  </div>
+</ng-template>
+<ng-template #textarea let-appearance="appearance" let-title="title" let-placeholder="placeholder" let-controlName="controlName"
+             let-hint="hint" let-required="required"
+             let-validationMessages="validationMessages"
+>
+  <div [hidden]="controlsView[controlName]" >
+    <mat-form-field [appearance]="appearance" >
+      <mat-label>{{title}}</mat-label>
+      <textarea matInput [placeholder]="placeholder" [formControl]="controls[controlName]" [required]="required"></textarea>
+      <mat-hint>{{hint}}</mat-hint>
+      <mat-error *ngFor="let validation of validationMessages">
+        <mat-error class="error-message" *ngIf="controls[controlName].hasError(validation.type) && (controls[controlName].dirty || controls[controlName].touched)">
+          {{validation.message(controls[controlName].getError(validation.type))}}
+        </mat-error>
+      </mat-error>
+    </mat-form-field>
+  </div>
+</ng-template>
+<ng-template #password let-appearance="appearance" let-title="title" let-placeholder="placeholder" let-controlName="controlName"
+             let-hint="hint" let-required="required"
+             let-validationMessages="validationMessages"
+>
+  <div [hidden]="controlsView[controlName]" >
+    <mat-form-field [appearance]="appearance" >
+      <mat-label>{{title}}</mat-label>
+      <input matInput [type]="hide ? 'password' : 'text'" [placeholder]="placeholder" [formControl]="controls[controlName]" [required]="required">
+      <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+        <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </button>
+      <mat-hint>{{hint}}</mat-hint>
+      <mat-error *ngFor="let validation of validationMessages">
+        <mat-error class="error-message" *ngIf="controls[controlName].hasError(validation.type) && (controls[controlName].dirty || controls[controlName].touched)">
+          {{validation.message(controls[controlName].getError(validation.type))}}
+        </mat-error>
+      </mat-error>
+    </mat-form-field>
+  </div>
+</ng-template>
+<ng-template #select let-appearance="appearance" let-title="title" let-placeholder="placeholder" let-controlName="controlName"
+             let-options="options" let-hint="hint" let-required="required"
+             let-validationMessages="validationMessages" let-multiple="multiple"
+>
+  <div [hidden]="controlsView[controlName]" >
+    <mat-form-field [appearance]="appearance" >
+      <mat-label>{{title}}</mat-label>
+      <mat-select  *ngIf="multiple" [required]="required" [formControl]="controls[controlName]" multiple>
+        <mat-option *ngFor="let option of options" value="{{option.value}}">{{option.name}}</mat-option>
+      </mat-select>
+      <mat-select  *ngIf="!multiple" [required]="required" [formControl]="controls[controlName]">
+        <mat-option *ngFor="let option of options" value="{{option.value}}">{{option.name}}</mat-option>
+      </mat-select>
+      <mat-hint>{{hint}}</mat-hint>
+      <mat-error *ngFor="let validation of validationMessages">
+        <mat-error class="error-message" *ngIf="controls[controlName].hasError(validation.type) && (controls[controlName].dirty || controls[controlName].touched)">
+          {{validation.message(controls[controlName].getError(validation.type))}}
+        </mat-error>
+      </mat-error>
+    </mat-form-field>
+  </div>
+</ng-template>
+<ng-template #radiobutton let-title="title" let-controlName="controlName"
+             let-required="required"
+             let-options="options" let-hint="hint" let-validationMessages="validationMessages"
+>
+  <div [hidden]="controlsView[controlName]">
+    <div>
+    <span class="mat-form-field-label-wrapper" style="position: relative;">
+      <label class="mat-form-field-label mat-empty mat-form-field-empty" style="position: relative; display: block">
+        <mat-label>{{title}}</mat-label>
+        <span *ngIf="required" aria-hidden="true" class="mat-placeholder-required mat-form-field-required-marker"> *</span>
+      </label>
+    </span>
+    <div style="margin-top: 15px;">
+      <mat-radio-group aria-label="title" [formControl]="controls[controlName]">
+        <mat-radio-button *ngFor="let option of options" [value]="option.value" style="margin-left: 15px;">{{option.name}}</mat-radio-button>
+      </mat-radio-group>
+    </div>
+    <div class="mat-form-field-hint-wrapper" style="margin-top: 15px; opacity: 1; transform: translateY(0%);">
+      <mat-hint class="mat-hint mat-form-field-subscript-wrapper" >{{hint}}</mat-hint>
+      <div class="mat-form-field-hint-spacer"></div>
+    </div>
+    <mat-error *ngFor="let validation of validationMessages">
+      <mat-error class="error-message" *ngIf="controls[controlName].hasError(validation.type) && (controls[controlName].dirty || controls[controlName].touched)">
+        {{validation.message(controls[controlName].getError(validation.type))}}
+      </mat-error>
+    </mat-error>
+    </div>
+  </div>
+</ng-template>
+<ng-template #group let-formConfigs="formConfigs" let-formGroup="formGroup" let-controlName="controlName">
+  <div [formGroup]="formGroup" [hidden]="controlsView[controlName]">
+    <lib-form-fields [formConfiguration]="formConfigs" [formGroup]="formGroup"></lib-form-fields>
+  </div>
+</ng-template>
+<ng-template #checkbox let-appearance="appearance" let-title="title" let-controlName="controlName"
+              let-required="required"
+             let-options="options" let-hint="hint" let-validationMessages="validationMessages"
+>
+  <div [hidden]="controlsView[controlName]">
+    <div>
+    <span class="mat-form-field-label-wrapper" style="position: relative">
+      <label class="mat-form-field-label mat-empty mat-form-field-empty" style="position: relative">
+        <mat-label>{{title}}</mat-label>
+        <span *ngIf="required" aria-hidden="true" class="mat-placeholder-required mat-form-field-required-marker"> *</span>
+      </label>
+    </span>
+    <lib-checkbox-control [options]="options" [formControl]="controls[controlName]"></lib-checkbox-control>
+    <div class="mat-form-field-hint-wrapper" style="opacity: 1; transform: translateY(0%);">
+      <mat-hint class="mat-hint mat-form-field-subscript-wrapper" >{{hint}}</mat-hint>
+      <div class="mat-form-field-hint-spacer"></div>
+    </div>
+    <mat-error *ngFor="let validation of validationMessages">
+      <mat-error class="error-message" *ngIf="controls[controlName].hasError(validation.type) && (controls[controlName].dirty || controls[controlName].touched)">
+        {{validation.message(controls[controlName].getError(validation.type))}}
+      </mat-error>
+    </mat-error>
+    </div>
+  </div>
+</ng-template>
+<ng-template #boolean let-appearance="appearance" let-title="title" let-controlName="controlName"
+             let-required="required"
+             let-options="options" let-hint="hint" let-validationMessages="validationMessages"
+>
+  <div [hidden]="controlsView[controlName]">
+    <div>
+    <span class="mat-form-field-label-wrapper" style="position: relative">
+      <label class="mat-form-field-label mat-empty mat-form-field-empty" style="position: relative">
+        <mat-label>{{title}}</mat-label>
+        <span *ngIf="required" aria-hidden="true" class="mat-placeholder-required mat-form-field-required-marker"> *</span>
+      </label>
+    </span>
+      <input type="checkbox" [formControl]="controls[controlName]">
+      <div class="mat-form-field-hint-wrapper" style="opacity: 1; transform: translateY(0%);">
+        <mat-hint class="mat-hint mat-form-field-subscript-wrapper" >{{hint}}</mat-hint>
+        <div class="mat-form-field-hint-spacer"></div>
+      </div>
+      <mat-error *ngFor="let validation of validationMessages">
+        <mat-error class="error-message" *ngIf="controls[controlName].hasError(validation.type) && (controls[controlName].dirty || controls[controlName].touched)">
+          {{validation.message(controls[controlName].getError(validation.type))}}
+        </mat-error>
+      </mat-error>
+    </div>
+  </div>
+</ng-template>
+<ng-container *ngFor="let item of formConfiguration">
+  <ng-container *ngIf="item.kindOfField === enumKindOfField.input && item.type === enumInputType.password">
+    <ng-template [ngTemplateOutlet]="password" [ngTemplateOutletContext]="item"></ng-template>
+  </ng-container>
+  <ng-container *ngIf="item.kindOfField === enumKindOfField.input && item.type !== enumInputType.password">
+    <ng-template [ngTemplateOutlet]="input" [ngTemplateOutletContext]="item"></ng-template>
+  </ng-container>
+  <ng-container *ngIf="item.kindOfField === enumKindOfField.select">
+    <ng-template [ngTemplateOutlet]="select" [ngTemplateOutletContext]="item"></ng-template>
+  </ng-container>
+  <ng-container *ngIf="item.kindOfField === enumKindOfField.textarea">
+    <ng-template [ngTemplateOutlet]="textarea" [ngTemplateOutletContext]="item"></ng-template>
+  </ng-container>
+  <ng-container *ngIf="item.kindOfField === enumKindOfField.checkbox">
+    <ng-template [ngTemplateOutlet]="checkbox" [ngTemplateOutletContext]="item"></ng-template>
+  </ng-container>
+  <ng-container *ngIf="item.kindOfField === enumKindOfField.boolean">
+    <ng-template [ngTemplateOutlet]="boolean" [ngTemplateOutletContext]="item"></ng-template>
+  </ng-container>
+  <ng-container *ngIf="item.kindOfField === enumKindOfField.radiobutton">
+    <ng-template [ngTemplateOutlet]="radiobutton" [ngTemplateOutletContext]="item"></ng-template>
+  </ng-container>
+  <ng-container *ngIf="item.kindOfField === enumKindOfField.group">
+    <ng-template [ngTemplateOutlet]="group"
+                 [ngTemplateOutletContext]="{formConfigs: item.group, formGroup: controls[item.controlName], controlName: item.controlName}"></ng-template>
+  </ng-container>
+</ng-container>

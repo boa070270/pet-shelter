@@ -1,0 +1,10 @@
+<div class="list-container">
+  <ul class="list-masonry">
+    <li class="list-item" *ngFor="let item of files">
+        <img class="list-image" src="{{item.src}}">
+        <div class="list-supporting">
+          <span class="list-label">{{item.label}}</span>
+        </div>
+    </li>
+  </ul>
+</div>

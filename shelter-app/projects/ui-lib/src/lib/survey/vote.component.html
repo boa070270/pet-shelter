@@ -1,0 +1,5 @@
+<ul #voteUL [ngClass]="{vertical: direction === 'column', horizontal: direction === 'row'}" (click)="onClick($event)">
+  <li [ngClass]="{'is-checked': choice.includes(o.value)}" class="{{o.icon}}" *ngFor="let o of opts; let i = index" [value]="i">
+    <span>{{o.title}} <u>{{voteResult[o.value]}}</u></span>
+  </li>
+</ul>
