@@ -2,7 +2,7 @@
   <ng-container *ngFor="let op of options; index as i" >
     <label>
       <input type="radio" value="{{op}}" [dir]="dir" [checked]="values.includes(op)" [disabled]="disabled" [name]="name" (change)="onChange($event)" (blur)="onBlur()">
-      <span>{{labels[i] || op}}</span>
+      <span>{{pTitles[i] || op}}</span>
       <span class="tooltip" *ngIf="tips[i]">{{tips[i]}}</span>
     </label>
   </ng-container>

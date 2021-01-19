@@ -70,7 +70,6 @@ export class VoteComponent implements OnInit, OnDestroy, OnChanges {
     if (!this.disableEdit) {
       const target: any = ev.target;
       if (target.tagName === 'LI') {
-        console.log((target as HTMLLIElement).value);
         this.toggleChoice((target as HTMLLIElement).value);
       }
     }

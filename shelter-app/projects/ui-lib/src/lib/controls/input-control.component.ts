@@ -13,7 +13,7 @@ export const INPUT_VALUE_ACCESSOR: any = {
 @Component({
   selector: 'lib-input-control',
   templateUrl: './input-control.component.html',
-  styleUrls: ['./input-control.component.css'],
+  styleUrls: ['./input-control.component.scss'],
   providers: [INPUT_VALUE_ACCESSOR]
 })
 export class InputControlComponent extends BaseControlComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
@@ -43,6 +43,8 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
   pPlaceholder: string;
   change: (_: any) => {};
   touch: () => {};
+  pError: string;
+  iconsClass: any;
 
   constructor(public systemLang: SystemLang) {
     super(systemLang);
@@ -53,6 +55,11 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
     this.pTitle = this.doIfNeedI18n(this.title);
     this.pTooltip = this.doIfNeedI18n(this.tooltip);
     this.pPlaceholder = this.doIfNeedI18n(this.placeholder);
+    this.pError = this.doIfNeedI18n(this.error);
+    this.iconsClass = {};
+    if (this.leadingIcon) {
+      this.iconsClass['gm-' + this.leadingIcon] = true;
+    }
   }
   ngOnChanges(changes: SimpleChanges): void {
     console.log('ngOnChanges', changes);
@@ -66,6 +73,9 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
     if (changes.placeholder) {
       this.pPlaceholder = this.doIfNeedI18n(this.placeholder);
     }
+    if (changes.error) {
+      this.pError = this.doIfNeedI18n(this.error);
+    }
   }
   ngOnDestroy(): void {
     super.ngOnDestroy();
@@ -75,6 +85,7 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
     this.pTitle = this.doIfNeedI18n(this.title);
     this.pTooltip = this.doIfNeedI18n(this.tooltip);
     this.pPlaceholder = this.doIfNeedI18n(this.placeholder);
+    this.pError = this.doIfNeedI18n(this.error);
   }
   writeValue(obj: any): void {
     this.value = (obj !== undefined && isNaN(obj) && typeof obj !== 'object') ? obj.toString() : null;
@@ -90,11 +101,6 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
   }
 
   onChange($event: Event): void {
-    console.log($event);
-    const target = $event.target as HTMLInputElement;
-    if (target.tagName === 'INPUT') {
-      this.value = target.value;
-    }
     if (typeof this.change === 'function') {
       this.change(this.value);
     }

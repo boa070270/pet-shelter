@@ -5,8 +5,7 @@ import { ButtonComponent } from './button/button.component';
 import { RadioControlComponent } from './radio-control.component';
 import { BaseControlComponent } from './base-control.component';
 import { InputControlComponent } from './input-control.component';
-// import {FormsModule} from "@angular/forms";
-
+import {FormsModule} from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -16,10 +15,11 @@ import { InputControlComponent } from './input-control.component';
     BaseControlComponent,
     InputControlComponent,
   ],
-  imports: [
-    CommonModule,
-    // FormsModule
-  ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        // FormsModule
+    ],
   exports: [
     ButtonComponent,
     CheckboxControlComponent,

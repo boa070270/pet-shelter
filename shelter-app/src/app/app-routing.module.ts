@@ -46,7 +46,6 @@ export class AppRoutingModule {
       for (const route of routes) {
         routers.push(route);
       }
-      console.log('resetConfig: ' + JSON.stringify(routers));
       this.router.resetConfig(routers);
     });
   }

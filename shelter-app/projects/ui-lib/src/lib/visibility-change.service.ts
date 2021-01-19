@@ -12,7 +12,6 @@ export class VisibilityChangeService implements OnDestroy {
   private readonly listener = () => { this.handleVisibilityChange(); };
 
   constructor(@Inject(DOCUMENT) private document: Document) {
-    console.log('constructor VisibilityChangeService');
     if (typeof document.hidden === 'undefined') {
       const browserPrefixes = ['moz', 'ms', 'o', 'webkit'];
       for (const prefix of browserPrefixes) {
@@ -31,10 +30,8 @@ export class VisibilityChangeService implements OnDestroy {
   }
   handleVisibilityChange(): void {
     if (this.document[this.hiddenProperty]) {
-      console.log('hidden');
       this.subject.next(false);
     } else {
-      console.log('show');
       this.subject.next(true);
     }
   }

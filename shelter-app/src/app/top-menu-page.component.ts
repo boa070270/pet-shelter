@@ -160,7 +160,7 @@ export class TopMenuPageComponent implements OnInit {
   radio: string[];
   dir = 'ltr';
   inputDefault = 101;
-  inputValue: string = 'helloworld';
+  inputValue: string = 'Ввід слів _';
   constructor(private basicService: BasicService) { }
 
   ngOnInit(): void {

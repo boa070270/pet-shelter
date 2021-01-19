@@ -82,8 +82,20 @@
 ></lib-radio-control>
 <span>{{radio | json}}</span>
 <h2>Input control</h2>
+<span>Check this text as top</span>
 <lib-input-control [(ngModel)]="inputValue"
-
+                   [autofocus]="true"
+                   [dir]="dir"
+                   [name]="'input1'"
+                   [disabled]="false"
+                   [hidden]="false"
+                   [title]="[{lang:'en',title:'Input title'},{lang:'uk',title:'Ввід слів'}]"
+                   [tooltip]="[{lang:'en',title:'Tooltip: there can be placed more words than in hint.'},{lang:'uk',title:'Пдісказка, що як робити'}]"
+                   [hint]="[{lang:'en',title:'Hint - a slight or indirect indication or suggestion.'},{lang:'uk',title:'Натяк, що це та навіщо'}]"
+                   [placeholder]="[{lang:'en',title:'Placeholder - a example of data.'},{lang:'uk',title:'Placeholder - місце для прикладу'}]"
+                   [error]="[{lang:'en',title:'Error - text'},{lang:'uk',title:'Error - текст помилки'}]"
+                   leadingIcon="face"
+                   [required]="true"
 ></lib-input-control>
 <span>{{inputValue}}</span>
 <br>

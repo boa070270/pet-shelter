@@ -22,8 +22,8 @@ export class CheckboxControlComponent extends BaseControlComponent implements On
   @Input() options: string[];
   @Input() titles: string[] | TitleType[];
   @Input() tooltips: string[] | TitleType[];
-  @Input() values: string[];
-  labels: string[] = [];
+  @Input() values: string[] = [];
+  pTitles: string[] = [];
   tips: string[] = [];
   disabled: boolean;
   change: (_: any) => {};
@@ -35,7 +35,7 @@ export class CheckboxControlComponent extends BaseControlComponent implements On
 
   ngOnInit(): void {
     super.ngOnInit();
-    this.labels =  this.doI18n(this.titles);
+    this.pTitles =  this.doI18n(this.titles);
     this.tips = this.doI18n(this.tooltips);
   }
   ngOnDestroy(): void {
@@ -43,14 +43,14 @@ export class CheckboxControlComponent extends BaseControlComponent implements On
   }
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.labels) {
-      this.labels =  this.doI18n(this.titles);
+      this.pTitles =  this.doI18n(this.titles);
     }
-    if (changes.tips) {
+    if (changes.tooltips) {
       this.tips = this.doI18n(this.tooltips);
     }
   }
   onChangeLang(): void {
-    this.labels =  this.doI18n(this.titles);
+    this.pTitles =  this.doI18n(this.titles);
     this.tips = this.doI18n(this.tooltips);
   }
 

@@ -1,13 +1,11 @@
 <div class="ui-input">
-  <label>
-    {{title}}
-    <input [type]="type" (blur)="touch()" [dir]="dir"
+  <label class="ui-input-icons" [ngClass]="iconsClass">
+    <input [type]="type" (blur)="touch()"
+           [placeholder]="pPlaceholder"
            [accessKey]="accessKey"
            [dir]="dir"
            [id]="id"
-           [value]="value"
            [hidden]="hidden"
-           [type]="type"
            [disabled]="disabled"
            [name]="name"
            [formTarget]="formTarget"
@@ -17,7 +15,12 @@
            [formEnctype]="formEnctype"
            [autofocus]="autofocus"
            [tabIndex]="tabIndex"
+           [(ngModel)]="value"
            (change)="onChange($event)"
+           required="required"
     >
+    <span class="ui-input-title" [ngClass]="{'ui-input-empty': !value}">{{pTitle}}</span>
+    <span class="ui-input-hint">{{pHint}}</span>
+    <span class="ui-input-error">{{pError}}</span>
   </label>
 </div>
