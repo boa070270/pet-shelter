@@ -4,3 +4,4 @@ export * from './checkbox-control.component';
 export * from './button/button.component';
 export * from './radio-control.component';
 export * from './input-control.component';
+export * from './select-control.component';

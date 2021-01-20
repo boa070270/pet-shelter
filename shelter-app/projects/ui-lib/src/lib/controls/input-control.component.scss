@@ -1,3 +1,5 @@
+@use './controls';
+
 :host {
   --columns: attr(cols string);
   display: block;

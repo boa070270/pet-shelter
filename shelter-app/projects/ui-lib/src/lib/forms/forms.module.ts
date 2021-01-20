@@ -12,25 +12,25 @@ import { DynamicFormDialogComponent } from './dynamic-form-dialog.component';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatRadioModule} from '@angular/material/radio';
 import { SharedModule } from '../shared';
-import { StringFieldComponent } from './fields/string-field.component';
+import { SwaggerFormComponent } from './swagger-form.component';
 
 @NgModule({
   declarations: [
     DynamicFormComponent,
     FormFieldsComponent,
     DynamicFormDialogComponent,
-    StringFieldComponent,
+    SwaggerFormComponent,
   ],
     imports: [
-        CommonModule,
-        MatFormFieldModule,
-        MatIconModule,
-        MatSelectModule,
-        ReactiveFormsModule,
-        MatInputModule,
-        MatButtonModule,
-        MatCheckboxModule,
-        MatRadioModule,
+      CommonModule,
+      MatFormFieldModule,
+      MatIconModule,
+      MatSelectModule,
+      ReactiveFormsModule,
+      MatInputModule,
+      MatButtonModule,
+      MatCheckboxModule,
+      MatRadioModule,
       SharedModule
     ],
   exports: [

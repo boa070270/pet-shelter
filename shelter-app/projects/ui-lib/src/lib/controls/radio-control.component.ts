@@ -1,4 +1,4 @@
-import {Component, forwardRef, OnDestroy, OnInit} from '@angular/core';
+import {Component, forwardRef, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SystemLang} from '../i18n';
 import {CheckboxControlComponent} from './checkbox-control.component';
@@ -15,13 +15,16 @@ export const RADIO_VALUE_ACCESSOR: any = {
   styleUrls: ['./checkbox-control.component.scss'],
   providers: [RADIO_VALUE_ACCESSOR],
 })
-export class RadioControlComponent extends CheckboxControlComponent implements OnInit, OnDestroy, ControlValueAccessor {
+export class RadioControlComponent extends CheckboxControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
   constructor(public systemLang: SystemLang) {
     super(systemLang);
   }
 
   ngOnInit(): void {
     super.ngOnInit();
+  }
+  ngOnChanges(changes: SimpleChanges): void {
+    super.ngOnChanges(changes);
   }
   ngOnDestroy(): void {
     super.ngOnDestroy();

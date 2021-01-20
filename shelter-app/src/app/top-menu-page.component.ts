@@ -161,6 +161,7 @@ export class TopMenuPageComponent implements OnInit {
   dir = 'ltr';
   inputDefault = 101;
   inputValue: string = 'Ввід слів _';
+  select: ['two', 'one'];
   constructor(private basicService: BasicService) { }
 
   ngOnInit(): void {

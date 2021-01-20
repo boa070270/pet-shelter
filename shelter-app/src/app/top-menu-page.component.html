@@ -99,6 +99,29 @@
 ></lib-input-control>
 <span>{{inputValue}}</span>
 <br>
+<h2>Select control</h2>
+<h2>Select multiple - false</h2>
+<lib-select-control [(ngModel)]="select" [dir]="dir"
+                   direction="grid"
+                   cols="4"
+                   [options]="['one','two','three','four','five','six','seven','eight','nine']"
+                   [titles]="[{id:'one', lang: 'en', title:'One'}, {id:'one', lang:'uk', title:'Один'}]"
+                   [tooltips]="['Обов\'язково']"
+                   hint="This is select panel"
+></lib-select-control>
+<span>{{select}}</span>
+<h2>Select multiple - true</h2>
+<lib-select-control [(ngModel)]="select" [dir]="dir"
+                    direction="grid"
+                    cols="4"
+                    [options]="['one','two','three','four','five','six','seven','eight','nine']"
+                    [titles]="[{id:'one', lang: 'en', title:'One'}, {id:'one', lang:'uk', title:'Один'}]"
+                    [tooltips]="['Обов\'язково']"
+                    [multiple]="true"
+                    hint="This is select multi panel"
+></lib-select-control>
+<span>{{select}}</span>
+<br>
 <h3>Button</h3>
 <lib-button>Button</lib-button>
 

@@ -15,7 +15,7 @@ export const CHECKBOX_VALUE_ACCESSOR: any = {
   styleUrls: ['./checkbox-control.component.scss'],
   providers: [CHECKBOX_VALUE_ACCESSOR],
 })
-export class CheckboxControlComponent extends BaseControlComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
+export class CheckboxControlComponent extends BaseControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
   @Input() name: any;
   @Input() direction: 'row' | 'col' | 'grid' = 'col';
   @Input() cols: number;

@@ -4,8 +4,7 @@ import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'lib-base-control',
-  templateUrl: './base-control.component.html',
-  styleUrls: ['./base-control.component.scss']
+  template: ''
 })
 export class BaseControlComponent implements OnInit, OnDestroy, OnChanges {
   @Input() hint: string | TitleType[];

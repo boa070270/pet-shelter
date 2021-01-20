@@ -1,3 +1,5 @@
+@use './controls';
+
 :host {
   --columns: attr(cols string);
   display: block;
@@ -40,26 +42,42 @@
     }
   }
 }
+.tooltip {
+  visibility: hidden;
+  position: absolute;
+  z-index: 1;
+  bottom: 100%;
+  left: 10px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  font-size: smaller;
+  border-radius: 6px;
+  padding: 5px;
+}
 label {
-  .tooltip {
-    visibility: hidden;
-    position: absolute;
-    z-index: 1;
-    bottom: 100%;
-    left: 10px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    font-size: smaller;
-    border-radius: 6px;
-    padding: 5px;
-  }
   &:hover {
     .tooltip {
       visibility: visible;
       display: block;
     }
   }
+}
+select {
+  min-width: controls.$ui-control-min-width;
+}
+option {
+  &:hover {
+    &+.tooltip {
+      visibility: visible;
+      display: block;
+    }
+    background-color: gray;
+  }
+}
+option:hover+.tooltip {
+  visibility: visible;
+  display: block;
 }
 .hint {
   color: gray;
