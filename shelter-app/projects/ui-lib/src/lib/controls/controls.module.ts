@@ -8,8 +8,6 @@ import {BaseControlComponent} from './base-control.component';
 import {InputControlComponent} from './input-control.component';
 import {SelectControlComponent} from './select-control.component';
 import {BooleanControlComponent} from './boolean-control.component';
-import {TableControlComponent} from './table-control.component';
-import {SwaggerFormComponent} from './swagger-form.component';
 
 @NgModule({
   declarations: [
@@ -20,8 +18,6 @@ import {SwaggerFormComponent} from './swagger-form.component';
     InputControlComponent,
     SelectControlComponent,
     BooleanControlComponent,
-    TableControlComponent,
-    SwaggerFormComponent
   ],
   imports: [
     CommonModule,
@@ -34,8 +30,6 @@ import {SwaggerFormComponent} from './swagger-form.component';
     InputControlComponent,
     SelectControlComponent,
     BooleanControlComponent,
-    TableControlComponent,
-    SwaggerFormComponent
   ]
 })
 export class ControlsModule {

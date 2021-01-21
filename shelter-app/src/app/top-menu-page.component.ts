@@ -11,7 +11,7 @@ import {
 } from 'ui-lib';
 import {EMPTY, Observable} from 'rxjs';
 import {from as fromObject} from 'rxjs';
-import {DynamicFormService} from 'ui-lib';
+import {SwaggerFormService} from 'ui-lib';
 
 const VOTE_OPTIONS: VoteOption[] = [
   {
@@ -172,6 +172,7 @@ export class TopMenuPageComponent implements OnInit {
   inputValue: string = 'Ввід слів _';
   select: ['two', 'one'];
   swagger: SwaggerObject = {
+    orderControls: ['id', 'description'],
     properties: {
       id: {
         type: 'string'
@@ -181,7 +182,7 @@ export class TopMenuPageComponent implements OnInit {
       }
     }
   };
-  constructor(private basicService: BasicService, private dynamicSwagger: DynamicFormService) {
+  constructor(private basicService: BasicService, private dynamicSwagger: SwaggerFormService) {
     dynamicSwagger.addSchemaIfNotExists('test', this.swagger);
   }
 

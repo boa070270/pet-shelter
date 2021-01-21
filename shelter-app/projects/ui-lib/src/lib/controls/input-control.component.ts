@@ -62,7 +62,7 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
     }
   }
   ngOnChanges(changes: SimpleChanges): void {
-    console.log('ngOnChanges', changes);
+    console.log('InputControlComponent.ngOnChanges', changes);
     super.ngOnChanges(changes);
     if (changes.title) {
       this.pTitle = this.doIfNeedI18n(this.title);

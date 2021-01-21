@@ -29,7 +29,7 @@ export * from './lib/shared';
 export * from './lib/survey';
 export * from './lib/i18n';
 export * from './lib/controls';
-export * from './lib/dynamic-form';
+export * from './lib/swagger-form';
 
 export * from './lib/ui-lib.service';
 export * from './lib/ui-lib.component';

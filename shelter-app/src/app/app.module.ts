@@ -4,7 +4,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
-import {SurveyModule, UiLibModule, SharedModule, ControlsModule, ObtainSystemLanguage, DynamicFormModule} from 'ui-lib';
+import {SurveyModule, UiLibModule, SharedModule, ControlsModule, ObtainSystemLanguage, SwaggerFormModule} from 'ui-lib';
 import {HttpClientModule} from '@angular/common/http';
 import { MainPageComponent } from './main-page.component';
 import { TopMenuPageComponent } from './top-menu-page.component';
@@ -68,7 +68,7 @@ import {BasicService} from './basic.service';
     SurveyModule,
     SharedModule,
     ControlsModule,
-    DynamicFormModule
+    SwaggerFormModule
   ],
     providers: [{provide: 'ObtainSystemLanguage', useClass: BasicService}],
     bootstrap: [AppComponent]

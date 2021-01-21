@@ -9,7 +9,7 @@ import {isTitleType, TitleType} from '../shared';
 })
 export class BaseControlComponent implements OnInit, OnDestroy, OnChanges {
   @Input() hint: string | TitleType[];
-  @Input() dir;
+  @Input() dir: string;
   pHint: string;
   private subs: Subscription;
 
