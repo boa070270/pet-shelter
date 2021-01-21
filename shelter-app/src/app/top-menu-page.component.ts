@@ -1,8 +1,17 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {BasicService} from './basic.service';
-import {CommentResponse, CommentType, DiscussionMediator, VoteOption, VoteType} from 'ui-lib';
+import {
+  CommentResponse,
+  CommentType,
+  DiscussionMediator,
+  SwaggerSchema,
+  SwaggerObject,
+  VoteOption,
+  VoteType
+} from 'ui-lib';
 import {EMPTY, Observable} from 'rxjs';
 import {from as fromObject} from 'rxjs';
+import {DynamicFormService} from 'ui-lib';
 
 const VOTE_OPTIONS: VoteOption[] = [
   {
@@ -162,7 +171,19 @@ export class TopMenuPageComponent implements OnInit {
   inputDefault = 101;
   inputValue: string = 'Ввід слів _';
   select: ['two', 'one'];
-  constructor(private basicService: BasicService) { }
+  swagger: SwaggerObject = {
+    properties: {
+      id: {
+        type: 'string'
+      },
+      description: {
+        type: 'string'
+      }
+    }
+  };
+  constructor(private basicService: BasicService, private dynamicSwagger: DynamicFormService) {
+    dynamicSwagger.addSchemaIfNotExists('test', this.swagger);
+  }
 
   ngOnInit(): void {
   }

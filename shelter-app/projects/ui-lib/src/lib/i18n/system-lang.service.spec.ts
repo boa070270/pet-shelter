@@ -1,5 +1,5 @@
 import { SystemLang } from './system-lang.service';
-import {LanguageType, ObtainSystemLanguage} from './language';
+import {LanguageType, ObtainSystemLanguage} from '../shared/language';
 import {BrowserStorageService} from '../shared';
 import {Observable} from 'rxjs';
 

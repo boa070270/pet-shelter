@@ -1,14 +1,14 @@
 import {Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
 import {BaseControlComponent} from './base-control.component';
-import {SystemLang, TitleType} from '../i18n';
+import {SystemLang} from '../i18n';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
+import {TitleType} from '../shared';
 
 export const INPUT_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
   useExisting: forwardRef(() => InputControlComponent),
   multi: true
 };
-
 
 @Component({
   selector: 'lib-input-control',

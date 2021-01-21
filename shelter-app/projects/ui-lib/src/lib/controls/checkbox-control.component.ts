@@ -1,7 +1,8 @@
 import {Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
-import {isTitleType, SystemLang, TitleType} from '../i18n';
+import {SystemLang} from '../i18n';
 import {BaseControlComponent} from './base-control.component';
+import {TitleType} from '../shared';
 
 export const CHECKBOX_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -74,12 +75,10 @@ export class CheckboxControlComponent extends BaseControlComponent implements On
   }
 
   writeValue(obj: any): void {
-    if (obj) {
-      if (Array.isArray(obj)) {
-        this.values = obj;
-      } else {
-        this.values = [];
-      }
+    if (Array.isArray(obj)) {
+      this.values = obj;
+    } else {
+      this.values = [];
     }
   }
   registerOnChange(fn: (_: any) => {}): void {
@@ -100,12 +99,14 @@ export class CheckboxControlComponent extends BaseControlComponent implements On
       } else {
         this.values.push(target.value);
       }
-      if (typeof this.change === 'function') {
-        this.change(this.values);
-      }
+      this.emitChange(this.values);
     }
   }
-
+  protected emitChange(value: any): void {
+    if (typeof this.change === 'function') {
+      this.change(value);
+    }
+  }
   onBlur(): void {
     if (typeof this.touch === 'function') {
       this.touch();

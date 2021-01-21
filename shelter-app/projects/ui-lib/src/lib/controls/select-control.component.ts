@@ -1,22 +1,25 @@
-import {Component, forwardRef, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
-import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
-import {SystemLang} from '../i18n';
+import {Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
 import {CheckboxControlComponent} from './checkbox-control.component';
+import {SystemLang} from '../i18n';
+import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {coerceArray} from '@angular/cdk/coercion';
 
-export const RADIO_VALUE_ACCESSOR: any = {
+export const SELECT_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
-  useExisting: forwardRef(() => RadioControlComponent),
+  useExisting: forwardRef(() => SelectControlComponent),
   multi: true
 };
 
 @Component({
-  selector: 'lib-radio-control',
-  templateUrl: './radio-control.component.html',
+  selector: 'lib-select-control',
+  templateUrl: './select-control.component.html',
   styleUrls: ['./checkbox-control.component.scss'],
-  providers: [RADIO_VALUE_ACCESSOR],
+  providers: [SELECT_VALUE_ACCESSOR],
 })
-export class RadioControlComponent extends CheckboxControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
+export class SelectControlComponent extends CheckboxControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
+  @Input() multiple: boolean;
+  @Input() required: boolean;
+
   constructor(public systemLang: SystemLang) {
     super(systemLang);
   }
@@ -27,6 +30,7 @@ export class RadioControlComponent extends CheckboxControlComponent implements O
   ngOnChanges(changes: SimpleChanges): void {
     super.ngOnChanges(changes);
   }
+
   ngOnDestroy(): void {
     super.ngOnDestroy();
   }
@@ -43,12 +47,7 @@ export class RadioControlComponent extends CheckboxControlComponent implements O
     super.setDisabledState(isDisabled);
   }
   onChange($event: Event): void {
-    const target: HTMLInputElement = $event.target as HTMLInputElement;
-    if (target && target.tagName === 'INPUT') {
-      this.values[0] = target.value;
-      this.emitChange(this.values[0]);
-    }
+    this.emitChange(this.values);
   }
 
 }
-

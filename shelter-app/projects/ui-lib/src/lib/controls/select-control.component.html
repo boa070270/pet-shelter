@@ -1,0 +1,16 @@
+<div class="ui-checkbox">
+  <label>
+      <select [dir]="dir" [disabled]="disabled" [name]="name" (change)="onChange($event)" (blur)="onBlur()"
+              [(ngModel)]="values"
+              [multiple]="multiple"
+              [required]="required"
+      >
+        <ng-container *ngFor="let op of options; index as i">
+            <option><span>{{pTitles[i] || op}}</span></option>
+        </ng-container>
+      </select>
+      Select's label
+      <span class="tooltip" *ngIf="tips[0]">{{tips[0]}}</span>
+  </label>
+</div>
+<span class="hint">{{pHint}}</span>

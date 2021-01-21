@@ -1,6 +1,7 @@
 import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
-import {isTitleType, SystemLang, TitleType} from '../i18n';
+import { SystemLang } from '../i18n';
 import {Subscription} from 'rxjs';
+import {isTitleType, TitleType} from '../shared';
 
 @Component({
   selector: 'lib-base-control',

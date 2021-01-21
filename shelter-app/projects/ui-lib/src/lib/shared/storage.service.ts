@@ -33,7 +33,11 @@ export class BrowserStorageService {
     return null;
   }
   setObj(key: string, value: any): void {
-    this.set(key, JSON.stringify(value));
+    try {
+      this.set(key, JSON.stringify(value));
+    } catch (e) {
+      console.log('BrowserStorageService: stringify error');
+    }
   }
   remove(key: string): void {
     this.storage.removeItem(key);

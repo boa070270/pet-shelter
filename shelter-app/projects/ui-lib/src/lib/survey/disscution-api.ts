@@ -1,5 +1,5 @@
 import {Observable} from 'rxjs';
-import {TitleType} from '../i18n';
+import {TitleType} from '../shared';
 
 export interface VoteMe {
   vote?: string;

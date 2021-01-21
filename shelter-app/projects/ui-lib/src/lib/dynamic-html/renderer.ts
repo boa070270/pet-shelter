@@ -30,8 +30,7 @@ export class DynamicHTMLRenderer {
               @Inject(DOCUMENT) private document: Document) {
     console.log('constructor DynamicHTMLRenderer');
     this.options.components.forEach(({selector, component}) => {
-      let cf: ComponentFactory<any>;
-      cf = this.cfr.resolveComponentFactory(component);
+      const cf = this.cfr.resolveComponentFactory(component);
       this.componentFactories.set(selector || cf.selector, cf);
     });
   }
