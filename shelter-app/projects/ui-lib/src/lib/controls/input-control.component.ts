@@ -88,6 +88,7 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
     this.pError = this.doIfNeedI18n(this.error);
   }
   writeValue(obj: any): void {
+    console.log('InputControlComponent.writeValue', obj);
     this.value = (obj !== undefined && isNaN(obj) && typeof obj !== 'object') ? obj.toString() : null;
   }
   registerOnChange(fn: any): void {
@@ -105,4 +106,10 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
       this.change(this.value);
     }
   }
+  onBlur(): void {
+    if (typeof this.touch === 'function') {
+      this.touch();
+    }
+  }
+
 }

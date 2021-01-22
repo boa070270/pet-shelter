@@ -1,3 +1,12 @@
+<h1>Dynamic form</h1>
+<!-- form #form="ngForm" (ngSubmit)="onSubmit(form)" -->
+  <lib-generator-form #form swagger="test"></lib-generator-form>
+  <input type="submit" (click)="onSubmit(form.formGroup)">
+<!-- /form -->
+<!--
+<ng-container [libSwaggerForm]="'test'"></ng-container>
+<ng-container [libSwaggerForm]="'test2'"></ng-container>
+-->
 <h1>Survey</h1>
 <lib-link [href]="'http://www.google.com'">This is link component</lib-link>
 <span>Vote component: direction column</span>
@@ -124,12 +133,6 @@
 <br>
 <h3>Button</h3>
 <lib-button>Button</lib-button>
-<h3>Dynamic form</h3>
-<lib-generator-form swagger="test"></lib-generator-form>
-<!--
-<ng-container [libSwaggerForm]="'test'"></ng-container>
-<ng-container [libSwaggerForm]="'test2'"></ng-container>
--->
 <br>
 <h1 tabindex="10">Icons</h1>
 <ul style="list-style: none;" (click)="clickUL($event)"> All icons

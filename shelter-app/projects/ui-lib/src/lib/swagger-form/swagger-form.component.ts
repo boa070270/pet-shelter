@@ -1,69 +1,91 @@
-import {
-  AfterContentInit,
-  AfterViewInit,
-  Component,
-  ComponentFactoryResolver,
-  Input, OnChanges,
-  OnInit,
-  QueryList, SimpleChanges,
-  ViewChildren
-} from '@angular/core';
+import {Component, forwardRef, Host, Input, OnDestroy, OnInit, Optional, SkipSelf} from '@angular/core';
 import {
   coerceToSwaggerArray,
   coerceToSwaggerNative,
   coerceToSwaggerObject,
-  SwaggerComponent,
-  SwaggerObject
+  SwaggerGroupComponent,
+  SwaggerObject,
+  SwaggerSchema
 } from './swagger-object';
-import {FormGroup} from '@angular/forms';
-import {SwaggerControlDirective} from './swagger-control.directive';
-import {SwaggerArrayComponent} from './swagger-array.component';
-import {SwaggerNativeComponent} from './swagger-native.component';
+import {ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators} from '@angular/forms';
+import {SwaggerFromGroupDirective} from './swagger-from-group.directive';
 
+export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
+  provide: NG_VALUE_ACCESSOR,
+  useExisting: forwardRef(() => SwaggerFormComponent),
+  multi: true
+};
 
 @Component({
   selector: 'lib-swagger-form',
   template: `
-    <div *ngIf="swagger" ngForm>
-    <ng-container *ngFor="let fld of properties">
-      <ng-container [ngSwitch]="fld.controlType">
-        <lib-swagger-native [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" *ngSwitchCase="'native'"></lib-swagger-native>
-        <lib-swagger-form [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" *ngSwitchCase="'object'"></lib-swagger-form>
-        <lib-swagger-array [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" *ngSwitchCase="'array'"></lib-swagger-array>
-        <!-- ng-template [libSwaggerControl]="swagger.properties[fld]" [propertyId]="fld"> </ng-template -->
+    <div *ngIf="swagger" [libSwaggerFromGroup]="formGroup">
+      <ng-container *ngFor="let fld of properties">
+        <ng-container [ngSwitch]="fld.controlType">
+          <lib-swagger-native [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" [required]="fld.required"
+                              *ngSwitchCase="'native'"></lib-swagger-native>
+          <lib-swagger-form [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" [required]="fld.required"
+                            [(ngModel)]="fld.propertyId" [nameControl]="fld.propertyId"
+                            *ngSwitchCase="'object'"></lib-swagger-form>
+          <lib-swagger-array [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" [required]="fld.required"
+                             [(ngModel)]="fld.propertyId" [nameControl]="fld.propertyId"
+                             *ngSwitchCase="'array'"></lib-swagger-array>
+        </ng-container>
       </ng-container>
-    </ng-container>
-  </div>`,
-  styleUrls: ['./swagger-form.component.scss']
+    </div>`,
+  styleUrls: ['./swagger-form.component.scss'],
+  providers: [SWAGGER_FORM_VALUE_ACCESSOR]
 })
-export class SwaggerFormComponent implements OnInit, OnChanges, SwaggerComponent, AfterViewInit {
-  @Input() swagger: SwaggerObject;
+export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDestroy, ControlValueAccessor  {
+  @Input() swagger: SwaggerSchema;
   @Input() propertyId: string;
-  properties: Array<{propertyId: string, controlType: string}> = [];
+  @Input() nameControl: string;
+  @Input() required: boolean;
+  properties: Array<{propertyId: string, controlType: string, required: boolean}> = [];
+  formGroup: FormGroup;
 
-  @ViewChildren(SwaggerControlDirective) controls: QueryList<SwaggerControlDirective>;
-  form: FormGroup;
+  onChange = (_: any) => {};
+  onTouched = () => {};
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver) {
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    console.log('SwaggerFormDirective.ngOnChanges', changes);
+  constructor(@Optional() @Host() @SkipSelf() public swaggerFromGroup: SwaggerFromGroupDirective) {
   }
 
   ngOnInit(): void {
-    console.log('SwaggerFormComponent.ngOnInit', this.swagger);
+    const ui = this.swagger.ui || {};
     this.processProperties();
-    console.log('SwaggerFormComponent.ngOnInit-after', this.swagger, this.propertyId, this.properties);
+    const validators = ui.validators || [];
+    if (this.required && !validators.includes(Validators.required)) {
+      validators.push(Validators.required);
+    }
+    this.formGroup = new FormGroup({}, validators, ui.asyncValidator);
+    if (this.swaggerFromGroup) {
+      this.swaggerFromGroup.libSwaggerFromGroup.addControl(this.nameControl, this.formGroup);
+    }
+  }
+  ngOnDestroy(): void {
   }
 
-  ngAfterViewInit(): void {
-    // this.loadComponents();
+  registerOnChange(fn: any): void {
+    this.onChange = fn;
   }
+
+  registerOnTouched(fn: any): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+  }
+
+  writeValue(obj: any): void {
+    console.log('SwaggerFormComponent.writeValue', obj);
+  }
+
   private processProperties(): void {
-    if (this.swagger && this.swagger.orderControls && this.swagger.properties) {
-      for (const propertyId of this.swagger.orderControls) {
-        const property = this.swagger.properties[propertyId];
+    const swagger = this.swagger as SwaggerObject;
+    const required = swagger.required || [];
+    if (swagger && swagger.orderControls && swagger.properties) {
+      for (const propertyId of swagger.orderControls) {
+        const property = swagger.properties[propertyId];
         let controlType = null;
         if (coerceToSwaggerNative(property)) {
           controlType = 'native';
@@ -74,26 +96,8 @@ export class SwaggerFormComponent implements OnInit, OnChanges, SwaggerComponent
         } else {
           continue;
         }
-        this.properties.push({propertyId, controlType});
+        this.properties.push({propertyId, controlType, required: required.includes(propertyId)});
       }
-    }
-  }
-  private loadComponents(): void {
-    console.log('SwaggerFormComponent.loadComponents', this.controls);
-    for (const ctrl of this.controls) {
-      const viewContainerRef = ctrl.viewContainerRef;
-      viewContainerRef.clear();
-      let componentFactory = null;
-      if (coerceToSwaggerNative(ctrl.libSwaggerControl)) {
-        componentFactory = this.componentFactoryResolver.resolveComponentFactory(SwaggerNativeComponent);
-      } else if (coerceToSwaggerObject(ctrl.libSwaggerControl)) {
-        componentFactory = this.componentFactoryResolver.resolveComponentFactory(SwaggerFormComponent);
-      } else if (coerceToSwaggerArray(ctrl.libSwaggerControl)){
-        componentFactory = this.componentFactoryResolver.resolveComponentFactory(SwaggerArrayComponent);
-      }
-      // @ts-ignore
-      const componentRef = viewContainerRef.createComponent<SwaggerComponent>(componentFactory);
-      componentRef.instance.swagger = ctrl.libSwaggerControl;
     }
   }
 }

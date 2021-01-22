@@ -28,12 +28,11 @@ class BigSequencer {
             }
         }
         for(let pos = 0; pos < NODE_LENGTH; ++pos) {
-            let num = this.bufferBase[pos];
-            num += 1;
-            if(num > MAX_UINT16) {
+            this.bufferBase[pos]++;
+            if(this.bufferBase[pos] > MAX_UINT16) {
                 this.bufferBase[pos] = 0;
                 if(pos >= NODE_LENGTH) {
-                    num = await this.nextCluster();
+                    let num = await this.nextCluster();
                     // we expect number uint16 or uint32
                     for(let i = 0; i < CLUSTER_LENGTH; ++i) {
                         this.bufferBase[NODE_LENGTH+i] = num & MAX_UINT16;
@@ -42,7 +41,6 @@ class BigSequencer {
                     break;
                 }
             } else {
-                this.bufferBase[pos]= num;
                 break;
             }
         }

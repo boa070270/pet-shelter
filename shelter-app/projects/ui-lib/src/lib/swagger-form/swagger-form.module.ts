@@ -7,8 +7,9 @@ import { SwaggerNativeComponent } from './swagger-native.component';
 import { SwaggerFormDirective } from './swagger-form.directive';
 import {SwaggerControlDirective} from './swagger-control.directive';
 import { SwaggerNativeDirective } from './swagger-native.directive';
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {ControlsModule} from "../controls";
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {ControlsModule} from '../controls';
+import { SwaggerFromGroupDirective } from './swagger-from-group.directive';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import {ControlsModule} from "../controls";
     SwaggerNativeComponent,
     SwaggerFormDirective,
     SwaggerControlDirective,
-    SwaggerNativeDirective
+    SwaggerNativeDirective,
+    SwaggerFromGroupDirective,
   ],
   imports: [
     CommonModule,
@@ -33,7 +35,8 @@ import {ControlsModule} from "../controls";
     SwaggerNativeComponent,
     SwaggerFormDirective,
     SwaggerControlDirective,
-    SwaggerNativeDirective
+    SwaggerNativeDirective,
+    SwaggerFromGroupDirective,
   ]
 })
 export class SwaggerFormModule { }

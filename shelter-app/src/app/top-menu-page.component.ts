@@ -1,17 +1,18 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {BasicService} from './basic.service';
 import {
   CommentResponse,
   CommentType,
   DiscussionMediator,
-  SwaggerSchema,
+  GeneratorFormComponent,
+  SwaggerFormService,
+  swaggerNative,
   SwaggerObject,
   VoteOption,
   VoteType
 } from 'ui-lib';
-import {EMPTY, Observable} from 'rxjs';
-import {from as fromObject} from 'rxjs';
-import {SwaggerFormService} from 'ui-lib';
+import {EMPTY, from as fromObject, Observable} from 'rxjs';
+import {NgForm} from '@angular/forms';
 
 const VOTE_OPTIONS: VoteOption[] = [
   {
@@ -162,23 +163,27 @@ class Mediator implements DiscussionMediator {
   ]
 })
 export class TopMenuPageComponent implements OnInit {
-  // @ViewChild('voteUL') ulElement: ElementRef<HTMLUListElement>;
+  @ViewChild('form') form: GeneratorFormComponent;
   voteOptions = VOTE_OPTIONS;
   voteResult = generateVoteTypes(true);
   checkbox: ['two'];
   radio: string[];
   dir = 'ltr';
   inputDefault = 101;
-  inputValue: string = 'Ввід слів _';
+  inputValue = 'Ввід слів _';
   select: ['two', 'one'];
   swagger: SwaggerObject = {
-    orderControls: ['id', 'description'],
+    orderControls: ['id', 'description', 'child'],
     properties: {
-      id: {
-        type: 'string'
-      },
-      description: {
-        type: 'string'
+      id: swaggerNative('string'),
+      description: swaggerNative('string'),
+      child: {
+        orderControls: ['childId', 'childDescription', 'sex'],
+        properties: {
+          childId: swaggerNative('string'),
+          childDescription: swaggerNative('string'),
+          sex: swaggerNative('string')
+        }
       }
     }
   };
@@ -198,5 +203,10 @@ export class TopMenuPageComponent implements OnInit {
     if (target.tagName === 'LI') {
       console.log((target as HTMLLIElement).value);
     }
+  }
+
+  onSubmit(form: NgForm): void {
+    console.log(form);
+    form.setValue({id: 'top', description: 'description top', child: {childId: 'child Id', childDescription: 'child Description'}});
   }
 }

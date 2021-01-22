@@ -1,25 +1,32 @@
-import {Component, ComponentFactoryResolver, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, ComponentFactoryResolver, ComponentRef, Input, OnInit, ViewChild} from '@angular/core';
 import {SwaggerFormDirective} from './swagger-form.directive';
 import {SwaggerFormService} from './swagger-form.service';
-import {coerceToSwaggerArray, coerceToSwaggerObject, SwaggerComponent, SwaggerObject, SwaggerSchema} from './swagger-object';
+import {coerceToSwaggerArray, coerceToSwaggerObject, SwaggerGroupComponent, SwaggerSchema} from './swagger-object';
 import {SwaggerArrayComponent} from './swagger-array.component';
 import {SwaggerFormComponent} from './swagger-form.component';
+import {FormGroup} from '@angular/forms';
 
 @Component({
   selector: 'lib-generator-form',
-  // templateUrl: './generator-form.component.html',
-  template: `
-    <div class="ui-dynamic-form">
-      <h3>Developing form</h3>
-      <ng-template [libSwaggerForm]="swagger"></ng-template>
-    </div>`,
+  templateUrl: './generator-form.component.html',
+  // template: `
+  //   <div class="ui-dynamic-form">
+  //     <h3>Developing form</h3>
+  //     <ng-template [libSwaggerForm]="swagger"></ng-template>
+  //   </div>`,
   styleUrls: ['./generator-form.component.scss']
 })
 export class GeneratorFormComponent implements OnInit {
   @Input() swagger: string;
   @ViewChild(SwaggerFormDirective, {static: true}) dynamicEntry;
   private schema: SwaggerSchema;
+  private componentRef: ComponentRef<SwaggerGroupComponent>;
 
+  get formGroup(): FormGroup {
+    if (this.componentRef) {
+      return this.componentRef.instance.formGroup;
+    }
+  }
   constructor(private dynamicFormService: SwaggerFormService,
               private componentFactoryResolver: ComponentFactoryResolver) { }
 
@@ -39,8 +46,8 @@ export class GeneratorFormComponent implements OnInit {
         componentFactory = this.componentFactoryResolver.resolveComponentFactory(SwaggerArrayComponent);
       }
       // @ts-ignore
-      const componentRef = viewContainerRef.createComponent<SwaggerComponent>(componentFactory);
-      componentRef.instance.swagger = this.schema;
+      this.componentRef = viewContainerRef.createComponent<SwaggerGroupComponent>(componentFactory);
+      this.componentRef.instance.swagger = this.schema;
     }
   }
 }

@@ -1,4 +1,5 @@
 import {TitleType} from '../shared';
+import {AsyncValidatorFn, FormGroup, ValidatorFn} from '@angular/forms';
 
 export interface CommonConstrictions {
   readOnly?: boolean;
@@ -38,11 +39,34 @@ export interface SwaggerCustomUI {
   title?: string | TitleType[];
   hint?: string | TitleType[];
   toolTypes?: string | TitleType[];
+  placeHolder?: string | TitleType[];
+  validators?: ValidatorFn[];
+  asyncValidator?: AsyncValidatorFn[];
+}
+export function swaggerUI(description?: string, title?: string | TitleType[], hint?: string | TitleType[],
+                          toolTypes?: string | TitleType[], placeHolder?: string | TitleType[]): SwaggerCustomUI {
+  return {description, title, hint, placeHolder, toolTypes};
 }
 export interface SwaggerNative {
   type: 'string' | 'number' | 'integer' | 'boolean';
+  controlType: string;
   constrictions?: NumberConstrictions | StringConstrictions;
   ui?: SwaggerCustomUI;
+}
+
+function defaultControlType(type: 'string' | 'number' | 'integer' | 'boolean',
+                            constrictions: NumberConstrictions | StringConstrictions): string {
+  if (type === 'boolean') {
+    return 'boolean';
+  }
+  if (constrictions && constrictions.enums) {
+    return constrictions.enums.length < 4 ? 'checkbox' : 'input';
+  }
+}
+
+export function swaggerNative(type: 'string' | 'number' | 'integer' | 'boolean', controlType?: string,
+                              constrictions?: NumberConstrictions | StringConstrictions, ui?: SwaggerCustomUI): SwaggerNative {
+  return {type, constrictions, ui, controlType: controlType || defaultControlType(type, constrictions)};
 }
 export interface SwaggerArray {
   itemsType: SwaggerNative | SwaggerObject;
@@ -61,11 +85,16 @@ export interface SwaggerObject {
   required?: string[];
   ui?: SwaggerCustomUI;
 }
+
 export type SwaggerSchema = SwaggerNative | SwaggerObject | SwaggerArray;
 
 export interface SwaggerComponent {
   swagger: SwaggerSchema;
   propertyId: string;
+  required?: boolean;
+}
+export interface SwaggerGroupComponent extends SwaggerComponent {
+  formGroup: FormGroup;
 }
 
 export function coerceToSwaggerNative(type: SwaggerSchema): SwaggerNative {
@@ -87,7 +116,7 @@ export function coerceToSwaggerObject(type: SwaggerSchema): SwaggerObject {
   }
 }
 export function mergeCustomUI(dest: SwaggerCustomUI, source: SwaggerCustomUI): SwaggerCustomUI {
-  const ui = dest || {};
+  const ui = dest || {} as SwaggerCustomUI;
   if (source) {
     ui.description = source.description || ui.description;
     ui.title = source.title || ui.title;
