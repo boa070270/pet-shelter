@@ -17,18 +17,17 @@ export const CHECKBOX_VALUE_ACCESSOR: any = {
   providers: [CHECKBOX_VALUE_ACCESSOR],
 })
 export class CheckboxControlComponent extends BaseControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
-  @Input() name: any;
   @Input() direction: 'row' | 'col' | 'grid' = 'col';
   @Input() cols: number;
   @Input() options: string[];
   @Input() titles: string[] | TitleType[];
+  @Input() optionAsTitle = true;
   @Input() tooltips: string[] | TitleType[];
-  @Input() values: string[] = [];
+  @Input() indeterminate: boolean = null;
+  values: {[key: string]: any} = {};
   pTitles: string[] = [];
   tips: string[] = [];
   disabled: boolean;
-  change: (_: any) => {};
-  touch: () => {};
 
   constructor(public systemLang: SystemLang) {
     super(systemLang);
@@ -36,6 +35,7 @@ export class CheckboxControlComponent extends BaseControlComponent implements On
 
   ngOnInit(): void {
     super.ngOnInit();
+    this.clearAll();
     this.pTitles =  this.doI18n(this.titles);
     this.tips = this.doI18n(this.tooltips);
   }
@@ -49,6 +49,7 @@ export class CheckboxControlComponent extends BaseControlComponent implements On
     if (changes.tooltips) {
       this.tips = this.doI18n(this.tooltips);
     }
+    super.ngOnChanges(changes);
   }
   onChangeLang(): void {
     this.pTitles =  this.doI18n(this.titles);
@@ -68,17 +69,22 @@ export class CheckboxControlComponent extends BaseControlComponent implements On
       if (tls.length > 0) {
         lbl.push(this.systemLang.getTitle(tls));
       } else if (cp) {
-        lbl.push(cp ? o : undefined);
+        lbl.push(cp ? o : null);
       }
     }
     return lbl;
   }
 
   writeValue(obj: any): void {
-    if (Array.isArray(obj)) {
-      this.values = obj;
-    } else {
-      this.values = [];
+    this.clearAll();
+    if (obj) {
+      if (Array.isArray(obj)) {
+        this.setArray(obj);
+      } else if (typeof obj === 'object' && obj !== null) {
+        this.setObject(obj);
+      } else {
+        this.setValue(obj, true);
+      }
     }
   }
   registerOnChange(fn: (_: any) => {}): void {
@@ -93,23 +99,55 @@ export class CheckboxControlComponent extends BaseControlComponent implements On
   onChange($event: Event): void {
     const target: HTMLInputElement = $event.target as HTMLInputElement;
     if (target && target.tagName === 'INPUT') {
-      const idx = this.values.indexOf(target.value);
-      if (idx >= 0) {
-        this.values.splice(idx, 1);
-      } else {
-        this.values.push(target.value);
+      this.toggle(target.value);
+      this.emitChange(this.getArrayValues());
+    }
+    console.log('CheckboxControlComponent.onChange', this.indeterminate, this.values);
+  }
+  setValue(key: string, value: any): void {
+    if (this.options.includes(key)) {
+      this.values[key] = value;
+      this.values = Object.assign({}, this.values);
+    }
+  }
+  getValue(key: string): any {
+    return this.values[key];
+  }
+  protected clearValue(key: string): void {
+    this.values[key] = null;
+  }
+  protected toggle(key: string): void {
+    this.values[key] = !this.values[key];
+  }
+  setObject(obj: any): void {
+    for (const [key, value] of Object.entries(obj)) {
+      if (this.options.includes(key)) {
+        this.values[key] = true;
       }
-      this.emitChange(this.values);
     }
+    this.values = Object.assign({}, this.values);
   }
-  protected emitChange(value: any): void {
-    if (typeof this.change === 'function') {
-      this.change(value);
+  setArray(opt: Array<string>): void {
+    for (const key of opt) {
+      if (this.options.includes(key)) {
+        this.values[key] = true;
+      }
     }
+    this.values = Object.assign({}, this.values);
   }
-  onBlur(): void {
-    if (typeof this.touch === 'function') {
-      this.touch();
+  getArrayValues(): string[] {
+    const a = [];
+    for (const [key, value] of Object.entries(this.values)) {
+      if (value) {
+        a.push(key);
+      }
+    }
+    return a;
+  }
+  clearAll(): void {
+    this.values = {};
+    if (Array.isArray(this.options)) {
+      this.options.forEach(o => this.values[o] = null);
     }
   }
 }

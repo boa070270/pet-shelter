@@ -8,6 +8,8 @@ import {BaseControlComponent} from './base-control.component';
 import {InputControlComponent} from './input-control.component';
 import {SelectControlComponent} from './select-control.component';
 import {BooleanControlComponent} from './boolean-control.component';
+import { TableControlComponent } from './table-control.component';
+import {CdkTableModule} from "@angular/cdk/table";
 
 @NgModule({
   declarations: [
@@ -18,10 +20,12 @@ import {BooleanControlComponent} from './boolean-control.component';
     InputControlComponent,
     SelectControlComponent,
     BooleanControlComponent,
+    TableControlComponent,
   ],
   imports: [
     CommonModule,
     FormsModule,
+    CdkTableModule,
   ],
   exports: [
     ButtonComponent,
@@ -30,6 +34,7 @@ import {BooleanControlComponent} from './boolean-control.component';
     InputControlComponent,
     SelectControlComponent,
     BooleanControlComponent,
+    TableControlComponent,
   ]
 })
 export class ControlsModule {

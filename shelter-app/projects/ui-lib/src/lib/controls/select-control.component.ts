@@ -47,7 +47,26 @@ export class SelectControlComponent extends CheckboxControlComponent implements 
     super.setDisabledState(isDisabled);
   }
   onChange($event: Event): void {
-    this.emitChange(this.values);
+    const target = $event.target as HTMLSelectElement;
+    if (target && target.tagName === 'SELECT') {
+      const selectedOptions = target.selectedOptions;
+      const selected = [];
+      if (selectedOptions !== undefined) {
+        for (let i = 0; i < selectedOptions.length; ++i) {
+          selected.push(selectedOptions.item(i).value);
+        }
+      } else {
+        const options = target.options;
+        for (let i = 0; i < options.length; i++) {
+          const opt: HTMLOptionElement = options.item(i);
+          if (opt.selected) {
+            selected.push(opt.value);
+          }
+        }
+      }
+      console.log('SelectControlComponent.onChange', selected);
+      this.emitChange(selected);
+    }
   }
 
 }

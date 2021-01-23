@@ -18,13 +18,12 @@ import {SwaggerFromGroupDirective} from './swagger-from-group.directive';
   template: `
     <div class="ui-swagger-native">
       <ng-container [ngSwitch]="swaggerType">
-        <lib-boolean-control *ngSwitchCase="'boolean'" [formControl]="formControl" name="{{propertyId}}"></lib-boolean-control> <!-- [formControlName]="propertyId" -->
-        <lib-input-control *ngSwitchCase="'input'" [formControl]="formControl" name="{{propertyId}}"></lib-input-control> <!-- [formControlName]="propertyId" -->
-        <lib-select-control *ngSwitchCase="'select'" [formControl]="formControl" name="{{propertyId}}"></lib-select-control> <!-- [formControlName]="propertyId" -->
-        <lib-checkbox-control *ngSwitchCase="'checkbox'" [formControl]="formControl" name="{{propertyId}}"></lib-checkbox-control> <!-- [formControlName]="propertyId" -->
-        <lib-radio-control *ngSwitchCase="'radio'" [formControl]="formControl" name="{{propertyId}}"></lib-radio-control> <!-- [formControlName]="propertyId" -->
+        <lib-boolean-control *ngSwitchCase="'boolean'" [formControl]="formControl" name="{{propertyId}}"></lib-boolean-control>
+        <lib-input-control *ngSwitchCase="'input'" [formControl]="formControl" name="{{propertyId}}"></lib-input-control>
+        <lib-select-control *ngSwitchCase="'select'" [formControl]="formControl" name="{{propertyId}}"></lib-select-control>
+        <lib-checkbox-control *ngSwitchCase="'checkbox'" [formControl]="formControl" name="{{propertyId}}"></lib-checkbox-control>
+        <lib-radio-control *ngSwitchCase="'radio'" [formControl]="formControl" name="{{propertyId}}"></lib-radio-control>
       </ng-container>
-        <!-- ng-template [libSwaggerNative]></ng-template -->
     </div>`,
   styleUrls: ['./swagger-native.component.scss']
 })

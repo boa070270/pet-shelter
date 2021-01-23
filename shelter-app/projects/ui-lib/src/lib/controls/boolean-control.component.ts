@@ -38,7 +38,7 @@ export class BooleanControlComponent extends CheckboxControlComponent implements
     super.setDisabledState(isDisabled);
   }
   onChange($event: Event): void {
-    this.emitChange(coerceBooleanProperty(this.values[0]));
+    this.emitChange(coerceBooleanProperty(this.values.true));
   }
 
 }

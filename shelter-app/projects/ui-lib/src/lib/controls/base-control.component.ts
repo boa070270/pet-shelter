@@ -8,10 +8,15 @@ import {isTitleType, TitleType} from '../shared';
   template: ''
 })
 export class BaseControlComponent implements OnInit, OnDestroy, OnChanges {
+  @Input() id: string;
+  @Input() name: string;
   @Input() hint: string | TitleType[];
+  @Input() error: string;
   @Input() dir: string;
   pHint: string;
   private subs: Subscription;
+  protected change: (_: any) => {};
+  protected touch: () => {};
 
   constructor(public systemLang: SystemLang) {
     this.subs = systemLang.onChange().subscribe(l => {
@@ -26,6 +31,7 @@ export class BaseControlComponent implements OnInit, OnDestroy, OnChanges {
     this.pHint = this.doIfNeedI18n(this.hint);
   }
   ngOnChanges(changes: SimpleChanges): void {
+    console.log('BaseControlComponent.ngOnChanges', this, changes);
     if (changes.hint) {
       this.pHint = this.doIfNeedI18n(this.hint);
     }
@@ -43,6 +49,18 @@ export class BaseControlComponent implements OnInit, OnDestroy, OnChanges {
 
   needI18n(fld): boolean {
     return (typeof fld === 'object' !== null) && (isTitleType(fld) || (Array.isArray(fld) && isTitleType(fld[0])));
+  }
+  protected emitChange(value: any): void {
+    console.log('BaseControlComponent.emitChange', this);
+    if (typeof this.change === 'function') {
+      this.change(value);
+    }
+  }
+  onBlur(): void {
+    console.log('BaseControlComponent.onBlur', this);
+    if (typeof this.touch === 'function') {
+      this.touch();
+    }
   }
 
 }

@@ -31,7 +31,7 @@ export class RadioControlComponent extends CheckboxControlComponent implements O
     super.ngOnDestroy();
   }
   writeValue(obj: any): void {
-    super.writeValue(coerceArray(obj));
+    super.writeValue(obj);
   }
   registerOnChange(fn: (_: any) => {}): void {
     super.registerOnChange(fn);
@@ -45,8 +45,9 @@ export class RadioControlComponent extends CheckboxControlComponent implements O
   onChange($event: Event): void {
     const target: HTMLInputElement = $event.target as HTMLInputElement;
     if (target && target.tagName === 'INPUT') {
-      this.values[0] = target.value;
-      this.emitChange(this.values[0]);
+      this.clearAll();
+      this.values[target.value] = true;
+      this.emitChange(this.getArrayValues());
     }
   }
 

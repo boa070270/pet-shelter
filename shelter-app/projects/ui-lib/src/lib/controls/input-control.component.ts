@@ -22,14 +22,11 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
   @Input() placeholder: string | TitleType[];
   @Input() leadingIcon: string;
   @Input() trailingIcon: string;
-  @Input() error: string;
   // Bind Element property
   @Input() type = 'text';
   @Input() hidden: boolean;
   @Input() disabled: boolean;
-  @Input() id: string;
   @Input() accessKey: string;
-  @Input() name: string;
   @Input() formTarget: string;
   @Input() formAction: string;
   @Input() formNoValidate: boolean;
