@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TableControlComponent } from './table-control.component';
 
 describe('TableControlComponent', () => {
-  let component: TableControlComponent;
-  let fixture: ComponentFixture<TableControlComponent>;
+  let component: TableControlComponent<any>;
+  let fixture: ComponentFixture<TableControlComponent<any>>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

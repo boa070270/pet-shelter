@@ -4,7 +4,7 @@ import {FormGroup} from '@angular/forms';
 @Directive({
   selector: '[libSwaggerFromGroup]'
 })
-export class SwaggerFromGroupDirective {
+export class SwaggerFormGroupDirective {
   @Input() libSwaggerFromGroup: FormGroup;
   constructor() { }
 

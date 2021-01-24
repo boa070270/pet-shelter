@@ -1,0 +1,9 @@
+<table>
+  <caption>{{caption}}</caption>
+  <tr>
+    <th *ngFor="let cell of displayedColumns">{{cell}}</th>
+  </tr>
+  <tr *ngFor="let row of data">
+    <td *ngFor="let cell of displayedColumns">{{row[cell]}}</td>
+  </tr>
+</table>

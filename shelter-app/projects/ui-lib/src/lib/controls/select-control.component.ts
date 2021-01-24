@@ -35,7 +35,9 @@ export class SelectControlComponent extends CheckboxControlComponent implements 
     super.ngOnDestroy();
   }
   writeValue(obj: any): void {
-    super.writeValue(coerceArray(obj));
+    if (obj !== null && obj !== undefined) {
+      super.writeValue(coerceArray(obj));
+    }
   }
   registerOnChange(fn: (_: any) => {}): void {
     super.registerOnChange(fn);
@@ -65,7 +67,11 @@ export class SelectControlComponent extends CheckboxControlComponent implements 
         }
       }
       console.log('SelectControlComponent.onChange', selected);
-      this.emitChange(selected);
+      if (selected.length > 1) {
+        this.emitChange(selected);
+      } else {
+        this.emitChange(selected[0]);
+      }
     }
   }
 

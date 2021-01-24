@@ -20,13 +20,13 @@ export class CheckboxControlComponent extends BaseControlComponent implements On
   @Input() direction: 'row' | 'col' | 'grid' = 'col';
   @Input() cols: number;
   @Input() options: string[];
-  @Input() titles: string[] | TitleType[];
+  @Input() titles: {[key: string]: string} | TitleType[];
   @Input() optionAsTitle = true;
   @Input() tooltips: string[] | TitleType[];
   @Input() indeterminate: boolean = null;
   values: {[key: string]: any} = {};
-  pTitles: string[] = [];
-  tips: string[] = [];
+  pTitles: {[id: string]: string};
+  tips: {[id: string]: string};
   disabled: boolean;
 
   constructor(public systemLang: SystemLang) {
@@ -36,48 +36,30 @@ export class CheckboxControlComponent extends BaseControlComponent implements On
   ngOnInit(): void {
     super.ngOnInit();
     this.clearAll();
-    this.pTitles =  this.doI18n(this.titles);
-    this.tips = this.doI18n(this.tooltips);
+    this.pTitles =  this.doIfNeedI18n(this.titles, {}) as any;
+    this.tips = this.doIfNeedI18n(this.tooltips, {});
   }
   ngOnDestroy(): void {
     super.ngOnDestroy();
   }
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.labels) {
-      this.pTitles =  this.doI18n(this.titles);
+      this.pTitles =  this.doIfNeedI18n(this.titles, {});
     }
     if (changes.tooltips) {
-      this.tips = this.doI18n(this.tooltips);
+      this.tips = this.doIfNeedI18n(this.tooltips, {});
     }
     super.ngOnChanges(changes);
   }
   onChangeLang(): void {
-    this.pTitles =  this.doI18n(this.titles);
-    this.tips = this.doI18n(this.tooltips);
-  }
-
-  doI18n(what: string[] | TitleType[]): string[] {
-    if (this.options.length > 0 && this.needI18n(what)) {
-      return this.i18n(what as TitleType[]);
-    }
-    return what as string[];
-  }
-  private i18n(t: TitleType[], cp: boolean = true): string[] {
-    const lbl = [];
-    for (const o of this.options) {
-      const tls = t.filter(v => v.id === o);
-      if (tls.length > 0) {
-        lbl.push(this.systemLang.getTitle(tls));
-      } else if (cp) {
-        lbl.push(cp ? o : null);
-      }
-    }
-    return lbl;
+    this.pTitles =  this.doIfNeedI18n(this.titles, {});
+    this.tips = this.doIfNeedI18n(this.tooltips, {});
   }
 
   writeValue(obj: any): void {
+    console.log('CheckboxControlComponent.writeValue', obj);
     this.clearAll();
-    if (obj) {
+    if (obj !== null && obj !== undefined) {
       if (Array.isArray(obj)) {
         this.setArray(obj);
       } else if (typeof obj === 'object' && obj !== null) {

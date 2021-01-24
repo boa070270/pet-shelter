@@ -3,11 +3,13 @@ import {AsyncValidatorFn, FormGroup, ValidatorFn} from '@angular/forms';
 
 export interface CommonConstrictions {
   readOnly?: boolean;
-  writeOnly?: boolean;
-  nullable?: boolean;
+  writeOnly?: boolean; // Maybe will be removed, has not any sense on client-side
+  nullable?: boolean; // TODO Make a decision how to use it (maybe always required if true)
   enums?: number[] | string[];
-  enumDescriptions: string[];
-  default: boolean | number | string;
+  enumDescriptions?: {[key: string]: string} | TitleType[];
+  enumMulti?: boolean; // TODO This's used in case swagger property has type array and simple type as item (with option uniqueItems)
+  default?: boolean | number | string;
+  format?: 'date' | 'date-time' | 'password' | 'byte' | 'binary' | 'email' | 'uuid' | 'uri' | 'hostname' | 'ipv4' | 'ipv6';
 }
 
 export interface NumberConstrictions extends CommonConstrictions {
@@ -21,7 +23,6 @@ export interface NumberConstrictions extends CommonConstrictions {
 export interface StringConstrictions extends CommonConstrictions {
   minLength?: number;
   maxLength?: number;
-  format?: 'date' | 'date-time' | 'password' | 'byte' | 'binary' | 'email' | 'uuid' | 'uri' | 'hostname' | 'ipv4' | 'ipv6';
   pattern?: RegExp;
 }
 export interface ArrayConstrictions {
@@ -35,17 +36,19 @@ export interface ArrayConstrictions {
  * other properties need handle work
  */
 export interface SwaggerCustomUI {
-  description?: string; // this property is used as hint
-  title?: string | TitleType[];
-  hint?: string | TitleType[];
-  toolTypes?: string | TitleType[];
+  description?: string | TitleType[]; // this property is used as hint
+  caption?: string | TitleType[];
+  toolTips?: string | TitleType[];
   placeHolder?: string | TitleType[];
   validators?: ValidatorFn[];
   asyncValidator?: AsyncValidatorFn[];
+  leadingIcon?: string;
+  trailingIcon?: string;
 }
-export function swaggerUI(description?: string, title?: string | TitleType[], hint?: string | TitleType[],
-                          toolTypes?: string | TitleType[], placeHolder?: string | TitleType[]): SwaggerCustomUI {
-  return {description, title, hint, placeHolder, toolTypes};
+export function swaggerUI(description?: string | TitleType[], caption?: string | TitleType[],
+                          toolTips?: string | TitleType[], placeHolder?: string | TitleType[],
+                          leadingIcon?: string, trailingIcon?: string): SwaggerCustomUI {
+  return {description, caption, placeHolder, toolTips, leadingIcon, trailingIcon};
 }
 export interface SwaggerNative {
   type: 'string' | 'number' | 'integer' | 'boolean';
@@ -119,8 +122,8 @@ export function mergeCustomUI(dest: SwaggerCustomUI, source: SwaggerCustomUI): S
   const ui = dest || {} as SwaggerCustomUI;
   if (source) {
     ui.description = source.description || ui.description;
-    ui.title = source.title || ui.title;
-    ui.toolTypes = source.toolTypes || ui.toolTypes;
+    ui.caption = source.caption || ui.caption;
+    ui.toolTips = source.toolTips || ui.toolTips;
   }
   return ui;
 }

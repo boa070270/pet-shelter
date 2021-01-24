@@ -8,7 +8,7 @@ import {
   SwaggerSchema
 } from './swagger-object';
 import {ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators} from '@angular/forms';
-import {SwaggerFromGroupDirective} from './swagger-from-group.directive';
+import {SwaggerFormGroupDirective} from './swagger-form-group.directive';
 
 export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -47,7 +47,7 @@ export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDe
   onChange = (_: any) => {};
   onTouched = () => {};
 
-  constructor(@Optional() @Host() @SkipSelf() public swaggerFromGroup: SwaggerFromGroupDirective) {
+  constructor(@Optional() @Host() @SkipSelf() public swaggerFromGroup: SwaggerFormGroupDirective) {
   }
 
   ngOnInit(): void {

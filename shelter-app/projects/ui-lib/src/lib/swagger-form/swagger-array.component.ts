@@ -1,6 +1,6 @@
 import {Component, Host, OnChanges, OnDestroy, OnInit, Optional, SimpleChanges, SkipSelf} from '@angular/core';
 import {SwaggerGroupComponent} from './swagger-object';
-import {SwaggerFromGroupDirective} from './swagger-from-group.directive';
+import {SwaggerFormGroupDirective} from './swagger-form-group.directive';
 import {SwaggerFormComponent} from './swagger-form.component';
 
 @Component({
@@ -10,7 +10,7 @@ import {SwaggerFormComponent} from './swagger-form.component';
 })
 export class SwaggerArrayComponent extends SwaggerFormComponent implements OnInit, OnDestroy, OnChanges, SwaggerGroupComponent {
 
-  constructor(@Optional() @Host() @SkipSelf() public swaggerFromGroup: SwaggerFromGroupDirective) {
+  constructor(@Optional() @Host() @SkipSelf() public swaggerFromGroup: SwaggerFormGroupDirective) {
     super(swaggerFromGroup);
   }
 

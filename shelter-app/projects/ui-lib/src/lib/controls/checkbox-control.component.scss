@@ -7,36 +7,36 @@
   padding: 2px;
   margin: 0;
   &[direction=col] {
-    > .ui-checkbox {
+    .ui-checkbox {
       display: grid;
       grid-column: 1;
     }
   }
   &[direction=row] {
-    > .ui-checkbox {
+    .ui-checkbox {
       display: flex;
     }
   }
   &[direction=grid] {
-    >.ui-checkbox {
+    .ui-checkbox {
       display: grid;
       grid-template-columns: 1fr 1fr;
     }
   }
   &[direction=grid][cols="3"] {
-    >.ui-checkbox {
+    .ui-checkbox {
       display: grid;
       grid-template-columns: repeat(3,1fr);
     }
   }
   &[direction=grid][cols="4"] {
-    >.ui-checkbox {
+    .ui-checkbox {
       display: grid;
       grid-template-columns: repeat(4,1fr);
     }
   }
   &[direction=grid][cols="5"] {
-    >.ui-checkbox {
+    .ui-checkbox {
       display: grid;
       grid-template-columns: repeat(4,1fr);
     }

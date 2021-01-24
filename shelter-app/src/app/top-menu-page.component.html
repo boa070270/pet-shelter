@@ -1,5 +1,5 @@
 <h1>Table</h1>
-<lib-table-control></lib-table-control>
+<lib-table-control [caption]="tableCaption" [observableColl]="tableColumns" [observableData]="tableData"></lib-table-control>
 
 <h1>Dynamic form</h1>
 <!-- form #form="ngForm" (ngSubmit)="onSubmit(form)" -->
@@ -101,7 +101,7 @@
                    [name]="'input1'"
                    [disabled]="false"
                    [hidden]="false"
-                   [title]="[{lang:'en',title:'Input title'},{lang:'uk',title:'Ввід слів'}]"
+                   [caption]="[{lang:'en',title:'Input title'},{lang:'uk',title:'Ввід слів'}]"
                    [tooltip]="[{lang:'en',title:'Tooltip: there can be placed more words than in hint.'},{lang:'uk',title:'Пдісказка, що як робити'}]"
                    [hint]="[{lang:'en',title:'Hint - a slight or indirect indication or suggestion.'},{lang:'uk',title:'Натяк, що це та навіщо'}]"
                    [placeholder]="[{lang:'en',title:'Placeholder - a example of data.'},{lang:'uk',title:'Placeholder - місце для прикладу'}]"

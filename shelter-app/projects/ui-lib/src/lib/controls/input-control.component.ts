@@ -17,7 +17,6 @@ export const INPUT_VALUE_ACCESSOR: any = {
   providers: [INPUT_VALUE_ACCESSOR]
 })
 export class InputControlComponent extends BaseControlComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
-  @Input() title: string | TitleType[];
   @Input() tooltip: string | TitleType[];
   @Input() placeholder: string | TitleType[];
   @Input() leadingIcon: string;
@@ -35,7 +34,6 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
   @Input() autofocus: boolean;
   @Input() tabIndex: number;
   value: string;
-  pTitle: string;
   pTooltip: string;
   pPlaceholder: string;
   change: (_: any) => {};
@@ -49,7 +47,6 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
 
   ngOnInit(): void {
     super.ngOnInit();
-    this.pTitle = this.doIfNeedI18n(this.title);
     this.pTooltip = this.doIfNeedI18n(this.tooltip);
     this.pPlaceholder = this.doIfNeedI18n(this.placeholder);
     this.pError = this.doIfNeedI18n(this.error);
@@ -61,9 +58,6 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
   ngOnChanges(changes: SimpleChanges): void {
     console.log('InputControlComponent.ngOnChanges', changes);
     super.ngOnChanges(changes);
-    if (changes.title) {
-      this.pTitle = this.doIfNeedI18n(this.title);
-    }
     if (changes.tooltip) {
       this.pTooltip = this.doIfNeedI18n(this.tooltip);
     }
@@ -79,7 +73,7 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
   }
   onChangeLang(): void {
     super.onChangeLang();
-    this.pTitle = this.doIfNeedI18n(this.title);
+    this.pCaption = this.doIfNeedI18n(this.caption);
     this.pTooltip = this.doIfNeedI18n(this.tooltip);
     this.pPlaceholder = this.doIfNeedI18n(this.placeholder);
     this.pError = this.doIfNeedI18n(this.error);
@@ -100,6 +94,7 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
 
   onChange($event: Event): void {
     if (typeof this.change === 'function') {
+      console.log('InputControlComponent.onChange(this.value)');
       this.change(this.value);
     }
   }

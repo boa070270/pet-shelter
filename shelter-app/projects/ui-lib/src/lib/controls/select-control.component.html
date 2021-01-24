@@ -1,4 +1,6 @@
-<div class="ui-checkbox">
+<label>
+  <span class="ui-input-title" *ngIf="pCaption">{{pCaption}}</span>
+  <div class="ui-checkbox">
   <label>
       <select [dir]="dir" [disabled]="disabled" [name]="name" (change)="onChange($event)" (blur)="onBlur()"
               [multiple]="multiple"
@@ -8,8 +10,8 @@
             <option><span>{{pTitles[i] || op}}</span></option>
         </ng-container>
       </select>
-      Select's label
       <span class="tooltip" *ngIf="tips[0]">{{tips[0]}}</span>
-  </label>
-</div>
+    </label>
+  </div>
+</label>
 <span class="hint">{{pHint}}</span>

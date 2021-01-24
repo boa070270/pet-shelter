@@ -1,13 +1,14 @@
-<div class="ui-checkbox" >
-  <ng-container *ngFor="let op of options; index as i" >
-  <label>
-    <input type="checkbox" value="{{op}}" [dir]="dir" [checked]="!!values[op]"
-           [disabled]="disabled" [name]="name" (change)="onChange($event)" (blur)="onBlur()"
-           [indeterminate]="!!values[op] && !!indeterminate"
-    >
-    <span *ngIf="optionAsTitle || pTitles">{{(pTitles && pTitles[i]) || op}}</span>
-    <span class="tooltip" *ngIf="tips && tips[i]">{{tips[i]}}</span>
-  </label>
-  </ng-container>
-</div>
+  <span class="ui-checkbox-title" *ngIf="pCaption">{{pCaption}}</span>
+  <div class="ui-checkbox" >
+    <ng-container *ngFor="let op of options; index as i" >
+    <label>
+      <input type="checkbox" value="{{op}}" [dir]="dir" [checked]="!!values[op]"
+             [disabled]="disabled" [name]="name" (change)="onChange($event)" (blur)="onBlur()"
+             [indeterminate]="!!values[op] && !!indeterminate"
+      >
+      <span *ngIf="optionAsTitle || pTitles[i]">{{(pTitles[i]) || op}}</span>
+      <span class="tooltip" *ngIf="tips[i]">{{tips[i]}}</span>
+    </label>
+    </ng-container>
+  </div>
 <span class="hint" *ngIf="pHint">{{pHint}}</span>

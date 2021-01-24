@@ -11,7 +11,7 @@ import {
   VoteOption,
   VoteType
 } from 'ui-lib';
-import {EMPTY, from as fromObject, Observable} from 'rxjs';
+import {BehaviorSubject, EMPTY, from as fromObject, Observable} from 'rxjs';
 import {NgForm} from '@angular/forms';
 
 const VOTE_OPTIONS: VoteOption[] = [
@@ -182,11 +182,28 @@ export class TopMenuPageComponent implements OnInit {
         properties: {
           childId: swaggerNative('string'),
           childDescription: swaggerNative('string'),
-          sex: swaggerNative('string')
+          sex: swaggerNative('string', null, {enums: ['m', 'f']})
         }
       }
     }
   };
+  /******* Table *******/
+  tableDataSet = [
+    {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
+    {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He'},
+    {position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li'},
+    {position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
+    {position: 5, name: 'Boron', weight: 10.811, symbol: 'B'},
+    {position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C'},
+    {position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
+    {position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O'},
+    {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
+    {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
+  ];
+  tableColumnSet = ['position', 'name', 'weight', 'symbol'];
+  tableCaption = 'Test table';
+  tableData = new BehaviorSubject<any>(this.tableDataSet);
+  tableColumns = new BehaviorSubject<string[]>(this.tableColumnSet);
   constructor(private basicService: BasicService, private dynamicSwagger: SwaggerFormService) {
     dynamicSwagger.addSchemaIfNotExists('test', this.swagger);
   }
@@ -207,6 +224,8 @@ export class TopMenuPageComponent implements OnInit {
 
   onSubmit(form: NgForm): void {
     console.log(form);
-    form.setValue({id: 'top', description: 'description top', child: {childId: 'child Id', childDescription: 'child Description'}});
+    const obj = {id: 'set top', description: 'set description top', child: {childId: 'set child Id', childDescription: 'set child Description', sex: 'm'}};
+    console.log('set new value to form', obj);
+    form.setValue(obj);
   }
 }
