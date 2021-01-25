@@ -9,6 +9,9 @@ import {InputControlComponent} from './input-control.component';
 import {SelectControlComponent} from './select-control.component';
 import {BooleanControlComponent} from './boolean-control.component';
 import { TableControlComponent } from './table/table-control.component';
+import { TableRowSelectorDirective } from './table/table-row-selector.directive';
+import { TableControlDirective } from './table/table-control.directive';
+import { TableCellDataDirective } from './table/table-cell-data.directive';
 
 @NgModule({
   declarations: [
@@ -20,6 +23,9 @@ import { TableControlComponent } from './table/table-control.component';
     SelectControlComponent,
     BooleanControlComponent,
     TableControlComponent,
+    TableRowSelectorDirective,
+    TableControlDirective,
+    TableCellDataDirective,
   ],
   imports: [
     CommonModule,
@@ -33,6 +39,7 @@ import { TableControlComponent } from './table/table-control.component';
     SelectControlComponent,
     BooleanControlComponent,
     TableControlComponent,
+    TableRowSelectorDirective,
   ]
 })
 export class ControlsModule {

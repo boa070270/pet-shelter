@@ -64,6 +64,7 @@ export class SystemMenuService implements OnDestroy {
   }
   menuTree(locale?: string): MenuTree[] {
     const result: MenuTree[] = [];
+    result.push({path: 'test', title: 'Test', component: 'TopMenuPageComponent'}); // TODO remove this
     const menusAndTitles = this.menusAndTitle;
     for (const m of menusAndTitles.menus) {
       let menuTree: MenuTree  = this._findParent(result, m.path);

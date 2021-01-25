@@ -8,14 +8,7 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import {
-  CommonConstrictions, NumberConstrictions,
-  StringConstrictions,
-  SwaggerComponent,
-  SwaggerCustomUI,
-  SwaggerNative,
-  SwaggerSchema
-} from './swagger-object';
+import {CommonConstrictions, SwaggerComponent, SwaggerCustomUI, SwaggerNative, SwaggerSchema} from './swagger-object';
 import {SwaggerNativeDirective} from './swagger-native.directive';
 import {FormControl, Validators} from '@angular/forms';
 import {SwaggerFormGroupDirective} from './swagger-form-group.directive';
@@ -30,7 +23,7 @@ import {SwaggerFormGroupDirective} from './swagger-form-group.directive';
         <lib-input-control *ngSwitchCase="'input'" [formControl]="formControl" name="{{propertyId}}"
                            [hint]="ui.description" [placeholder]="ui.placeHolder" [tooltip]="ui.toolTips"
                            [caption]="ui.caption" [leadingIcon]="ui.leadingIcon" [trailingIcon]="ui.trailingIcon"
-                           [type]="constrictions.format" [disabled]="constrictions.readOnly"
+                           [type]="constrictions.format"
         ></lib-input-control>
         <lib-select-control *ngSwitchCase="'select'" [formControl]="formControl" name="{{propertyId}}"
                             [hint]="ui.description" [tooltips]="ui.toolTips"
