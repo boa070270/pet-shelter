@@ -6,7 +6,7 @@ import {
   SwaggerGroupComponent,
   SwaggerObject,
   SwaggerSchema
-} from './swagger-object';
+} from '../shared/swagger-object';
 import {ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators} from '@angular/forms';
 import {SwaggerFormGroupDirective} from './swagger-form-group.directive';
 

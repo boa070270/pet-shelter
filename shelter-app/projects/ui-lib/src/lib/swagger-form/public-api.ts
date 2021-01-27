@@ -2,7 +2,6 @@ export * from './swagger-form.module';
 export * from './swagger-form.directive';
 export * from './generator-form.component';
 export * from './swagger-form.service';
-export * from './swagger-object';
 export * from './swagger-array.component';
 export * from './swagger-form.component';
 export * from './swagger-control.directive';

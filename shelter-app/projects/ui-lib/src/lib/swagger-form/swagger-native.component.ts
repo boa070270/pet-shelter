@@ -15,7 +15,7 @@ import {
   SwaggerCustomUI,
   SwaggerNative,
   SwaggerSchema
-} from './swagger-object';
+} from '../shared/swagger-object';
 import {SwaggerNativeDirective} from './swagger-native.directive';
 import {FormControl, Validators} from '@angular/forms';
 import {SwaggerFormGroupDirective} from './swagger-form-group.directive';

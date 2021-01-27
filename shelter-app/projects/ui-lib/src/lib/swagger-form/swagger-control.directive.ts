@@ -1,5 +1,5 @@
 import {ComponentFactoryResolver, Directive, Input, OnChanges, SimpleChanges, ViewContainerRef} from '@angular/core';
-import {SwaggerSchema} from './swagger-object';
+import {SwaggerSchema} from '../shared/swagger-object';
 
 @Directive({
   selector: '[libSwaggerControl]'

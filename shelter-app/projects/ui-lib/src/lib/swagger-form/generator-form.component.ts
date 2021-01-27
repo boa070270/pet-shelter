@@ -1,7 +1,7 @@
 import {Component, ComponentFactoryResolver, ComponentRef, Input, OnInit, ViewChild} from '@angular/core';
 import {SwaggerFormDirective} from './swagger-form.directive';
 import {SwaggerFormService} from './swagger-form.service';
-import {coerceToSwaggerArray, coerceToSwaggerObject, SwaggerGroupComponent, SwaggerSchema} from './swagger-object';
+import {coerceToSwaggerArray, coerceToSwaggerObject, SwaggerGroupComponent, SwaggerSchema} from '../shared/swagger-object';
 import {SwaggerArrayComponent} from './swagger-array.component';
 import {SwaggerFormComponent} from './swagger-form.component';
 import {FormGroup} from '@angular/forms';

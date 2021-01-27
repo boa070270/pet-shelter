@@ -22,7 +22,7 @@ Form can be build by:
 </ul>
 
 ###Internal format
-This format is similar to Swagger JSON. All interfaces are described here [swagger-object.tx](src/lib/swagger-form/swagger-object.ts)
+This format is similar to Swagger JSON. All interfaces are described here [swagger-object.tx](src/lib/shared/swagger-object.ts)
 Example: [from Swagger Editor](https://editor.swagger.io/)
 <pre>
 {

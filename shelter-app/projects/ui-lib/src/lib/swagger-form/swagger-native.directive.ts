@@ -1,5 +1,5 @@
 import {Directive, Input, ViewContainerRef} from '@angular/core';
-import {SwaggerNative} from './swagger-object';
+import {SwaggerNative} from '../shared/swagger-object';
 
 @Directive({
   selector: '[libSwaggerNative]'

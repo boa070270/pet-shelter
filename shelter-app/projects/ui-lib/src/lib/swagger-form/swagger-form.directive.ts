@@ -1,5 +1,5 @@
 import {ComponentFactoryResolver, Directive, Input, OnChanges, SimpleChanges, ViewContainerRef} from '@angular/core';
-import {coerceToSwaggerArray, coerceToSwaggerObject, SwaggerComponent, SwaggerSchema} from './swagger-object';
+import {coerceToSwaggerArray, coerceToSwaggerObject, SwaggerComponent, SwaggerSchema} from '../shared/swagger-object';
 import {SwaggerFormService} from './swagger-form.service';
 import {SwaggerFormComponent} from './swagger-form.component';
 import {SwaggerArrayComponent} from './swagger-array.component';

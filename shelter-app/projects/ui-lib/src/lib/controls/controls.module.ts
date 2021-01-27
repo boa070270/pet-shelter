@@ -9,6 +9,7 @@ import {InputControlComponent} from './input-control.component';
 import {SelectControlComponent} from './select-control.component';
 import {BooleanControlComponent} from './boolean-control.component';
 import { TableControlComponent } from './table/table-control.component';
+import {ComponentsPluginService} from '../shared';
 
 @NgModule({
   declarations: [
@@ -36,4 +37,17 @@ import { TableControlComponent } from './table/table-control.component';
   ]
 })
 export class ControlsModule {
+  constructor(componentsPlugin: ComponentsPluginService) {
+    componentsPlugin.addPlugin('lib-button',
+      {
+        component: ButtonComponent,
+        schema: {
+          orderControls: [],
+          properties: {
+            value: {
+              type: 'string'
+            }
+          }
+      }});
+  }
 }

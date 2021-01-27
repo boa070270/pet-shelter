@@ -1,5 +1,5 @@
 import {Component, Host, OnChanges, OnDestroy, OnInit, Optional, SimpleChanges, SkipSelf} from '@angular/core';
-import {SwaggerGroupComponent} from './swagger-object';
+import {SwaggerGroupComponent} from '../shared/swagger-object';
 import {SwaggerFormGroupDirective} from './swagger-form-group.directive';
 import {SwaggerFormComponent} from './swagger-form.component';
 

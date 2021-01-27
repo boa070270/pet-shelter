@@ -1,4 +1,4 @@
-import {TitleType} from '../shared';
+import {TitleType} from './index';
 import {AsyncValidatorFn, FormGroup, ValidatorFn} from '@angular/forms';
 
 export interface CommonConstrictions {

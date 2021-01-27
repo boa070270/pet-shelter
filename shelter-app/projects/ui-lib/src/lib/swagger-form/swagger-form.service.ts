@@ -1,5 +1,5 @@
 import {EventEmitter, Injectable, OnDestroy, Output} from '@angular/core';
-import {SwaggerSchema} from './swagger-object';
+import {SwaggerSchema} from '../shared/swagger-object';
 import {BrowserStorageService} from '../shared';
 
 const FORM_KEYS = 'ui-lib-swagger-form-keys';
