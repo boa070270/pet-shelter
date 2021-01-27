@@ -38,7 +38,6 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
   pPlaceholder: string;
   change: (_: any) => {};
   touch: () => {};
-  pError: string;
   iconsClass: any;
 
   constructor(public systemLang: SystemLang) {
@@ -64,19 +63,14 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
     if (changes.placeholder) {
       this.pPlaceholder = this.doIfNeedI18n(this.placeholder);
     }
-    if (changes.error) {
-      this.pError = this.doIfNeedI18n(this.error);
-    }
   }
   ngOnDestroy(): void {
     super.ngOnDestroy();
   }
   onChangeLang(): void {
     super.onChangeLang();
-    this.pCaption = this.doIfNeedI18n(this.caption);
     this.pTooltip = this.doIfNeedI18n(this.tooltip);
     this.pPlaceholder = this.doIfNeedI18n(this.placeholder);
-    this.pError = this.doIfNeedI18n(this.error);
   }
   writeValue(obj: any): void {
     console.log('InputControlComponent.writeValue', obj);

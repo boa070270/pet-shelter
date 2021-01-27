@@ -9,7 +9,7 @@ import {InputControlComponent} from './input-control.component';
 import {SelectControlComponent} from './select-control.component';
 import {BooleanControlComponent} from './boolean-control.component';
 import { TableControlComponent } from './table/table-control.component';
-import {ComponentsPluginService} from '../shared';
+import {ComponentsPluginService, PROPERTY_STRING} from '../shared';
 
 @NgModule({
   declarations: [
@@ -38,15 +38,13 @@ import {ComponentsPluginService} from '../shared';
 })
 export class ControlsModule {
   constructor(componentsPlugin: ComponentsPluginService) {
-    componentsPlugin.addPlugin('lib-button',
+    componentsPlugin.addPlugin('lib-checkbox-control',
       {
-        component: ButtonComponent,
+        component: CheckboxControlComponent,
         schema: {
           orderControls: [],
           properties: {
-            value: {
-              type: 'string'
-            }
+            value: PROPERTY_STRING,
           }
       }});
   }

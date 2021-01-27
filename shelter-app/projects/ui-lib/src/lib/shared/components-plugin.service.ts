@@ -9,7 +9,7 @@ export interface ComponentPlugin {
   providedIn: 'root'
 })
 export class ComponentsPluginService {
-  private plugins: {[key: string]: ComponentPlugin};
+  private plugins: {[key: string]: ComponentPlugin} = {};
 
   constructor() { }
 

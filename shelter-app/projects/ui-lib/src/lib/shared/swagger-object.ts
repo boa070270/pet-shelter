@@ -66,7 +66,19 @@ function defaultControlType(type: 'string' | 'number' | 'integer' | 'boolean',
     return constrictions.enums.length < 4 ? 'checkbox' : 'input';
   }
 }
-
+export const PROPERTY_STRING: SwaggerNative = {
+  type: 'string',
+  controlType: 'input'
+};
+export const PROPERTY_NUMBER: SwaggerNative = {
+  type: 'integer',
+  controlType: 'input'
+};
+export const PROPERTY_INTEGER = PROPERTY_NUMBER;
+export const PROPERY_BOOLEAN: SwaggerNative = {
+  type: 'boolean',
+  controlType: 'lib-boolean-control'
+}
 export function swaggerNative(type: 'string' | 'number' | 'integer' | 'boolean', controlType?: string,
                               constrictions?: NumberConstrictions | StringConstrictions, ui?: SwaggerCustomUI): SwaggerNative {
   return {type, constrictions, ui, controlType: controlType || defaultControlType(type, constrictions)};

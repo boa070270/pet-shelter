@@ -11,11 +11,12 @@ export class BaseControlComponent implements OnInit, OnDestroy, OnChanges {
   @Input() id: string;
   @Input() name: string;
   @Input() hint: string | TitleType[];
-  @Input() error: string;
+  @Input() error: string | TitleType[];
   @Input() dir: string;
   @Input() caption: string | TitleType[];
   pHint: string;
   pCaption: string;
+  pError: string;
   private subs: Subscription;
   protected change: (_: any) => {};
   protected touch: () => {};
@@ -44,12 +45,17 @@ export class BaseControlComponent implements OnInit, OnDestroy, OnChanges {
     if (changes.caption) {
       this.pCaption = this.doIfNeedI18n(this.caption);
     }
+    if (changes.error) {
+      this.pError = this.doIfNeedI18n(this.error);
+    }
   }
   ngOnDestroy(): void {
       this.subs.unsubscribe();
   }
   onChangeLang(): void {
     this.pHint = this.doIfNeedI18n(this.hint) as string;
+    this.pCaption = this.doIfNeedI18n(this.caption);
+    this.pError = this.doIfNeedI18n(this.error);
   }
 
   /**
