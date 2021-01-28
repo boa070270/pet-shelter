@@ -33,6 +33,7 @@ export class TableControlComponent<R> extends BaseControlComponent implements On
   }
   onChangeLang(): void {
     this.pColumnTitles = this.doIfNeedI18n(this.columnTitles, {});
+    super.onChangeLang();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

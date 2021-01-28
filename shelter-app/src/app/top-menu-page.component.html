@@ -6,6 +6,8 @@
   <lib-generator-form #form swagger="test"></lib-generator-form>
   <input type="submit" (click)="onSubmit(form.formGroup)">
 <!-- /form -->
+<h1>Title type control</h1>
+<lib-title-type-control [dir]="dir" [caption]="[{lang:'en', title: 'The caption'},{lang:'uk', title:'Назва'}]"></lib-title-type-control>
 <!--
 <ng-container [libSwaggerForm]="'test'"></ng-container>
 <ng-container [libSwaggerForm]="'test2'"></ng-container>

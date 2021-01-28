@@ -47,6 +47,13 @@ export class SystemLang implements OnDestroy {
   getLanguages(): LanguageType[] {
     return this.languages;
   }
+  getDisplayName(lang: string): string {
+    for (const l of this.languages) {
+      if (l.lang === lang) {
+        return l.displayName;
+      }
+    }
+  }
   setLocale(locale: string): void {
     this.locale = locale;
     this.storage.set(KEY_LOCALE, this.locale);

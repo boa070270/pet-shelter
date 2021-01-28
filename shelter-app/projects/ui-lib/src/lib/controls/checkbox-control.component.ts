@@ -54,6 +54,7 @@ export class CheckboxControlComponent extends BaseControlComponent implements On
   onChangeLang(): void {
     this.pTitles =  this.doIfNeedI18n(this.titles, {});
     this.tips = this.doIfNeedI18n(this.tooltips, {});
+    super.onChangeLang();
   }
 
   writeValue(obj: any): void {
@@ -68,15 +69,6 @@ export class CheckboxControlComponent extends BaseControlComponent implements On
         this.setValue(obj, true);
       }
     }
-  }
-  registerOnChange(fn: (_: any) => {}): void {
-    this.change = fn;
-  }
-  registerOnTouched(fn: any): void {
-      this.touch = fn();
-  }
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
   }
   onChange($event: Event): void {
     const target: HTMLInputElement = $event.target as HTMLInputElement;

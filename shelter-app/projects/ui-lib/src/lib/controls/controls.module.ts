@@ -1,4 +1,4 @@
-import {NgModule} from '@angular/core';
+import {Input, NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {CheckboxControlComponent} from './checkbox-control.component';
@@ -9,7 +9,8 @@ import {InputControlComponent} from './input-control.component';
 import {SelectControlComponent} from './select-control.component';
 import {BooleanControlComponent} from './boolean-control.component';
 import { TableControlComponent } from './table/table-control.component';
-import {ComponentsPluginService, PROPERTY_STRING} from '../shared';
+import {ComponentsPluginService, PROPERTY_STRING, TitleType} from '../shared';
+import { TitleTypeControlComponent } from './title-type-control.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +22,7 @@ import {ComponentsPluginService, PROPERTY_STRING} from '../shared';
     SelectControlComponent,
     BooleanControlComponent,
     TableControlComponent,
+    TitleTypeControlComponent,
   ],
   imports: [
     CommonModule,
@@ -34,6 +36,7 @@ import {ComponentsPluginService, PROPERTY_STRING} from '../shared';
     SelectControlComponent,
     BooleanControlComponent,
     TableControlComponent,
+    TitleTypeControlComponent,
   ]
 })
 export class ControlsModule {
@@ -49,3 +52,9 @@ export class ControlsModule {
       }});
   }
 }
+// const BASE_PROPERTIES: {
+//   hint: string | TitleType[];
+//   error: string | TitleType[];
+//   caption: string | TitleType[];
+//
+// }

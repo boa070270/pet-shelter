@@ -6,7 +6,7 @@ export interface LanguageType {
   rate: number;
 }
 export interface TitleType {
-  id: string;
+  id?: string;
   lang: string;
   title: string;
 }

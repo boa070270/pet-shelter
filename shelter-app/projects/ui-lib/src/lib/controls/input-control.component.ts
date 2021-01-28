@@ -23,8 +23,6 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
   @Input() trailingIcon: string;
   // Bind Element property
   @Input() type = 'text';
-  @Input() hidden: boolean;
-  @Input() disabled: boolean;
   @Input() accessKey: string;
   @Input() formTarget: string;
   @Input() formAction: string;
@@ -36,8 +34,6 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
   value: string;
   pTooltip: string;
   pPlaceholder: string;
-  change: (_: any) => {};
-  touch: () => {};
   iconsClass: any;
 
   constructor(public systemLang: SystemLang) {
@@ -75,15 +71,6 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
   writeValue(obj: any): void {
     console.log('InputControlComponent.writeValue', obj);
     this.value = (obj !== undefined && isNaN(obj) && typeof obj !== 'object') ? obj.toString() : null;
-  }
-  registerOnChange(fn: any): void {
-    this.change = fn;
-  }
-  registerOnTouched(fn: any): void {
-    this.touch = fn;
-  }
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
   }
 
   onChange($event: Event): void {

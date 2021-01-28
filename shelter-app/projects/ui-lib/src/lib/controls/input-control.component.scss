@@ -55,11 +55,12 @@
 
 .ui-input-empty {
   top: 0;
-  left: 1.2em;
   font-size: inherit;
-  color: inherit;
+  //color: inherit;
 }
-
+.ui-input-icon-place {
+  left: 1.2em;
+}
 .ui-input-hint, .ui-input-error {
   font-size: x-small;
   padding: 0;

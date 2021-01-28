@@ -2,18 +2,21 @@ import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@an
 import { SystemLang } from '../i18n';
 import {Subscription} from 'rxjs';
 import {distinctTitleId, isTitleType, TitleType} from '../shared';
+import {ControlValueAccessor} from '@angular/forms';
 
 @Component({
   selector: 'lib-base-control',
   template: ''
 })
-export class BaseControlComponent implements OnInit, OnDestroy, OnChanges {
+export class BaseControlComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
   @Input() id: string;
   @Input() name: string;
   @Input() hint: string | TitleType[];
   @Input() error: string | TitleType[];
   @Input() dir: string;
   @Input() caption: string | TitleType[];
+  @Input() hidden: boolean;
+  @Input() disabled: boolean;
   pHint: string;
   pCaption: string;
   pError: string;
@@ -68,7 +71,7 @@ export class BaseControlComponent implements OnInit, OnDestroy, OnChanges {
       if (holder) {
         holder[what] = what;
       } else {
-        return what;
+        return what || '';
       }
     } else if (this.needI18n(what)) {
       if (holder) {
@@ -81,7 +84,7 @@ export class BaseControlComponent implements OnInit, OnDestroy, OnChanges {
         return this.systemLang.getTitle(what as TitleType[]);
       }
     }
-    return holder;
+    return holder || '';
   }
 
   needI18n(what: any): boolean {
@@ -98,6 +101,18 @@ export class BaseControlComponent implements OnInit, OnDestroy, OnChanges {
     if (typeof this.touch === 'function') {
       this.touch();
     }
+  }
+  registerOnChange(fn: any): void {
+    this.change = fn;
+  }
+  registerOnTouched(fn: any): void {
+    this.touch = fn;
+  }
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
+  }
+
+  writeValue(obj: any): void {
   }
 
 }

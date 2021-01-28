@@ -7,3 +7,4 @@ export * from './input-control.component';
 export * from './select-control.component';
 export * from './boolean-control.component';
 export * from './table/table-control.component';
+export * from './title-type-control.component';

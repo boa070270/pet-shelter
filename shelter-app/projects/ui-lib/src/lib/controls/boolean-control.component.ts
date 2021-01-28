@@ -1,13 +1,19 @@
-import {Component, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
+import {Component, forwardRef, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
 import {CheckboxControlComponent} from './checkbox-control.component';
 import {SystemLang} from '../i18n';
-import {ControlValueAccessor} from '@angular/forms';
+import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {coerceBooleanProperty} from '@angular/cdk/coercion';
 
+export const BOOLEAN_INPUT_ACCESSOR: any = {
+  provide: NG_VALUE_ACCESSOR,
+  useExisting: forwardRef(() => BooleanControlComponent),
+  multi: true
+};
 @Component({
   selector: 'lib-boolean-control',
   templateUrl: './checkbox-control.component.html',
-  styleUrls: ['./checkbox-control.component.scss']
+  styleUrls: ['./checkbox-control.component.scss'],
+  providers: [BOOLEAN_INPUT_ACCESSOR]
 })
 export class BooleanControlComponent extends CheckboxControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
@@ -16,12 +22,13 @@ export class BooleanControlComponent extends CheckboxControlComponent implements
   }
 
   ngOnInit(): void {
-    this.options = ['true'];
+    this.options = ['b0'];
     super.ngOnInit();
   }
   ngOnChanges(changes: SimpleChanges): void {
     super.ngOnChanges(changes);
   }
+
   ngOnDestroy(): void {
     super.ngOnDestroy();
   }
@@ -37,8 +44,9 @@ export class BooleanControlComponent extends CheckboxControlComponent implements
   setDisabledState(isDisabled: boolean): void {
     super.setDisabledState(isDisabled);
   }
-  onChange($event: Event): void {
-    this.emitChange(coerceBooleanProperty(this.values.true));
+
+  protected emitChange(value: any): void {
+    super.emitChange(Array.isArray(value) && value.length > 0);
   }
 
 }

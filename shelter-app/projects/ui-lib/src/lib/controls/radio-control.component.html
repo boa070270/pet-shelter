@@ -4,8 +4,8 @@
     <ng-container *ngFor="let op of options; index as i" >
       <label>
         <input type="radio" value="{{op}}" [dir]="dir" [checked]="!!values[op]" [disabled]="disabled" [name]="name" (change)="onChange($event)" (blur)="onBlur()">
-        <span *ngIf="optionAsTitle || pTitles">{{(pTitles && pTitles[i]) || op}}</span>
-        <span class="tooltip" *ngIf="tips && tips[i]">{{tips[i]}}</span>
+        <span *ngIf="optionAsTitle || pTitles">{{(pTitles && pTitles[op]) || op}}</span>
+        <span class="tooltip" *ngIf="tips && tips[op]">{{tips[op]}}</span>
       </label>
     </ng-container>
   </div>
