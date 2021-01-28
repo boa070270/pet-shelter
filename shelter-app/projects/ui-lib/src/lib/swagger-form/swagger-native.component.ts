@@ -30,7 +30,7 @@ import {SwaggerFormGroupDirective} from './swagger-form-group.directive';
         <lib-input-control *ngSwitchCase="'input'" [formControl]="formControl" name="{{propertyId}}"
                            [hint]="ui.description" [placeholder]="ui.placeHolder" [tooltip]="ui.toolTips"
                            [caption]="ui.caption" [leadingIcon]="ui.leadingIcon" [trailingIcon]="ui.trailingIcon"
-                           [type]="constrictions.format" [disabled]="constrictions.readOnly"
+                           [type]="constrictions.format"
         ></lib-input-control>
         <lib-select-control *ngSwitchCase="'select'" [formControl]="formControl" name="{{propertyId}}"
                             [hint]="ui.description" [tooltips]="ui.toolTips"

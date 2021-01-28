@@ -18,11 +18,10 @@ const routes: Routes = [
   { path: 'page/:id', component: PageComponent },
   { path: 'pet/:id', component: PetComponent },
   { path: 'search', component: SearchPageComponent },
-  { path: 'test', component: TopMenuPageComponent },
   { path: 'admin', loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule) },
 ];
 const KnownComponents = {
-  EndMenuPage: TopMenuPageComponent,
+  TopMenuPageComponent: TopMenuPageComponent, // TODO remove this
   SubMenuPage: SubMenuPageComponent,
   MenuPage: MenuPageComponent
 };
@@ -46,6 +45,7 @@ export class AppRoutingModule {
       for (const route of routes) {
         routers.push(route);
       }
+      console.log('AppRoutingModule.constructor', routers);
       this.router.resetConfig(routers);
     });
   }

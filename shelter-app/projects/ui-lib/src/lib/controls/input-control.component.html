@@ -17,7 +17,7 @@
            [(ngModel)]="value"
            (change)="onChange($event)"
     >
-    <span class="ui-input-title" [ngClass]="{'ui-input-empty': !value, 'ui-input-icon-place': !!leadingIcon}" *ngIf="!!pCaption">{{pCaption}}</span>
+    <span class="ui-input-title" [ngClass]="{'ui-input-empty': !value, 'ui-input-icon-place': !!leadingIcon}" >{{pCaption}}</span>
     <span class="ui-input-hint" *ngIf="!!pHint">{{pHint}}</span>
     <span class="ui-input-error" *ngIf="!!pError">{{pError}}</span>
   </label>

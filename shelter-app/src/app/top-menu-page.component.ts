@@ -203,7 +203,7 @@ export class TopMenuPageComponent implements OnInit {
   tableColumnSet = ['position', 'name', 'weight', 'symbol'];
   tableCaption = 'Test table';
   tableData = new BehaviorSubject<any>(this.tableDataSet);
-  tableColumns = new BehaviorSubject<string[]>(this.tableColumnSet);
+  tableColumns = this.tableColumnSet;
   constructor(private basicService: BasicService, private dynamicSwagger: SwaggerFormService) {
     dynamicSwagger.addSchemaIfNotExists('test', this.swagger);
   }
