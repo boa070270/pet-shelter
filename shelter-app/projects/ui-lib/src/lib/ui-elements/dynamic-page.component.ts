@@ -3,7 +3,7 @@ import { createCustomElement } from '@angular/elements';
 import {
   GeneratorFormComponent,
   SwaggerArrayComponent,
-  SwaggerFormComponent,
+  SwaggerFormComponent, SwaggerFormDirective,
   SwaggerNativeComponent
 } from '../swagger-form';
 import {
@@ -30,22 +30,51 @@ export class DynamicPageComponent implements OnInit {
     const booleanControlComponent = createCustomElement(BooleanControlComponent, {injector});
     const titleTypeControlComponent = createCustomElement(TitleTypeControlComponent, {injector});
     const tableControlComponent = createCustomElement(TableControlComponent, {injector});
-    customElements.define('lib-checkbox-control', checkboxControlComponent);
-    customElements.define('lib-input-control', inputControlComponent);
-    customElements.define('lib-radio-control', radioControlComponent);
-    customElements.define('lib-select-control', selectControlComponent);
-    customElements.define('lib-boolean-control', booleanControlComponent);
-    customElements.define('lib-title-type-control', titleTypeControlComponent);
-    customElements.define('lib-table-control', tableControlComponent);
+    if (!customElements.get('lib-checkbox-control')) {
+      customElements.define('lib-checkbox-control', checkboxControlComponent);
+    }
+    if (customElements.get('lib-input-control')) {
+      customElements.define('lib-input-control', inputControlComponent);
+    }
+    if (customElements.get('lib-radio-control')) {
+      customElements.define('lib-radio-control', radioControlComponent);
+    }
+    if (customElements.get('lib-select-control')) {
+      customElements.define('lib-select-control', selectControlComponent);
+    }
+    if (customElements.get('lib-boolean-control')) {
+      customElements.define('lib-boolean-control', booleanControlComponent);
+    }
+    if (customElements.get('lib-title-type-control')) {
+      customElements.define('lib-title-type-control', titleTypeControlComponent);
+    }
+    if (customElements.get('lib-table-control')) {
+      customElements.define('lib-table-control', tableControlComponent);
+    }
 
     const generatorFormComponent = createCustomElement(GeneratorFormComponent, {injector});
     const swaggerFormComponent = createCustomElement(SwaggerFormComponent, {injector});
     const swaggerArrayComponent = createCustomElement(SwaggerArrayComponent, {injector});
     const swaggerNativeComponent = createCustomElement(SwaggerNativeComponent, {injector});
-    customElements.define('lib-swagger-form', swaggerFormComponent);
-    customElements.define('lib-generator-form', generatorFormComponent);
-    customElements.define('lib-swagger-array', swaggerArrayComponent);
-    customElements.define('lib-swagger-native', swaggerNativeComponent);
+    const libSwaggerForm = createCustomElement(SwaggerFormDirective, {injector});
+    if (customElements.get('lib-swagger-form')) {
+      customElements.define('lib-swagger-form', swaggerFormComponent);
+    }
+    if (customElements.get('lib-generator-form')) {
+      customElements.define('lib-generator-form', generatorFormComponent);
+    }
+    if (customElements.get('lib-swagger-array')) {
+      customElements.define('lib-swagger-array', swaggerArrayComponent);
+    }
+    if (customElements.get('lib-swagger-native')) {
+      customElements.define('lib-swagger-native', swaggerNativeComponent);
+    }
+    if (customElements.get('lib-swagger-native')) {
+      customElements.define('lib-swagger-native', swaggerNativeComponent);
+    }
+    if (customElements.get('[libSwaggerForm]')) {
+      customElements.define('[libSwaggerForm]', libSwaggerForm);
+    }
   }
 
   ngOnInit(): void {
