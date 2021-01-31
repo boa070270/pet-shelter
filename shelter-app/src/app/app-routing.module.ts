@@ -11,6 +11,7 @@ import {SearchPageComponent} from './search-page.component';
 import {MenuPageComponent} from './menu-page.component';
 import {SystemMenuService} from './system-menu.service';
 import {LoginPageComponent} from './login-page.component';
+import {TestDynamicComponent} from './test-dynamic.component';
 
 const routes: Routes = [
   { path: '', component: MainPageComponent },
@@ -18,10 +19,11 @@ const routes: Routes = [
   { path: 'page/:id', component: PageComponent },
   { path: 'pet/:id', component: PetComponent },
   { path: 'search', component: SearchPageComponent },
+  { path: 'test-dynamic', component: TestDynamicComponent},
   { path: 'admin', loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule) },
 ];
 const KnownComponents = {
-  TopMenuPageComponent: TopMenuPageComponent, // TODO remove this
+  TopMenuPageComponent, // TODO remove this
   SubMenuPage: SubMenuPageComponent,
   MenuPage: MenuPageComponent
 };
