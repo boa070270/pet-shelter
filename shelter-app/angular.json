@@ -166,5 +166,8 @@
       }
     }
   },
-  "defaultProject": "shelter-app"
+  "defaultProject": "shelter-app",
+  "cli": {
+    "analytics": false
+  }
 }

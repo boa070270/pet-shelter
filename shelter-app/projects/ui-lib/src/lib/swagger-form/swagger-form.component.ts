@@ -1,4 +1,15 @@
-import {Component, forwardRef, Host, Input, OnDestroy, OnInit, Optional, SkipSelf} from '@angular/core';
+import {
+  AfterContentChecked,
+  AfterContentInit, AfterViewChecked, AfterViewInit,
+  Component,
+  forwardRef,
+  Host,
+  Input, OnChanges,
+  OnDestroy,
+  OnInit,
+  Optional, SimpleChanges,
+  SkipSelf
+} from '@angular/core';
 import {
   coerceToSwaggerArray,
   coerceToSwaggerNative,
@@ -6,9 +17,8 @@ import {
   SwaggerGroupComponent,
   SwaggerObject,
   SwaggerSchema
-} from '../shared/swagger-object';
+} from '../shared';
 import {ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators} from '@angular/forms';
-import {SwaggerFormGroupDirective} from './swagger-form-group.directive';
 
 export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -19,50 +29,61 @@ export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
 @Component({
   selector: 'lib-swagger-form',
   template: `
-    <div *ngIf="swagger" [libSwaggerFromGroup]="formGroup">
+    <div *ngIf="swagger">
+      <span>Form swagger: {{swagger | json}}</span>
       <ng-container *ngFor="let fld of properties">
         <ng-container [ngSwitch]="fld.controlType">
           <lib-swagger-native [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" [required]="fld.required"
-                              *ngSwitchCase="'native'"></lib-swagger-native>
+                              [pFormGroup]="formGroup" *ngSwitchCase="'native'"></lib-swagger-native>
           <lib-swagger-form [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" [required]="fld.required"
                             [(ngModel)]="fld.propertyId" [nameControl]="fld.propertyId"
-                            *ngSwitchCase="'object'"></lib-swagger-form>
+                            [pFormGroup]="formGroup" *ngSwitchCase="'object'"></lib-swagger-form>
           <lib-swagger-array [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" [required]="fld.required"
                              [(ngModel)]="fld.propertyId" [nameControl]="fld.propertyId"
-                             *ngSwitchCase="'array'"></lib-swagger-array>
+                             [pFormGroup]="formGroup" *ngSwitchCase="'array'"></lib-swagger-array>
         </ng-container>
       </ng-container>
     </div>`,
   styleUrls: ['./swagger-form.component.scss'],
   providers: [SWAGGER_FORM_VALUE_ACCESSOR]
 })
-export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDestroy, ControlValueAccessor  {
+export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDestroy, ControlValueAccessor {
   @Input() swagger: SwaggerSchema;
   @Input() propertyId: string;
   @Input() nameControl: string;
   @Input() required: boolean;
+  @Input() pFormGroup: FormGroup;
   properties: Array<{propertyId: string, controlType: string, required: boolean}> = [];
   formGroup: FormGroup;
 
   onChange = (_: any) => {};
   onTouched = () => {};
 
-  constructor(@Optional() @Host() @SkipSelf() public swaggerFromGroup: SwaggerFormGroupDirective) {
+  constructor() {
+  }
+
+  ngOnDestroy(): void {
   }
 
   ngOnInit(): void {
-    const ui = this.swagger.ui || {};
-    this.processProperties();
-    const validators = ui.validators || [];
-    if (this.required && !validators.includes(Validators.required)) {
-      validators.push(Validators.required);
+    if (this.swagger) {
+      // console.log('SwaggerFormComponent.ngOnInit', this.swagger);
+      const ui = this.swagger.ui || {};
+      this.processProperties();
+      const validators = ui.validators || [];
+      if (this.required && !validators.includes(Validators.required)) {
+        validators.push(Validators.required);
+      }
+      this.formGroup = new FormGroup({}, validators, ui.asyncValidator);
+      // if (this.swaggerFromGroup) {
+      //   this.swaggerFromGroup.libSwaggerFromGroup.addControl(this.nameControl, this.formGroup);
+      // }
+      if (this.pFormGroup) {
+        this.pFormGroup.addControl(this.nameControl, this.formGroup);
+      }
+    } else {
+      console.error('SwaggerFormComponent.ngOnInit: No swagger');
     }
-    this.formGroup = new FormGroup({}, validators, ui.asyncValidator);
-    if (this.swaggerFromGroup) {
-      this.swaggerFromGroup.libSwaggerFromGroup.addControl(this.nameControl, this.formGroup);
-    }
-  }
-  ngOnDestroy(): void {
   }
 
   registerOnChange(fn: any): void {
@@ -100,4 +121,5 @@ export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDe
       }
     }
   }
+
 }

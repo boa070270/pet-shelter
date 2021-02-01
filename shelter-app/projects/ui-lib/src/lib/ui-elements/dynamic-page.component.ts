@@ -1,9 +1,9 @@
-import {Component, ElementRef, Injector, OnInit, ViewChild} from '@angular/core';
-import { createCustomElement } from '@angular/elements';
+import {Component, ElementRef, Injector, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {createCustomElement} from '@angular/elements';
 import {
   GeneratorFormComponent,
   SwaggerArrayComponent,
-  SwaggerFormComponent, SwaggerFormDirective,
+  SwaggerFormComponent,
   SwaggerNativeComponent
 } from '../swagger-form';
 import {
@@ -11,7 +11,9 @@ import {
   CheckboxControlComponent,
   InputControlComponent,
   RadioControlComponent,
-  SelectControlComponent, TableControlComponent, TitleTypeControlComponent
+  SelectControlComponent,
+  TableControlComponent,
+  TitleTypeControlComponent
 } from '../controls';
 
 @Component({
@@ -30,45 +32,45 @@ export class DynamicPageComponent implements OnInit {
     const booleanControlComponent = createCustomElement(BooleanControlComponent, {injector});
     const titleTypeControlComponent = createCustomElement(TitleTypeControlComponent, {injector});
     const tableControlComponent = createCustomElement(TableControlComponent, {injector});
-    // if (!customElements.get('lib-checkbox-control')) {
-      customElements.define('lib-checkbox-control', checkboxControlComponent);
-    // }
-    // if (customElements.get('lib-input-control')) {
-      customElements.define('lib-input-control', inputControlComponent);
-    // }
-    // if (customElements.get('lib-radio-control')) {
-      customElements.define('lib-radio-control', radioControlComponent);
-    // }
-    // if (customElements.get('lib-select-control')) {
-      customElements.define('lib-select-control', selectControlComponent);
-    // }
-    // if (customElements.get('lib-boolean-control')) {
-      customElements.define('lib-boolean-control', booleanControlComponent);
-    // }
-    // if (customElements.get('lib-title-type-control')) {
-      customElements.define('lib-title-type-control', titleTypeControlComponent);
-    // }
-    // if (customElements.get('lib-table-control')) {
-      customElements.define('lib-table-control', tableControlComponent);
-    // }
+    if (!customElements.get('lib-checkbox-element')) {
+      customElements.define('lib-checkbox-element', checkboxControlComponent);
+    }
+    if (!customElements.get('lib-input-element')) {
+      customElements.define('lib-input-element', inputControlComponent);
+    }
+    if (!customElements.get('lib-radio-element')) {
+      customElements.define('lib-radio-element', radioControlComponent);
+    }
+    if (!customElements.get('lib-select-element')) {
+      customElements.define('lib-select-element', selectControlComponent);
+    }
+    if (!customElements.get('lib-boolean-element')) {
+      customElements.define('lib-boolean-element', booleanControlComponent);
+    }
+    if (!customElements.get('lib-title-type-element')) {
+      customElements.define('lib-title-type-element', titleTypeControlComponent);
+    }
+    if (!customElements.get('lib-table-element')) {
+      customElements.define('lib-table-element', tableControlComponent);
+    }
 
     const generatorFormComponent = createCustomElement(GeneratorFormComponent, {injector});
     const swaggerFormComponent = createCustomElement(SwaggerFormComponent, {injector});
     const swaggerArrayComponent = createCustomElement(SwaggerArrayComponent, {injector});
     const swaggerNativeComponent = createCustomElement(SwaggerNativeComponent, {injector});
     // const libSwaggerForm = createCustomElement(SwaggerFormDirective, {injector});
-    // if (customElements.get('lib-swagger-form')) {
-      customElements.define('lib-swagger-form', swaggerFormComponent);
-    // }
-    // if (customElements.get('lib-generator-form')) {
-      customElements.define('lib-generator-form', generatorFormComponent);
-    // }
-    // if (customElements.get('lib-swagger-array')) {
-      customElements.define('lib-swagger-array', swaggerArrayComponent);
-    // }
-    // if (customElements.get('lib-swagger-native')) {
-      customElements.define('lib-swagger-native', swaggerNativeComponent);
-    // }
+    if (!customElements.get('lib-swagger-form-element')) {
+      customElements.define('lib-swagger-form-element', swaggerFormComponent);
+    }
+    if (!customElements.get('lib-generator-form-element')) {
+      customElements.define('lib-generator-form-element', generatorFormComponent);
+    }
+    if (!customElements.get('lib-swagger-array-element')) {
+      customElements.define('lib-swagger-array-element', swaggerArrayComponent);
+    }
+    if (!customElements.get('lib-swagger-native-element')) {
+      customElements.define('lib-swagger-native-element', swaggerNativeComponent);
+    }
     // if (customElements.get('lib-swagger-native')) {
     //   customElements.define('lib-swagger-native', swaggerNativeComponent);
     // }
@@ -79,5 +81,4 @@ export class DynamicPageComponent implements OnInit {
 
   ngOnInit(): void {
   }
-
 }

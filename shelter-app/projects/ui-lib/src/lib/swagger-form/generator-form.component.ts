@@ -1,9 +1,17 @@
-import {Component, ComponentFactoryResolver, ComponentRef, Input, OnInit, ViewChild} from '@angular/core';
-import {SwaggerFormDirective} from './swagger-form.directive';
+import {
+  AfterContentChecked,
+  AfterContentInit, AfterViewChecked,
+  AfterViewInit,
+  Component,
+  ComponentFactoryResolver,
+  ComponentRef,
+  Input,
+  OnChanges, OnDestroy,
+  OnInit,
+  SimpleChanges
+} from '@angular/core';
 import {SwaggerFormService} from './swagger-form.service';
-import {coerceToSwaggerArray, coerceToSwaggerObject, SwaggerGroupComponent, SwaggerSchema} from '../shared/swagger-object';
-import {SwaggerArrayComponent} from './swagger-array.component';
-import {SwaggerFormComponent} from './swagger-form.component';
+import {SwaggerComponent, SwaggerGroupComponent, SwaggerSchema} from '../shared/swagger-object';
 import {FormGroup} from '@angular/forms';
 
 @Component({
@@ -12,13 +20,14 @@ import {FormGroup} from '@angular/forms';
   template: `
     <div class="ui-dynamic-form">
       <h3>Developing form</h3>
+      <lib-input-control></lib-input-control>
       <lib-swagger-form [swagger]="schema"></lib-swagger-form>
     </div>`,
   styleUrls: ['./generator-form.component.scss']
 })
 export class GeneratorFormComponent implements OnInit {
   @Input() swagger: string;
-  @ViewChild(SwaggerFormDirective, {static: true}) dynamicEntry;
+  // @ViewChild(SwaggerFormDirective, {static: true}) dynamicEntry;
   schema: SwaggerSchema;
   private componentRef: ComponentRef<SwaggerGroupComponent>;
 
@@ -27,27 +36,31 @@ export class GeneratorFormComponent implements OnInit {
       return this.componentRef.instance.formGroup;
     }
   }
+
   constructor(private swaggerFormService: SwaggerFormService,
-              private componentFactoryResolver: ComponentFactoryResolver) { }
+              private componentFactoryResolver: ComponentFactoryResolver) {
+  }
 
   ngOnInit(): void {
+    console.log('GeneratorFormComponent.ngOnInit', this.swagger);
     this.schema = this.swaggerFormService.getSchema(this.swagger);
-    this.loadForm();
+    console.log('GeneratorFormComponent.ngOnInit schema', this.schema);
+    // this.loadForm();
   }
 
-  private loadForm(): void {
-    if (this.schema) {
-      const viewContainerRef = this.dynamicEntry.viewContainerRef;
-      viewContainerRef.clear();
-      let componentFactory = null;
-      if (coerceToSwaggerObject(this.schema)) {
-        componentFactory = this.componentFactoryResolver.resolveComponentFactory(SwaggerFormComponent);
-      } else if (coerceToSwaggerArray(this.schema)){
-        componentFactory = this.componentFactoryResolver.resolveComponentFactory(SwaggerArrayComponent);
-      }
-      // @ts-ignore
-      this.componentRef = viewContainerRef.createComponent<SwaggerGroupComponent>(componentFactory);
-      this.componentRef.instance.swagger = this.schema;
-    }
-  }
+  // private loadForm(): void {
+  //   if (this.schema) {
+  //     const viewContainerRef = this.dynamicEntry.viewContainerRef;
+  //     viewContainerRef.clear();
+  //     let componentFactory = null;
+  //     if (coerceToSwaggerObject(this.schema)) {
+  //       componentFactory = this.componentFactoryResolver.resolveComponentFactory(SwaggerFormComponent);
+  //     } else if (coerceToSwaggerArray(this.schema)){
+  //       componentFactory = this.componentFactoryResolver.resolveComponentFactory(SwaggerArrayComponent);
+  //     }
+  //     // @ts-ignore
+  //     this.componentRef = viewContainerRef.createComponent<SwaggerGroupComponent>(componentFactory);
+  //     this.componentRef.instance.swagger = this.schema;
+  //   }
+  // }
 }

@@ -38,6 +38,7 @@ export class InputControlComponent extends BaseControlComponent implements OnIni
 
   constructor(public systemLang: SystemLang) {
     super(systemLang);
+    console.log('lib-input-constructor');
   }
 
   ngOnInit(): void {

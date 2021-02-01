@@ -4,15 +4,31 @@ import {DynamicPageComponent, SwaggerFormService, swaggerNative, SwaggerObject} 
 
 @Component({
   selector: 'app-test-dynamic',
-  templateUrl: './test-dynamic.component.html',
+  // templateUrl: './test-dynamic.component.html',
+  template: `
+    <div>
+      <h1>Dynamic page</h1>
+      <div #insertHere></div>
+      <lib-dynamic-page>
+
+      </lib-dynamic-page>
+      <textarea [(ngModel)]="textHtml"></textarea>
+      <select [(ngModel)]="knownText" (change)="onChange()">
+        <option value="a">Text Hello</option>
+        <option value="b">Generator form</option>
+        <option value="c">Swagger form</option>
+      </select>
+      <button (click)="onClick()">Render</button>
+    </div>
+  `,
   styleUrls: ['./test-dynamic.component.sass']
 })
 export class TestDynamicComponent implements OnInit {
   textHtml: string;
   knownTexts = {
     a: '<span>Hello world!</span>',
-    b: '<lib-generator-form #form swagger="test"></lib-generator-form>',
-    c: '<lib-swagger-form swagger=""></lib-swagger-form>'
+    b: '<lib-generator-form-element #form swagger="test"></lib-generator-form-element>',
+    // c: '<lib-swagger-form swagger=""></lib-swagger-form>'
   };
   knownText: any;
   swagger: SwaggerObject = {
