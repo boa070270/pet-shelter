@@ -8,18 +8,18 @@ import {FormGroup} from '@angular/forms';
 
 @Component({
   selector: 'lib-generator-form',
-  templateUrl: './generator-form.component.html',
-  // template: `
-  //   <div class="ui-dynamic-form">
-  //     <h3>Developing form</h3>
-  //     <ng-template [libSwaggerForm]="swagger"></ng-template>
-  //   </div>`,
+  // templateUrl: './generator-form.component.html',
+  template: `
+    <div class="ui-dynamic-form">
+      <h3>Developing form</h3>
+      <lib-swagger-form [swagger]="schema"></lib-swagger-form>
+    </div>`,
   styleUrls: ['./generator-form.component.scss']
 })
 export class GeneratorFormComponent implements OnInit {
   @Input() swagger: string;
   @ViewChild(SwaggerFormDirective, {static: true}) dynamicEntry;
-  private schema: SwaggerSchema;
+  schema: SwaggerSchema;
   private componentRef: ComponentRef<SwaggerGroupComponent>;
 
   get formGroup(): FormGroup {
@@ -27,11 +27,11 @@ export class GeneratorFormComponent implements OnInit {
       return this.componentRef.instance.formGroup;
     }
   }
-  constructor(private dynamicFormService: SwaggerFormService,
+  constructor(private swaggerFormService: SwaggerFormService,
               private componentFactoryResolver: ComponentFactoryResolver) { }
 
   ngOnInit(): void {
-    this.schema = this.dynamicFormService.getSchema(this.swagger);
+    this.schema = this.swaggerFormService.getSchema(this.swagger);
     this.loadForm();
   }
 

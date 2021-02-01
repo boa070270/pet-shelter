@@ -11,7 +11,8 @@ export class TestDynamicComponent implements OnInit {
   textHtml: string;
   knownTexts = {
     a: '<span>Hello world!</span>',
-    b: '<lib-generator-form #form swagger="test"></lib-generator-form>'
+    b: '<lib-generator-form #form swagger="test"></lib-generator-form>',
+    c: '<lib-swagger-form swagger=""></lib-swagger-form>'
   };
   knownText: any;
   swagger: SwaggerObject = {
@@ -32,8 +33,8 @@ export class TestDynamicComponent implements OnInit {
   @ViewChild('insertHere', {static: true}) insertHere: ElementRef<HTMLDivElement>;
   innerHtml: any;
 
-  constructor(private dynamicSwagger: SwaggerFormService) {
-    dynamicSwagger.addSchemaIfNotExists('test', this.swagger);
+  constructor(private swaggerFormService: SwaggerFormService) {
+    swaggerFormService.addSchemaIfNotExists('test', this.swagger);
   }
 
   ngOnInit(): void {

@@ -8,16 +8,16 @@ import {SwaggerArrayComponent} from './swagger-array.component';
   selector: '[libSwaggerForm]'
 })
 export class SwaggerFormDirective implements OnChanges {
-  @Input() libSwaggerForm: string;
+  // @Input() libSwaggerForm: string;
 
   constructor(public viewContainerRef: ViewContainerRef,
               public dynamicFormService: SwaggerFormService,
               private componentFactoryResolver: ComponentFactoryResolver) {
   }
 
-  getSwaggerSchema(): SwaggerSchema {
-    return this.dynamicFormService.getSchema(this.libSwaggerForm);
-  }
+  // getSwaggerSchema(): SwaggerSchema {
+    // return this.dynamicFormService.getSchema(this.libSwaggerForm);
+  // }
   ngOnChanges(changes: SimpleChanges): void {
     console.log('SwaggerFormDirective.ngOnChanges', changes);
     // if (changes.libSwaggerForm) {
