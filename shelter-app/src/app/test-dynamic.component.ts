@@ -1,6 +1,8 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {BasicService} from './basic.service';
 import {DynamicPageComponent, SwaggerFormService, swaggerNative, SwaggerObject} from 'ui-lib';
+import {BehaviorSubject} from "rxjs";
+import {TableSchemaService} from "../../projects/ui-lib/src/lib/controls/table/table-schema.service";
 
 @Component({
   selector: 'app-test-dynamic',
@@ -9,14 +11,12 @@ import {DynamicPageComponent, SwaggerFormService, swaggerNative, SwaggerObject} 
     <div>
       <h1>Dynamic page</h1>
       <div #insertHere></div>
-      <lib-dynamic-page>
-
-      </lib-dynamic-page>
+<!--      <lib-dynamic-page></lib-dynamic-page>-->
       <textarea [(ngModel)]="textHtml"></textarea>
       <select [(ngModel)]="knownText" (change)="onChange()">
         <option value="a">Text Hello</option>
         <option value="b">Generator form</option>
-        <option value="c">Swagger form</option>
+        <option value="d">Table</option>
       </select>
       <button (click)="onClick()">Render</button>
     </div>
@@ -29,6 +29,7 @@ export class TestDynamicComponent implements OnInit {
     a: '<span>Hello world!</span>',
     b: '<lib-generator-form-element #form swagger="test"></lib-generator-form-element>',
     // c: '<lib-swagger-form swagger=""></lib-swagger-form>'
+    d: '<lib-table-generator-element schema="test"></lib-table-generator-element>'
   };
   knownText: any;
   swagger: SwaggerObject = {
@@ -49,8 +50,30 @@ export class TestDynamicComponent implements OnInit {
   @ViewChild('insertHere', {static: true}) insertHere: ElementRef<HTMLDivElement>;
   innerHtml: any;
 
-  constructor(private swaggerFormService: SwaggerFormService) {
+  /******* Table *******/
+  tableDataSet = [
+    {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
+    {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He'},
+    {position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li'},
+    {position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
+    {position: 5, name: 'Boron', weight: 10.811, symbol: 'B'},
+    {position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C'},
+    {position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
+    {position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O'},
+    {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
+    {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
+  ];
+  tableColumnSet = ['position', 'name', 'weight', 'symbol'];
+  tableCaption = 'Test table';
+  tableData = new BehaviorSubject<any>(this.tableDataSet);
+
+  constructor(private swaggerFormService: SwaggerFormService, private tableSchemaService: TableSchemaService) {
     swaggerFormService.addSchemaIfNotExists('test', this.swagger);
+    tableSchemaService.setTableSchema('test', {
+      observableData: this.tableData,
+      columns: this.tableColumnSet,
+      caption: this.tableCaption,
+    });
   }
 
   ngOnInit(): void {

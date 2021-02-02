@@ -14,6 +14,7 @@ import { TitleTypeControlComponent } from './title-type-control.component';
 import { TableRowSelectorDirective } from './table/table-row-selector.directive';
 import { TableControlDirective } from './table/table-control.directive';
 import { TableCellDataDirective } from './table/table-cell-data.directive';
+import { TableGeneratorComponent } from './table/table-generator.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { TableCellDataDirective } from './table/table-cell-data.directive';
     TableRowSelectorDirective,
     TableControlDirective,
     TableCellDataDirective,
+    TableGeneratorComponent,
   ],
   imports: [
     CommonModule,

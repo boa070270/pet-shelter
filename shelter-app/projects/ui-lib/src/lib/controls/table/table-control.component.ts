@@ -18,7 +18,15 @@ import {TableControl} from './table-control';
 
 @Component({
   selector: 'lib-table-control',
-  templateUrl: './table-control.component.html',
+  // templateUrl: './table-control.component.html',
+  template: `
+  <table libTableControl>
+  <caption>{{caption}}</caption>
+  <tr><th *ngFor="let cell of displayedColumns">{{cell}}</th></tr>
+  <tr *ngFor="let row of data" [libTableRowSelector]="row">
+    <td *ngFor="let cell of displayedColumns" [libTableCellData]="cell">{{row[cell]}}</td>
+  </tr>
+  </table>`,
   styleUrls: ['./table-control.component.scss'],
   providers: [TableControl]
 })

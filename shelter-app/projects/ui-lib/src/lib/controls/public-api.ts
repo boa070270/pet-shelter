@@ -11,3 +11,4 @@ export * from './title-type-control.component';
 export * from './table/table-row-selector.directive';
 export * from './table/table-control.directive';
 export * from './table/table-cell-data.directive';
+export * from './table/table-generator.component';
