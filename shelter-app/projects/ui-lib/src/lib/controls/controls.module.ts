@@ -72,7 +72,7 @@ export class ControlsModule {
 }
 // const BASE_PROPERTIES: {
 //   hint: string | TitleType[];
-//   error: string | TitleType[];
+//   error: string | TitleType[];33333333333333333
 //   caption: string | TitleType[];
 //
 // }

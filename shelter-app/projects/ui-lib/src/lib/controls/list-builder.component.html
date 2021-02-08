@@ -2,18 +2,17 @@
   <span class="ui-input-title" *ngIf="pCaption">{{pCaption}}</span>
   <div class="list-builder-panel">
     <div class="list-builder-panel-left">
-      <lib-select-control [options]="availableList"></lib-select-control>
+      <lib-select-control [options]="availableList" [titles]="titles" [tooltips]="tooltips" [multiple]="true"></lib-select-control>
     </div>
     <div class="list-builder-control">
-      <button class="gm-keyboard_arrow_left" title="Remove"></button>
-      <button class="gm-keyboard_arrow_right" title="Insert"></button>
-      <button class="gm-keyboard_arrow_up" title="Order Up"></button>
-      <button class="gm-keyboard_arrow_down" title="Order Down"></button>
+      <button [title]="titleAdd" [disabled]="disabled || available.getArrayValues().length === 0" (click)="onAdd()">+</button>
+      <button [title]="titleRemove" [disabled]="disabled || result.getArrayValues().length === 0" (click)="onRemove()">-</button>
+      <button class="gm-keyboard_arrow_up" [title]="titleUp" [disabled]="disabled || result.getArrayValues().length === 0" (click)="onUp()"></button>
+      <button class="gm-keyboard_arrow_down" [title]="titleDown" [disabled]="disabled || result.getArrayValues().length === 0" (click)="onDown()"></button>
     </div>
     <div class="list-builder-panel-right">
-      <lib-list-select [options]="resultList"></lib-list-select>
+      <lib-list-select [options]="resultList" [titles]="titles" [tooltips]="tooltips"></lib-list-select>
     </div>
   </div>
-  <span class="tooltip" *ngIf="tips[0]">{{tips[0]}}</span>
 </label>
 <span class="hint">{{pHint}}</span>

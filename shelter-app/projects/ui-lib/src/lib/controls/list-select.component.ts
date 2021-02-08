@@ -70,10 +70,19 @@ export class ListSelectComponent extends SelectControlComponent implements OnIni
 
   onKeyDown(event: KeyboardEvent): void {
     console.log(event);
+    if (event.isComposing || event.keyCode === 229) {
+      return;
+    }
+    // TODO https://developer.mozilla.org/ru/docs/Web/Accessibility/Keyboard-navigable_JavaScript_widgets
     switch (event.code) {
       case 'ArrowUp':
+        // TODO we need to switch focus on the prev row if it present, else like tab switch to the prev focused element
         break;
       case 'ArrowDown':
+        // TODO we need to switch focus on the next row if it present, else like tab switch to the next focused element
+        break;
+      case 'Space':
+        // TODO select | unselect current row
         break;
     }
   }

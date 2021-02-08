@@ -19,7 +19,7 @@ export const CHECKBOX_VALUE_ACCESSOR: any = {
 export class CheckboxControlComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
   @Input() direction: 'row' | 'col' | 'grid' = 'col';
   @Input() cols: number;
-  @Input() options: string[];
+  @Input() options: string[] = [];
   @Input() titles: {[key: string]: string} | TitleType[];
   @Input() optionAsTitle = true;
   @Input() tooltips: string[] | TitleType[];
@@ -43,6 +43,9 @@ export class CheckboxControlComponent extends BaseComponent implements OnInit, O
     super.ngOnDestroy();
   }
   ngOnChanges(changes: SimpleChanges): void {
+    if (!this.options) {
+      this.options = [];
+    }
     if (changes.labels) {
       this.pTitles =  this.doIfNeedI18n(this.titles, {});
     }
