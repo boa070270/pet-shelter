@@ -12,7 +12,7 @@ import {
   InputControlComponent,
   RadioControlComponent,
   SelectControlComponent,
-  TableControlComponent,
+  TableComponent,
   TitleTypeControlComponent
 } from '../controls';
 
@@ -31,7 +31,7 @@ export class DynamicPageComponent implements OnInit {
     const selectControlComponent = createCustomElement(SelectControlComponent, {injector});
     const booleanControlComponent = createCustomElement(BooleanControlComponent, {injector});
     const titleTypeControlComponent = createCustomElement(TitleTypeControlComponent, {injector});
-    const tableControlComponent = createCustomElement(TableControlComponent, {injector});
+    const tableControlComponent = createCustomElement(TableComponent, {injector});
     if (!customElements.get('lib-checkbox-element')) {
       customElements.define('lib-checkbox-element', checkboxControlComponent);
     }

@@ -1,5 +1,5 @@
 import {Observable} from 'rxjs';
-import {Input, Type} from '@angular/core';
+import {Type} from '@angular/core';
 
 export interface TableSchema {
   caption?: string;

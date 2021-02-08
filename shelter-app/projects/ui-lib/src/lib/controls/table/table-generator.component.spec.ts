@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { TableGeneratorComponent } from './table-generator.component';
+import {TableGeneratorComponent} from './table-generator.component';
 
 describe('TableGeneratorComponent', () => {
   let component: TableGeneratorComponent;

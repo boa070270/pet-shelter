@@ -45,7 +45,7 @@ export interface SwaggerCustomUI {
   leadingIcon?: string;
   trailingIcon?: string;
 }
-export function swaggerUI(description?: string | TitleType[], caption?: string | TitleType[],
+export function swaggerUI(caption?: string | TitleType[], description?: string | TitleType[],
                           toolTips?: string | TitleType[], placeHolder?: string | TitleType[],
                           leadingIcon?: string, trailingIcon?: string): SwaggerCustomUI {
   return {description, caption, placeHolder, toolTips, leadingIcon, trailingIcon};

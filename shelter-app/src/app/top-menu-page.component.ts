@@ -1,18 +1,20 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {BasicService} from './basic.service';
 import {
   CommentResponse,
   CommentType,
-  DiscussionMediator,
-  GeneratorFormComponent,
+  DiscussionMediator, ExtendedData,
+  GeneratorFormComponent, OkDialogComponent, SimpleDialogComponent,
   SwaggerFormService,
   swaggerNative,
-  SwaggerObject,
+  SwaggerObject, swaggerUI, TitleType,
   VoteOption,
   VoteType
 } from 'ui-lib';
 import {BehaviorSubject, EMPTY, from as fromObject, Observable} from 'rxjs';
 import {NgForm} from '@angular/forms';
+import {Dialog} from '@angular/cdk-experimental/dialog';
+import {ModalDialogComponent} from '../../projects/ui-lib/src/lib/dialogs/modal-dialog.component';
 
 const VOTE_OPTIONS: VoteOption[] = [
   {
@@ -164,6 +166,7 @@ class Mediator implements DiscussionMediator {
 })
 export class TopMenuPageComponent implements OnInit {
   @ViewChild('form') form: GeneratorFormComponent;
+  @ViewChild('tmplDialog') tmplDialog: TemplateRef<any>;
   voteOptions = VOTE_OPTIONS;
   voteResult = generateVoteTypes(true);
   checkbox: ['two'];
@@ -204,7 +207,23 @@ export class TopMenuPageComponent implements OnInit {
   tableCaption = 'Test table';
   tableData = new BehaviorSubject<any>(this.tableDataSet);
   tableColumns = this.tableColumnSet;
-  constructor(private basicService: BasicService, private dynamicSwagger: SwaggerFormService) {
+  listOptions = ['first', 'second', 'third', 'fifth', 'sixth'];
+  lustTitles: TitleType[] = [
+    {id: 'first', lang: 'en', title: 'First element'},
+    {id: 'first', lang: 'uk', title: 'First element'},
+    {id: 'second', lang: 'en', title: 'First element'},
+    {id: 'second', lang: 'uk', title: 'First element'},
+    {id: 'first', lang: 'en', title: 'First element'},
+    {id: 'first', lang: 'uk', title: 'First element'},
+    {id: 'first', lang: 'en', title: 'First element'},
+    {id: 'first', lang: 'uk', title: 'First element'},
+    {id: 'first', lang: 'en', title: 'First element'},
+    {id: 'first', lang: 'uk', title: 'First element'},
+  ];
+  listSelect: any;
+  constructor(private basicService: BasicService,
+              private dynamicSwagger: SwaggerFormService,
+              private dialog: Dialog) {
     dynamicSwagger.addSchemaIfNotExists('test', this.swagger);
   }
 
@@ -227,5 +246,36 @@ export class TopMenuPageComponent implements OnInit {
     const obj = {id: 'set top', description: 'set description top', child: {childId: 'set child Id', childDescription: 'set child Description', sex: 'm'}};
     console.log('set new value to form', obj);
     form.setValue(obj);
+  }
+
+  openDialog(): void {
+    const extData = new ExtendedData();
+    extData.action = 'save_cancel';
+    extData.caption = 'Hello World!';
+    extData.icon = 'gm-warning';
+    extData.swagger = {
+      required: ['login', 'password'],
+      orderControls: ['login', 'password'],
+      properties: {
+        login: {
+          type: 'string', controlType: 'input',
+          ui: swaggerUI([{lang: 'en', title: 'Login'}, {lang: 'uk', title: 'Логін'}])
+        },
+        password: {
+          type: 'string', controlType: 'input',
+          ui: swaggerUI([{lang: 'en', title: 'Password'}, {lang: 'uk', title: 'Пароль'}]),
+          constrictions: {format: 'password'}
+        }
+      }
+    };
+    extData.data = {login: 'admin', password: '******'};
+    const dialogRef = this.dialog.openFromComponent(SimpleDialogComponent, {data: extData, /*disableClose: true*/});
+    console.log('TopMenuPageComponent.openDialog', dialogRef);
+    dialogRef.afterOpened().subscribe(v => {
+      console.log(v);
+    });
+    dialogRef.afterClosed().subscribe(v => {
+      console.log(v);
+    });
   }
 }

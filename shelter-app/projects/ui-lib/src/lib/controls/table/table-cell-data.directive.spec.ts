@@ -1,4 +1,4 @@
-import { TableCellDataDirective } from './table-cell-data.directive';
+import {TableCellDataDirective} from './table-cell-data.directive';
 
 describe('TableCellDataDirective', () => {
   it('should create an instance', () => {

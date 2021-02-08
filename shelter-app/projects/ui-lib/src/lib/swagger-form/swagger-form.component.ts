@@ -30,7 +30,6 @@ export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
   selector: 'lib-swagger-form',
   template: `
     <div *ngIf="swagger">
-      <span>Form swagger: {{swagger | json}}</span>
       <ng-container *ngFor="let fld of properties">
         <ng-container [ngSwitch]="fld.controlType">
           <lib-swagger-native [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" [required]="fld.required"

@@ -1,4 +1,15 @@
 <a routerLink="/test-dynamic">Test Dynamic Page</a>
+<h1>List select</h1>
+<lib-list-select caption="List select" name="listSelect" [options]="listOptions" [(ngModel)]="listSelect"></lib-list-select>
+<span>{{listSelect | json}}</span>
+<br>
+
+<h1>List builder</h1>
+<lib-list-builder caption="List builder" [options]="listOptions"></lib-list-builder>
+<br>
+<h1>Dialog</h1>
+<ng-template #tmplDialog let-textDialog>{{textDialog}}</ng-template>
+<button (click)="openDialog()">Dialog</button>
 <h1>Table</h1>
 <lib-table-control [caption]="tableCaption" [columns]="tableColumns" [observableData]="tableData"></lib-table-control>
 
@@ -136,9 +147,6 @@
                     hint="This is select multi panel"
 ></lib-select-control>
 <span>{{select}}</span>
-<br>
-<h3>Button</h3>
-<lib-button>Button</lib-button>
 <br>
 <h1 tabindex="10">Icons</h1>
 <ul style="list-style: none;" (click)="clickUL($event)"> All icons

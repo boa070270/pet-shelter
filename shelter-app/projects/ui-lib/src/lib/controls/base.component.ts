@@ -5,10 +5,10 @@ import {distinctTitleId, isTitleType, TitleType} from '../shared';
 import {ControlValueAccessor} from '@angular/forms';
 
 @Component({
-  selector: 'lib-base-control',
+  selector: 'lib-base',
   template: ''
 })
-export class BaseControlComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
+export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
   @Input() id: string;
   @Input() name: string;
   @Input() hint: string | TitleType[];
@@ -91,7 +91,7 @@ export class BaseControlComponent implements OnInit, OnDestroy, OnChanges, Contr
     return (typeof what === 'object' !== null) && (isTitleType(what) || (Array.isArray(what) && isTitleType(what[0])));
   }
   protected emitChange(value: any): void {
-    console.log('BaseControlComponent.emitChange', this);
+    console.log('BaseControlComponent.emitChange', this, value);
     if (typeof this.change === 'function') {
       this.change(value);
     }

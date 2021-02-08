@@ -4,7 +4,7 @@ import {
   EditTableConfiguration,
   makeColumnInfo,
   TableEvent,
-  OkDialogComponent,
+  YesNoDialogComponent,
   DynamicFormDialogComponent, EditTableComponent
 } from 'ui-lib';
 import {BasicService} from '../basic.service';
@@ -152,7 +152,7 @@ export class FilesTableComponent implements OnInit {
   }
   private hdlViewDetails(rows: any[]): void {
     if (rows.length !== 1) {
-      this.dialog.open(OkDialogComponent, {data: {msg: 'Please select one file'}});
+      this.dialog.open(YesNoDialogComponent, {data: {msg: 'Please select one file'}});
     } else {
       const fileType = (rows[0] as FileType);
       this.service.getFile(fileType.id).subscribe(next => {
@@ -163,7 +163,7 @@ export class FilesTableComponent implements OnInit {
 
   private hdlMakeBanner(rows: any[]): void {
     if (rows.length !== 1) {
-      this.dialog.open(OkDialogComponent, {data: {msg: 'Please select one file you want to make as banner'}});
+      this.dialog.open(YesNoDialogComponent, {data: {msg: 'Please select one file you want to make as banner'}});
     } else {
       const configuration = this.formsConfiguration.bannerFormConfiguration();
       configuration.options.readonly = false;
@@ -181,7 +181,7 @@ export class FilesTableComponent implements OnInit {
             banner.ref.refId = fileType.id;
             this.service.addBanner(banner).pipe(tap(next => {
               if (typeof next === 'string') {
-                this.dialog.open(OkDialogComponent, {data: {msg:  `There was successfully added banners`}});
+                this.dialog.open(YesNoDialogComponent, {data: {msg:  `There was successfully added banners`}});
                 subs.unsubscribe();
               }
             }));
@@ -192,7 +192,7 @@ export class FilesTableComponent implements OnInit {
   }
   private hdlMakePage(rows: any[]): void {
     if (rows.length === 0) {
-      this.dialog.open(OkDialogComponent, {data: {msg: 'Please select files you want to make as page'}});
+      this.dialog.open(YesNoDialogComponent, {data: {msg: 'Please select files you want to make as page'}});
     } else {
       const configuration = this.formsConfiguration.pageFormConfiguration();
       configuration.options.readonly = false;
@@ -218,7 +218,7 @@ export class FilesTableComponent implements OnInit {
               })).toPromise());
             }
             Promise.all(promises).then(() => {
-              this.dialog.open(OkDialogComponent, {data: {msg:  `The page was successfully made with ${successful} assets`}});
+              this.dialog.open(YesNoDialogComponent, {data: {msg:  `The page was successfully made with ${successful} assets`}});
               subs.unsubscribe();
             });
           }
@@ -228,7 +228,7 @@ export class FilesTableComponent implements OnInit {
   }
   private hdlMakePet(rows: any[]): void {
     if (rows.length === 0) {
-      this.dialog.open(OkDialogComponent, {data: {msg: 'Please select files you want to make as pet'}});
+      this.dialog.open(YesNoDialogComponent, {data: {msg: 'Please select files you want to make as pet'}});
     } else {
       const configuration = this.formsConfiguration.petFormConfiguration();
       configuration.options.readonly = false;
@@ -254,7 +254,7 @@ export class FilesTableComponent implements OnInit {
               })).toPromise());
             }
             Promise.all(promises).then(() => {
-              this.dialog.open(OkDialogComponent, {data: {msg:  `The pet was successfully made with ${successful} assets`}});
+              this.dialog.open(YesNoDialogComponent, {data: {msg:  `The pet was successfully made with ${successful} assets`}});
               subs.unsubscribe();
             });
           }

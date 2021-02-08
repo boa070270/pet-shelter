@@ -1,0 +1,19 @@
+<label>
+  <span class="ui-input-title" *ngIf="pCaption">{{pCaption}}</span>
+  <div class="list-builder-panel">
+    <div class="list-builder-panel-left">
+      <lib-select-control [options]="availableList"></lib-select-control>
+    </div>
+    <div class="list-builder-control">
+      <button class="gm-keyboard_arrow_left" title="Remove"></button>
+      <button class="gm-keyboard_arrow_right" title="Insert"></button>
+      <button class="gm-keyboard_arrow_up" title="Order Up"></button>
+      <button class="gm-keyboard_arrow_down" title="Order Down"></button>
+    </div>
+    <div class="list-builder-panel-right">
+      <lib-list-select [options]="resultList"></lib-list-select>
+    </div>
+  </div>
+  <span class="tooltip" *ngIf="tips[0]">{{tips[0]}}</span>
+</label>
+<span class="hint">{{pHint}}</span>

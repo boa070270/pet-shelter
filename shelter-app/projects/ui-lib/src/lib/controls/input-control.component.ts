@@ -1,5 +1,5 @@
 import {Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
-import {BaseControlComponent} from './base-control.component';
+import {BaseComponent} from './base.component';
 import {SystemLang} from '../i18n';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {TitleType} from '../shared';
@@ -16,7 +16,7 @@ export const INPUT_VALUE_ACCESSOR: any = {
   styleUrls: ['./input-control.component.scss'],
   providers: [INPUT_VALUE_ACCESSOR]
 })
-export class InputControlComponent extends BaseControlComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
+export class InputControlComponent extends BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
   @Input() tooltip: string | TitleType[];
   @Input() placeholder: string | TitleType[];
   @Input() leadingIcon: string;

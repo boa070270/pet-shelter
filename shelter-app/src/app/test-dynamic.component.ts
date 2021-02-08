@@ -17,6 +17,7 @@ import {TableSchemaService} from "../../projects/ui-lib/src/lib/controls/table/t
         <option value="a">Text Hello</option>
         <option value="b">Generator form</option>
         <option value="d">Table</option>
+        <option value="e">CdkTable</option>
       </select>
       <button (click)="onClick()">Render</button>
     </div>
@@ -29,7 +30,8 @@ export class TestDynamicComponent implements OnInit {
     a: '<span>Hello world!</span>',
     b: '<lib-generator-form-element #form swagger="test"></lib-generator-form-element>',
     // c: '<lib-swagger-form swagger=""></lib-swagger-form>'
-    d: '<lib-table-generator-element schema="test"></lib-table-generator-element>'
+    d: '<lib-table-generator-element schema="test"></lib-table-generator-element>',
+    e: '<test-table-element></test-table-element>'
   };
   knownText: any;
   swagger: SwaggerObject = {

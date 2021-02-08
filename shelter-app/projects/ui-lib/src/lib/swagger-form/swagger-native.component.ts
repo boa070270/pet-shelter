@@ -22,7 +22,6 @@ import {FormControl, FormGroup, Validators} from '@angular/forms';
   selector: 'lib-swagger-native',
   template: `
     <div class="ui-swagger-native">
-      <span>{{swaggerType}} Swagger: {{swagger | json}}</span>
       <ng-container [ngSwitch]="swaggerType">
         <lib-boolean-control *ngSwitchCase="'boolean'" [formControl]="formControl"
                              name="{{propertyId}}"></lib-boolean-control>

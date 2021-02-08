@@ -1,11 +1,28 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {OkDialogComponent} from './ok-dialog.component';
-
+import {DialogModule} from '@angular/cdk-experimental/dialog';
+import { ModalDialogComponent } from './modal-dialog.component';
+import { OkDialogComponent } from './ok-dialog.component';
+import { SimpleDialogComponent } from './simple-dialog.component';
+import {ControlsModule} from '../controls';
+import {SwaggerFormModule} from '../swagger-form';
 @NgModule({
-  declarations: [OkDialogComponent],
+  declarations: [
+    OkDialogComponent,
+    ModalDialogComponent,
+    SimpleDialogComponent
+  ],
   imports: [
-    CommonModule
+    CommonModule,
+    DialogModule,
+    ControlsModule,
+    SwaggerFormModule
+  ],
+  exports: [
+    DialogModule,
+    OkDialogComponent,
+    ModalDialogComponent,
+    SimpleDialogComponent
   ]
 })
 export class DialogsModule { }

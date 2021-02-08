@@ -1,0 +1,27 @@
+// TODO need to provide color to icon for this we need to
+// 1. define our colors in ./styles/_common (maybe define them as variables to possibility change them through configuration)
+// 2. extends ExtendedData by added parameter color
+// 3. add relative class to span that contain icon
+.dialog-caption {
+  font-weight: bold;
+  text-align: center;
+  span {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+  :nth-child(1) {
+    color: red;
+    font-weight: lighter;
+  }
+}
+.dialog-message {
+  font-weight: lighter;
+  word-wrap: normal;
+}
+.dialog-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-content: space-around;
+}
+

@@ -1,4 +1,4 @@
-import { TableRowSelectorDirective } from './table-row-selector.directive';
+import {TableRowSelectorDirective} from './table-row-selector.directive';
 
 describe('TableRowSelectorDirective', () => {
   it('should create an instance', () => {

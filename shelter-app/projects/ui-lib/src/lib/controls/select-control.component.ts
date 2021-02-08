@@ -52,25 +52,24 @@ export class SelectControlComponent extends CheckboxControlComponent implements 
     const target = $event.target as HTMLSelectElement;
     if (target && target.tagName === 'SELECT') {
       const selectedOptions = target.selectedOptions;
-      const selected = [];
+      this.clearAll();
       if (selectedOptions !== undefined) {
         for (let i = 0; i < selectedOptions.length; ++i) {
-          selected.push(selectedOptions.item(i).value);
+          this.toggle(selectedOptions.item(i).value);
         }
       } else {
         const options = target.options;
         for (let i = 0; i < options.length; i++) {
           const opt: HTMLOptionElement = options.item(i);
           if (opt.selected) {
-            selected.push(opt.value);
+            this.toggle(opt.value);
           }
         }
       }
-      console.log('SelectControlComponent.onChange', selected);
-      if (selected.length > 1) {
-        this.emitChange(selected);
+      if (this.multiple) {
+        this.emitChange(this.getArrayValues());
       } else {
-        this.emitChange(selected[0]);
+        this.emitChange(this.getArrayValues()[0]);
       }
     }
   }

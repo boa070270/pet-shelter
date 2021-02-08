@@ -1,5 +1,5 @@
 import {Directive, ElementRef, Input, OnDestroy} from '@angular/core';
-import {TableControlComponent} from './table-control.component';
+import {TableComponent} from './table.component';
 import {TableControl} from './table-control';
 
 @Directive({
@@ -10,7 +10,7 @@ import {TableControl} from './table-control';
 })
 export class TableRowSelectorDirective implements OnDestroy {
   @Input() libTableRowSelector: any;
-  constructor(private tableControlComponent: TableControlComponent,
+  constructor(private tableControlComponent: TableComponent,
               private tableControl: TableControl,
               private element: ElementRef) {
     if (this.tableControlComponent.tableControl === tableControl) {

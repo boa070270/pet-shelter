@@ -1,6 +1,6 @@
 import {Component, OnChanges, OnDestroy, OnInit} from '@angular/core';
 import {SystemLang} from '../i18n';
-import {BaseControlComponent} from './base-control.component';
+import {BaseComponent} from './base.component';
 import {ControlValueAccessor} from '@angular/forms';
 import {TitleType} from '../shared';
 
@@ -16,7 +16,7 @@ import {TitleType} from '../shared';
   `,
   styleUrls: ['./title-type-control.component.css']
 })
-export class TitleTypeControlComponent extends BaseControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
+export class TitleTypeControlComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
   ctrlTitles: TitleType[] = [{id: 'b0', lang: 'uk', title: 'Багатомовність'}, {id: 'b0', lang: 'en', title: 'Multi language'}];
   ctrl: boolean;
   str: string;

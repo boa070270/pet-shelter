@@ -1,19 +1,45 @@
-import {ComponentRef, Inject, Injectable, OnDestroy, SimpleChanges, TemplateRef, Type} from '@angular/core';
+import {Injectable, OnDestroy, Type} from '@angular/core';
 import {BehaviorSubject, isObservable, Observable, Subject, Subscription} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 
+/**
+ * This injectable class contain all data that is binding to table
+ */
 @Injectable()
 export class TableControl implements OnDestroy {
+  /**
+   * function that can two rows
+   */
   fnEqual: (a: any, b: any) => boolean;
+  /**
+   * contains types of columns
+   */
   columnTypes: { [p: string]: (row: any, cell: string) => string | Type<any>};
+  /**
+   * contains all data
+   * @private
+   */
   private pData: ReadonlyArray<any>;
   set data(d: ReadonlyArray<any>){
     this.pData = d;
     console.log('TableControl emit data', d);
     this.dataModify.next(this.pData);
   }
+
+  /**
+   * contains all columns
+   */
   allColumns: string[];
+  /**
+   * contain names of columns
+   * @private
+   */
   private pDisplayedColumns: string[];
+
+  /**
+   * contains displayed columns
+   * @param ss
+   */
   set displayedColumns(ss: string[]) {
     this.pDisplayedColumns = ss;
     console.log('TableControl emit columns', ss);

@@ -83,3 +83,40 @@ option:hover+.tooltip {
   color: gray;
   font-size: smaller;
 }
+.list-builder-panel {
+  display: grid;
+  grid-template-columns: 4fr 1fr 4fr;
+}
+.list-builder-panel-left, .list-builder-panel-right {
+  width: 100%;
+  select {
+    width: 100%;
+  }
+}
+.list-select {
+  list-style: none;
+  min-height: calc(4em + 8px);
+  height: calc(4em + 8px);
+  margin: 0;
+  padding: 2px;
+  font: 400 13.3333px Arial;
+  white-space: nowrap;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  border-width: 1px;
+  border-style: solid;
+  box-sizing: content-box;
+  :focus {
+    border-width: 2px;
+  }
+  li:hover {
+    background-color: gray;
+  }
+  li {
+    border: none;
+  }
+  .li-checked {
+    background-color: dodgerblue;
+    color: white;
+  }
+}

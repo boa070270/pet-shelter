@@ -1,12 +1,9 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {BaseDataSource, EditTableConfiguration, makeColumnInfo} from 'ui-lib';
+import {EditTableConfiguration, makeColumnInfo} from 'ui-lib';
 import {BasicService} from '../basic.service';
 import {MatDialog} from '@angular/material/dialog';
-import {Observable} from 'rxjs';
 // from x-payload
-import {convertFieldsToFieldArray, FieldAndTitlesType} from '../common/types';
-import {map} from 'rxjs/operators';
-import {fromPromise} from 'rxjs/internal-compatibility';
+import {FieldAndTitlesType} from '../common/types';
 import {FormsConfigurationService} from './forms-configuration.service';
 
 @Component({

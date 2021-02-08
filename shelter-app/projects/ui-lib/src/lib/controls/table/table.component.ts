@@ -1,19 +1,8 @@
-import {
-  Component,
-  ComponentRef,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  Output,
-  SimpleChanges,
-  TemplateRef, Type
-} from '@angular/core';
-import {BehaviorSubject, isObservable, Observable, Subject, Subscription} from 'rxjs';
+import {Component, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, Type} from '@angular/core';
+import {Observable, Subject, Subscription} from 'rxjs';
 import {SystemLang} from '../../i18n';
 import {TitleType} from '../../shared';
-import {BaseControlComponent} from '../base-control.component';
-import {takeUntil} from 'rxjs/operators';
+import {BaseComponent} from '../base.component';
 import {TableControl} from './table-control';
 
 @Component({
@@ -27,10 +16,10 @@ import {TableControl} from './table-control';
     <td *ngFor="let cell of displayedColumns" [libTableCellData]="cell">{{row[cell]}}</td>
   </tr>
   </table>`,
-  styleUrls: ['./table-control.component.scss'],
+  styleUrls: ['./table.component.scss'],
   providers: [TableControl]
 })
-export class TableControlComponent extends BaseControlComponent implements OnInit, OnChanges, OnDestroy {
+export class TableComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy {
   @Input()
   set observableData(d: Observable<ReadonlyArray<any>>) {
     this.tableControl.setObservableData(d);

@@ -1,0 +1,7 @@
+<div class="dialog-caption" *ngIf="caption"><span class="{{icon}}" *ngIf="icon"></span><span>{{ caption }}</span></div>
+<lib-swagger-form [swagger]="swagger" *ngIf="swagger"></lib-swagger-form>
+<span class="dialog-message" *ngIf="!swagger">{{data}}</span>
+<div class="dialog-actions" *ngIf="needActionBlk">
+  <div><button (click)="save()">{{btnOk}}</button></div>
+  <div><button [autofocus]="true" (click)="cancel()" *ngIf="btnCancel">{{btnCancel}}</button></div>
+</div>

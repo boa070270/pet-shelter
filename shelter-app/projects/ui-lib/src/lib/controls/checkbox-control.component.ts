@@ -1,7 +1,7 @@
 import {Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SystemLang} from '../i18n';
-import {BaseControlComponent} from './base-control.component';
+import {BaseComponent} from './base.component';
 import {TitleType} from '../shared';
 
 export const CHECKBOX_VALUE_ACCESSOR: any = {
@@ -16,7 +16,7 @@ export const CHECKBOX_VALUE_ACCESSOR: any = {
   styleUrls: ['./checkbox-control.component.scss'],
   providers: [CHECKBOX_VALUE_ACCESSOR],
 })
-export class CheckboxControlComponent extends BaseControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
+export class CheckboxControlComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
   @Input() direction: 'row' | 'col' | 'grid' = 'col';
   @Input() cols: number;
   @Input() options: string[];
@@ -110,13 +110,7 @@ export class CheckboxControlComponent extends BaseControlComponent implements On
     this.values = Object.assign({}, this.values);
   }
   getArrayValues(): string[] {
-    const a = [];
-    for (const [key, value] of Object.entries(this.values)) {
-      if (value) {
-        a.push(key);
-      }
-    }
-    return a;
+    return this.options.filter(o => this.values[o]);
   }
   clearAll(): void {
     this.values = {};

@@ -1,7 +1,7 @@
-import {Directive, Input, OnDestroy, Output} from '@angular/core';
+import {Directive, OnDestroy} from '@angular/core';
 import {TableControl} from './table-control';
-import {TableControlComponent} from './table-control.component';
-import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import {TableComponent} from './table.component';
+import {Observable} from 'rxjs';
 
 @Directive({
   selector: '[libTableControl]'
@@ -10,7 +10,7 @@ export class TableControlDirective implements OnDestroy{
   dataSource: Observable<any>;
   selected: Array<any> = [];
 
-  constructor(private tableControlComponent: TableControlComponent,
+  constructor(private tableControlComponent: TableComponent,
               public tableControl: TableControl) {
     console.log('TableControlDirective.constructor');
     if ( tableControlComponent.tableControl === tableControl) {

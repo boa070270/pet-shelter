@@ -39,7 +39,8 @@ import { LoginPageComponent } from './login-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {BasicService} from './basic.service';
 import { TestDynamicComponent } from './test-dynamic.component';
-
+import {DialogsModule} from "../../projects/ui-lib/src/lib/dialogs/dialogs.module";
+// import {Dialog, DialogModule} from '@angular/cdk-experimental/dialog';
 
 @NgModule({
     declarations: [
@@ -79,9 +80,13 @@ import { TestDynamicComponent } from './test-dynamic.component';
     SharedModule,
     ControlsModule,
     SwaggerFormModule,
-    UiElementsModule
+    UiElementsModule,
+    DialogsModule
+    // DialogModule
   ],
-    providers: [{provide: 'ObtainSystemLanguage', useClass: BasicService}],
+    providers: [
+      {provide: 'ObtainSystemLanguage', useClass: BasicService},
+      ],
     bootstrap: [AppComponent]
 })
 export class AppModule {

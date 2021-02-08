@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TableControlComponent } from './table-control.component';
+import { ListSelectComponent } from './list-select.component';
 
-describe('TableControlComponent', () => {
-  let component: TableControlComponent<any>;
-  let fixture: ComponentFixture<TableControlComponent<any>>;
+describe('ListSelectComponent', () => {
+  let component: ListSelectComponent;
+  let fixture: ComponentFixture<ListSelectComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TableControlComponent ]
+      declarations: [ ListSelectComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TableControlComponent);
+    fixture = TestBed.createComponent(ListSelectComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
