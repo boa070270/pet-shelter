@@ -1,26 +1,15 @@
 import {Component, Inject, OnDestroy, ViewChild} from '@angular/core';
 import {CdkDialogContainer, DIALOG_DATA, DialogRef} from '@angular/cdk-experimental/dialog';
 import {SystemLang} from '../i18n';
-import {SwaggerObject, TitleType} from '../shared';
+import {SwaggerObject, TitleType, ActionType, ExtendedData} from '../shared';
 import {SwaggerFormComponent} from '../swagger-form';
 import {Subscription} from 'rxjs';
 
-export type ActionType = 'ok' | 'save_cancel' | 'yes_no';
 const DEF_TITLE_OK: TitleType[] = [{lang: 'en', title: 'Ok'}, {lang: 'uk', title: 'Tak'}];
 const DEF_TITLE_CANCEL: TitleType[] = [{lang: 'en', title: 'Cancel'}, {lang: 'uk', title: 'Відміна'}];
 const DEF_TITLE_YES: TitleType[] = [{lang: 'en', title: 'Yes'}, {lang: 'uk', title: 'Tak'}];
 const DEF_TITLE_NO: TitleType[] = [{lang: 'en', title: 'No'}, {lang: 'uk', title: 'Ні'}];
 const DEF_TITLE_SAVE: TitleType[] = [{lang: 'en', title: 'Save'}, {lang: 'uk', title: 'Зберегти'}];
-
-export class ExtendedData {
-  data: any;
-  action?: ActionType;
-  swagger?: SwaggerObject;
-  readOnly?: boolean;
-  icon?: string;
-  iconColor?: 'info-color' | 'warn-color' | 'error-color';
-  caption?: string;
-}
 
 @Component({
   selector: 'lib-simple-dialog',

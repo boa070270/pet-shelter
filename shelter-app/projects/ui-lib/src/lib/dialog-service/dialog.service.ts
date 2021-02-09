@@ -1,14 +1,19 @@
-import { Injectable } from '@angular/core';
+import {Injectable, Type} from '@angular/core';
 import {Dialog, DialogRef} from '@angular/cdk-experimental/dialog';
-import {ActionType, ExtendedData, SimpleDialogComponent} from '../dialogs';
-import {swaggerUI} from '../shared';
+import {ActionType, ComponentsPluginService, ExtendedData} from '../shared';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DialogService {
+  private readonly simpleDialogComponent: Type<any>;
 
-  constructor(private dialog: Dialog) { }
+  constructor(private dialog: Dialog,
+              private componentsPlugin: ComponentsPluginService) {
+    const plugin = this.componentsPlugin.getPlugin('simple-dialog');
+    this.simpleDialogComponent = plugin.component;
+  }
+
   /* e.g.
   const extData = new ExtendedData();
   extData.action = 'save_cancel';
@@ -33,7 +38,7 @@ export class DialogService {
   extData.data = {login: 'admin', password: '******'};
    */
   openExtDialog(extData: ExtendedData, modal?: boolean): DialogRef<any> {
-    return this.dialog.openFromComponent(SimpleDialogComponent, {data: extData, disableClose: modal || false});
+    return this.dialog.openFromComponent(this.simpleDialogComponent, {data: extData, disableClose: modal || false});
   }
   infoExtDialog(extData: ExtendedData, modal?: boolean): DialogRef<any> {
     extData.iconColor = 'info-color';

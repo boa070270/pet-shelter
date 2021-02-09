@@ -21,6 +21,12 @@ const DEF_DOWN_TITLES: TitleType[] = [{lang: 'en', title: 'Down'}, {lang: 'uk', 
 export class ListBuilderComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
   // tslint:disable-next-line:variable-name
   private _extraParams: CheckboxParameters = {};
+  availableList: string[] = [];
+  resultList: string[] = [];
+  titleRemove: string;
+  titleAdd: string;
+  titleUp: string;
+  titleDown: string;
   @Input()
   set extraParams(p: CheckboxParameters) {
     this._extraParams = p || {};
@@ -31,8 +37,6 @@ export class ListBuilderComponent extends BaseComponent implements OnInit, OnCha
     }
     return this._extraParams;
   }
-  availableList: string[] = [];
-  resultList: string[] = [];
   @Input()
   set options(p: string[]) {
     this.extraParams.options = p;
@@ -57,10 +61,6 @@ export class ListBuilderComponent extends BaseComponent implements OnInit, OnCha
   get tooltips(): string[] | TitleType[] {
     return this.extraParams.tooltips || null;
   }
-  titleRemove: string;
-  titleAdd: string;
-  titleUp: string;
-  titleDown: string;
 
   @ViewChild(SelectControlComponent, {static: true}) available: SelectControlComponent;
   @ViewChild(ListSelectComponent, {static: true}) result: ListSelectComponent;
