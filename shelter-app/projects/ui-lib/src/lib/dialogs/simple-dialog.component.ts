@@ -1,4 +1,4 @@
-import {Component, Inject, Injector, OnDestroy, ViewChild} from '@angular/core';
+import {Component, Inject, OnDestroy, ViewChild} from '@angular/core';
 import {CdkDialogContainer, DIALOG_DATA, DialogRef} from '@angular/cdk-experimental/dialog';
 import {SystemLang} from '../i18n';
 import {SwaggerObject, TitleType} from '../shared';
@@ -18,6 +18,7 @@ export class ExtendedData {
   swagger?: SwaggerObject;
   readOnly?: boolean;
   icon?: string;
+  iconColor?: 'info-color' | 'warn-color' | 'error-color';
   caption?: string;
 }
 
@@ -31,12 +32,13 @@ export class SimpleDialogComponent implements OnDestroy {
   action: ActionType;
   swagger: SwaggerObject;
   data: any;
-  icon: string;
   caption: string;
   btnOk: string;
   btnCancel: string;
+  iconClasses: any;
   @ViewChild(SwaggerFormComponent) form: SwaggerFormComponent;
   private subscription: Subscription;
+  icon: any;
 
   constructor(protected dialogRef: DialogRef<any>,
               protected dialogContainer: CdkDialogContainer,
@@ -48,9 +50,16 @@ export class SimpleDialogComponent implements OnDestroy {
       this.needActionBlk = !!dialogData.action;
       this.swagger = dialogData.swagger;
       this.data = dialogData.data;
-      this.icon = dialogData.icon;
       this.caption = dialogData.caption;
       this.action = dialogData.action;
+      this.iconClasses = {};
+      if (dialogData.icon) {
+        this.iconClasses[dialogData.icon] = true;
+        this.icon = dialogData.icon;
+      }
+      if (dialogData.iconColor) {
+        this.iconClasses[dialogData.iconColor] = true;
+      }
     } else {
       this.data = dialogData;
     }
@@ -84,8 +93,10 @@ export class SimpleDialogComponent implements OnDestroy {
   }
   save(): void {
     if (this.swagger) {
-      console.log(this.form.formGroup.value);
-      this.dialogRef.close(this.form.formGroup.value);
+      if (this.form.formGroup.valid) {
+        console.log('SimpleDialogComponent.save', this.form.formGroup.value);
+        this.dialogRef.close(this.form.formGroup.value);
+      }
     }
   }
 }

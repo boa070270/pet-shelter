@@ -1,4 +1,5 @@
 @use './controls';
+@import '../../styles/colors';
 
 :host {
   --columns: attr(cols string);
@@ -73,7 +74,7 @@
 }
 
 .ui-input-error {
-  color: red;
+  color: $error-color;
   display: none;
 }
 

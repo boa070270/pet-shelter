@@ -2,7 +2,7 @@ import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {BasicService} from './basic.service';
 import {
   CommentResponse,
-  CommentType,
+  CommentType, DialogService,
   DiscussionMediator, ExtendedData,
   GeneratorFormComponent, OkDialogComponent, SimpleDialogComponent,
   SwaggerFormService,
@@ -13,8 +13,6 @@ import {
 } from 'ui-lib';
 import {BehaviorSubject, EMPTY, from as fromObject, Observable} from 'rxjs';
 import {NgForm} from '@angular/forms';
-import {Dialog} from '@angular/cdk-experimental/dialog';
-import {ModalDialogComponent} from '../../projects/ui-lib/src/lib/dialogs/modal-dialog.component';
 
 const VOTE_OPTIONS: VoteOption[] = [
   {
@@ -223,7 +221,7 @@ export class TopMenuPageComponent implements OnInit {
   listSelect: any;
   constructor(private basicService: BasicService,
               private dynamicSwagger: SwaggerFormService,
-              private dialog: Dialog) {
+              private dialogService: DialogService) {
     dynamicSwagger.addSchemaIfNotExists('test', this.swagger);
   }
 
@@ -269,7 +267,7 @@ export class TopMenuPageComponent implements OnInit {
       }
     };
     extData.data = {login: 'admin', password: '******'};
-    const dialogRef = this.dialog.openFromComponent(SimpleDialogComponent, {data: extData, /*disableClose: true*/});
+    const dialogRef = this.dialogService.warnExtDialog(extData, true);
     console.log('TopMenuPageComponent.openDialog', dialogRef);
     dialogRef.afterOpened().subscribe(v => {
       console.log(v);

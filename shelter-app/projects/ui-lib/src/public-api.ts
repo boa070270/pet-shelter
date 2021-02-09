@@ -31,6 +31,7 @@ export * from './lib/i18n';
 export * from './lib/controls';
 export * from './lib/swagger-form';
 export * from './lib/ui-elements';
+export * from './lib/dialog-service';
 
 export * from './lib/ui-lib.service';
 export * from './lib/ui-lib.component';

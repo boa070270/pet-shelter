@@ -18,7 +18,7 @@ import {
   SwaggerNative,
   SwaggerSchema
 } from '../shared';
-import {ControlValueAccessor, FormGroup, NG_VALUE_ACCESSOR} from '@angular/forms';
+import {ControlValueAccessor, FormGroup, NG_VALUE_ACCESSOR, ValidationErrors} from '@angular/forms';
 import {CdkPortalOutlet, ComponentPortal} from '@angular/cdk/portal';
 import {
   BaseComponent,

@@ -18,7 +18,14 @@ import {
   SwaggerObject,
   SwaggerSchema
 } from '../shared';
-import {ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators} from '@angular/forms';
+import {
+  AbstractControl,
+  ControlValueAccessor,
+  FormControl,
+  FormGroup,
+  NG_VALUE_ACCESSOR,
+  Validators
+} from '@angular/forms';
 
 export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -33,7 +40,7 @@ export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
       <ng-container *ngFor="let fld of properties">
         <ng-container [ngSwitch]="fld.controlType">
           <lib-swagger-native [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" [required]="fld.required"
-                              [pFormGroup]="formGroup" *ngSwitchCase="'native'" [formControl]="formGroup.get(fld.propertyId)"></lib-swagger-native>
+                              [pFormGroup]="formGroup" *ngSwitchCase="'native'" [formControl]="formGroup.get(fld.propertyId)" ></lib-swagger-native>
           <lib-swagger-form [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" [required]="fld.required"
                             [(ngModel)]="fld.propertyId" [nameControl]="fld.propertyId"
                             [pFormGroup]="formGroup" *ngSwitchCase="'object'"></lib-swagger-form>
@@ -46,19 +53,30 @@ export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
   styleUrls: ['./swagger-form.component.scss'],
   providers: [SWAGGER_FORM_VALUE_ACCESSOR]
 })
-export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDestroy, ControlValueAccessor {
+export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDestroy, AfterContentInit, AfterViewInit, ControlValueAccessor {
   @Input() swagger: SwaggerSchema;
   @Input() propertyId: string;
   @Input() nameControl: string;
   @Input() required: boolean;
   @Input() pFormGroup: FormGroup;
-  properties: Array<{propertyId: string, controlType: string, required: boolean}> = [];
+  properties: Array<{propertyId: string, controlType: string, required: boolean, control?: AbstractControl}> = [];
   formGroup: FormGroup;
 
   onChange = (_: any) => {};
   onTouched = () => {};
 
   constructor() {
+  }
+
+  ngAfterContentInit(): void {
+    this.properties.forEach(p => {
+      if (p.controlType === 'native') {
+        this.formGroup.addControl(p.propertyId, p.control);
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
   }
 
   ngOnDestroy(): void {
@@ -98,6 +116,9 @@ export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDe
 
   writeValue(obj: any): void {
     console.log('SwaggerFormComponent.writeValue', obj);
+    if (typeof obj === 'object' && obj !== null) {
+      this.formGroup.setValue(obj);
+    }
   }
 
   private processProperties(): void {
@@ -106,18 +127,18 @@ export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDe
     if (swagger && swagger.orderControls && swagger.properties) {
       for (const propertyId of swagger.orderControls) {
         const property = swagger.properties[propertyId];
-        let controlType = null;
+        const p: any = {propertyId, required: required.includes(propertyId)};
         if (coerceToSwaggerNative(property)) {
-          controlType = 'native';
-          this.formGroup.addControl(propertyId, this.makeFormControl(property as SwaggerNative, required.includes(propertyId)));
+          p.controlType = 'native';
+          p.control = this.makeFormControl(property as SwaggerNative, required.includes(propertyId));
         } else if (coerceToSwaggerObject(property)) {
-          controlType = 'object';
+          p.controlType = 'object';
         } else if (coerceToSwaggerArray(property)) {
-          controlType = 'array';
+          p.controlType = 'array';
         } else {
           continue;
         }
-        this.properties.push({propertyId, controlType, required: required.includes(propertyId)});
+        this.properties.push(p);
       }
     }
   }
