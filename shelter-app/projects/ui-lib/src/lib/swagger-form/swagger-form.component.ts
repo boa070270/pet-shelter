@@ -13,8 +13,8 @@ import {
 import {
   coerceToSwaggerArray,
   coerceToSwaggerNative,
-  coerceToSwaggerObject,
-  SwaggerGroupComponent,
+  coerceToSwaggerObject, CommonConstrictions, SwaggerCustomUI,
+  SwaggerGroupComponent, SwaggerNative,
   SwaggerObject,
   SwaggerSchema
 } from '../shared';
@@ -33,7 +33,7 @@ export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
       <ng-container *ngFor="let fld of properties">
         <ng-container [ngSwitch]="fld.controlType">
           <lib-swagger-native [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" [required]="fld.required"
-                              [pFormGroup]="formGroup" *ngSwitchCase="'native'"></lib-swagger-native>
+                              [pFormGroup]="formGroup" *ngSwitchCase="'native'" [formControl]="formGroup.get(fld.propertyId)"></lib-swagger-native>
           <lib-swagger-form [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" [required]="fld.required"
                             [(ngModel)]="fld.propertyId" [nameControl]="fld.propertyId"
                             [pFormGroup]="formGroup" *ngSwitchCase="'object'"></lib-swagger-form>
@@ -68,12 +68,12 @@ export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDe
     if (this.swagger) {
       // console.log('SwaggerFormComponent.ngOnInit', this.swagger);
       const ui = this.swagger.ui || {};
-      this.processProperties();
       const validators = ui.validators || [];
       if (this.required && !validators.includes(Validators.required)) {
         validators.push(Validators.required);
       }
       this.formGroup = new FormGroup({}, validators, ui.asyncValidator);
+      this.processProperties();
       // if (this.swaggerFromGroup) {
       //   this.swaggerFromGroup.libSwaggerFromGroup.addControl(this.nameControl, this.formGroup);
       // }
@@ -109,6 +109,7 @@ export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDe
         let controlType = null;
         if (coerceToSwaggerNative(property)) {
           controlType = 'native';
+          this.formGroup.addControl(propertyId, this.makeFormControl(property as SwaggerNative, required.includes(propertyId)));
         } else if (coerceToSwaggerObject(property)) {
           controlType = 'object';
         } else if (coerceToSwaggerArray(property)) {
@@ -119,6 +120,15 @@ export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDe
         this.properties.push({propertyId, controlType, required: required.includes(propertyId)});
       }
     }
+  }
+  makeFormControl(swagger: SwaggerNative, required): FormControl {
+    const constrictions = swagger.constrictions || {} as CommonConstrictions;
+    const ui = swagger.ui || {} as SwaggerCustomUI;
+    const validators = ui.validators || [];
+    if (required && !validators.includes(Validators.required)) {
+      validators.push(Validators.required);
+    }
+    return new FormControl(constrictions.default, validators, ui.asyncValidator);
   }
 
 }

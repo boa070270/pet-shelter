@@ -1,7 +1,7 @@
-import {Component, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {Component, forwardRef, OnChanges, OnDestroy, OnInit} from '@angular/core';
 import {SystemLang} from '../i18n';
 import {BaseComponent} from './base.component';
-import {ControlValueAccessor} from '@angular/forms';
+import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {TitleType} from '../shared';
 
 @Component({
@@ -14,7 +14,12 @@ import {TitleType} from '../shared';
       </div>
       <span *ngIf="pHint">{{pHint}}</span>
   `,
-  styleUrls: ['./title-type-control.component.css']
+  styleUrls: ['./title-type-control.component.css'],
+  providers: [{
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: forwardRef(() => TitleTypeControlComponent),
+    multi: true
+  }]
 })
 export class TitleTypeControlComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
   ctrlTitles: TitleType[] = [{id: 'b0', lang: 'uk', title: 'Багатомовність'}, {id: 'b0', lang: 'en', title: 'Multi language'}];

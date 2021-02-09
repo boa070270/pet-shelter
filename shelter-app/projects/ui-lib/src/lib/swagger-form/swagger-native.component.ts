@@ -1,67 +1,76 @@
 import {
-  AfterContentChecked,
-  AfterContentInit, AfterViewChecked,
   AfterViewInit,
   Component,
+  ComponentRef,
+  forwardRef,
+  Injector,
   Input,
   OnChanges,
-  OnDestroy,
   OnInit,
-  SimpleChanges
+  SimpleChanges,
+  ViewChild
 } from '@angular/core';
 import {
   CommonConstrictions,
+  ComponentsPluginService,
   SwaggerComponent,
   SwaggerCustomUI,
   SwaggerNative,
   SwaggerSchema
 } from '../shared';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {ControlValueAccessor, FormGroup, NG_VALUE_ACCESSOR} from '@angular/forms';
+import {CdkPortalOutlet, ComponentPortal} from '@angular/cdk/portal';
+import {
+  BaseComponent,
+  CheckboxControlComponent,
+  CheckboxParameters,
+  InputControlComponent,
+  InputParameters,
+  ListBuilderComponent
+} from '../controls';
 
 @Component({
   selector: 'lib-swagger-native',
   template: `
     <div class="ui-swagger-native">
-      <ng-container [ngSwitch]="swaggerType">
-        <lib-boolean-control *ngSwitchCase="'boolean'" [formControl]="formControl"
-                             name="{{propertyId}}"></lib-boolean-control>
-        <lib-input-control *ngSwitchCase="'input'" [formControl]="formControl" name="{{propertyId}}"
-                           [hint]="ui.description" [placeholder]="ui.placeHolder" [tooltip]="ui.toolTips"
-                           [caption]="ui.caption" [leadingIcon]="ui.leadingIcon" [trailingIcon]="ui.trailingIcon"
-                           [type]="constrictions.format"
-        ></lib-input-control>
-        <lib-select-control *ngSwitchCase="'select'" [formControl]="formControl" name="{{propertyId}}"
-                            [hint]="ui.description" [tooltips]="ui.toolTips"
-                            [caption]="ui.caption" [multiple]="constrictions.enumMulti"
-                            [options]="constrictions.enums" [titles]="constrictions.enumDescriptions"
-        ></lib-select-control>
-        <lib-checkbox-control *ngSwitchCase="'checkbox'" [formControl]="formControl" name="{{propertyId}}"
-                              [hint]="ui.description" [tooltips]="ui.toolTips"
-                              [caption]="ui.caption"
-                              [options]="constrictions.enums" [titles]="constrictions.enumDescriptions"
-        ></lib-checkbox-control>
-        <lib-radio-control *ngSwitchCase="'radio'" [formControl]="formControl" name="{{propertyId}}"
-                           [hint]="ui.description" [tooltips]="ui.toolTips"
-                           [caption]="ui.caption"
-                           [options]="constrictions.enums" [titles]="constrictions.enumDescriptions"
-        ></lib-radio-control>
-      </ng-container>
+      <ng-template [cdkPortalOutlet]></ng-template>
     </div>`,
-  styleUrls: ['./swagger-native.component.scss']
+  styleUrls: ['./swagger-native.component.scss'],
+  providers: [{
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: forwardRef(() => SwaggerNativeComponent),
+    multi: true
+  }]
 })
-export class SwaggerNativeComponent implements OnInit, OnChanges, SwaggerComponent, AfterViewInit {
-
+export class SwaggerNativeComponent implements OnInit, OnChanges, SwaggerComponent, AfterViewInit, ControlValueAccessor {
   @Input() swagger: SwaggerSchema;
   @Input() propertyId: string;
   @Input() required: boolean;
   @Input() pFormGroup: FormGroup;
-  swaggerType: string;
-  ui: SwaggerCustomUI;
-  constrictions: CommonConstrictions;
-  formControl: FormControl;
+  @ViewChild(CdkPortalOutlet, {static: true}) portalOutlet: CdkPortalOutlet;
+  private componentRef: ComponentRef<BaseComponent>;
 
+  constructor(private componentsPlugin: ComponentsPluginService) {}
 
-  constructor() {
+  writeValue(obj: any): void {
+     if (this.componentRef) {
+       this.componentRef.instance.writeValue(obj);
+     }
+  }
+  registerOnChange(fn: any): void {
+    if (this.componentRef) {
+      this.componentRef.instance.registerOnChange(fn);
+    }
+  }
+  registerOnTouched(fn: any): void {
+    if (this.componentRef) {
+      this.componentRef.instance.registerOnTouched(fn);
+    }
+  }
+  setDisabledState?(isDisabled: boolean): void {
+    if (this.componentRef) {
+      this.componentRef.instance.setDisabledState(isDisabled);
+    }
   }
 
   ngOnInit(): void {
@@ -78,22 +87,30 @@ export class SwaggerNativeComponent implements OnInit, OnChanges, SwaggerCompone
   private defineControlType(): void {
     const swagger = this.swagger as SwaggerNative;
     if (swagger) {
-      this.swaggerType = swagger.type;
-      this.constrictions = swagger.constrictions || {} as CommonConstrictions;
-      this.ui = this.swagger.ui || {} as SwaggerCustomUI;
-      if (this.pFormGroup) {
-        const validators = this.ui.validators || [];
-        if (this.required && !validators.includes(Validators.required)) {
-          validators.push(Validators.required);
+      const constrictions = swagger.constrictions || {} as CommonConstrictions;
+      const ui = this.swagger.ui || {} as SwaggerCustomUI;
+      const commonParams = {required: this.required, caption: ui.caption, hint: ui.description, name: this.propertyId};
+      let componentName = swagger.controlType;
+      if (!componentName) {
+        if (constrictions.enums) {
+          componentName = constrictions.enums.length < 4 ? 'radio' : 'select';
         }
-        this.formControl = new FormControl(this.constrictions.default, validators, this.ui.asyncValidator);
-        this.pFormGroup.addControl(this.propertyId, this.formControl);
+        if (swagger.type === 'string' || swagger.type === 'number' || swagger.type === 'integer') {
+          componentName = 'input';
+        }
       }
-      if (this.constrictions.enums) {
-        this.swaggerType = this.constrictions.enums.length < 4 ? 'radio' : 'select';
-      }
-      if (this.swaggerType === 'string' || this.swaggerType === 'number' || this.swaggerType === 'integer') {
-        this.swaggerType = 'input';
+      const component = this.componentsPlugin.getPlugin(componentName);
+      if (component && component.component) {
+        const portal = new ComponentPortal(component.component);
+        this.componentRef = this.portalOutlet.attachComponentPortal(portal);
+        this.componentRef.instance.common = commonParams;
+        const inst = this.componentRef.instance;
+        if (inst instanceof InputControlComponent) {
+          inst.extraParams = {placeholder: ui.placeHolder, tooltip: ui.toolTip,
+            leadingIcon: ui.leadingIcon, trailingIcon: ui.trailingIcon, type: constrictions.format};
+        } else if (inst instanceof CheckboxControlComponent || inst instanceof ListBuilderComponent) {
+          inst.extraParams = {tooltips: constrictions.enumTooltips, options: constrictions.enums, titles: constrictions.enumDescriptions};
+        }
       }
     } else {
       console.log('SwaggerNativeComponent: No swagger');

@@ -1,4 +1,12 @@
 <a routerLink="/test-dynamic">Test Dynamic Page</a>
+<h1>Test Table</h1>
+<lib-test-table></lib-test-table>
+<br>
+
+<h1>Table</h1>
+<lib-table-control [caption]="tableCaption" [columns]="tableColumns" [observableData]="tableData"></lib-table-control>
+<br>
+
 <h1>List select</h1>
 <lib-list-select caption="List select" name="listSelect" [options]="listOptions" [(ngModel)]="listSelect"></lib-list-select>
 <span>{{listSelect | json}}</span>
@@ -10,8 +18,6 @@
 <h1>Dialog</h1>
 <ng-template #tmplDialog let-textDialog>{{textDialog}}</ng-template>
 <button (click)="openDialog()">Dialog</button>
-<h1>Table</h1>
-<lib-table-control [caption]="tableCaption" [columns]="tableColumns" [observableData]="tableData"></lib-table-control>
 
 <h1>Dynamic form</h1>
 <!-- form #form="ngForm" (ngSubmit)="onSubmit(form)" -->

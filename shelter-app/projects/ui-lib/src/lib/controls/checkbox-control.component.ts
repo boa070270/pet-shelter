@@ -10,6 +10,17 @@ export const CHECKBOX_VALUE_ACCESSOR: any = {
   multi: true
 };
 
+export type CheckboxDirection = 'row' | 'col' | 'grid';
+export interface CheckboxParameters {
+  direction?: CheckboxDirection;
+  cols?: number;
+  options?: any[];
+  titles?: {[key: string]: string} | TitleType[];
+  optionAsTitle?: boolean;
+  tooltips?: string[] | TitleType[];
+  indeterminate?: boolean;
+  multiple?: boolean;
+}
 @Component({
   selector: 'lib-checkbox-control',
   templateUrl: './checkbox-control.component.html',
@@ -17,17 +28,73 @@ export const CHECKBOX_VALUE_ACCESSOR: any = {
   providers: [CHECKBOX_VALUE_ACCESSOR],
 })
 export class CheckboxControlComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
-  @Input() direction: 'row' | 'col' | 'grid' = 'col';
-  @Input() cols: number;
-  @Input() options: string[] = [];
-  @Input() titles: {[key: string]: string} | TitleType[];
-  @Input() optionAsTitle = true;
-  @Input() tooltips: string[] | TitleType[];
-  @Input() indeterminate: boolean = null;
+  // tslint:disable-next-line:variable-name
+  private _extraParams: CheckboxParameters = {};
+  @Input()
+  set extraParams(p: CheckboxParameters) {
+    this._extraParams = p || {};
+  }
+  get extraParams(): CheckboxParameters {
+    if (!this._extraParams) {
+      this._extraParams = {};
+    }
+    return this._extraParams;
+  }
+  @Input()
+  set direction(p: CheckboxDirection) {
+    this.extraParams.direction = p;
+  }
+  get direction(): CheckboxDirection {
+    return this.extraParams.direction || 'col';
+  }
+  @Input()
+  set cols(p: number) {
+    this.extraParams.cols = p;
+  }
+  get cols(): number {
+    return this.extraParams.cols || null;
+  }
+  @Input()
+  set options(p: any[]) {
+    this.extraParams.options = p;
+  }
+  get options(): any[] {
+    if (!this.extraParams.options) {
+      this.extraParams.options = [];
+    }
+    return this.extraParams.options;
+  }
+  @Input()
+  set titles(p: {[key: string]: string} | TitleType[]) {
+    this.extraParams.titles = p;
+  }
+  get titles(): {[key: string]: string} | TitleType[] {
+    return this.extraParams.titles || null;
+  }
+  @Input()
+  set optionAsTitle(p: boolean) {
+    this.extraParams.optionAsTitle = p;
+  }
+  get optionAsTitle(): boolean {
+    return this.extraParams.optionAsTitle || true;
+  }
+  @Input()
+  set tooltips(p: string[] | TitleType[]) {
+    this.extraParams.tooltips = p;
+  }
+  get tooltips(): string[] | TitleType[] {
+    return this.extraParams.tooltips || null;
+  }
+  @Input()
+  set indeterminate(p: boolean) {
+    this.extraParams.indeterminate = p;
+  }
+  get indeterminate(): boolean {
+    return this.extraParams.indeterminate || null;
+  }
   values: {[key: string]: any} = {};
   pTitles: {[id: string]: string};
   tips: {[id: string]: string};
-  disabled: boolean;
 
   constructor(public systemLang: SystemLang) {
     super(systemLang);
@@ -43,9 +110,6 @@ export class CheckboxControlComponent extends BaseComponent implements OnInit, O
     super.ngOnDestroy();
   }
   ngOnChanges(changes: SimpleChanges): void {
-    if (!this.options) {
-      this.options = [];
-    }
     if (changes.labels) {
       this.pTitles =  this.doIfNeedI18n(this.titles, {});
     }
@@ -81,44 +145,34 @@ export class CheckboxControlComponent extends BaseComponent implements OnInit, O
     }
     console.log('CheckboxControlComponent.onChange', this.indeterminate, this.values);
   }
-  setValue(key: string, value: any): void {
+  setValue(key: any, value: any): void {
     if (this.options.includes(key)) {
       this.values[key] = value;
       this.values = Object.assign({}, this.values);
     }
   }
-  getValue(key: string): any {
+  getValue(key: any): any {
     return this.values[key];
   }
-  protected clearValue(key: string): void {
+  protected clearValue(key: any): void {
     this.values[key] = null;
   }
-  protected toggle(key: string): void {
+  protected toggle(key: any): void {
     this.values[key] = !this.values[key];
   }
   setObject(obj: any): void {
-    for (const [key, value] of Object.entries(obj)) {
-      if (this.options.includes(key)) {
-        this.values[key] = true;
-      }
-    }
+    Object.keys(obj).forEach(k => this.values[k] = this.options.includes(k));
     this.values = Object.assign({}, this.values);
   }
   setArray(opt: Array<string>): void {
-    for (const key of opt) {
-      if (this.options.includes(key)) {
-        this.values[key] = true;
-      }
-    }
+    opt.forEach(o => this.values[o] = this.options.includes(o));
     this.values = Object.assign({}, this.values);
   }
-  getArrayValues(): string[] {
-    return this.options.filter(o => this.values[o]);
+  getArrayValues(): any[] {
+    return this.options.filter(o => this.values[o] !== null && this.values[o] !== undefined);
   }
   clearAll(): void {
     this.values = {};
-    if (Array.isArray(this.options)) {
-      this.options.forEach(o => this.values[o] = null);
-    }
+    this.options.forEach(o => this.values[o] = null);
   }
 }

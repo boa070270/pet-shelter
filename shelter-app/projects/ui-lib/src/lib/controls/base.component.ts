@@ -4,19 +4,98 @@ import {Subscription} from 'rxjs';
 import {distinctTitleId, isTitleType, TitleType} from '../shared';
 import {ControlValueAccessor} from '@angular/forms';
 
+export interface CommonParameters {
+  id?: string;
+  name?: string;
+  hint?: string | TitleType[];
+  error?: string | TitleType[];
+  dir?: string;
+  caption?: string | TitleType[];
+  hidden?: boolean;
+  disabled?: boolean;
+  required?: boolean;
+}
 @Component({
   selector: 'lib-base',
   template: ''
 })
 export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
-  @Input() id: string;
-  @Input() name: string;
-  @Input() hint: string | TitleType[];
-  @Input() error: string | TitleType[];
-  @Input() dir: string;
-  @Input() caption: string | TitleType[];
-  @Input() hidden: boolean;
-  @Input() disabled: boolean;
+  // tslint:disable-next-line:variable-name
+  private _commons = {};
+  @Input()
+  set common(p: CommonParameters) {
+    this._commons = p || {};
+  }
+  get common(): CommonParameters {
+    if (!this._commons) {
+      this._commons = {};
+    }
+    return this._commons;
+  }
+  @Input()
+  set id(p: string) {
+    this.common.id = p;
+  }
+  get id(): string {
+    return this.common.id || null;
+  }
+  @Input()
+  set name(p: string){
+    this.common.name = p;
+  }
+  get name(): string {
+    return this.common.name || null;
+  }
+  @Input()
+  set hint(p: string | TitleType[]) {
+    this.common.hint = p;
+  }
+  get hint(): string | TitleType[] {
+    return this.common.hint || null;
+  }
+  @Input()
+  set error(p: string | TitleType[]) {
+    this.common.error = p;
+  }
+  get error(): string | TitleType[] {
+    return this.common.error;
+  }
+  @Input()
+  set dir(p: string) {
+    this.common.dir = p;
+  }
+  get dir(): string {
+    return this.common.dir || null;
+  }
+  @Input()
+  set caption(p: string | TitleType[]) {
+    this.common.caption = p;
+  }
+  get caption(): string | TitleType[] {
+    return this.common.caption;
+  }
+  @Input()
+  set hidden(p: boolean) {
+    this.common.hidden = p;
+  }
+  get hidden(): boolean {
+    return this.common.hidden || null;
+  }
+  @Input()
+  set disabled(p: boolean) {
+    this.common.disabled = p;
+  }
+  get disabled(): boolean {
+    return this.common.disabled;
+  }
+  @Input()
+  set required(p: boolean) {
+    this.common.required = p;
+  }
+  get required(): boolean {
+    return this.common.required;
+  }
+
   pHint: string;
   pCaption: string;
   pError: string;

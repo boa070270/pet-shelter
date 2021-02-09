@@ -6,6 +6,7 @@ import {coerceArray} from '@angular/cdk/coercion';
 import {ListSelectComponent} from './list-select.component';
 import {BaseComponent} from './base.component';
 import {TitleType} from '../shared';
+import {CheckboxParameters} from './checkbox-control.component';
 
 const DEF_REMOVE_TITLES: TitleType[] = [{lang: 'en', title: 'Remove'}, {lang: 'uk', title: 'Видалити'}];
 const DEF_ADD_TITLES: TitleType[] = [{lang: 'en', title: 'Add'}, {lang: 'uk', title: 'Добавити'}];
@@ -18,11 +19,44 @@ const DEF_DOWN_TITLES: TitleType[] = [{lang: 'en', title: 'Down'}, {lang: 'uk', 
   styleUrls: ['./checkbox-control.component.scss']
 })
 export class ListBuilderComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
+  // tslint:disable-next-line:variable-name
+  private _extraParams: CheckboxParameters = {};
+  @Input()
+  set extraParams(p: CheckboxParameters) {
+    this._extraParams = p || {};
+  }
+  get extraParams(): CheckboxParameters {
+    if (!this._extraParams) {
+      this._extraParams = {};
+    }
+    return this._extraParams;
+  }
   availableList: string[] = [];
   resultList: string[] = [];
-  @Input() options: string[] = [];
-  @Input() titles: {[key: string]: string} | TitleType[];
-  @Input() tooltips: string[] | TitleType[];
+  @Input()
+  set options(p: string[]) {
+    this.extraParams.options = p;
+  }
+  get options(): string[] {
+    if (!this.extraParams.options) {
+      this.extraParams.options = [];
+    }
+    return this.extraParams.options;
+  }
+  @Input()
+  set titles(p: {[key: string]: string} | TitleType[]) {
+    this.extraParams.titles = p;
+  }
+  get titles(): {[key: string]: string} | TitleType[] {
+    return this.extraParams.titles || null;
+  }
+  @Input()
+  set tooltips(p: string[] | TitleType[]) {
+    this.extraParams.tooltips = p;
+  }
+  get tooltips(): string[] | TitleType[] {
+    return this.extraParams.tooltips || null;
+  }
   titleRemove: string;
   titleAdd: string;
   titleUp: string;
@@ -56,9 +90,6 @@ export class ListBuilderComponent extends BaseComponent implements OnInit, OnCha
     this.availableList = this.options.filter( v => !this.resultList.includes(v)).sort();
   }
   ngOnChanges(changes: SimpleChanges): void {
-    if (!this.options) {
-      this.options = [];
-    }
     if (!this.resultList) {
       this.resultList = [];
     }

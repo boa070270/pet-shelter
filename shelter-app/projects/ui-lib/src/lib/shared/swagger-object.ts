@@ -7,6 +7,7 @@ export interface CommonConstrictions {
   nullable?: boolean; // TODO Make a decision how to use it (maybe always required if true)
   enums?: number[] | string[];
   enumDescriptions?: {[key: string]: string} | TitleType[];
+  enumTooltips?: string[] | TitleType[];
   enumMulti?: boolean; // TODO This's used in case swagger property has type array and simple type as item (with option uniqueItems)
   default?: boolean | number | string;
   format?: 'date' | 'date-time' | 'password' | 'byte' | 'binary' | 'email' | 'uuid' | 'uri' | 'hostname' | 'ipv4' | 'ipv6';
@@ -38,7 +39,7 @@ export interface ArrayConstrictions {
 export interface SwaggerCustomUI {
   description?: string | TitleType[]; // this property is used as hint
   caption?: string | TitleType[];
-  toolTips?: string | TitleType[];
+  toolTip?: string | TitleType[];
   placeHolder?: string | TitleType[];
   validators?: ValidatorFn[];
   asyncValidator?: AsyncValidatorFn[];
@@ -46,9 +47,9 @@ export interface SwaggerCustomUI {
   trailingIcon?: string;
 }
 export function swaggerUI(caption?: string | TitleType[], description?: string | TitleType[],
-                          toolTips?: string | TitleType[], placeHolder?: string | TitleType[],
+                          toolTip?: string | TitleType[], placeHolder?: string | TitleType[],
                           leadingIcon?: string, trailingIcon?: string): SwaggerCustomUI {
-  return {description, caption, placeHolder, toolTips, leadingIcon, trailingIcon};
+  return {description, caption, placeHolder, toolTip, leadingIcon, trailingIcon};
 }
 export interface SwaggerNative {
   type: 'string' | 'number' | 'integer' | 'boolean';
@@ -75,10 +76,10 @@ export const PROPERTY_NUMBER: SwaggerNative = {
   controlType: 'input'
 };
 export const PROPERTY_INTEGER = PROPERTY_NUMBER;
-export const PROPERY_BOOLEAN: SwaggerNative = {
+export const PROPERTY_BOOLEAN: SwaggerNative = {
   type: 'boolean',
   controlType: 'lib-boolean-control'
-}
+};
 export function swaggerNative(type: 'string' | 'number' | 'integer' | 'boolean', controlType?: string,
                               constrictions?: NumberConstrictions | StringConstrictions, ui?: SwaggerCustomUI): SwaggerNative {
   return {type, constrictions, ui, controlType: controlType || defaultControlType(type, constrictions)};
@@ -135,7 +136,7 @@ export function mergeCustomUI(dest: SwaggerCustomUI, source: SwaggerCustomUI): S
   if (source) {
     ui.description = source.description || ui.description;
     ui.caption = source.caption || ui.caption;
-    ui.toolTips = source.toolTips || ui.toolTips;
+    ui.toolTip = source.toolTip || ui.toolTip;
   }
   return ui;
 }

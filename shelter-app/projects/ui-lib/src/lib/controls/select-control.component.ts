@@ -17,8 +17,13 @@ export const SELECT_VALUE_ACCESSOR: any = {
   providers: [SELECT_VALUE_ACCESSOR],
 })
 export class SelectControlComponent extends CheckboxControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
-  @Input() multiple: boolean;
-  @Input() required: boolean;
+  @Input()
+  set multiple(p: boolean) {
+    this.extraParams.multiple = p;
+  }
+  get multiple(): boolean {
+    return this.extraParams.multiple || null;
+  }
 
   constructor(public systemLang: SystemLang) {
     super(systemLang);
@@ -52,7 +57,7 @@ export class SelectControlComponent extends CheckboxControlComponent implements 
     const target = $event.target as HTMLSelectElement;
     if (target && target.tagName === 'SELECT') {
       const selectedOptions = target.selectedOptions;
-      this.clearAll();
+      super.clearAll();
       if (selectedOptions !== undefined) {
         for (let i = 0; i < selectedOptions.length; ++i) {
           this.toggle(selectedOptions.item(i).value);

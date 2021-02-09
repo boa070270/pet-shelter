@@ -50,15 +50,19 @@ import { ListSelectComponent } from './list-select.component';
     InputControlComponent,
     SelectControlComponent,
     BooleanControlComponent,
+    ListBuilderComponent,
+    ListSelectComponent,
     TableComponent,
     TitleTypeControlComponent,
     TableRowSelectorDirective,
-    ListBuilderComponent,
-    ListSelectComponent
+    TableCdkComponent,
+    TestTableComponent,
   ]
 })
 export class ControlsModule {
   constructor(componentsPlugin: ComponentsPluginService) {
+    componentsPlugin.addPlugin('lib-boolean-control', {component: BooleanControlComponent, schema: null });
+    componentsPlugin.addPlugin('boolean', {component: BooleanControlComponent, schema: null });
     componentsPlugin.addPlugin('lib-checkbox-control',
       {
         component: CheckboxControlComponent,
@@ -68,6 +72,19 @@ export class ControlsModule {
             value: PROPERTY_STRING,
           }
       }});
+    componentsPlugin.addPlugin('checkbox', {component: CheckboxControlComponent, schema: null});
+    componentsPlugin.addPlugin('lib-input-control', {component: InputControlComponent, schema: null });
+    componentsPlugin.addPlugin('input', {component: InputControlComponent, schema: null });
+    componentsPlugin.addPlugin('lib-list-builder', {component: ListBuilderComponent, schema: null });
+    componentsPlugin.addPlugin('list-builder', {component: ListBuilderComponent, schema: null });
+    componentsPlugin.addPlugin('lib-list-select', {component: ListSelectComponent, schema: null });
+    componentsPlugin.addPlugin('list-select', {component: ListSelectComponent, schema: null });
+    componentsPlugin.addPlugin('lib-radio-control', {component: RadioControlComponent, schema: null });
+    componentsPlugin.addPlugin('radio', {component: RadioControlComponent, schema: null });
+    componentsPlugin.addPlugin('lib-select-control', {component: SelectControlComponent, schema: null });
+    componentsPlugin.addPlugin('select', {component: SelectControlComponent, schema: null });
+    componentsPlugin.addPlugin('lib-title-type-control', {component: TitleTypeControlComponent, schema: null });
+    componentsPlugin.addPlugin('title-type', {component: TitleTypeControlComponent, schema: null });
   }
 }
 // const BASE_PROPERTIES: {

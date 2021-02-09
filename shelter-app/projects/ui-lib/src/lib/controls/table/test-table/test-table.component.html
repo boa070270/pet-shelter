@@ -1,9 +1,9 @@
 <table cdk-table [dataSource]="dataSource">
   <!-- Position Column -->
-<!--  <ng-container cdkColumnDef="position" [stickyEnd]="true">-->
-<!--    <th cdk-header-cell *cdkHeaderCellDef> No. </th>-->
-<!--    <td cdk-cell *cdkCellDef="let element"> {{element.position}} </td>-->
-<!--  </ng-container>-->
+  <ng-container cdkColumnDef="position" [stickyEnd]="true">
+    <th cdk-header-cell *cdkHeaderCellDef> No. </th>
+    <td cdk-cell *cdkCellDef="let element"> {{element.position}} </td>
+  </ng-container>
 
   <!-- Name Column -->
   <ng-container cdkColumnDef="name">
@@ -23,6 +23,6 @@
     <td cdk-cell *cdkCellDef="let element"> {{element.symbol}} </td>
   </ng-container>
 
-  <tr cdk-header-row *cdkHeaderRowDef="displayedColumns"></tr>
+  <tr cdk-header-row *cdkHeaderRowDef="displayedColumns" (click)="headerClick()"></tr>
   <tr cdk-row *cdkRowDef="let row; columns: displayedColumns;"></tr>
 </table>

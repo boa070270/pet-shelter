@@ -85,12 +85,30 @@ option:hover+.tooltip {
 }
 .list-builder-panel {
   display: grid;
-  grid-template-columns: 4fr 1fr 4fr;
+  grid-template-areas: "action left"
+                      "action right";
+  //grid-template-rows: 1fr 1fr;
+  grid-template-columns: 6em 4fr;
 }
-.list-builder-panel-left, .list-builder-panel-right {
-  width: 100%;
+.list-builder-panel-left {
+  grid-area: left;
   select {
     width: 100%;
+  }
+}
+.list-builder-panel-right {
+  grid-area: right;
+}
+.list-builder-control {
+  grid-area: action;
+  writing-mode: vertical-lr;
+  text-align: center;
+  button {
+    font-weight: bold;
+    padding: 0;
+    width: 6em;
+    height: 1.7em;
+    margin: 2px;
   }
 }
 .list-select {

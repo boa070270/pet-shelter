@@ -6,6 +6,7 @@ import {SwaggerFormComponent} from './swagger-form.component';
 import { SwaggerNativeComponent } from './swagger-native.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ControlsModule} from '../controls';
+import {PortalModule} from "@angular/cdk/portal";
 
 @NgModule({
   declarations: [
@@ -14,12 +15,13 @@ import {ControlsModule} from '../controls';
     SwaggerArrayComponent,
     SwaggerNativeComponent,
   ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    ControlsModule,
-    ReactiveFormsModule
-  ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ControlsModule,
+        ReactiveFormsModule,
+        PortalModule
+    ],
   exports: [
     GeneratorFormComponent,
     SwaggerFormComponent,

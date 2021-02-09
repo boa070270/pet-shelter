@@ -1,5 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {TestTableService} from './test-table.service';
+import {Dialog} from "@angular/cdk-experimental/dialog";
 
 @Component({
   selector: 'lib-test-table',
@@ -12,7 +13,8 @@ export class TestTableComponent implements OnInit {
   @Input()
   dataSource;
 
-  constructor(testTableService: TestTableService) {
+  constructor(testTableService: TestTableService,
+              private dialog: Dialog) {
     this.displayedColumns = testTableService.columns;
     this.dataSource = testTableService.datasource;
   }
@@ -20,4 +22,7 @@ export class TestTableComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  headerClick(): void {
+    
+  }
 }
