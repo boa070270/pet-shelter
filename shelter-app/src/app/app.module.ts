@@ -11,7 +11,8 @@ import {
   ControlsModule,
   ObtainSystemLanguage,
   SwaggerFormModule,
-  UiElementsModule
+  UiElementsModule,
+  DialogsModule
 } from 'ui-lib';
 import {HttpClientModule} from '@angular/common/http';
 import { MainPageComponent } from './main-page.component';
@@ -39,8 +40,6 @@ import { LoginPageComponent } from './login-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {BasicService} from './basic.service';
 import { TestDynamicComponent } from './test-dynamic.component';
-import {DialogsModule} from "../../projects/ui-lib/src/lib/dialogs/dialogs.module";
-// import {Dialog, DialogModule} from '@angular/cdk-experimental/dialog';
 
 @NgModule({
     declarations: [
@@ -81,8 +80,7 @@ import {DialogsModule} from "../../projects/ui-lib/src/lib/dialogs/dialogs.modul
     ControlsModule,
     SwaggerFormModule,
     UiElementsModule,
-    DialogsModule
-    // DialogModule
+    DialogsModule,
   ],
     providers: [
       {provide: 'ObtainSystemLanguage', useClass: BasicService},

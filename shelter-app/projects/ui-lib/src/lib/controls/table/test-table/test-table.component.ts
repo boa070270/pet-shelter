@@ -6,21 +6,21 @@ import {ExtendedData} from '../../../shared';
 @Component({
   selector: 'lib-test-table',
   // templateUrl: './test-table.component.html',
-  template: `<table cdk-table [dataSource]="dataSource" [fixedLayout]="true">
+  template: `<table cdk-table [dataSource]="dataSource" >
     <!-- Position Column -->
-    <ng-container cdkColumnDef="position" [stickyEnd]="true" [sticky]="true">
+    <ng-container cdkColumnDef="position" >
       <th cdk-header-cell *cdkHeaderCellDef> No. </th>
       <td cdk-cell *cdkCellDef="let element"> {{element.position}} </td>
     </ng-container>
 
     <!-- Name Column -->
-    <ng-container cdkColumnDef="name" [stickyEnd]="true" [sticky]="true">
+    <ng-container cdkColumnDef="name" [sticky]="true">
       <th cdk-header-cell *cdkHeaderCellDef> Name </th>
       <td cdk-cell *cdkCellDef="let element"> {{element.name}} </td>
     </ng-container>
 
     <!-- Weight Column -->
-    <ng-container cdkColumnDef="weight" [stickyEnd]="true" [sticky]="true">
+    <ng-container cdkColumnDef="weight" >
       <th cdk-header-cell *cdkHeaderCellDef> Weight </th>
       <td cdk-cell *cdkCellDef="let element"> {{element.weight}} </td>
     </ng-container>
@@ -51,7 +51,7 @@ import {ExtendedData} from '../../../shared';
       <td cdk-cell *cdkCellDef="let element"> {{element.colE}} </td>
     </ng-container>
 
-    <tr cdk-header-row *cdkHeaderRowDef="displayedColumns" (click)="headerClick()"></tr>
+    <tr cdk-header-row *cdkHeaderRowDef="displayedColumns" (click)="headerClick()" ></tr>
     <tr cdk-row *cdkRowDef="let row; columns: displayedColumns;"></tr>
   </table>`,
   styleUrls: ['./test-table.component.css']

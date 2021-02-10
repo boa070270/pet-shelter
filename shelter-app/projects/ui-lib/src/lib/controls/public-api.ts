@@ -13,5 +13,6 @@ export * from './table/table-row-selector.directive';
 export * from './table/table-control.directive';
 export * from './table/table-cell-data.directive';
 export * from './table/table-generator.component';
+export * from './table/table-schema.service';
 export * from './table/test-table/test-table.component';
 export * from './table/test-table/test-table.service';

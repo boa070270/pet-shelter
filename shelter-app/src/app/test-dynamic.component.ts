@@ -1,8 +1,7 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {BasicService} from './basic.service';
-import {DynamicPageComponent, SwaggerFormService, swaggerNative, SwaggerObject} from 'ui-lib';
-import {BehaviorSubject} from "rxjs";
-import {TableSchemaService} from "../../projects/ui-lib/src/lib/controls/table/table-schema.service";
+import {DynamicPageComponent, SwaggerFormService, swaggerNative, SwaggerObject, TableSchemaService} from 'ui-lib';
+import {BehaviorSubject} from 'rxjs';
 
 @Component({
   selector: 'app-test-dynamic',
