@@ -10,4 +10,15 @@ export class ExtendedData {
   icon?: string;
   iconColor?: 'info-color' | 'warn-color' | 'error-color';
   caption?: string;
+  static create(data: any, readonly: boolean, swagger?: SwaggerObject, action?: ActionType, caption?: string, icon?: string, iconColor?: 'info-color' | 'warn-color' | 'error-color'): ExtendedData {
+    const result = new ExtendedData();
+    result.data = data;
+    result.readOnly = readonly;
+    result.swagger = swagger;
+    result.action = action;
+    result.caption = caption;
+    result.icon = icon;
+    result.iconColor = iconColor;
+    return result;
+  }
 }

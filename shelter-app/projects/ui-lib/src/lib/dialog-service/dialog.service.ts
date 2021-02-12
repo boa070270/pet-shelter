@@ -1,6 +1,7 @@
-import {Injectable, Type} from '@angular/core';
+import {Injectable, TemplateRef, Type} from '@angular/core';
 import {Dialog, DialogRef} from '@angular/cdk-experimental/dialog';
 import {ActionType, ComponentsPluginService, ExtendedData} from '../shared';
+import {ComponentType} from '@angular/cdk/overlay';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,19 @@ export class DialogService {
     const plugin = this.componentsPlugin.getPlugin('simple-dialog');
     this.simpleDialogComponent = plugin.component;
   }
-
+  // standard service
+  getById(id: string): DialogRef<any> | undefined {
+    return this.dialog.getById(id);
+  }
+  closeAll(): void {
+    this.dialog.closeAll();
+  }
+  openFromComponent<T>(component: ComponentType<T>, config?: any): DialogRef<any>{
+    return this.dialog.openFromComponent<T>(component, config);
+  }
+  openFromTemplate<T>(template: TemplateRef<T>, config?: any): DialogRef<any> {
+    return this.dialog.openFromTemplate(template, config);
+  }
   /* e.g.
   const extData = new ExtendedData();
   extData.action = 'save_cancel';
