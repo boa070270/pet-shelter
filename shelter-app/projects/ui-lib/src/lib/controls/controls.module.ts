@@ -1,4 +1,4 @@
-import {Input, NgModule} from '@angular/core';
+import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {CheckboxControlComponent} from './checkbox-control.component';
@@ -7,18 +7,12 @@ import {BaseComponent} from './base.component';
 import {InputControlComponent} from './input-control.component';
 import {SelectControlComponent} from './select-control.component';
 import {BooleanControlComponent} from './boolean-control.component';
-import { TableComponent } from './table/table.component';
-import {ComponentsPluginService, PROPERTY_STRING, TitleType} from '../shared';
-import { TitleTypeControlComponent } from './title-type-control.component';
-import { TableRowSelectorDirective } from './table/table-row-selector.directive';
-import { TableControlDirective } from './table/table-control.directive';
-import { TableCellDataDirective } from './table/table-cell-data.directive';
-import { TableGeneratorComponent } from './table/table-generator.component';
-import { TableCdkComponent } from './table/table-cdk.component';
-import { TestTableComponent } from './table/test-table/test-table.component';
+import {ComponentsPluginService, SwaggerNative, SwaggerObject} from '../shared';
+import {TitleTypeControlComponent} from './title-type-control.component';
+import {TableComponent} from './table/table.component';
 import {CdkTableModule} from '@angular/cdk/table';
-import { ListBuilderComponent } from './list-builder.component';
-import { ListSelectComponent } from './list-select.component';
+import {ListBuilderComponent} from './list-builder.component';
+import {ListSelectComponent} from './list-select.component';
 
 @NgModule({
   declarations: [
@@ -28,14 +22,8 @@ import { ListSelectComponent } from './list-select.component';
     InputControlComponent,
     SelectControlComponent,
     BooleanControlComponent,
-    TableComponent,
     TitleTypeControlComponent,
-    TableRowSelectorDirective,
-    TableControlDirective,
-    TableCellDataDirective,
-    TableGeneratorComponent,
-    TableCdkComponent,
-    TestTableComponent,
+    TableComponent,
     ListBuilderComponent,
     ListSelectComponent,
   ],
@@ -52,11 +40,8 @@ import { ListSelectComponent } from './list-select.component';
     BooleanControlComponent,
     ListBuilderComponent,
     ListSelectComponent,
-    TableComponent,
     TitleTypeControlComponent,
-    TableRowSelectorDirective,
-    TableCdkComponent,
-    TestTableComponent,
+    TableComponent,
   ]
 })
 export class ControlsModule {
@@ -66,12 +51,8 @@ export class ControlsModule {
     componentsPlugin.addPlugin('lib-checkbox-control',
       {
         component: CheckboxControlComponent,
-        schema: {
-          orderControls: [],
-          properties: {
-            value: PROPERTY_STRING,
-          }
-      }});
+        schema: new SwaggerObject([], {value: SwaggerNative.asString()})
+      });
     componentsPlugin.addPlugin('checkbox', {component: CheckboxControlComponent, schema: null});
     componentsPlugin.addPlugin('lib-input-control', {component: InputControlComponent, schema: null });
     componentsPlugin.addPlugin('input', {component: InputControlComponent, schema: null });
@@ -85,6 +66,7 @@ export class ControlsModule {
     componentsPlugin.addPlugin('select', {component: SelectControlComponent, schema: null });
     componentsPlugin.addPlugin('lib-title-type-control', {component: TitleTypeControlComponent, schema: null });
     componentsPlugin.addPlugin('title-type', {component: TitleTypeControlComponent, schema: null });
+    componentsPlugin.addPlugin('lib-table', {component: TableComponent, schema: null });
   }
 }
 // const BASE_PROPERTIES: {

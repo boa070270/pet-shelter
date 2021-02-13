@@ -1,7 +1,7 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {BasicService} from './basic.service';
-import {DynamicPageComponent, SwaggerFormService, swaggerNative, SwaggerObject, TableSchemaService} from 'ui-lib';
-import {BehaviorSubject} from 'rxjs';
+import {PeriodicElement, SwaggerFormService, SwaggerNative, SwaggerObject, TableProviderService} from 'ui-lib';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {DataSource} from '@angular/cdk/collections';
 
 @Component({
   selector: 'app-test-dynamic',
@@ -33,48 +33,26 @@ export class TestDynamicComponent implements OnInit {
     e: '<test-table-element></test-table-element>'
   };
   knownText: any;
-  swagger: SwaggerObject = {
-    orderControls: ['id', 'description', 'child'],
-    properties: {
-      id: swaggerNative('string'),
-      description: swaggerNative('string'),
-      child: {
-        orderControls: ['childId', 'childDescription', 'sex'],
-        properties: {
-          childId: swaggerNative('string'),
-          childDescription: swaggerNative('string'),
-          sex: swaggerNative('string', null, {enums: ['m', 'f']})
-        }
-      }
-    }
-  };
+  swagger: SwaggerObject = new SwaggerObject(
+    ['id', 'description', 'child'],
+  {
+      id: SwaggerNative.asString(),
+      description: SwaggerNative.asString(),
+      child: new SwaggerObject(
+        ['childId', 'childDescription', 'sex'],
+        {
+          childId: SwaggerNative.asString(),
+          childDescription: SwaggerNative.asString(),
+          sex: SwaggerNative.asString( null, {enums: ['m', 'f']})
+        })
+      });
   @ViewChild('insertHere', {static: true}) insertHere: ElementRef<HTMLDivElement>;
   innerHtml: any;
 
-  /******* Table *******/
-  tableDataSet = [
-    {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
-    {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He'},
-    {position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li'},
-    {position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
-    {position: 5, name: 'Boron', weight: 10.811, symbol: 'B'},
-    {position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C'},
-    {position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
-    {position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O'},
-    {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
-    {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
-  ];
-  tableColumnSet = ['position', 'name', 'weight', 'symbol'];
-  tableCaption = 'Test table';
-  tableData = new BehaviorSubject<any>(this.tableDataSet);
-
-  constructor(private swaggerFormService: SwaggerFormService, private tableSchemaService: TableSchemaService) {
+  constructor(private swaggerFormService: SwaggerFormService, private tableProviderService: TableProviderService) {
     swaggerFormService.addSchemaIfNotExists('test', this.swagger);
-    tableSchemaService.setTableSchema('test', {
-      observableData: this.tableData,
-      columns: this.tableColumnSet,
-      caption: this.tableCaption,
-    });
+    tableProviderService.setTableSwagger('test', TableSwagger);
+    tableProviderService.setDataSource('test', new ExampleDataSource());
   }
 
   ngOnInit(): void {
@@ -88,4 +66,39 @@ export class TestDynamicComponent implements OnInit {
   onChange(): void {
     this.textHtml = this.knownTexts[this.knownText];
   }
+}
+
+/******* Table *******/
+const TableSwagger = new SwaggerObject(
+  ['position', 'name', 'weight', 'symbol', 'colA', 'colB', 'colC', 'colD', 'colE'],
+  {
+    position: SwaggerNative.asNumber(),
+    name: SwaggerNative.asString(),
+    weight: SwaggerNative.asNumber(),
+    symbol: SwaggerNative.asString(),
+  });
+
+const tableDataSet = [
+  {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
+  {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He'},
+  {position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li'},
+  {position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
+  {position: 5, name: 'Boron', weight: 10.811, symbol: 'B'},
+  {position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C'},
+  {position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
+  {position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O'},
+  {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
+  {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
+];
+
+export class ExampleDataSource extends DataSource<any> {
+  /** Stream of data that is provided to the table. */
+  data = new BehaviorSubject<any[]>(tableDataSet);
+
+  /** Connect function called by the table to retrieve one stream containing the data to render. */
+  connect(): Observable<PeriodicElement[]> {
+    return this.data;
+  }
+
+  disconnect(): void {}
 }

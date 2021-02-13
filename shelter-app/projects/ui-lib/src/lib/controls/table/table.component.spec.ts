@@ -1,10 +1,10 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {TableComponent} from './table.component';
+import { TableComponent } from './table.component';
 
-describe('TableControlComponent', () => {
-  let component: TableComponent<any>;
-  let fixture: ComponentFixture<TableComponent<any>>;
+describe('TestTableComponent', () => {
+  let component: TableComponent;
+  let fixture: ComponentFixture<TableComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

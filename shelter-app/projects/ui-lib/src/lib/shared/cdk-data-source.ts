@@ -6,7 +6,32 @@ import {equals as eqLstRange, sortOut} from './list-range-helper';
 const MAX_CACHE_SIZE = 100;
 const DEF_PORTION_SIZE = 20;
 
-
+export const ORDER_ASC = 1;
+export const ORDER_DESC = -1;
+export interface IOrder {
+  p: string;
+  order: number;
+}
+export function simpleCompare(p1: any, p2: any, order: IOrder): number {
+  if (p1 === p2 || typeof p1 !== typeof p2 || typeof p1 === 'function' || typeof p2 === 'function') {
+    return 0;
+  }
+  if (p1 === undefined) {
+    return -1;
+  } else if (p2 === undefined) {
+    return 1;
+  }
+  switch (typeof p1) {
+    case 'string':
+      return (p1 as string).localeCompare(p2);
+    case 'number':
+    case 'bigint':
+      return (p1 as number) - (p2 as number);
+    case 'boolean': // recognize false < true
+      return p1 ? -1 : 1;
+    //
+  }
+}
 export interface DataExpectedResult<T> {
   data: T[];
   total: number;
@@ -77,11 +102,8 @@ export class MainDataSource<T> {
     this.consumers.delete(ds);
   }
   obtainPage(ds: CdkDataSource<T>, force?: boolean): void {
-    const lstRange = ds.lstRange;
-    const queryParams = ds.queryParams;
-    const orderParams = ds.orderParams;
     const subject = this.consumers.get(ds);
-    this.updateSubject(subject, lstRange, queryParams, orderParams, force);
+    this.updateSubject(subject, ds.lstRange, ds.queryParams, ds.orderParams, force);
   }
   private makeWorker(lstRange: ListRange, query?: any, order?: any): LoaderWorker<T> {
     const worker = {
@@ -204,5 +226,8 @@ export class CdkDataSource<T> extends DataSource<T> {
   filter(query: any): void {
     this.queryParams = query;
     this.main.obtainPage(this);
+  }
+  refresh(): void {
+    this.main.obtainPage(this, true);
   }
 }

@@ -2,12 +2,16 @@ import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {BasicService} from './basic.service';
 import {
   CommentResponse,
-  CommentType, DialogService,
-  DiscussionMediator, ExtendedData,
-  GeneratorFormComponent, OkDialogComponent, SimpleDialogComponent,
+  CommentType,
+  DialogService,
+  DiscussionMediator,
+  ExtendedData,
+  GeneratorFormComponent,
   SwaggerFormService,
-  swaggerNative,
-  SwaggerObject, swaggerUI, TitleType,
+  SwaggerNative,
+  SwaggerObject,
+  swaggerUI,
+  TitleType,
   VoteOption,
   VoteType
 } from 'ui-lib';
@@ -173,21 +177,19 @@ export class TopMenuPageComponent implements OnInit {
   inputDefault = 101;
   inputValue = 'Ввід слів _';
   select: ['two', 'one'];
-  swagger: SwaggerObject = {
-    orderControls: ['id', 'description', 'child'],
-    properties: {
-      id: swaggerNative('string'),
-      description: swaggerNative('string'),
-      child: {
-        orderControls: ['childId', 'childDescription', 'sex'],
-        properties: {
-          childId: swaggerNative('string'),
-          childDescription: swaggerNative('string'),
-          sex: swaggerNative('string', null, {enums: ['m', 'f']})
-        }
-      }
-    }
-  };
+  swagger = new SwaggerObject(
+    ['id', 'description', 'child'],
+    {
+      id: SwaggerNative.asString(),
+      description: SwaggerNative.asString(),
+      child: new SwaggerObject(
+        ['childId', 'childDescription', 'sex'],
+        {
+          childId: SwaggerNative.asString(),
+          childDescription: SwaggerNative.asString(),
+          sex: SwaggerNative.asString(null, {enums: ['m', 'f']})
+        })
+      });
   /******* Table *******/
   tableDataSet = [
     {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
@@ -251,21 +253,14 @@ export class TopMenuPageComponent implements OnInit {
     extData.action = 'save_cancel';
     extData.caption = 'Hello World!';
     extData.icon = 'gm-warning';
-    extData.swagger = {
-      required: ['login', 'password'],
-      orderControls: ['login', 'password'],
-      properties: {
-        login: {
-          type: 'string', controlType: 'input',
-          ui: swaggerUI([{lang: 'en', title: 'Login'}, {lang: 'uk', title: 'Логін'}])
-        },
-        password: {
-          type: 'string', controlType: 'input',
-          ui: swaggerUI([{lang: 'en', title: 'Password'}, {lang: 'uk', title: 'Пароль'}]),
-          constrictions: {format: 'password'}
-        }
-      }
-    };
+    extData.swagger = new SwaggerObject(
+      ['login', 'password'],
+      {
+        login: SwaggerNative.asString('input', null, swaggerUI([{lang: 'en', title: 'Login'}, {lang: 'uk', title: 'Логін'}])),
+        password: SwaggerNative.asString('input', {format: 'password'}, swaggerUI([{lang: 'en', title: 'Password'}, {lang: 'uk', title: 'Пароль'}])),
+      },
+    null,
+      ['login', 'password']);
     extData.data = {login: 'admin', password: '******'};
     const dialogRef = this.dialogService.warnExtDialog(extData, true);
     console.log('TopMenuPageComponent.openDialog', dialogRef);

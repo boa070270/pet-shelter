@@ -6,7 +6,9 @@ import {
   ControlsModule,
   InputControlComponent,
   RadioControlComponent,
-  SelectControlComponent, TableComponent, TableGeneratorComponent, TestTableComponent, TitleTypeControlComponent
+  SelectControlComponent,
+  TableComponent,
+  TitleTypeControlComponent
 } from '../controls';
 import {SurveyModule} from '../survey';
 import {
@@ -45,18 +47,14 @@ export class UiElementsModule {
     const selectControlComponent = createCustomElement(SelectControlComponent, {injector});
     const booleanControlComponent = createCustomElement(BooleanControlComponent, {injector});
     const titleTypeControlComponent = createCustomElement(TitleTypeControlComponent, {injector});
-    const tableComponent = createCustomElement(TableComponent, {injector});
-    const tableGeneratorComponent = createCustomElement(TableGeneratorComponent, {injector});
     customElements.define('lib-checkbox-element', checkboxControlComponent);
     customElements.define('lib-input-element', inputControlComponent);
     customElements.define('lib-radio-element', radioControlComponent);
     customElements.define('lib-select-element', selectControlComponent);
     customElements.define('lib-boolean-element', booleanControlComponent);
     customElements.define('lib-title-type-element', titleTypeControlComponent);
-    customElements.define('lib-table-element', tableComponent);
-    customElements.define('lib-table-generator-element', tableGeneratorComponent);
-    const testTable = createCustomElement(TestTableComponent, {injector});
-    customElements.define('test-table-element', testTable);
+    const tableComponent = createCustomElement(TableComponent, {injector});
+    customElements.define('table-element', tableComponent);
 
     const generatorFormComponent = createCustomElement(GeneratorFormComponent, {injector});
     const swaggerFormComponent = createCustomElement(SwaggerFormComponent, {injector});

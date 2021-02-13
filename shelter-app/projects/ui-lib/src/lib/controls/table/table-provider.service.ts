@@ -1,16 +1,30 @@
 import { Injectable } from '@angular/core';
 import {DataSource} from '@angular/cdk/collections';
 import {BehaviorSubject, Observable} from 'rxjs';
-import {PROPERTY_NUMBER, PROPERTY_STRING, SwaggerObject} from "../../../shared";
+import {SwaggerNative, SwaggerObject, swaggerUI} from '../../shared';
 
 @Injectable({
   providedIn: 'root'
 })
-export class TestTableService {
+export class TableProviderService {
+  private tableDefs = {};
+  private tableData = {};
   columns = ['position', 'name', 'weight', 'symbol', 'colA', 'colB', 'colC', 'colD', 'colE'];
   datasource = new ExampleDataSource();
   swagger = Swagger;
   constructor() { }
+  setTableSwagger(name: string, swagger: SwaggerObject): void {
+    this.tableDefs[name] = swagger;
+  }
+  getTableSwagger(name): SwaggerObject {
+    return this.tableDefs[name];
+  }
+  setDataSource(name: string, dataSource: DataSource<any>): void {
+    this.tableData[name] = dataSource;
+  }
+  getDataSource(name: string): DataSource<any> {
+    return this.tableData[name];
+  }
 }
 export interface PeriodicElement {
   name: string;
@@ -23,20 +37,21 @@ export interface PeriodicElement {
   colD: string;
   colE: string;
 }
-const Swagger: SwaggerObject = {
-  orderControls: ['position', 'name', 'weight', 'symbol', 'colA', 'colB', 'colC', 'colD', 'colE'],
-  properties: {
-    position: PROPERTY_NUMBER,
-    name: PROPERTY_STRING,
-    weight: PROPERTY_NUMBER,
-    symbol: PROPERTY_STRING,
-    colA: PROPERTY_STRING,
-    colB: PROPERTY_STRING,
-    colC: PROPERTY_STRING,
-    colD: PROPERTY_STRING,
-    colE: PROPERTY_STRING
+const Swagger = new SwaggerObject(
+  ['position', 'name', 'weight', 'symbol', 'colA', 'colB', 'colC', 'colD', 'colE'],
+  {
+    position: SwaggerNative.asInteger(),
+    name: SwaggerNative.asString(),
+    weight: SwaggerNative.asNumber(),
+    symbol: SwaggerNative.asString(),
+    colA: SwaggerNative.asString(),
+    colB: SwaggerNative.asString(),
+    colC: SwaggerNative.asString(),
+    colD: SwaggerNative.asString(),
+    colE: SwaggerNative.asString()
   },
-};
+  swaggerUI([{lang: 'en', title: 'Simple table'}, {lang: 'uk', title: 'Тестова табличка'}])
+);
 const ELEMENT_DATA: PeriodicElement[] = [
   {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H', colA: 'A1 some text', colB: 'B1 some text', colC: 'C1 some text', colD: 'D1 some text', colE: 'E1 some text'},
   {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He', colA: 'A2 some text', colB: 'B2 some text', colC: 'C2 some text', colD: 'D2 some text', colE: 'E2 some text'},
