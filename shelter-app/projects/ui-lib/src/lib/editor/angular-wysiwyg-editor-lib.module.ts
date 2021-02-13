@@ -4,6 +4,7 @@ import {CommonModule} from '@angular/common';
 import {EditorPluginComponent} from './editor-plugin.component';
 import {DynamicHTMLModule} from './dynamic-html';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {DialogsModule} from "../dialogs";
 
 
 
@@ -20,7 +21,8 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
             ]
         }),
         ReactiveFormsModule,
-        FormsModule
+        FormsModule,
+        DialogsModule
     ],
   exports: [EditorComponent]
 })

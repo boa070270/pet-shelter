@@ -12,6 +12,8 @@ import {
 import {Form, NgForm} from '@angular/forms';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {TableSchema} from '../controls/table/table-schema';
+import {ExtendedData, swaggerUI} from "../shared";
+import {DialogService} from "../dialog-service";
 
 @Component({
     // tslint:disable-next-line:component-selector
@@ -64,7 +66,7 @@ export class EditorPluginComponent {
    * [upload to server] - button or on save or delete
    */
 
-  constructor() { }
+  constructor(private dialogService: DialogService) { }
 
     onSelect(event: Event): void {
         // const i = (event.target as HTMLSelectElement).options.selectedIndex;
@@ -149,4 +151,66 @@ export class EditorPluginComponent {
         return '<editor-plugin>' + this.plugin.outerHTML + '</editor-plugin>';
     }
 
+    onClick(): void {
+      // open dialog
+      // try getting from server
+      // if has something - should be in dialog
+      // nothing - empty
+      // on dialog close - save here, because to update/save on server we need key name
+      const extData = new ExtendedData();
+      extData.action = 'save_cancel';
+      extData.caption = this.selected;
+      // extData.icon = 'gm-warning';
+      extData.swagger = {
+        orderControls: [],
+        properties: {
+          observableData: {
+
+          },
+          columns: {
+
+          },
+          caption: {
+
+          }
+        }
+      };
+
+
+        // [caption] = "tableSchema.caption"
+        // [columns] = "tableSchema.columns"
+        // [observableData] = "tableSchema.observableData"
+        // [filtered] = "tableSchema.filtered"
+        // [stickied] = "tableSchema.stickied"
+        // [fnEqual] = "tableSchema.fnEqual"
+        // [rowNumbers] = "tableSchema.rowNumbers"
+
+      //        observableData: this.tableData,
+      //        columns: this.tableColumnSet,
+      //        caption: this.tableCaption,
+      //   {
+      //   required: ['login', 'password'],
+      //   orderControls: ['login', 'password'],
+      //   properties: {
+      //     login: {
+      //       type: 'string', controlType: 'input',
+      //       ui: swaggerUI([{lang: 'en', title: 'Login'}, {lang: 'uk', title: 'Логін'}])
+      //     },
+      //     password: {
+      //       type: 'string', controlType: 'input',
+      //       ui: swaggerUI([{lang: 'en', title: 'Password'}, {lang: 'uk', title: 'Пароль'}]),
+      //       constrictions: {format: 'password'}
+      //     }
+      //   }
+      // };
+      // extData.data = {login: 'admin', password: '******'}; -- what already have?
+      const dialogRef = this.dialogService.warnExtDialog(extData, true);
+      console.log('EditorPluginComponent.openDialog', dialogRef);
+      dialogRef.afterOpened().subscribe(v => {
+        console.log(v);
+      });
+      dialogRef.afterClosed().subscribe(v => {
+        console.log(v);
+      });
+    }
 }

@@ -15,7 +15,7 @@
             <label class="plugin-label">
                 <input placeholder="plugin name" #keyName>
             </label>
-            <!-- <button mat-raised-button style="margin-left: auto" (click)="save(myForm)">Save</button> -->
+            <button (click)="onClick()">Edit</button>
         </form>
     </div>
     <div contenteditable="true" class="plugin-editable-area" #editable>{{(plugin)?plugin.innerHTML:''}}</div>
