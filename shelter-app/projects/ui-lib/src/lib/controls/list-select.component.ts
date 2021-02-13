@@ -3,6 +3,7 @@ import {SelectControlComponent} from './select-control.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SystemLang} from '../i18n';
 import {coerceArray} from '@angular/cdk/coercion';
+import {Directionality} from '@angular/cdk/bidi';
 
 export const LIST_SELECT_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -17,8 +18,8 @@ export const LIST_SELECT_VALUE_ACCESSOR: any = {
 })
 export class ListSelectComponent extends SelectControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
-  constructor(public systemLang: SystemLang) {
-    super(systemLang);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
+    super(systemLang, directionality);
     this.multiple = true;
   }
   ngOnInit(): void {

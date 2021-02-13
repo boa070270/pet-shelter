@@ -3,6 +3,7 @@ import {BaseComponent} from './base.component';
 import {SystemLang} from '../i18n';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {TitleType} from '../shared';
+import {Directionality} from "@angular/cdk/bidi";
 
 export const INPUT_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -141,8 +142,8 @@ export class InputControlComponent extends BaseComponent implements OnInit, OnDe
   pPlaceholder: string;
   iconsClass: any;
 
-  constructor(public systemLang: SystemLang) {
-    super(systemLang);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
+    super(systemLang, directionality);
     console.log('lib-input-constructor');
   }
 

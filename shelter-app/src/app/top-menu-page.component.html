@@ -22,7 +22,7 @@
   <input type="submit" (click)="onSubmit(form.formGroup)">
 <!-- /form -->
 <h1>Title type control</h1>
-<lib-title-type-control [dir]="dir" [caption]="[{lang:'en', title: 'The caption'},{lang:'uk', title:'Назва'}]"></lib-title-type-control>
+<lib-title-type-control [caption]="[{lang:'en', title: 'The caption'},{lang:'uk', title:'Назва'}]"></lib-title-type-control>
 <!--
 <ng-container [libSwaggerForm]="'test'"></ng-container>
 <ng-container [libSwaggerForm]="'test2'"></ng-container>
@@ -42,7 +42,7 @@
 <h2>Controls</h2>
 <h3>Checkbox</h3>
 <h4>direction - col</h4>
-<lib-checkbox-control [(ngModel)]="checkbox" [dir]="dir"
+<lib-checkbox-control [(ngModel)]="checkbox"
                       direction="col"
                       [options]="['one','two','three','four','five','six','seven','eight','nine']"
                       [titles]="[{id:'one', lang: 'en', title:'One'}, {id:'one', lang:'uk', title:'Один'}]"
@@ -50,7 +50,7 @@
                       hint="This is checkbox panel"
 ></lib-checkbox-control>
 <h4>direction - rows</h4>
-<lib-checkbox-control [(ngModel)]="checkbox" [dir]="dir"
+<lib-checkbox-control [(ngModel)]="checkbox"
                       direction="row"
                       [options]="['one','two','three','four','five','six','seven','eight','nine']"
                       [titles]="[{id:'one', lang: 'en', title:'One'}, {id:'one', lang:'uk', title:'Один'}]"
@@ -58,7 +58,7 @@
                       hint="This is checkbox panel"
 ></lib-checkbox-control>
 <h4>direction - grid</h4>
-<lib-checkbox-control [(ngModel)]="checkbox" [dir]="dir"
+<lib-checkbox-control [(ngModel)]="checkbox"
                       direction="grid"
                       [options]="['one','two','three','four','five','six','seven','eight','nine']"
                       [titles]="[{id:'one', lang: 'en', title:'One'}, {id:'one', lang:'uk', title:'Один'}]"
@@ -66,7 +66,7 @@
                       hint="This is checkbox panel"
 ></lib-checkbox-control>
 <h4>direction - grid, cols=4</h4>
-<lib-checkbox-control [(ngModel)]="checkbox" [dir]="dir"
+<lib-checkbox-control [(ngModel)]="checkbox"
                       direction="grid"
                       cols="4"
                       [options]="['one','two','three','four','five','six','seven','eight','nine']"
@@ -77,7 +77,7 @@
 <span>{{checkbox | json}}</span>
 <h3>Radio</h3>
 <h4>direction - col</h4>
-<lib-radio-control [(ngModel)]="radio" [dir]="dir"
+<lib-radio-control [(ngModel)]="radio"
                       direction="col"
                       [options]="['one','two','three','four','five','six','seven','eight','nine']"
                       [titles]="[{id:'one', lang: 'en', title:'One'}, {id:'one', lang:'uk', title:'Один'}]"
@@ -85,7 +85,7 @@
                       hint="This is checkbox panel"
 ></lib-radio-control>
 <h4>direction - rows</h4>
-<lib-radio-control [(ngModel)]="radio" [dir]="dir"
+<lib-radio-control [(ngModel)]="radio"
                       direction="row"
                       [options]="['one','two','three','four','five','six','seven','eight','nine']"
                       [titles]="[{id:'one', lang: 'en', title:'One'}, {id:'one', lang:'uk', title:'Один'}]"
@@ -93,7 +93,7 @@
                       hint="This is checkbox panel"
 ></lib-radio-control>
 <h4>direction - grid</h4>
-<lib-radio-control [(ngModel)]="radio" [dir]="dir"
+<lib-radio-control [(ngModel)]="radio"
                       direction="grid"
                       [options]="['one','two','three','four','five','six','seven','eight','nine']"
                       [titles]="[{id:'one', lang: 'en', title:'One'}, {id:'one', lang:'uk', title:'Один'}]"
@@ -101,7 +101,7 @@
                       hint="This is checkbox panel"
 ></lib-radio-control>
 <h4>direction - grid, cols=4</h4>
-<lib-radio-control [(ngModel)]="radio" [dir]="dir"
+<lib-radio-control [(ngModel)]="radio"
                       direction="grid"
                       cols="4"
                       [options]="['one','two','three','four','five','six','seven','eight','nine']"
@@ -114,7 +114,6 @@
 <span>Check this text as top</span>
 <lib-input-control [(ngModel)]="inputValue"
                    [autofocus]="true"
-                   [dir]="dir"
                    [name]="'input1'"
                    [disabled]="false"
                    [hidden]="false"
@@ -130,7 +129,7 @@
 <br>
 <h2>Select control</h2>
 <h2>Select multiple - false</h2>
-<lib-select-control [(ngModel)]="select" [dir]="dir"
+<lib-select-control [(ngModel)]="select"
                    direction="grid"
                    cols="4"
                    [options]="['one','two','three','four','five','six','seven','eight','nine']"
@@ -140,7 +139,7 @@
 ></lib-select-control>
 <span>{{select}}</span>
 <h2>Select multiple - true</h2>
-<lib-select-control [(ngModel)]="select" [dir]="dir"
+<lib-select-control [(ngModel)]="select"
                     direction="grid"
                     cols="4"
                     [options]="['one','two','three','four','five','six','seven','eight','nine']"

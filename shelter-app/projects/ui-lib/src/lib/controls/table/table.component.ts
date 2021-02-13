@@ -8,6 +8,7 @@ import {CdkTable} from '@angular/cdk/table';
 import {BehaviorSubject} from 'rxjs';
 import {DialogRef} from '@angular/cdk-experimental/dialog';
 import {DataSource} from '@angular/cdk/collections';
+import {Directionality} from "@angular/cdk/bidi";
 
 const DIALOG_SEARCH = new SwaggerObject(['search'], { search: SwaggerNative.asString()});
 @Component({
@@ -73,8 +74,9 @@ export class TableComponent extends BaseComponent implements OnInit {
 
   constructor(public systemLang: SystemLang,
               private testTableService: TableProviderService,
-              private dialogService: DialogService) {
-    super(systemLang);
+              private dialogService: DialogService,
+              protected directionality: Directionality) {
+    super(systemLang, directionality);
     this.swagger = testTableService.swagger;
     this.dataSource = testTableService.datasource;
   }

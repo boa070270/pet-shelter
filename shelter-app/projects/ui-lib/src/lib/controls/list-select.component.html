@@ -2,7 +2,7 @@
   <span class="ui-input-title" *ngIf="pCaption">{{pCaption}}</span>
   <div class="ui-checkbox">
     <label>
-      <ul [dir]="dir" tabindex="0" [ngClass]="{'list-select': true, 'list-disabled': disabled}"
+      <ul [dir]="dir" tabindex="0" [ngClass]="{'list-select': true, 'list-disabled': disabled, noselect: true}"
           (click)="onChange($event)" (blur)="onBlur()"
           (keydown)="onKeyDown($event)"
       >

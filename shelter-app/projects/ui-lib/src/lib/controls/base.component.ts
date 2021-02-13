@@ -1,19 +1,20 @@
 import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
-import { SystemLang } from '../i18n';
+import {SystemLang} from '../i18n';
 import {Subscription} from 'rxjs';
 import {distinctTitleId, isTitleType, TitleType} from '../shared';
 import {ControlValueAccessor} from '@angular/forms';
+import {Directionality} from '@angular/cdk/bidi';
 
 export interface CommonParameters {
   id?: string;
   name?: string;
   hint?: string | TitleType[];
   error?: string | TitleType[];
-  dir?: string;
   caption?: string | TitleType[];
   hidden?: boolean;
   disabled?: boolean;
   required?: boolean;
+  nameAsCaption?: boolean;
 }
 @Component({
   selector: 'lib-base',
@@ -61,13 +62,6 @@ export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValue
     return this.common.error;
   }
   @Input()
-  set dir(p: string) {
-    this.common.dir = p;
-  }
-  get dir(): string {
-    return this.common.dir || null;
-  }
-  @Input()
   set caption(p: string | TitleType[]) {
     this.common.caption = p;
   }
@@ -95,16 +89,21 @@ export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValue
   get required(): boolean {
     return this.common.required;
   }
-
+  dir: string;
   pHint: string;
   pCaption: string;
   pError: string;
-  private subs: Subscription;
+  private subsLang: Subscription;
+  private subsDir: Subscription;
   protected change: (_: any) => {};
   protected touch: () => {};
 
-  constructor(public systemLang: SystemLang) {
-    this.subs = systemLang.onChange().subscribe(l => {
+  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
+    this.dir = directionality.value;
+    this.subsDir = directionality.change.subscribe(d => {
+      this.dir = d;
+    });
+    this.subsLang = systemLang.onChange().subscribe(l => {
       if (typeof l === 'string') {
         this.onChangeLang();
       }
@@ -114,6 +113,9 @@ export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValue
 
   ngOnInit(): void {
     this.pCaption = this.doIfNeedI18n(this.caption);
+    if (!this.pCaption && this.common.nameAsCaption) {
+      this.pCaption = this.name;
+    }
     this.pHint = this.doIfNeedI18n(this.hint) as string;
   }
   ngOnChanges(changes: SimpleChanges): void {
@@ -132,7 +134,8 @@ export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValue
     }
   }
   ngOnDestroy(): void {
-      this.subs.unsubscribe();
+      this.subsLang.unsubscribe();
+      this.subsDir.unsubscribe();
   }
   onChangeLang(): void {
     this.pHint = this.doIfNeedI18n(this.hint) as string;

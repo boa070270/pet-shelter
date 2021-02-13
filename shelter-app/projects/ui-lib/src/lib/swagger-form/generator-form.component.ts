@@ -15,11 +15,11 @@ import {SwaggerFormComponent} from './swagger-form.component';
 export class GeneratorFormComponent implements OnInit {
   @Input() swagger: string;
   schema: SwaggerSchema;
-  @ViewChild('form', {static: true}) componentRef: SwaggerFormComponent;
+  @ViewChild(SwaggerFormComponent) formComponent: SwaggerFormComponent;
 
   get formGroup(): FormGroup {
-    if (this.componentRef) {
-      return this.componentRef.formGroup;
+    if (this.formComponent) {
+      return this.formComponent.formGroup;
     }
   }
 

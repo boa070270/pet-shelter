@@ -3,7 +3,6 @@ import {
   Component,
   ComponentRef,
   forwardRef,
-  Injector,
   Input,
   OnChanges,
   OnInit,
@@ -18,16 +17,9 @@ import {
   SwaggerNative,
   SwaggerSchema
 } from '../shared';
-import {ControlValueAccessor, FormGroup, NG_VALUE_ACCESSOR, ValidationErrors} from '@angular/forms';
+import {ControlValueAccessor, FormGroup, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {CdkPortalOutlet, ComponentPortal} from '@angular/cdk/portal';
-import {
-  BaseComponent,
-  CheckboxControlComponent,
-  CheckboxParameters,
-  InputControlComponent,
-  InputParameters,
-  ListBuilderComponent
-} from '../controls';
+import {BaseComponent, CheckboxControlComponent, InputControlComponent, ListBuilderComponent} from '../controls';
 
 @Component({
   selector: 'lib-swagger-native',
@@ -105,6 +97,8 @@ export class SwaggerNativeComponent implements OnInit, OnChanges, SwaggerCompone
         this.componentRef = this.portalOutlet.attachComponentPortal(portal);
         this.componentRef.instance.common = commonParams;
         const inst = this.componentRef.instance;
+        inst.common = {name: this.propertyId, hint: ui.description, caption: ui.caption, required: this.required,
+          nameAsCaption: ui.nameAsCaption !== undefined ? ui.nameAsCaption : true};
         if (inst instanceof InputControlComponent) {
           inst.extraParams = {placeholder: ui.placeHolder, tooltip: ui.toolTip,
             leadingIcon: ui.leadingIcon, trailingIcon: ui.trailingIcon, type: constrictions.format};

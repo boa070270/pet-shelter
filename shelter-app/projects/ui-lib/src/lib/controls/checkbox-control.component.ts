@@ -3,6 +3,7 @@ import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SystemLang} from '../i18n';
 import {BaseComponent} from './base.component';
 import {TitleType} from '../shared';
+import {Directionality} from "@angular/cdk/bidi";
 
 export const CHECKBOX_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -96,8 +97,8 @@ export class CheckboxControlComponent extends BaseComponent implements OnInit, O
   pTitles: {[id: string]: string};
   tips: {[id: string]: string};
 
-  constructor(public systemLang: SystemLang) {
-    super(systemLang);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
+    super(systemLang, directionality);
   }
 
   ngOnInit(): void {
@@ -143,7 +144,6 @@ export class CheckboxControlComponent extends BaseComponent implements OnInit, O
       this.toggle(target.value);
       this.emitChange(this.getArrayValues());
     }
-    console.log('CheckboxControlComponent.onChange', this.indeterminate, this.values);
   }
   setValue(key: any, value: any): void {
     if (this.options.includes(key)) {

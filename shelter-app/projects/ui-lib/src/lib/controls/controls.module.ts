@@ -13,6 +13,7 @@ import {TableComponent} from './table/table.component';
 import {CdkTableModule} from '@angular/cdk/table';
 import {ListBuilderComponent} from './list-builder.component';
 import {ListSelectComponent} from './list-select.component';
+import { BidiModule } from '@angular/cdk/bidi';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import {ListSelectComponent} from './list-select.component';
     CommonModule,
     FormsModule,
     CdkTableModule,
+    BidiModule
   ],
   exports: [
     CheckboxControlComponent,

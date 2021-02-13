@@ -3,6 +3,7 @@ import {CheckboxControlComponent} from './checkbox-control.component';
 import {SystemLang} from '../i18n';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {coerceArray} from '@angular/cdk/coercion';
+import {Directionality} from '@angular/cdk/bidi';
 
 export const SELECT_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -25,8 +26,8 @@ export class SelectControlComponent extends CheckboxControlComponent implements 
     return this.extraParams.multiple || null;
   }
 
-  constructor(public systemLang: SystemLang) {
-    super(systemLang);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
+    super(systemLang, directionality);
   }
 
   ngOnInit(): void {

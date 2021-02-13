@@ -7,6 +7,7 @@ import {ListSelectComponent} from './list-select.component';
 import {BaseComponent} from './base.component';
 import {TitleType} from '../shared';
 import {CheckboxParameters} from './checkbox-control.component';
+import {Directionality} from "@angular/cdk/bidi";
 
 const DEF_REMOVE_TITLES: TitleType[] = [{lang: 'en', title: 'Remove'}, {lang: 'uk', title: 'Видалити'}];
 const DEF_ADD_TITLES: TitleType[] = [{lang: 'en', title: 'Add'}, {lang: 'uk', title: 'Добавити'}];
@@ -65,8 +66,8 @@ export class ListBuilderComponent extends BaseComponent implements OnInit, OnCha
   @ViewChild(SelectControlComponent, {static: true}) available: SelectControlComponent;
   @ViewChild(ListSelectComponent, {static: true}) result: ListSelectComponent;
 
-  constructor(public systemLang: SystemLang) {
-    super(systemLang);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
+    super(systemLang, directionality);
   }
 
   ngOnInit(): void {

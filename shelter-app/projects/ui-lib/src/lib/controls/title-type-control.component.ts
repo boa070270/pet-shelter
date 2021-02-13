@@ -3,14 +3,16 @@ import {SystemLang} from '../i18n';
 import {BaseComponent} from './base.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {TitleType} from '../shared';
+import {Directionality} from '@angular/cdk/bidi';
 
+const TITLE_CTRL = [{id: 'b0', lang: 'uk', title: 'Багатомовність'}, {id: 'b0', lang: 'en', title: 'Multi language'}];
 @Component({
   selector: 'lib-title-type-control',
   template: `
-      <lib-boolean-control name="ctl" [titles]="ctrlTitles" [dir]="dir" [(ngModel)]="ctrl"></lib-boolean-control>
-      <lib-input-control name="str" [(ngModel)]="str" [dir]="dir" *ngIf="!ctrl" [caption]="pCaption"></lib-input-control>
+      <lib-boolean-control name="ctl" [titles]="ctrlTitles" [(ngModel)]="ctrl"></lib-boolean-control>
+      <lib-input-control name="str" [(ngModel)]="str" *ngIf="!ctrl" [caption]="pCaption"></lib-input-control>
       <div *ngIf="ctrl">
-        <lib-input-control *ngFor="let t of titles" name="{{t.lang}}" [dir]="dir" type="text" [placeholder]="t.title" [caption]="pCaption"></lib-input-control>
+        <lib-input-control *ngFor="let t of titles" name="{{t.lang}}" type="text" [placeholder]="t.title" [caption]="pCaption"></lib-input-control>
       </div>
       <span *ngIf="pHint">{{pHint}}</span>
   `,
@@ -22,13 +24,13 @@ import {TitleType} from '../shared';
   }]
 })
 export class TitleTypeControlComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
-  ctrlTitles: TitleType[] = [{id: 'b0', lang: 'uk', title: 'Багатомовність'}, {id: 'b0', lang: 'en', title: 'Multi language'}];
+  ctrlTitles: TitleType[] = TITLE_CTRL;
   ctrl: boolean;
   str: string;
   titles: TitleType[] = [];
 
-  constructor(public systemLang: SystemLang) {
-    super(systemLang);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
+    super(systemLang, directionality);
     systemLang.getLanguages().forEach(l => {
       this.titles.push({id: '', title: l.displayName, lang: l.lang});
     });

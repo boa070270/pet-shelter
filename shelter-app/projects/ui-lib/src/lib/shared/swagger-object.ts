@@ -45,6 +45,7 @@ export interface SwaggerCustomUI {
   asyncValidator?: AsyncValidatorFn[];
   leadingIcon?: string;
   trailingIcon?: string;
+  nameAsCaption?: boolean;
 }
 export function swaggerUI(caption?: string | TitleType[], description?: string | TitleType[],
                           toolTip?: string | TitleType[], placeHolder?: string | TitleType[],
