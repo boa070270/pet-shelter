@@ -1,5 +1,5 @@
 import {Component, Inject, OnDestroy, ViewChild} from '@angular/core';
-import {CdkDialogContainer, DIALOG_DATA, DialogRef} from '@angular/cdk-experimental/dialog';
+import {CdkDialogContainer, DIALOG_DATA, DialogRef} from '../dialog-service';
 import {SystemLang} from '../i18n';
 import {SwaggerObject, TitleType, ActionType, ExtendedData} from '../shared';
 import {SwaggerFormComponent} from '../swagger-form';
@@ -65,6 +65,10 @@ export class SimpleDialogComponent implements OnDestroy {
   }
   prepareTitle(): void {
     switch (this.action) {
+      case 'ok_cancel':
+        this.btnCancel = this.systemLang.getTitle(DEF_TITLE_CANCEL);
+        this.btnOk = this.systemLang.getTitle(DEF_TITLE_OK);
+        break;
       case 'save_cancel':
         this.btnCancel = this.systemLang.getTitle(DEF_TITLE_CANCEL);
         this.btnOk = this.systemLang.getTitle(DEF_TITLE_SAVE);

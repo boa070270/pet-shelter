@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {DataSource} from '@angular/cdk/collections';
 import {BehaviorSubject, Observable} from 'rxjs';
-import {SwaggerNative, SwaggerObject, swaggerUI} from '../../shared';
+import {SwaggerNative, SwaggerObject, swaggerUI, ArrayDataSource} from '../../shared';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +10,7 @@ export class TableProviderService {
   private tableDefs = {};
   private tableData = {};
   columns = ['position', 'name', 'weight', 'symbol', 'colA', 'colB', 'colC', 'colD', 'colE'];
-  datasource = new ExampleDataSource();
+  datasource = new ArrayDataSource(ELEMENT_DATA);
   swagger = Swagger;
   constructor() { }
   setTableSwagger(name: string, swagger: SwaggerObject): void {
@@ -64,15 +64,3 @@ const ELEMENT_DATA: PeriodicElement[] = [
   {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F', colA: 'A9 some text', colB: 'B9 some text', colC: 'C9 some text', colD: 'D9 some text', colE: 'E9 some text'},
   {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne', colA: 'A10 some text', colB: 'B10 some text', colC: 'C10 some text', colD: 'D10 some text', colE: 'E10 some text'},
 ];
-
-export class ExampleDataSource extends DataSource<PeriodicElement> {
-  /** Stream of data that is provided to the table. */
-  data = new BehaviorSubject<PeriodicElement[]>(ELEMENT_DATA);
-
-  /** Connect function called by the table to retrieve one stream containing the data to render. */
-  connect(): Observable<PeriodicElement[]> {
-    return this.data;
-  }
-
-  disconnect(): void {}
-}

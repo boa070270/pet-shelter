@@ -6,3 +6,5 @@ export * from './components-plugin.service';
 export * from './logger.service';
 export * from './dynamic';
 export * from './dialog-api';
+export * from './cdk-data-source';
+export * from './list-range-helper';

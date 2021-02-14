@@ -44,3 +44,20 @@ export function sortOut(lst: ListRange, lists: ListRange[]): {absent: ListRange[
   }
   return {absent, present};
 }
+export function newPageSize(lst: ListRange, pSize: number): ListRange {
+  if (lst.start === 0) {
+    return {start: 0, end: pSize};
+  } else {
+    const start = Math.floor(lst.start / pSize);
+    return {start, end: start + pSize};
+  }
+}
+
+/**
+ * calculate ListRange for page number and page size
+ * @param pageSize number of records on one page
+ * @param page page number, the first page is 0
+ */
+export function changePage(pageSize: number, page: number): ListRange {
+  return {start: page * pageSize, end: page * pageSize + pageSize};
+}

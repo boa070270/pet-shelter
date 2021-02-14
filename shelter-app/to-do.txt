@@ -1,0 +1,12 @@
+- IFilter:
+  bring all parameters to this type
+  make filter-dialog-component
+  show this dialog on showDialogFilter instead simple one input
+
+- BUG! on test table occurs error field position not found?
+
+- BUG! Swagger! there isn't applied "disable". The view dialog on test table allow editing
+
+- Task! Swagger! Need to provide property "immutable", that do not allow edit field if it has parameter.
+
+- Task! Swagger! What do I need to do with forms that need dynamically change its content?

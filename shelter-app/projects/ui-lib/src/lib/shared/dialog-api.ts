@@ -1,6 +1,6 @@
 import {SwaggerObject} from './swagger-object';
 
-export type ActionType = 'ok' | 'save_cancel' | 'yes_no';
+export type ActionType = 'ok' | 'ok_cancel' | 'save_cancel' | 'yes_no';
 
 export class ExtendedData {
   data: any;

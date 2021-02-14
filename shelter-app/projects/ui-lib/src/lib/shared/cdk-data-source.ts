@@ -1,20 +1,24 @@
 import {CollectionViewer, DataSource, ListRange} from '@angular/cdk/collections';
-import {ConnectableObservable, merge, Observable, of, Subject, Subscription} from 'rxjs';
+import {BehaviorSubject, ConnectableObservable, merge, Observable, of, Subject, Subscription} from 'rxjs';
 import {mapTo, publishLast, reduce, takeLast, tap} from 'rxjs/operators';
-import {equals as eqLstRange, sortOut} from './list-range-helper';
+import {changePage, equals as eqLstRange, newPageSize, sortOut} from './list-range-helper';
 
-const MAX_CACHE_SIZE = 100;
-const DEF_PORTION_SIZE = 20;
-
-export const ORDER_ASC = 1;
-export const ORDER_DESC = -1;
+export const PagingSize = [2, 3, 5, 10, 20, 50, 100];
 export interface IOrder {
   p: string;
   order: number;
 }
-export function simpleCompare(p1: any, p2: any, order: IOrder): number {
+export interface IFilter {
+  // priority top, if true return only select rows
+  selected: boolean;
+  // priority 1 if not empty filter all property on this string
+  light: string;
+  // if light empty, check every property
+  property: {[key: string]: string};
+}
+export function simpleCompare(p1: any, p2: any): number {
   if (p1 === p2 || typeof p1 !== typeof p2 || typeof p1 === 'function' || typeof p2 === 'function') {
-    return 0;
+    return 0; // when we cannot compare return 0, we can use it for filter but not as base for equal
   }
   if (p1 === undefined) {
     return -1;
@@ -29,7 +33,7 @@ export function simpleCompare(p1: any, p2: any, order: IOrder): number {
       return (p1 as number) - (p2 as number);
     case 'boolean': // recognize false < true
       return p1 ? -1 : 1;
-    //
+    case 'object':
   }
 }
 export interface DataExpectedResult<T> {
@@ -39,7 +43,7 @@ export interface DataExpectedResult<T> {
   scrollId: string;
 }
 export declare abstract class DataService<T> {
-  abstract obtainData(lstRange?: ListRange, query?: any, order?: any): Observable<DataExpectedResult<T>>;
+  abstract obtainData(lstRange?: ListRange, query?: IFilter, order?: IOrder[]): Observable<DataExpectedResult<T>>;
 }
 
 interface LoaderWorker<T> {
@@ -68,7 +72,90 @@ function simpleEquals(o1: any, o2: any): boolean {
   }
   return false;
 }
-
+export abstract class BaseDataSource<T> {
+  protected readonly consumers: Map<CdkDataSource<T>, Subject<T[]>> = new Map<CdkDataSource<T>, Subject<T[]>>();
+  protected data: T[];
+  protected lastModified: Date;
+  protected total: number;
+  protected equalData: (o1: any, o2: any) => boolean;
+  get totalRecords(): number {
+    return this.total || 0;
+  }
+  protected constructor(protected minSize: number = 20,
+                        protected maxSize: number = 200,
+                        protected equalsOrder: (o1: any, o2: any) => boolean = simpleEquals,
+                        protected equalsFilter: (f1: any, f2: any) => boolean = simpleEquals,
+                        protected compareData?: (d1: T, d2: T) => number) {
+    this.data = [];
+    this.equalData = this.compareData ? (p1, p2) => this.compareData(p1, p2) === 0 : simpleEquals;
+  }
+  registerDS(): CdkDataSource<T> {
+    const ds = new CdkDataSource<T>(this);
+    // TODO I don't like that we stored data in this.dada, then part of it in BehaviorSubject and then part in Table
+    this.consumers.set(ds, new BehaviorSubject([]));
+    return ds;
+  }
+  unregisterDS(ds: CdkDataSource<T>): void {
+    const subj = this.consumers.get(ds);
+    if (subj && !subj.isStopped) {
+      subj.complete();
+    }
+    this.consumers.delete(ds);
+  }
+  getConsumer(ds: CdkDataSource<T>): Subject<T[]> {
+    return this.consumers.get(ds);
+  }
+  obtainPage(ds: CdkDataSource<T>, force?: boolean): void {
+    const subject = this.consumers.get(ds);
+    this.updateSubject(subject, ds.lstRange, ds.queryParams, ds.orderParams, force);
+  }
+  protected abstract updateSubject(subject: Subject<T[]>, lst: ListRange, queryParams: any, orderParams: IOrder[], force?: boolean): void;
+}
+export class ArrayDataSource extends BaseDataSource<any> {
+  constructor(data: any[],
+              protected minSize: number = 20,
+              protected maxSize: number = 200,
+              protected equalsOrder: (o1: any, o2: any) => boolean = simpleEquals,
+              protected equalsFilter: (f1: any, f2: any) => boolean = simpleEquals,
+              protected compareData?: (d1: any, d2: any) => number) {
+    super(minSize, maxSize, equalsOrder, equalsFilter, compareData);
+    this.data = data || [];
+    this.total = this.data.length;
+  }
+  protected updateSubject(subject: Subject<any[]>, lst: ListRange, queryParams: any, orderParams: IOrder[],
+                          force: boolean | undefined): void {
+    let compare: (p1: any, p2: any) => number = () => 1;
+    let filter: (p: any) => boolean = () => true;
+    const compareData = this.compareData ? this.compareData : simpleCompare;
+    if (orderParams && orderParams.length > 0) {
+      compare = (a, b) => {
+        let res;
+        for (const o of orderParams) {
+          res = compareData(a[o.p], b[o.p]);
+          if (res !== 0) {
+            return res * o.order;
+          }
+        }
+        return res;
+      };
+    }
+    if (queryParams) {
+      filter = (a) => {
+        if (typeof queryParams === 'string') {
+          return Object.values(a).find(v => ('' + v).includes(queryParams)) !== undefined;
+        } else {
+          for (const [key, value] of Object.entries(queryParams)) {
+            if (('' + a[key]).includes('' + value)) {
+              return true;
+            }
+          }
+        }
+      };
+    }
+    const d = this.data.filter(filter).sort(compare).slice(lst.start, lst.end);
+    subject.next(d);
+  }
+}
 /**
  * Cases:
  * - we have all records of the data: we don't need to ask service to load, we sort and filter the data locally
@@ -76,35 +163,21 @@ function simpleEquals(o1: any, o2: any): boolean {
  *    - every different filter or sort will has a different result
  *    - queries that do not have filter nor sort can obtain a result from cache
  */
-export class MainDataSource<T> {
-  readonly consumers: Map<CdkDataSource<T>, Subject<T[]>> = new Map<CdkDataSource<T>, Subject<T[]>>();
+export class MainDataSource<T> extends BaseDataSource<T>{
   private readonly workers: LoaderWorker<T>[];
-  private readonly data: T[] = [];
-  private lastModified: Date;
-  private total: number;
   // private subscription: Subscription; TODO need to unsubscribe all waste
   private externalModified: boolean;
 
   constructor(private dataService: DataService<T>,
-              private size: number = MAX_CACHE_SIZE,
-              private equalsData: (d1: T, d2: T) => boolean = simpleEquals,
-              private equalsOrder: (o1: any, o2: any) => boolean = simpleEquals,
-              private equalsFilter: (f1: any, f2: any) => boolean = simpleEquals) {
+              protected minSize,
+              protected maxSize,
+              protected equalsOrder: (o1: any, o2: any) => boolean = simpleEquals,
+              protected equalsFilter: (f1: any, f2: any) => boolean = simpleEquals,
+              protected compareData?: (d1: T, d2: T) => number) {
+    super(minSize, maxSize, equalsOrder, equalsFilter, compareData);
     this.makeWorker({start: 0, end: 20});
   }
 
-  registerDS(): CdkDataSource<T> {
-    const ds = new CdkDataSource<T>(this);
-    this.consumers.set(ds, new Subject());
-    return ds;
-  }
-  unregisterDS(ds: CdkDataSource<T>): void {
-    this.consumers.delete(ds);
-  }
-  obtainPage(ds: CdkDataSource<T>, force?: boolean): void {
-    const subject = this.consumers.get(ds);
-    this.updateSubject(subject, ds.lstRange, ds.queryParams, ds.orderParams, force);
-  }
   private makeWorker(lstRange: ListRange, query?: any, order?: any): LoaderWorker<T> {
     const worker = {
       lstRange, query, order, subscriptions: 1,
@@ -130,7 +203,7 @@ export class MainDataSource<T> {
       }
     }
   }
-  private updateSubject(subject: Subject<T[]>, lst: ListRange, queryParams: any, orderParams: any, force?: boolean): void {
+  protected updateSubject(subject: Subject<T[]>, lst: ListRange, queryParams: any, orderParams: IOrder[], force?: boolean): void {
     if (force) {
       const worker = this.makeWorker(lst, queryParams, orderParams);
       worker.work.subscribe((d) => {
@@ -190,26 +263,58 @@ export class MainDataSource<T> {
   private _update(d: T[]): void {
     // TODO we need add new data to this cache without duplicate. This method need refactoring to increase performance
     d.forEach( e => {
-      if (this.data.find(p => this.equalsData(p, e)) === undefined) {
+      if (this.data.find(p => this.equalData(p, e)) === undefined) {
         this.data.push(e);
       }
     });
   }
 }
 export class CdkDataSource<T> extends DataSource<T> {
-  lstRange: ListRange = {start: 0, end: DEF_PORTION_SIZE};
+  private pSize: number = PagingSize[0];
+  lstRange: ListRange = {start: 0, end: this.pSize};
+  set pageSize(p: number) {
+    this.pSize = p * 1;
+    this.recalcListRange();
+  }
+  get pageSize(): number {
+    return this.pSize;
+  }
+  private curPage = 0;
+  set currentPage(n: number) {
+    const pos = n * 1 || 1;
+    if (pos < 1) {
+      this.curPage = 0;
+    } else if (pos > this.maxPage) {
+      this.curPage = this.pageSize - 1;
+    } else {
+      this.curPage = pos - 1;
+    }
+    this.lstRange = changePage(this.pSize, this.curPage);
+    this.main.obtainPage(this);
+  }
+  get currentPage(): number {
+    return this.curPage + 1;
+  }
+  get maxPage(): number {
+    return Math.ceil(this.totalRecords / this.pSize);
+  }
   queryParams: any;
-  orderParams: any;
+  orderParams: IOrder[];
+  selectedRows = [];
+  get totalRecords(): number {
+    return this.main.totalRecords;
+  }
   private subscription: Subscription;
-  constructor(private main: MainDataSource<T>) {
+  constructor(private main: BaseDataSource<T>) {
     super();
   }
   connect(collectionViewer: CollectionViewer): Observable<T[] | ReadonlyArray<T>> {
     this.subscription = collectionViewer.viewChange.subscribe(r => {
-      this.lstRange = r;
+      this.lstRange = newPageSize(r, this.pSize);
+      this.curPage = Math.floor(this.lstRange.start / this.pSize);
       this.main.obtainPage(this);
     });
-    return this.main.consumers.get(this);
+    return this.main.getConsumer(this);
   }
 
   disconnect(collectionViewer: CollectionViewer): void {
@@ -219,7 +324,7 @@ export class CdkDataSource<T> extends DataSource<T> {
       this.subscription = null;
     }
   }
-  sort(order: any): void {
+  sort(order: IOrder[]): void {
     this.orderParams = order;
     this.main.obtainPage(this);
   }
@@ -229,5 +334,10 @@ export class CdkDataSource<T> extends DataSource<T> {
   }
   refresh(): void {
     this.main.obtainPage(this, true);
+  }
+  private recalcListRange(): void {
+    this.lstRange = newPageSize(this.lstRange, this.pSize);
+    this.curPage = Math.floor(this.lstRange.start / this.pSize);
+    this.main.obtainPage(this);
   }
 }

@@ -129,3 +129,25 @@ th {
     font-weight: lighter;
   }
 }
+.hint {
+  color: gray;
+  font-size: smaller;
+}
+.table-status-bar {
+  display: flex;
+  justify-content: space-between;
+  color: gray;
+  font-size: smaller;
+  padding: {
+    left: 0.5em;
+    right: 0.5em;
+  };
+  input {
+    font: inherit;
+  }
+  button{
+    font: inherit;
+    padding: 2px;
+    margin: 2px;
+  }
+}
