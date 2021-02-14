@@ -20,13 +20,14 @@ import {DialogConfig} from './dialog-config';
 import {CdkDialogContainer} from './dialog-container';
 import {ComponentPortal, TemplatePortal} from '@angular/cdk/portal';
 import {Directionality} from '@angular/cdk/bidi';
-import {PositionStrategy} from "@angular/cdk/overlay/position/position-strategy";
+import {PositionStrategy} from '@angular/cdk/overlay/position/position-strategy';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DialogService implements OnDestroy {
   private readonly simpleDialogComponent: Type<any>;
+  private readonly snakeBarComponent: Type<any>;
   // tslint:disable-next-line:variable-name
   _afterAllClosedBase = new Subject<void>();
   // tslint:disable-next-line:variable-name
@@ -54,8 +55,8 @@ export class DialogService implements OnDestroy {
       location.subscribe(() => this.closeAll());
     }
 
-    const plugin = this.componentsPlugin.getPlugin('simple-dialog');
-    this.simpleDialogComponent = plugin.component;
+    this.simpleDialogComponent = this.componentsPlugin.getPlugin('simple-dialog').component;
+    this.snakeBarComponent = this.componentsPlugin.getPlugin('snake-bar').component;
   }
 
   /* e.g.
@@ -101,16 +102,32 @@ export class DialogService implements OnDestroy {
     return this.openExtDialog(extData, modal);
   }
   infoMsgDialog(msg: string, modal?: boolean, action?: ActionType): DialogRef<any> {
-    const extData: ExtendedData = {data: msg, action};
+    const extData = ExtendedData.create(msg, true, null, action);
     return this.infoExtDialog(extData, modal);
   }
   warnMsgDialog(msg: string, modal?: boolean, action?: ActionType): DialogRef<any> {
-    const extData: ExtendedData = {data: msg, action};
+    const extData = ExtendedData.create(msg, true, null, action);
     return this.warnExtDialog(extData, modal);
   }
   errorMsgDialog(msg: string, modal?: boolean, action?: ActionType): DialogRef<any> {
-    const extData: ExtendedData = {data: msg, action};
+    const extData = ExtendedData.create(msg, true, null, action);
     return this.errorExtDialog(extData, modal);
+  }
+  openSnakeBar(extData: ExtendedData): void {
+    const dlg = this.snakeFromComponent(this.snakeBarComponent, {data: extData, disableClose: false});
+    setTimeout(() => dlg.close(), 5000);
+  }
+  snakeInfo(msg: string): void {
+    const extData = ExtendedData.create(msg, true, null, 'ok', '', 'gm-info_outline', 'info-color');
+    this.openSnakeBar(extData);
+  }
+  snakeWarn(msg: string): void {
+    const extData = ExtendedData.create(msg, true, null, 'ok', '', 'gm-warning', 'warn-color');
+    this.openSnakeBar(extData);
+  }
+  snakeError(msg: string): void {
+    const extData = ExtendedData.create(msg, true, null, 'ok', '', 'gm-error', 'error-color');
+    this.openSnakeBar(extData);
   }
   snakeFromComponent<T>(component: ComponentType<T>, config?: DialogConfig): DialogRef<any> {
     config.position = {bottom: '0'};

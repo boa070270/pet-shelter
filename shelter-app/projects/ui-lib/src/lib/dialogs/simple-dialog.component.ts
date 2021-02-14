@@ -25,14 +25,14 @@ export class SimpleDialogComponent implements OnDestroy {
   btnOk: string;
   btnCancel: string;
   iconClasses: any;
+  dialogBorderClass: string;
   @ViewChild(SwaggerFormComponent) form: SwaggerFormComponent;
   private subscription: Subscription;
-  icon: any;
 
   constructor(protected dialogRef: DialogRef<any>,
               protected dialogContainer: CdkDialogContainer,
               @Inject(DIALOG_DATA) protected dialogData: any,
-              private systemLang: SystemLang) {
+              protected systemLang: SystemLang) {
     console.log('SimpleDialogComponent.constructor', dialogRef, dialogContainer, dialogData);
     this.needActionBlk = dialogRef.disableClose;
     if (dialogData instanceof ExtendedData) {
@@ -44,10 +44,10 @@ export class SimpleDialogComponent implements OnDestroy {
       this.iconClasses = {};
       if (dialogData.icon) {
         this.iconClasses[dialogData.icon] = true;
-        this.icon = dialogData.icon;
       }
       if (dialogData.iconColor) {
         this.iconClasses[dialogData.iconColor] = true;
+        this.dialogBorderClass = 'border-' + dialogData.iconColor;
       }
     } else {
       this.data = dialogData;
@@ -90,6 +90,8 @@ export class SimpleDialogComponent implements OnDestroy {
         console.log('SimpleDialogComponent.save', this.form.formGroup.value);
         this.dialogRef.close(this.form.formGroup.value);
       }
+    } else {
+      this.dialogRef.close('ok');
     }
   }
 }

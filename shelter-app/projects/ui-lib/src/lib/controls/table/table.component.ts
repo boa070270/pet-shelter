@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {Component, ElementRef, Input, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {TableProviderService} from './table-provider.service';
 import {DialogService} from '../../dialog-service';
 import {
@@ -12,64 +12,18 @@ import {
 import {SystemLang} from '../../i18n';
 import {BaseComponent} from '../base.component';
 import {CdkTable} from '@angular/cdk/table';
-import {BehaviorSubject} from 'rxjs';
+import {BehaviorSubject, merge} from 'rxjs';
 import {DialogRef} from '../../dialog-service';
 import {Directionality} from '@angular/cdk/bidi';
+import {reduce} from 'rxjs/operators';
 
 const DIALOG_SEARCH = new SwaggerObject(['search'], { search: SwaggerNative.asString()});
 @Component({
   selector: 'lib-table',
-  // templateUrl: './test-table.component.html',
-  template: `<div><table cdk-table>
-    <caption>
-      <div class="table-caption-block">
-        <div>
-        <select [(ngModel)]="pageSize">
-          <option *ngFor="let o of PagingSize">{{o}}</option>
-        </select>
-        <button (click)="headerClick()" class="gm-view_column"></button>
-        </div>
-        <strong>{{pCaption}}</strong>
-        <label>
-            <span class="gm-search"></span>
-            <input #inputSearch type="text" class="table-search" (click)="clickSearch()" (keyup)="keyUp()">
-            <span></span>
-        </label>
-      </div>
-    </caption>
-    <ng-container *ngFor="let col of allColumns" cdkColumnDef="{{col}}" >
-      <th cdk-header-cell *cdkHeaderCellDef  class="{{orderIcons[col]}}" (click)="orderCell(col)"> {{pDisplayedNames[col]}} </th>
-      <td cdk-cell *cdkCellDef="let element"> {{element[col]}} </td>
-    </ng-container>
-
-    <tr cdk-header-row *cdkHeaderRowDef="displayedColumns"></tr>
-    <tr cdk-row *cdkRowDef="let row; columns: displayedColumns;" (click)="rowClick(row)" [ngClass]="{'table-mark-row': selectedRows.includes(row)}"></tr>
-  </table>
-    <div class="table-status-bar">
-      <span>Selected: {{selectedRows.length}} rows</span>
-      <span *ngIf="maxPage > 1">
-        <button (click)="currentPage = 0"><<</button>
-        <button (click)="incPage(-1)"><</button>
-        <input type="number" [(ngModel)]="currentPage" [min]="1" [max]="maxPage">
-        <button (click)="incPage(1)">></button>
-        <button (click)="changePage(maxPage)">>></button>
-      </span>
-    </div>
-    <span class="hint">{{pHint}}</span>
-  </div>
-  <ng-template #dlg>
-    <button (click)="clearSelect()" class="gm-remove_done"></button>
-    <button (click)="refresh()" class="gm-refresh"></button>
-    <button (click)="headerClick()" class="gm-view_column"></button>
-    <button (click)="showSearchDialog()" class="gm-search"></button>
-    <button (click)="editRow()" class="gm-edit"></button>
-    <button (click)="viewRow()" class="gm-tv"></button>
-    <button (click)="addRow()" class="gm-add"></button>
-    <button (click)="addRow()" class="gm-delete"></button>
-  </ng-template>`,
+  templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss']
 })
-export class TableComponent extends BaseComponent implements OnInit {
+export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
   readonly PagingSize = PagingSize;
   get pageSize(): number {
     return (this.cdkDataSource || {}).pageSize;
@@ -86,7 +40,7 @@ export class TableComponent extends BaseComponent implements OnInit {
   displayedNames: {[column: string]: string | TitleType[]};
   @Input()
   dataSource: BaseDataSource<any>;
-  cdkDataSource: CdkDataSource<any>;
+  private cdkDataSource: CdkDataSource<any>;
   displayedColumns: string[];
   allColumns: string[];
   @ViewChild(CdkTable, {static: true}) cdkTable: CdkTable<any>;
@@ -156,6 +110,12 @@ export class TableComponent extends BaseComponent implements OnInit {
     this.cdkTable.dataSource = this.cdkDataSource;
     this.tableViewChange = this.cdkTable.viewChange;
   }
+  ngOnDestroy(): void {
+    super.ngOnDestroy();
+    this.dataSource.unregisterDS(this.cdkDataSource);
+    this.dataSource = null;
+    this.closeDialog();
+  }
 
   headerClick(): void {
     const extDate = ExtendedData.create({columns: this.displayedColumns}, false,
@@ -202,7 +162,14 @@ export class TableComponent extends BaseComponent implements OnInit {
     console.log('Table.editRow');
     this.closeDialog();
     if (this.swagger) {
-      this.dialogService.openExtDialog(ExtendedData.create(this.currentRow, false, this.swagger, 'save_cancel'));
+      this.dialogService.openExtDialog(ExtendedData.create(this.currentRow, false, this.swagger, 'save_cancel'))
+        .afterClosed().subscribe( row => {
+          if (row) {
+            this.dataSource.updateRow(row).subscribe( () => {
+              this.dialogService.snakeInfo('Row was updated');
+            });
+          }
+        });
     }
   }
 
@@ -228,9 +195,7 @@ export class TableComponent extends BaseComponent implements OnInit {
   }
 
   clearSelect(): void {
-    this.dataSource.unregisterDS(this.cdkDataSource);
-    this.dataSource = null;
-    this.closeDialog();
+    this.cdkDataSource.clearSelectedRows();
   }
 
   refresh(): void {
@@ -245,6 +210,26 @@ export class TableComponent extends BaseComponent implements OnInit {
     this.closeDialog();
     if (this.swagger) {
       this.dialogService.openExtDialog(ExtendedData.create({}, true, this.swagger, 'save_cancel'));
+    }
+  }
+  deleteRows(): void {
+    console.log('Table.deleteRows');
+    this.closeDialog();
+    if (this.selectedRows.length > 0) {
+      this.dialogService.warnMsgDialog(`Do you really want to delete ${this.selectedRows.length} rows`, true, 'yes_no')
+        .afterClosed().subscribe( ok => {
+         if (ok) {
+           const observers = [];
+           for (const row of this.selectedRows) {
+             observers.push(this.cdkDataSource.deleteRow(row));
+           }
+           merge(...observers, 2).pipe(
+             reduce((ac) => ac + 1, 0)
+           ).subscribe( n => {
+             this.dialogService.snakeInfo(`Successfully was deleted ${n} rows`);
+           });
+         }
+      });
     }
   }
 
@@ -268,4 +253,5 @@ export class TableComponent extends BaseComponent implements OnInit {
   incPage(n: number): void {
     this.currentPage += n;
   }
+
 }

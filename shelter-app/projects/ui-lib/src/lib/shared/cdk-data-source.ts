@@ -1,9 +1,9 @@
 import {CollectionViewer, DataSource, ListRange} from '@angular/cdk/collections';
-import {BehaviorSubject, ConnectableObservable, merge, Observable, of, Subject, Subscription} from 'rxjs';
+import {BehaviorSubject, ConnectableObservable, EMPTY, merge, Observable, of, Subject, Subscription} from 'rxjs';
 import {mapTo, publishLast, reduce, takeLast, tap} from 'rxjs/operators';
 import {changePage, equals as eqLstRange, newPageSize, sortOut} from './list-range-helper';
 
-export const PagingSize = [2, 3, 5, 10, 20, 50, 100];
+export const PagingSize = [10, 20, 50, 100];
 export interface IOrder {
   p: string;
   order: number;
@@ -38,12 +38,26 @@ export function simpleCompare(p1: any, p2: any): number {
 }
 export interface DataExpectedResult<T> {
   data: T[];
-  total: number;
-  lastModified: Date;
-  scrollId: string;
+  /*
+  The number of rows in the source
+   */
+  totalAll: number;
+  /*
+  The number of rows for this filter, if filter doesn't applied this equal to totalAll
+  TODO this waits on implementation
+   */
+  totalFiltered: number;
+  /*
+  This time is used to cache data
+   */
+  responseTime: Date;
+  scrollId?: string;
 }
 export declare abstract class DataService<T> {
   abstract obtainData(lstRange?: ListRange, query?: IFilter, order?: IOrder[]): Observable<DataExpectedResult<T>>;
+  abstract deleteData(row: T): Observable<DataExpectedResult<T>>;
+  abstract updateData(row: T): Observable<DataExpectedResult<T>>;
+  abstract insertData(row: T): Observable<DataExpectedResult<T>>;
 }
 
 interface LoaderWorker<T> {
@@ -110,6 +124,28 @@ export abstract class BaseDataSource<T> {
     this.updateSubject(subject, ds.lstRange, ds.queryParams, ds.orderParams, force);
   }
   protected abstract updateSubject(subject: Subject<T[]>, lst: ListRange, queryParams: any, orderParams: IOrder[], force?: boolean): void;
+
+  deleteRow(row: any): Observable<DataExpectedResult<T>> {
+    console.log('deleteRow', row);
+    const i = this.data.indexOf(row);
+    if (i >= 0) {
+      this.data.splice(i, 1);
+    }
+    return of({totalAll: this.total, totalFiltered: this.total, data: [], responseTime: this.lastModified});
+  }
+
+  insertRow(row: any): Observable<DataExpectedResult<T>> {
+    console.log('insertRow', row);
+    this.data.push(row);
+    return of({totalAll: this.total, totalFiltered: this.total, data: [], responseTime: this.lastModified});
+  }
+
+  updateRow(row: any): Observable<DataExpectedResult<T>> {
+    console.log('updateRow', row);
+    const i = this.data.indexOf(row);
+    this.data[i] = row;
+    return of({totalAll: this.total, totalFiltered: this.total, data: [], responseTime: this.lastModified});
+  }
 }
 export class ArrayDataSource extends BaseDataSource<any> {
   constructor(data: any[],
@@ -229,20 +265,21 @@ export class MainDataSource<T> extends BaseDataSource<T>{
       const src = workers.map(w => w.work);
       if (usesData && lst.start < this.data.length) {
         const data = this.data.slice(lst.start, lst.end < this.data.length ? lst.end : this.data.length);
-        src.unshift(of({data, lastModified: this.lastModified, total: this.total, scrollId: undefined}));
+        src.unshift(of({data, responseTime: this.lastModified, totalAll: this.total, totalFiltered: 0, scrollId: undefined}));
       }
       const worker = merge(...src, 1)
         .pipe(
           reduce(
             (ac, cur) => {
               ac.data = ac.data.concat(cur.data);
-              if ( ac.lastModified.getTime() < cur.lastModified.getTime() ) {
-                ac.total = cur.total;
-                ac.lastModified = cur.lastModified;
+              if ( ac.lastModified.getTime() < cur.responseTime.getTime() ) {
+                ac.total = cur.totalAll;
+                ac.lastModified = cur.responseTime;
               }
               return ac;
             },
-            {data: [], total: 0, lastModified: new Date(0), scrollId: ''}));
+            {data: [], total: 0, lastModified: new Date(0), scrollId: ''}),
+          );
       worker.subscribe(d => {
         subject.next(d.data);
       });
@@ -250,23 +287,46 @@ export class MainDataSource<T> extends BaseDataSource<T>{
       this.cleanWorkers();
     }
   }
-
-  private concatDate(d: DataExpectedResult<T>): void {
-    this.total = d.total;
-    if (this.lastModified.getTime() !== d.lastModified.getTime()) {
+  private updateCounters(r: DataExpectedResult<T>): void {
+    if (r.responseTime.getTime() > this.lastModified.getTime()) {
+      this.lastModified = r.responseTime;
+      this.total = r.totalAll;
       this.externalModified = true;
     }
-    this.lastModified = d.lastModified;
     // TODO d.scrollId isn't used
-    this._update(d.data);
   }
-  private _update(d: T[]): void {
+  private concatDate(d: DataExpectedResult<T>): void {
+    this.updateCounters(d);
     // TODO we need add new data to this cache without duplicate. This method need refactoring to increase performance
-    d.forEach( e => {
+    d.data.forEach( e => {
       if (this.data.find(p => this.equalData(p, e)) === undefined) {
         this.data.push(e);
       }
     });
+  }
+  private _update(d: T[]): void {
+  }
+  deleteRow(row: any): Observable<DataExpectedResult<T>> {
+    super.deleteRow(row);
+    return this.dataService.deleteData(row)
+      .pipe(
+        tap( r => this.updateCounters(r))
+      );
+  }
+  insertRow(row: any): Observable<DataExpectedResult<T>> {
+    super.insertRow(row);
+    return this.dataService.insertData(row)
+      .pipe(
+        tap( r => this.updateCounters(r))
+      );
+  }
+
+  updateRow(row: any): Observable<DataExpectedResult<T>> {
+    super.updateRow(row);
+    return this.dataService.updateData(row)
+      .pipe(
+        tap( r => this.updateCounters(r))
+      );
   }
 }
 export class CdkDataSource<T> extends DataSource<T> {
@@ -274,7 +334,7 @@ export class CdkDataSource<T> extends DataSource<T> {
   lstRange: ListRange = {start: 0, end: this.pSize};
   set pageSize(p: number) {
     this.pSize = p * 1;
-    this.recalcListRange();
+    this.reCalcListRange();
   }
   get pageSize(): number {
     return this.pSize;
@@ -335,9 +395,31 @@ export class CdkDataSource<T> extends DataSource<T> {
   refresh(): void {
     this.main.obtainPage(this, true);
   }
-  private recalcListRange(): void {
+  private reCalcListRange(): void {
     this.lstRange = newPageSize(this.lstRange, this.pSize);
     this.curPage = Math.floor(this.lstRange.start / this.pSize);
     this.main.obtainPage(this);
   }
+  updateRow(row: T): Observable<DataExpectedResult<T>> {
+    return this.main.updateRow(row).pipe(
+      tap(() => this.main.obtainPage(this))
+    );
+  }
+  insertRow(row: T): Observable<DataExpectedResult<T>> {
+    return this.main.insertRow(row).pipe(
+      tap(() => this.main.obtainPage(this))
+    );
+  }
+  deleteRow(row: T): Observable<DataExpectedResult<T>> {
+    return this.main.deleteRow(row).pipe(
+      tap(() => {
+        this.main.obtainPage(this);
+        this.selectedRows = [];
+      })
+    );
+  }
+  clearSelectedRows(): void {
+    this.selectedRows = [];
+  }
+
 }

@@ -10,3 +10,13 @@
 - Task! Swagger! Need to provide property "immutable", that do not allow edit field if it has parameter.
 
 - Task! Swagger! What do I need to do with forms that need dynamically change its content?
+
+- Task! Table! I want extend status bar to show number of all rows and number of filtered rows
+
+Done: - Task! DataSource need to know how update/add/delete rows
+
+- Table! need to ask on delete
+
+- Task! Exclude material
+
+- BUG! The dialog do not work!

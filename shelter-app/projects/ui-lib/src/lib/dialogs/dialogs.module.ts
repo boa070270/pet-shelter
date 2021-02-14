@@ -6,10 +6,12 @@ import {ControlsModule} from '../controls';
 import {SwaggerFormModule} from '../swagger-form';
 import {FormsModule} from '@angular/forms';
 import {ComponentsPluginService} from '../shared';
+import { SnakeBarComponent } from './snake-bar.component';
 @NgModule({
   declarations: [
     OkDialogComponent,
-    SimpleDialogComponent
+    SimpleDialogComponent,
+    SnakeBarComponent
   ],
   imports: [
     CommonModule,
@@ -19,11 +21,13 @@ import {ComponentsPluginService} from '../shared';
   ],
   exports: [
     OkDialogComponent,
-    SimpleDialogComponent
+    SimpleDialogComponent,
+    SnakeBarComponent
   ]
 })
 export class DialogsModule {
   constructor(componentsPlugin: ComponentsPluginService) {
     componentsPlugin.addPlugin('simple-dialog', {component: SimpleDialogComponent, schema: null});
+    componentsPlugin.addPlugin('snake-bar', {component: SnakeBarComponent, schema: null});
   }
 }

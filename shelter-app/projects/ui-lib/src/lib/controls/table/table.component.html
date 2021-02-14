@@ -1,28 +1,47 @@
-<table cdk-table [dataSource]="dataSource">
-  <!-- Position Column -->
-  <ng-container cdkColumnDef="position" [stickyEnd]="true">
-    <th cdk-header-cell *cdkHeaderCellDef> No. </th>
-    <td cdk-cell *cdkCellDef="let element"> {{element.position}} </td>
+<div><table cdk-table>
+  <caption>
+    <div class="table-caption-block">
+      <div>
+        <select [(ngModel)]="pageSize">
+          <option *ngFor="let o of PagingSize">{{o}}</option>
+        </select>
+        <button (click)="headerClick()" class="gm-view_column"></button>
+      </div>
+      <strong>{{pCaption}}</strong>
+      <label>
+        <span class="gm-search"></span>
+        <input #inputSearch type="text" class="table-search" (click)="clickSearch()" (keyup)="keyUp()">
+        <span></span>
+      </label>
+    </div>
+  </caption>
+  <ng-container *ngFor="let col of allColumns" cdkColumnDef="{{col}}" >
+    <th cdk-header-cell *cdkHeaderCellDef  class="{{orderIcons[col]}}" (click)="orderCell(col)"> {{pDisplayedNames[col]}} </th>
+    <td cdk-cell *cdkCellDef="let element"> {{element[col]}} </td>
   </ng-container>
 
-  <!-- Name Column -->
-  <ng-container cdkColumnDef="name">
-    <th cdk-header-cell *cdkHeaderCellDef> Name </th>
-    <td cdk-cell *cdkCellDef="let element"> {{element.name}} </td>
-  </ng-container>
-
-  <!-- Weight Column -->
-  <ng-container cdkColumnDef="weight">
-    <th cdk-header-cell *cdkHeaderCellDef> Weight </th>
-    <td cdk-cell *cdkCellDef="let element"> {{element.weight}} </td>
-  </ng-container>
-
-  <!-- Symbol Column -->
-  <ng-container cdkColumnDef="symbol">
-    <th cdk-header-cell *cdkHeaderCellDef> Symbol </th>
-    <td cdk-cell *cdkCellDef="let element"> {{element.symbol}} </td>
-  </ng-container>
-
-  <tr cdk-header-row *cdkHeaderRowDef="displayedColumns" (click)="headerClick()"></tr>
-  <tr cdk-row *cdkRowDef="let row; columns: displayedColumns;"></tr>
+  <tr cdk-header-row *cdkHeaderRowDef="displayedColumns"></tr>
+  <tr cdk-row *cdkRowDef="let row; columns: displayedColumns;" (click)="rowClick(row)" [ngClass]="{'table-mark-row': selectedRows.includes(row)}"></tr>
 </table>
+  <div class="table-status-bar">
+    <span>Selected: {{selectedRows.length}} rows</span>
+    <span *ngIf="maxPage > 1">
+        <button (click)="currentPage = 0"><<</button>
+        <button (click)="incPage(-1)"><</button>
+        <input type="number" [(ngModel)]="currentPage" [min]="1" [max]="maxPage">
+        <button (click)="incPage(1)">></button>
+        <button (click)="changePage(maxPage)">>></button>
+      </span>
+  </div>
+  <span class="hint">{{pHint}}</span>
+</div>
+<ng-template #dlg>
+  <button (click)="clearSelect()" class="gm-remove_done"></button>
+  <button (click)="refresh()" class="gm-refresh"></button>
+  <button (click)="headerClick()" class="gm-view_column"></button>
+  <button (click)="showSearchDialog()" class="gm-search"></button>
+  <button (click)="editRow()" class="gm-edit"></button>
+  <button (click)="viewRow()" class="gm-tv"></button>
+  <button (click)="addRow()" class="gm-add"></button>
+  <button (click)="deleteRows()" class="gm-delete"></button>
+</ng-template>

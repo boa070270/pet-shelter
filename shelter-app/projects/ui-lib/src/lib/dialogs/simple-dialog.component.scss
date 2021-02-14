@@ -40,4 +40,34 @@
   justify-content: space-around;
   align-content: space-around;
 }
-
+.border-dialog {
+  padding: 5px;
+  border: {
+    radius: 5px;
+    style: solid;
+    width: 1px;
+  }
+}
+.border-info-color {
+  @extend .border-dialog;
+  border: {
+    color: $info-color;
+  }
+}
+.border-warn-color {
+  @extend .border-dialog;
+  border: {
+    color: $warn-color;
+  }
+}
+.border-error-color {
+  @extend .border-dialog;
+  border: {
+    color: $error-color;
+  }
+}
+.snake-dialog {
+  button {
+    display: inline-block;
+  }
+}

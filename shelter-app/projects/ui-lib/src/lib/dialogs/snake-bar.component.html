@@ -1,0 +1,4 @@
+<div class="{{dialogBorderClass}} snake-dialog">
+  <span [ngClass]="iconClasses" class="dialog-caption"></span><span>{{ caption }}</span>
+  <span class="dialog-message" *ngIf="!swagger">{{data}}</span>
+</div>
