@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {FieldValueType, PetType} from './types';
 import {BasicService} from '../basic.service';
 import {FieldsService} from '../fields.service';
-import {BaseDataSource, ShowMediaType, UIDataSource} from 'ui-lib';
+import {AbstractDataSource, BaseDataSource, ShowMediaType, UIDataSource} from 'ui-lib';
 import {SystemLang} from 'ui-lib';
 import {ActivatedRoute} from '@angular/router';
 import {of} from 'rxjs';

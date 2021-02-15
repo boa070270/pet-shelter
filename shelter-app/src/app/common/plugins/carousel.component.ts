@@ -1,8 +1,7 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {BaseDataSource} from 'ui-lib';
+import {BaseDataSource, SystemLang} from 'ui-lib';
 import {CarouselType} from '../types';
 import {BasicService} from '../../basic.service';
-import {SystemLang} from 'ui-lib';
 import {tap} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
 import {ViewportRuler} from '@angular/cdk/overlay';

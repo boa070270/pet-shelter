@@ -3,7 +3,7 @@ import {BaseComponent} from './base.component';
 import {SystemLang} from '../i18n';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {TitleType} from '../shared';
-import {Directionality} from "@angular/cdk/bidi";
+import {Directionality} from '@angular/cdk/bidi';
 
 export const INPUT_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -177,9 +177,12 @@ export class InputControlComponent extends BaseComponent implements OnInit, OnDe
   }
   writeValue(obj: any): void {
     console.log('InputControlComponent.writeValue', obj);
-    this.value = (obj !== undefined && isNaN(obj) && typeof obj !== 'object') ? obj.toString() : null;
+    this.value = obj;
   }
-
+  setDisabledState(isDisabled: boolean): void {
+    super.setDisabledState(isDisabled);
+    console.log('InputControlComponent.setDisabledState', isDisabled);
+  }
   onChange($event: Event): void {
     if (typeof this.change === 'function') {
       console.log('InputControlComponent.onChange(this.value)');

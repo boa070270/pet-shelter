@@ -1,20 +1,12 @@
-import {
-  AfterContentChecked,
-  AfterContentInit, AfterViewChecked, AfterViewInit,
-  Component,
-  forwardRef,
-  Host,
-  Input, OnChanges,
-  OnDestroy,
-  OnInit,
-  Optional, SimpleChanges,
-  SkipSelf
-} from '@angular/core';
+import {AfterContentInit, AfterViewInit, Component, forwardRef, Input, OnDestroy, OnInit} from '@angular/core';
 import {
   coerceToSwaggerArray,
   coerceToSwaggerNative,
-  coerceToSwaggerObject, CommonConstrictions, SwaggerCustomUI,
-  SwaggerGroupComponent, SwaggerNative,
+  coerceToSwaggerObject,
+  CommonConstrictions,
+  SwaggerCustomUI,
+  SwaggerGroupComponent,
+  SwaggerNative,
   SwaggerObject,
   SwaggerSchema
 } from '../shared';
@@ -53,12 +45,14 @@ export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
   styleUrls: ['./swagger-form.component.scss'],
   providers: [SWAGGER_FORM_VALUE_ACCESSOR]
 })
+// tslint:disable-next-line:max-line-length
 export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDestroy, AfterContentInit, AfterViewInit, ControlValueAccessor {
-  @Input() swagger: SwaggerSchema;
+  @Input() swagger: SwaggerObject;
   @Input() propertyId: string;
   @Input() nameControl: string;
   @Input() required: boolean;
   @Input() pFormGroup: FormGroup;
+  @Input() readOnly: boolean;
   properties: Array<{propertyId: string, controlType: string, required: boolean, control?: AbstractControl}> = [];
   formGroup: FormGroup;
 
@@ -74,6 +68,9 @@ export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDe
         this.formGroup.addControl(p.propertyId, p.control);
       }
     });
+    if (this.readOnly) {
+      this.formGroup.disable();
+    }
   }
 
   ngAfterViewInit(): void {

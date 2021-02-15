@@ -1,7 +1,7 @@
 import {Injectable, OnDestroy} from '@angular/core';
 import {HttpClient, HttpEvent, HttpHeaders, HttpResponse} from '@angular/common/http';
 import {Observable, Subscription} from 'rxjs';
-import {BaseDataSource, BrowserStorageService} from 'ui-lib';
+import {AbstractDataSource, BaseDataSource, BrowserStorageService} from 'ui-lib';
 import {map} from 'rxjs/operators';
 import {
   BannerType,

@@ -26,6 +26,7 @@ export class SimpleDialogComponent implements OnDestroy {
   btnCancel: string;
   iconClasses: any;
   dialogBorderClass: string;
+  disabled: boolean;
   @ViewChild(SwaggerFormComponent) form: SwaggerFormComponent;
   private subscription: Subscription;
 
@@ -41,7 +42,9 @@ export class SimpleDialogComponent implements OnDestroy {
       this.data = dialogData.data;
       this.caption = dialogData.caption;
       this.action = dialogData.action;
+      this.disabled = dialogData.readOnly;
       this.iconClasses = {};
+      this.dialogBorderClass = 'border-dialog';
       if (dialogData.icon) {
         this.iconClasses[dialogData.icon] = true;
       }
@@ -86,7 +89,7 @@ export class SimpleDialogComponent implements OnDestroy {
   }
   save(): void {
     if (this.swagger) {
-      if (this.form.formGroup.valid) {
+      if (this.form.formGroup.valid || this.form.formGroup.disabled) {
         console.log('SimpleDialogComponent.save', this.form.formGroup.value);
         this.dialogRef.close(this.form.formGroup.value);
       }

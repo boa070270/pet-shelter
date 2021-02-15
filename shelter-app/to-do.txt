@@ -15,8 +15,17 @@
 
 Done: - Task! DataSource need to know how update/add/delete rows
 
-- Table! need to ask on delete
+Done: Table! need to ask on delete
 
 - Task! Exclude material
 
-- BUG! The dialog do not work!
+Done: BUG! The dialog do not work!
+Done: Task! needs text formatting function
+
+- Task! table-component needs to be readable only
+- Task! table-component needs to take custom form to edit/view/add
+
+Task! need to takeout all configurations texts to a naw service, than this service will take this texts from backend
+  - TableComponent
+
+BUG! Swagger form do not validate number, allow input string

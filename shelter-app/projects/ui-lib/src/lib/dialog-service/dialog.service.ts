@@ -130,12 +130,16 @@ export class DialogService implements OnDestroy {
     this.openSnakeBar(extData);
   }
   snakeFromComponent<T>(component: ComponentType<T>, config?: DialogConfig): DialogRef<any> {
-    config.position = {bottom: '0'};
-    return this.openFromComponent(component, config);
+    const cfg = config || {};
+    cfg.position = {bottom: '0'};
+    cfg.hasBackdrop = false;
+    return this.openFromComponent(component, cfg);
   }
   snakeFromTemplate<T>(template: TemplateRef<T>, config?: DialogConfig): DialogRef<any> {
-    config.position = {bottom: '0'};
-    return this.openFromTemplate(template, config);
+    const cfg = config || {};
+    cfg.position = {bottom: '0'};
+    cfg.hasBackdrop = false;
+    return this.openFromTemplate(template, cfg);
   }
   /** Stream that emits when all dialogs are closed. */
   _getAfterAllClosed(): Observable<void> {

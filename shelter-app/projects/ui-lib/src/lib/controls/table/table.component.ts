@@ -2,7 +2,7 @@ import {Component, ElementRef, Input, OnDestroy, OnInit, TemplateRef, ViewChild}
 import {TableProviderService} from './table-provider.service';
 import {DialogService} from '../../dialog-service';
 import {
-  BaseDataSource, CdkDataSource, PagingSize,
+  AbstractDataSource, CdkDataSource, PagingSize,
   coerceToSwaggerNative,
   ExtendedData, IOrder,
   SwaggerNative,
@@ -39,7 +39,7 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
   @Input()
   displayedNames: {[column: string]: string | TitleType[]};
   @Input()
-  dataSource: BaseDataSource<any>;
+  dataSource: AbstractDataSource<any>;
   private cdkDataSource: CdkDataSource<any>;
   displayedColumns: string[];
   allColumns: string[];
@@ -158,28 +158,6 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
       this.dialogTimer = null;
     }
   }
-  editRow(): void {
-    console.log('Table.editRow');
-    this.closeDialog();
-    if (this.swagger) {
-      this.dialogService.openExtDialog(ExtendedData.create(this.currentRow, false, this.swagger, 'save_cancel'))
-        .afterClosed().subscribe( row => {
-          if (row) {
-            this.dataSource.updateRow(row).subscribe( () => {
-              this.dialogService.snakeInfo('Row was updated');
-            });
-          }
-        });
-    }
-  }
-
-  viewRow(): void {
-    console.log('Table.viewRow');
-    this.closeDialog();
-    if (this.swagger) {
-      this.dialogService.openExtDialog(ExtendedData.create(this.currentRow, true, this.swagger, 'save_cancel'));
-    }
-  }
 
   rowClick(row: any): void {
     this.currentRow = row;
@@ -190,26 +168,52 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
       this.selectedRows.push(row);
     }
     this.closeDialog();
-    this.dialogRef = this.dialogService.snakeFromTemplate(this.dlgTemplate, {hasBackdrop: false});
+    this.dialogRef = this.dialogService.snakeFromTemplate(this.dlgTemplate);
     this.dialogTimer = setTimeout(() => { this.closeDialog(); }, 5000);
   }
 
   clearSelect(): void {
     this.cdkDataSource.clearSelectedRows();
-  }
-
-  refresh(): void {
-    if (this.dataSource && typeof (this.dataSource as any).refresh === 'function') {
-      (this.dataSource as any).refresh();
-    }
     this.closeDialog();
   }
 
+  refresh(): void {
+    this.cdkDataSource.refresh();
+    this.closeDialog();
+  }
+
+  editRow(): void {
+    this.closeDialog();
+    if (this.swagger) {
+      this.dialogService.openExtDialog(ExtendedData.create(this.currentRow, false, this.swagger, 'save_cancel'))
+        .afterClosed().subscribe( row => {
+        if (row) {
+          this.cdkDataSource.updateRow(row).subscribe( () => {
+            this.dialogService.snakeInfo('Row was updated');
+          });
+        }
+      });
+    }
+  }
+
+  viewRow(): void {
+    this.closeDialog();
+    if (this.swagger) {
+      this.dialogService.openExtDialog(ExtendedData.create(this.currentRow, true, this.swagger, 'ok'));
+    }
+  }
   addRow(): void {
     console.log('Table.addRow');
     this.closeDialog();
     if (this.swagger) {
-      this.dialogService.openExtDialog(ExtendedData.create({}, true, this.swagger, 'save_cancel'));
+      this.dialogService.openExtDialog(ExtendedData.create({}, false, this.swagger, 'save_cancel'))
+        .afterClosed().subscribe( row => {
+        if (row) {
+          this.cdkDataSource.insertRow(row).subscribe( () => {
+            this.dialogService.snakeInfo('Row was inserted');
+          });
+        }
+      });
     }
   }
   deleteRows(): void {

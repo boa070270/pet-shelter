@@ -86,7 +86,7 @@ function simpleEquals(o1: any, o2: any): boolean {
   }
   return false;
 }
-export abstract class BaseDataSource<T> {
+export abstract class AbstractDataSource<T> {
   protected readonly consumers: Map<CdkDataSource<T>, Subject<T[]>> = new Map<CdkDataSource<T>, Subject<T[]>>();
   protected data: T[];
   protected lastModified: Date;
@@ -147,7 +147,7 @@ export abstract class BaseDataSource<T> {
     return of({totalAll: this.total, totalFiltered: this.total, data: [], responseTime: this.lastModified});
   }
 }
-export class ArrayDataSource extends BaseDataSource<any> {
+export class ArrayDataSource extends AbstractDataSource<any> {
   constructor(data: any[],
               protected minSize: number = 20,
               protected maxSize: number = 200,
@@ -199,7 +199,7 @@ export class ArrayDataSource extends BaseDataSource<any> {
  *    - every different filter or sort will has a different result
  *    - queries that do not have filter nor sort can obtain a result from cache
  */
-export class MainDataSource<T> extends BaseDataSource<T>{
+export class MainDataSource<T> extends AbstractDataSource<T>{
   private readonly workers: LoaderWorker<T>[];
   // private subscription: Subscription; TODO need to unsubscribe all waste
   private externalModified: boolean;
@@ -365,7 +365,7 @@ export class CdkDataSource<T> extends DataSource<T> {
     return this.main.totalRecords;
   }
   private subscription: Subscription;
-  constructor(private main: BaseDataSource<T>) {
+  constructor(private main: AbstractDataSource<T>) {
     super();
   }
   connect(collectionViewer: CollectionViewer): Observable<T[] | ReadonlyArray<T>> {

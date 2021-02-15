@@ -2,10 +2,10 @@ import {
   AfterViewInit,
   Component,
   ComponentRef,
-  forwardRef,
+  forwardRef, Host,
   Input,
-  OnChanges,
-  OnInit,
+  OnChanges, OnDestroy,
+  OnInit, Optional, Self,
   SimpleChanges,
   ViewChild
 } from '@angular/core';
@@ -17,9 +17,17 @@ import {
   SwaggerNative,
   SwaggerSchema
 } from '../shared';
-import {ControlValueAccessor, FormGroup, NG_VALUE_ACCESSOR} from '@angular/forms';
+import {
+  AbstractControl,
+  ControlValueAccessor,
+  FormControl,
+  FormControlDirective,
+  FormGroup,
+  NG_VALUE_ACCESSOR
+} from '@angular/forms';
 import {CdkPortalOutlet, ComponentPortal} from '@angular/cdk/portal';
 import {BaseComponent, CheckboxControlComponent, InputControlComponent, ListBuilderComponent} from '../controls';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'lib-swagger-native',
@@ -34,15 +42,18 @@ import {BaseComponent, CheckboxControlComponent, InputControlComponent, ListBuil
     multi: true
   }]
 })
-export class SwaggerNativeComponent implements OnInit, OnChanges, SwaggerComponent, AfterViewInit, ControlValueAccessor {
+export class SwaggerNativeComponent implements OnInit, OnChanges, OnDestroy, SwaggerComponent, AfterViewInit, ControlValueAccessor {
   @Input() swagger: SwaggerSchema;
   @Input() propertyId: string;
   @Input() required: boolean;
   @Input() pFormGroup: FormGroup;
   @ViewChild(CdkPortalOutlet, {static: true}) portalOutlet: CdkPortalOutlet;
   private componentRef: ComponentRef<BaseComponent>;
+  private statusSubs: Subscription;
+  private formControl: AbstractControl;
 
-  constructor(private componentsPlugin: ComponentsPluginService) {}
+  constructor(private componentsPlugin: ComponentsPluginService) {
+  }
 
   writeValue(obj: any): void {
      if (this.componentRef) {
@@ -66,9 +77,16 @@ export class SwaggerNativeComponent implements OnInit, OnChanges, SwaggerCompone
   }
 
   ngOnInit(): void {
-    // console.log('SwaggerNativeComponent.ngOnInit', this.swagger, this.propertyId);
     this.defineControlType();
-    // console.log('SwaggerNativeComponent.ngOnInit.after', this.swagger, this.propertyId, this.swaggerType);
+    if (this.pFormGroup && this.pFormGroup.controls) {
+      this.formControl = this.pFormGroup.controls[this.propertyId];
+
+      if (this.formControl) {
+        this.statusSubs = this.formControl.statusChanges.subscribe(status => {
+          this.onStatusChange(status);
+        });
+      }
+    }
   }
   ngOnChanges(changes: SimpleChanges): void {
     // console.log('SwaggerNativeComponent.ngOnChanges', changes);
@@ -76,6 +94,13 @@ export class SwaggerNativeComponent implements OnInit, OnChanges, SwaggerCompone
   ngAfterViewInit(): void {
     // console.log('SwaggerNativeComponent.ngAfterViewInit', this.swagger);
   }
+  ngOnDestroy(): void {
+    if (this.statusSubs) {
+      this.statusSubs.unsubscribe();
+      this.statusSubs = null;
+    }
+  }
+
   private defineControlType(): void {
     const swagger = this.swagger as SwaggerNative;
     if (swagger) {
@@ -108,6 +133,23 @@ export class SwaggerNativeComponent implements OnInit, OnChanges, SwaggerCompone
       }
     } else {
       console.log('SwaggerNativeComponent: No swagger');
+    }
+  }
+
+  private onStatusChange(status: any): void {
+    console.log('SwaggerNativeComponent.onStatusChange', status, typeof status);
+    switch (status) {
+      case 'VALID': // This control has passed all validation checks.
+        break;
+      case 'INVALID' : // This control has failed at least one validation check.
+        break;
+      case 'PENDING' : // This control is in the midst of conducting a validation check.
+        break;
+      case 'DISABLED' : // This control is exempt from validation checks.
+        break;
+    }
+    if (status === 'INVALID') {
+      console.log('SwaggerNativeComponent', this.formControl.errors);
     }
   }
 }
