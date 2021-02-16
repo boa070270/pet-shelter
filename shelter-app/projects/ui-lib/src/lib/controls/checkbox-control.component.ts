@@ -3,7 +3,7 @@ import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SystemLang} from '../i18n';
 import {BaseComponent} from './base.component';
 import {TitleType} from '../shared';
-import {Directionality} from "@angular/cdk/bidi";
+import {Directionality} from '@angular/cdk/bidi';
 
 export const CHECKBOX_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,

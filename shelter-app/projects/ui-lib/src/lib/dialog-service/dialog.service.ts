@@ -1,8 +1,8 @@
 import {
   ComponentRef,
-  Inject,
   Injectable,
-  Injector, OnDestroy,
+  Injector,
+  OnDestroy,
   Optional,
   SkipSelf,
   StaticProvider,
@@ -14,7 +14,7 @@ import {ComponentType, Overlay, OverlayConfig, OverlayRef, ScrollStrategy} from 
 import {DialogRef} from './dialog-ref';
 import {defer, Observable, of as observableOf, Subject} from 'rxjs';
 import {startWith} from 'rxjs/operators';
-import {DIALOG_CONFIG, DIALOG_CONTAINER, DIALOG_DATA, DIALOG_REF, DIALOG_SCROLL_STRATEGY} from './dialog-injectors';
+import {DIALOG_CONTAINER, DIALOG_DATA, DIALOG_REF} from './dialog-injectors';
 import {Location} from '@angular/common';
 import {DialogConfig} from './dialog-config';
 import {CdkDialogContainer} from './dialog-container';
@@ -166,6 +166,13 @@ export class DialogService implements OnDestroy {
     this.openDialogs.forEach(ref => ref.close());
   }
 
+  open<T>(compOrTemplate: ComponentType<T> | TemplateRef<T>, config?: DialogConfig): DialogRef<any> {
+    if (compOrTemplate instanceof TemplateRef) {
+      return this.openFromTemplate(compOrTemplate, config);
+    } else {
+      return this.openFromComponent(compOrTemplate, config);
+    }
+  }
   /** Opens a dialog from a component. */
   openFromComponent<T>(component: ComponentType<T>, config?: DialogConfig): DialogRef<any> {
     config = this._applyConfigDefaults(config);

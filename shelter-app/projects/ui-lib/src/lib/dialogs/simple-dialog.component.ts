@@ -5,6 +5,7 @@ import {SwaggerObject, TitleType, ActionType, ExtendedData} from '../shared';
 import {SwaggerFormComponent} from '../swagger-form';
 import {Subscription} from 'rxjs';
 
+// i18n
 const DEF_TITLE_OK: TitleType[] = [{lang: 'en', title: 'Ok'}, {lang: 'uk', title: 'Tak'}];
 const DEF_TITLE_CANCEL: TitleType[] = [{lang: 'en', title: 'Cancel'}, {lang: 'uk', title: 'Відміна'}];
 const DEF_TITLE_YES: TitleType[] = [{lang: 'en', title: 'Yes'}, {lang: 'uk', title: 'Tak'}];

@@ -7,8 +7,9 @@ import {ListSelectComponent} from './list-select.component';
 import {BaseComponent} from './base.component';
 import {TitleType} from '../shared';
 import {CheckboxParameters} from './checkbox-control.component';
-import {Directionality} from "@angular/cdk/bidi";
+import {Directionality} from '@angular/cdk/bidi';
 
+// i18n
 const DEF_REMOVE_TITLES: TitleType[] = [{lang: 'en', title: 'Remove'}, {lang: 'uk', title: 'Видалити'}];
 const DEF_ADD_TITLES: TitleType[] = [{lang: 'en', title: 'Add'}, {lang: 'uk', title: 'Добавити'}];
 const DEF_UP_TITLES: TitleType[] = [{lang: 'en', title: 'Up'}, {lang: 'uk', title: 'Вгору'}];

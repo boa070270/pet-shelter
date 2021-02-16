@@ -8,3 +8,5 @@ export * from './dynamic';
 export * from './dialog-api';
 export * from './cdk-data-source';
 export * from './list-range-helper';
+export * from './dictionary.service';
+export * from './utils';

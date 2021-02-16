@@ -14,6 +14,7 @@ import {CdkTableModule} from '@angular/cdk/table';
 import {ListBuilderComponent} from './list-builder.component';
 import {ListSelectComponent} from './list-select.component';
 import { BidiModule } from '@angular/cdk/bidi';
+import { ChoiceFormatPipe } from './choice-format.pipe';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { BidiModule } from '@angular/cdk/bidi';
     TableComponent,
     ListBuilderComponent,
     ListSelectComponent,
+    ChoiceFormatPipe,
   ],
   imports: [
     CommonModule,

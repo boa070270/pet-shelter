@@ -1,6 +1,5 @@
-import {isTitleType, LanguageType, ObtainSystemLanguage, TitleType} from '../shared';
+import {BrowserStorageService, I18NType, isTitleType, LanguageType, ObtainSystemLanguage, TitleType} from '../shared';
 import {EventEmitter, Inject, Injectable, OnDestroy} from '@angular/core';
-import {BrowserStorageService} from '../shared';
 import {Subscription} from 'rxjs';
 
 const KEY_LANGUAGES = 'SystemLanguages';
@@ -47,13 +46,6 @@ export class SystemLang implements OnDestroy {
   getLanguages(): LanguageType[] {
     return this.languages;
   }
-  getDisplayName(lang: string): string {
-    for (const l of this.languages) {
-      if (l.lang === lang) {
-        return l.displayName;
-      }
-    }
-  }
   setLocale(locale: string): void {
     this.locale = locale;
     this.storage.set(KEY_LOCALE, this.locale);
@@ -80,5 +72,22 @@ export class SystemLang implements OnDestroy {
       return (titles as TitleType).title;
     }
   }
-
+  i18n(src: I18NType): any {
+    if (typeof src === 'object' && src !== null) {
+      const result = {};
+      for (const [key, value] of Object.entries(src)) {
+        if (typeof value === 'string') {
+          result[key] = value;
+        } else if (Array.isArray(value)) {
+          result[key] = this.getTitle(value);
+        } else {
+          const r = this.i18n(value);
+          if (r) {
+            result[key] = r;
+          }
+        }
+      }
+      return result;
+    }
+  }
 }

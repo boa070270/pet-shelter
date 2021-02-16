@@ -10,3 +10,4 @@ export * from './list-builder.component';
 export * from './list-select.component';
 export * from './table/table.component';
 export * from './table/table-provider.service';
+export * from './choice-format.pipe';

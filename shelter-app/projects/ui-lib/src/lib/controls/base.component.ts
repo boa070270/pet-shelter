@@ -1,7 +1,7 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
+import {Component, Inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
 import {SystemLang} from '../i18n';
 import {Subscription} from 'rxjs';
-import {distinctTitleId, isTitleType, TitleType} from '../shared';
+import {distinctTitleId, I18NType, isTitleType, TitleType} from '../shared';
 import {ControlValueAccessor} from '@angular/forms';
 import {Directionality} from '@angular/cdk/bidi';
 
@@ -18,7 +18,8 @@ export interface CommonParameters {
 }
 @Component({
   selector: 'lib-base',
-  template: ''
+  template: '',
+  providers: [{provide: 'i18NCfg', useValue: null}]
 })
 export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
   // tslint:disable-next-line:variable-name
@@ -93,13 +94,16 @@ export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValue
   pHint: string;
   pCaption: string;
   pError: string;
+  i18n: any;
   private subsLang: Subscription;
   private subsDir: Subscription;
   protected change: (_: any) => {};
   protected touch: () => {};
+  private readonly i18NCfg: I18NType;
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
+  constructor(public systemLang: SystemLang, protected directionality: Directionality, @Inject('i18NCfg') i18NCfg?: I18NType) {
     this.dir = directionality.value;
+    this.i18NCfg = i18NCfg;
     this.subsDir = directionality.change.subscribe(d => {
       this.dir = d;
     });
@@ -112,11 +116,10 @@ export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValue
 
 
   ngOnInit(): void {
-    this.pCaption = this.doIfNeedI18n(this.caption);
+    this.onChangeLang();
     if (!this.pCaption && this.common.nameAsCaption) {
       this.pCaption = this.name;
     }
-    this.pHint = this.doIfNeedI18n(this.hint) as string;
   }
   ngOnChanges(changes: SimpleChanges): void {
     console.log('BaseControlComponent.ngOnChanges', this, changes);
@@ -141,6 +144,7 @@ export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValue
     this.pHint = this.doIfNeedI18n(this.hint) as string;
     this.pCaption = this.doIfNeedI18n(this.caption);
     this.pError = this.doIfNeedI18n(this.error);
+    this.i18n = this.systemLang.i18n(this.i18NCfg);
   }
 
   /**

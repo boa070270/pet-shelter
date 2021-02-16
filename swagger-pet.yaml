@@ -35,9 +35,15 @@ basePath: /api/v1
 schemes:
     - http
     - https
-
+parameters:
+    X-Client-ID:
+        in: header
+        name: x-client-id
+        type: string
 paths:
     /lang:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: lang
         get:
             x-query: 'select lang, display_name as "displayName", rate from shelter_lang'
@@ -106,6 +112,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /lang/{lang}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: lang
         delete:
             x-query: 'delete from shelter_lang where lang = :lang'
@@ -140,6 +148,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /menu:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: menu
         get:
             x-query:
@@ -248,6 +258,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /menu/{path}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: menu
         get:
             x-query:
@@ -322,6 +334,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /fields:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: pets
         get:
             x-query:
@@ -354,10 +368,11 @@ paths:
                     CAST(:fields.name as VARCHAR) as name,
                     CAST(:fields.type as VARCHAR) as type,
                     CAST(:fields.subtype as VARCHAR) as subtype,
-                    CAST(:fields.enumValues as VARCHAR) as enum_values
+                    CAST(:fields.enumValues as VARCHAR) as enum_values,
+                    CAST(:fields.order as INTEGER) as fld_order
                 ), upd as (
                     UPDATE pets_fields f
-                    SET type = d.type, subtype = d.subtype, enum_values = d.enum_values
+                    SET type = d.type, subtype = d.subtype, enum_values = d.enum_values, fld_order = d.fld_order
                     FROM data d
                     WHERE f.name = d.name
                     RETURNING f.*
@@ -408,6 +423,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /fields/{id}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: pets
         delete:
             x-query: >
@@ -449,6 +466,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /assets/{id}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: large-objects
         get:
             summary: Get stored resource by id
@@ -479,6 +498,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /files:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: large-objects
         post:
             summary: Upload file
@@ -495,7 +516,13 @@ paths:
                 -   in: formData
                     name: upfile
                     type: file
+                    required: true
                     description: The file to upload.
+                -   in: formData
+                    name: comment
+                    type: string
+                    required: false
+                    description: The comment to file
             responses:
                 200:
                     x-payload: 'data.id'
@@ -513,7 +540,7 @@ paths:
         get:
             x-query: >
                 SELECT
-                     s.id, original_name as "originalName", encoding, mimetype as "mimeType", size, created,
+                     s.id, original_name as "originalName", encoding, mimetype as "mimeType", size, created, comment,
                      COALESCE(n.num, 0) as "numberOfReferences"
                 FROM storage_lob s
                           left join (
@@ -553,6 +580,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /files/{id}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: large-objects
         get:
             x-query:
@@ -647,6 +676,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /carousel/{resource}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: banner
         get:
             x-query:
@@ -810,6 +841,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /pets/{id}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: pets
         get:
             x-query:
@@ -880,6 +913,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /search:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: search
         get:
             summary: Search by all site
@@ -890,28 +925,26 @@ paths:
                 - public
             parameters:
                 -   in: query
+                    name: index
+                    required: false
+                    type: string
+                -   in: query
                     name: lang
                     required: false
                     type: string
-                    default: uk
                 -   in: query
                     name: query
                     required: false
                     type: string
                     description: the query to search
                 -   in: query
-                    type: string
-                    name: tag
                     required: false
-                    description: this parameter restrict to return only pages with the same tag
-                -   in: query
-                    required: false
-                    name: count
+                    name: size
                     type: integer
                     default: 10
                 -   in: query
-                    type: string
-                    name: scrollId
+                    type: integer
+                    name: from
                     required: false
             responses:
                 200:
@@ -924,6 +957,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /search-pet:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: search
         post:
             summary: Search by all site
@@ -933,6 +968,15 @@ paths:
             tags:
                 - public
             parameters:
+                -   in: query
+                    required: false
+                    name: size
+                    type: integer
+                    default: 10
+                -   in: query
+                    type: integer
+                    name: from
+                    required: false
                 -   in: body
                     name: query
                     required: true
@@ -949,6 +993,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /banners:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: banner
         get:
             x-query: >
@@ -1052,6 +1098,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /banners/{id}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: banner
         delete:
             x-query: 'DELETE FROM banner WHERE id = :id'
@@ -1086,10 +1134,12 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /page:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: pages
         get:
             x-query: >
-                select id, lang, title, summary, body, created, score, draft, tags, restriction,
+                select id, lang, title, summary, body, created, score, draft, tags, restriction, menu_id
                              a.id_asset as "refId", a.tooltip, s.mimetype as "mimeType"
                 from pages p, page_attachment a, storage_lob s
                 WHERE p.id = a.id_page and a.id_asset = s.id
@@ -1120,8 +1170,8 @@ paths:
                         $ref: '#/definitions/StatusType'
         post:
             x-query:
-              - insert into pages(id, lang, title, summary, body, score, draft, tags, restriction)
-                values(:page.id, :page.lang,:page.title, :page.summary, :page.body, :page.score, :page.draft, :page.tags, :page.restriction)
+              - insert into pages(id, lang, title, summary, body, score, draft, tags, restriction, menu_id
+                values(:page.id, :page.lang,:page.title, :page.summary, :page.body, :page.score, :page.draft, :page.tags, :page.restriction, :page.menuId)
               - insert into page_attachment(id_page, id_asset, tooltip)
                 values(:page.id, :page.ref.refId, :page.ref.tooltip)
             summary: add page
@@ -1158,7 +1208,7 @@ paths:
             x-query:
               - UPDATE pages SET
                 modified = now(), title = :page.title, summary = :page.summary, body = :page.body, score = :page.score,
-                draft = :page.draft, tags := :page.tags, restriction = :page.restriction, lang = :page.lang
+                draft = :page.draft, tags := :page.tags, restriction = :page.restriction, lang = :page.lang, path = :path
                 WHERE id = :page.id
               - DELETE from page_attachment WHERE id_page = :page.id
               - insert into page_attachment(id_page, id_asset, tooltip)
@@ -1193,8 +1243,82 @@ paths:
                     description: Internal server error
                     schema:
                         $ref: '#/definitions/StatusType'
-    /page/{id}:
+    /page-to-path:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: pages
+        get:
+            x-query: >
+                select id, lang, title, summary, body, created, score, draft, tags, restriction,
+                             a.id_asset as "refId", a.tooltip, s.mimetype as "mimeType"
+                from pages p, page_attachment a, storage_lob s
+                WHERE p.id = a.id_page and a.id_asset = s.id and p.path = {:path}
+            summary: Get page for menu path
+            operationId: getPageMenu
+            tags:
+                - public
+            produces:
+                - application/json
+            parameters:
+                -   in: query
+                    name: menuId
+                    required: true
+                    type: string
+                    description: path of page
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: one page if present
+                    schema:
+                        $ref: '#/definitions/PagesResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                404:
+                    description: Not found
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /page/{id}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
+        x-swagger-router-controller: pages
+        get:
+            x-query: >
+                select id, lang, title, summary, body, created, score, draft, tags, restriction,
+                             a.id_asset as "refId", a.tooltip, s.mimetype as "mimeType"
+                from pages p, page_attachment a, storage_lob s
+                WHERE p.id = a.id_page and a.id_asset = s.id and p.id = {id}
+            summary: Get pages
+            operationId: getPage
+            tags:
+                - public
+            produces:
+                - application/json
+            parameters:
+                -   in: path
+                    name: id
+                    required: true
+                    type: string
+                    description: page id
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: one page
+                    schema:
+                        $ref: '#/definitions/PagesResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
         delete:
             x-query: "delete from pages where id = :id"
             summary: delete page
@@ -1227,7 +1351,38 @@ paths:
                     description: Internal server error
                     schema:
                         $ref: '#/definitions/StatusType'
+    /login:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
+        x-swagger-router-controller: users
+        get:
+            summary: Get user
+            operationId: login
+            tags:
+                - administrative
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin,writer]
+            produces:
+                - application/json
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: all users
+                    schema:
+                        $ref: '#/definitions/UserType'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
     /user:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: users
         get:
             summary: Get users
@@ -1244,7 +1399,7 @@ paths:
             responses:
                 200:
                     x-payload: 'data'
-                    description: all pages
+                    description: all users
                     schema:
                         $ref: '#/definitions/UsersResponse'
                 400:
@@ -1327,6 +1482,8 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
     /user/{login}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
         x-swagger-router-controller: users
         delete:
             summary: delete user
@@ -1360,6 +1517,270 @@ paths:
                     description: Internal server error
                     schema:
                         $ref: '#/definitions/StatusType'
+    /vote/{resId}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
+        x-swagger-router-controller: votes
+        get:
+            summary: Get votes
+            operationId: getVotes
+            x-query: >
+                with data as (select
+                cast(:resOd as varchar) resId,
+                cast(:x-client-id as uuid) clientId
+                ), me as (
+                     select vote_id, vote from votes, data where res_id = resId and browser_id = clientId
+                 ), gr as (
+                     select vote_id, vote, count(*) as cnt from votes, data where res_id = resId
+                     group by vote_id, vote
+                )
+                select 'me' as who, resId as "resId", vote_id as "voteId", vote, 1 as "count" from me, data
+                union
+                select 'all' as who, resId as "resId", vote_id as "voteId", vote, cnt as "count"  from gr, data
+            parameters:
+                -     in: path
+                      name: resId
+                      required: true
+                      type: string
+                      description: resource id
+            tags:
+                - public
+            produces:
+                - application/json
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: all users
+                    schema:
+                        $ref: '#/definitions/VotesResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        post:
+            summary: Vote
+            operationId: vote
+            x-query: >
+                with data as (select
+                cast(:resId as varchar) resId,
+                cast(:x-client-id as uuid) clientId,
+                cast(:voteId as int) voteId,
+                cast(:value as varchar) v
+                )
+                insert into votes(res_id, browser_id, vote_id, vote)
+                select resId, clientId, voteId, v from data
+                where not exists(select * from votes where res_id = resId and browser_id = clientId and vote_id = voteId)
+            tags:
+                - public
+            produces:
+                - application/json
+            parameters:
+                -     in: path
+                      name: resId
+                      required: true
+                      type: string
+                      description: resource id
+                -   in: body
+                    name: body
+                    description: vote
+                    required: true
+                    schema:
+                        type: object
+                        required:
+                            - vote
+                        properties:
+                            vote:
+                                type: string
+                                description: the value of vote
+                            voteId:
+                                type: number
+                                description: number of vote if resource has more than one
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /comment/{resId}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
+        x-swagger-router-controller: votes
+        get:
+            summary: Get comments
+            operationId: getComments
+            x-query: >
+                with recursive rcomments as (
+                select
+                id, created, res_id as "resId", nick_name as "nickName", comm_id as "commentId", comment
+                from comments where res_id = :resId and coalesce(comm_id, 'unknown') = coalesce(:commentId, comm_id, 'unknown')
+                union
+                select
+                c.id, c.created, c.res_id as "resId", c.nick_name as "nickName", c.comm_id as "commentId", c.comment
+                from comments c
+                inner join rcomments r on c.comm_id = r.id
+                ), vote_me as (
+                select r.id, vote from votes, rcomments r where res_id = r.id and browser_id = :clientId
+                ), vote_gr as (
+                select r.id, vote, count(*) as cnt from votes, rcomments r where res_id = r.id
+                group by r.id, vote
+                ), n as (
+                select "commentId", count(*) as "numberOf" from rcomments group by "commentId"
+                )
+                select r.*, n."numberOf", vote_gr.vote vote_gr_vote, vote_gr.cnt vote_gr_count, vote_me.vote vote_me from rcomments r
+                left join vote_gr on vote_gr.id = r.id
+                left join vote_me on vote_me.id = r.id
+                left join n n on n."commentId" = r.id
+                order by r."commentId" asc NULLS FIRST, r.created
+                OFFSET :from ROWS FETCH NEXT :size ROWS ONLY
+            parameters:
+                -     in: path
+                      name: resId
+                      required: true
+                      type: string
+                      description: resource id
+                -   in: query
+                    required: false
+                    name: commentId
+                    type: string
+                -   in: query
+                    required: false
+                    name: size
+                    type: integer
+                    default: 20
+                -   in: query
+                    type: integer
+                    name: from
+                    default: 0
+                    required: false
+            tags:
+                - public
+            produces:
+                - application/json
+            responses:
+                200:
+                    x-payload: 'data'
+                    description: all users
+                    schema:
+                        $ref: '#/definitions/CommentsResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        post:
+            summary: Add comment
+            operationId: addComment
+            x-query: >
+                with data as (select
+                cast(:resId as varchar) resId,
+                cast(:x-client-id as uuid) clientId,
+                cast(:comment as varchar) txt,
+                cast(:nickName as varchar) nick,
+                cast(:commentId as varchar) commentId,
+                cast(:newId as varchar) newId
+                )
+                insert into comments(id, res_id, browser_id, comm_id, comment, nick_name)
+                select newId, resId, clientId, commentId, txt, nick from data
+                returning id
+            tags:
+                - public
+            produces:
+                - application/json
+            parameters:
+                -     in: path
+                      name: resId
+                      required: true
+                      type: string
+                      description: resource id
+                -   in: body
+                    name: body
+                    description: body
+                    required: true
+                    schema:
+                        type: object
+                        required:
+                            - comment
+                        properties:
+                            comment:
+                                type: string
+                                description: the text of comment
+                            nickName:
+                                type: string
+                            commentId:
+                                type: string
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        put:
+            summary: Update comment
+            operationId: updateComment
+            x-query: update comments set comment = :comment where id = :commentId and browser_id = :x-client-id
+            tags:
+                - public
+            produces:
+                - application/json
+            parameters:
+                -     in: path
+                      name: resId
+                      required: true
+                      type: string
+                      description: comment id
+                -   in: body
+                    name: body
+                    description: body
+                    required: true
+                    schema:
+                        type: object
+                        required:
+                            - comment
+                            - commentId
+                        properties:
+                            comment:
+                                type: string
+                                description: the text of comment
+                            commentId:
+                                type: string
+                                description: id od comment
+            responses:
+                200:
+                    x-payload: 'data.id'
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
 definitions:
     StatusType:
         type: object
@@ -1370,7 +1791,7 @@ definitions:
             code:
                 type: integer
                 example: 0
-            detail:
+            details:
                 type: object
             message:
                 type: string
@@ -1426,7 +1847,7 @@ definitions:
                 type: string
                 example: public
             position:
-                type: number
+                type: integer
             parentId:
                 type: string
     TitleType:
@@ -1500,6 +1921,9 @@ definitions:
             subtype:
                 type: string
                 example: 'textarea'
+            order:
+                type: integer
+                description: define the order of displayed fields
             enumValues:
                 type: string
                 description: input an enum definition as words separated by a comma
@@ -1550,16 +1974,24 @@ definitions:
                 description: set of tags separated by comma defines what menu will expose this page
             restriction:
                 type: string
-                enum:
-                    - admin
-                    - writer
-                    - public
                 description: you can restrict the access to this page
                 example: admin, writer
+            menuId:
+                type: string
+                description: bind a page to menu
+            created:
+                type: string
             ref:
                 type: array
                 items:
                   $ref: '#/definitions/ReferenceType'
+    PageResponse:
+        type: object
+        properties:
+            data:
+                $ref: '#/definitions/PageType'
+            status:
+                $ref: '#/definitions/StatusType'
     PagesResponse:
         type: object
         properties:
@@ -1583,6 +2015,8 @@ definitions:
                 type: string
             created:
                 type: string
+            comment:
+                type: string
             numberOfReferences:
                 type: number
     FileResponse:
@@ -1593,18 +2027,19 @@ definitions:
                     file:
                         $ref: '#/definitions/FileType'
                     references:
-                        type: object
-                        properties:
-                            refId:
-                                type: string
-                            refType:
-                                type: string
-                                enum:
-                                    - banner
-                                    - page
-                                    - pet
-                            refName:
-                                type: string
+                        type: array
+                        items:
+                            properties:
+                                refId:
+                                    type: string
+                                refType:
+                                    type: string
+                                    enum:
+                                        - banner
+                                        - page
+                                        - pet
+                                refName:
+                                    type: string
             status:
                 $ref: '#/definitions/StatusType'
     FilesResponse:
@@ -1710,9 +2145,7 @@ definitions:
     PetTypeResponse:
         properties:
             data:
-                type: array
-                items:
-                    $ref: '#/definitions/PetType'
+                $ref: '#/definitions/PetType'
             status:
                 $ref: '#/definitions/StatusType'
     SearchType:
@@ -1720,27 +2153,65 @@ definitions:
         properties:
             id:
                 type: string
-                description: resource id (page or pet)
-            assertId:
+            resource:
                 type: string
-                description: id of image
+            lang:
+                type: string
+                description: page locale
             title:
                 type: string
-            subtitle:
+                description: page's title
+            summary:
                 type: string
-            content:
+                description: a summary of this page
+            body:
                 type: string
-            author:
+                description: page's body
+            score:
+                type: integer
+                description: can be use as position/order
+            draft:
+                type: boolean
+                description: mark page as a draft
+            tags:
+                type: string
+                description: set of tags separated by comma defines what menu will expose this page
+            restriction:
+                type: string
+                enum:
+                    - admin
+                    - writer
+                    - public
+                description: you can restrict the access to this page
+                example: admin, writer
+            ref:
+                type: array
+                items:
+                    $ref: '#/definitions/ReferenceType'
+            fields:
+                type: array
+                items:
+                    $ref: '#/definitions/FieldValueType'
+            originalName:
+                type: string
+            mimeType:
                 type: string
             created:
+                type: string
+            comment:
                 type: string
     SearchResponse:
         type: object
         properties:
             data:
-                type: array
-                items:
-                    $ref: '#/definitions/SearchType'
+                type: object
+                properties:
+                    scrollId:
+                        type: string
+                    data:
+                        type: array
+                        items:
+                            $ref: '#/definitions/SearchType'
             status:
                 $ref: '#/definitions/StatusType'
     QueryType:
@@ -1773,11 +2244,13 @@ definitions:
             password:
                 type: string
             role:
-                type: string
-                enum:
-                    - admin
-                    - writer
-                    - public
+                type: array
+                items:
+                    type: string
+                    enum:
+                        - admin
+                        - writer
+                        - public
             created:
                 type: string
             enabled:
@@ -1789,5 +2262,66 @@ definitions:
                 type: array
                 items:
                     $ref: '#/definitions/UserType'
+            status:
+                $ref: '#/definitions/StatusType'
+    VoteType:
+        type: object
+        properties:
+            who:
+                type: string
+            resId:
+                type: string
+            voteId:
+                type: number
+            vote:
+                type: string
+            count:
+                type: number
+    VotesResponse:
+        type: object
+        properties:
+            data:
+                type: array
+                items:
+                    $ref: '#/definitions/VoteType'
+            status:
+                $ref: '#/definitions/StatusType'
+    CommentType:
+        type: object
+        properties:
+            id:
+                type: string
+            created:
+                type: string
+            resId:
+                type: string
+            nickName:
+                type: string
+            commentId:
+                type: string
+            comment:
+                type: string
+            isMy:
+                type: boolean
+            vote:
+                type: array
+                items:
+                    $ref: '#/definitions/VoteType'
+            numberOf:
+                type: integer
+    CommentsResponse:
+        type: object
+        properties:
+            data:
+                type: object
+                properties:
+                    lastComment:
+                        type: string
+                    numberOf:
+                        type: integer
+                    responses:
+                        type: array
+                        items:
+                            $ref: '#/definitions/CommentType'
             status:
                 $ref: '#/definitions/StatusType'

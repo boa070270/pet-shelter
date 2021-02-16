@@ -5,6 +5,7 @@ import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {TitleType} from '../shared';
 import {Directionality} from '@angular/cdk/bidi';
 
+// i18n
 const TITLE_CTRL = [{id: 'b0', lang: 'uk', title: 'Багатомовність'}, {id: 'b0', lang: 'en', title: 'Multi language'}];
 @Component({
   selector: 'lib-title-type-control',
