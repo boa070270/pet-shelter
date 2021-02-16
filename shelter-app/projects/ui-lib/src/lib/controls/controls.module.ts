@@ -14,6 +14,7 @@ import {CdkTableModule} from '@angular/cdk/table';
 import {ListBuilderComponent} from './list-builder.component';
 import {ListSelectComponent} from './list-select.component';
 import { BidiModule } from '@angular/cdk/bidi';
+import { EditableListComponent } from './editable-list.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { BidiModule } from '@angular/cdk/bidi';
     TableComponent,
     ListBuilderComponent,
     ListSelectComponent,
+    EditableListComponent,
   ],
   imports: [
     CommonModule,
@@ -44,6 +46,7 @@ import { BidiModule } from '@angular/cdk/bidi';
     ListSelectComponent,
     TitleTypeControlComponent,
     TableComponent,
+    EditableListComponent,
   ]
 })
 export class ControlsModule {
@@ -59,6 +62,7 @@ export class ControlsModule {
     componentsPlugin.addPlugin('lib-input-control', {component: InputControlComponent, schema: null });
     componentsPlugin.addPlugin('input', {component: InputControlComponent, schema: null });
     componentsPlugin.addPlugin('lib-list-builder', {component: ListBuilderComponent, schema: null });
+    componentsPlugin.addPlugin('lib-editable-list', {component: EditableListComponent, schema: null });
     componentsPlugin.addPlugin('list-builder', {component: ListBuilderComponent, schema: null });
     componentsPlugin.addPlugin('lib-list-select', {component: ListSelectComponent, schema: null });
     componentsPlugin.addPlugin('list-select', {component: ListSelectComponent, schema: null });

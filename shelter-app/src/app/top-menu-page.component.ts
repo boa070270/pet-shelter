@@ -208,6 +208,7 @@ export class TopMenuPageComponent implements OnInit {
   tableData = new BehaviorSubject<any>(this.tableDataSet);
   tableColumns = this.tableColumnSet;
   listOptions = ['first', 'second', 'third', 'fifth', 'sixth'];
+  listOptions2 = ['first', 'second', 'third', 'fifth', 'sixth'];
   lustTitles: TitleType[] = [
     {id: 'first', lang: 'en', title: 'First element'},
     {id: 'first', lang: 'uk', title: 'First element'},
