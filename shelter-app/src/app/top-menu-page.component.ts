@@ -4,7 +4,7 @@ import {
   CommentResponse,
   CommentType,
   DialogService,
-  DiscussionMediator,
+  DiscussionMediator, EditableListComponent,
   ExtendedData,
   GeneratorFormComponent,
   SwaggerFormService,
