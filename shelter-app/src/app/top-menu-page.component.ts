@@ -187,7 +187,7 @@ export class TopMenuPageComponent implements OnInit {
         {
           childId: SwaggerNative.asString(),
           childDescription: SwaggerNative.asString(),
-          sex: SwaggerNative.asString(null, {enums: ['m', 'f']})
+          sex: SwaggerNative.asString(null, {enum: ['m', 'f']})
         })
       });
   /******* Table *******/

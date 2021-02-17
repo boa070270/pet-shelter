@@ -5,7 +5,7 @@ export interface CommonConstrictions {
   readOnly?: boolean;
   writeOnly?: boolean; // Maybe will be removed, has not any sense on client-side
   nullable?: boolean; // TODO Make a decision how to use it (maybe always required if true)
-  enums?: number[] | string[];
+  enum?: number[] | string[];
   enumDescriptions?: {[key: string]: string} | TitleType[];
   enumTooltips?: string[] | TitleType[];
   enumMulti?: boolean; // TODO This can be used in case swagger property has type array and simple type as item (with option uniqueItems)
@@ -90,8 +90,8 @@ export abstract class SwaggerNative extends SwaggerSchema {
     if (controlType) {
       this.ctrlType = controlType;
     } else {
-      if (constraints && constraints.enums) {
-        this.ctrlType = constraints.enums.length < 4 ? 'radio' : 'select';
+      if (constraints && constraints.enum) {
+        this.ctrlType = constraints.enum.length < 4 ? 'radio' : 'select';
       } else {
         this.ctrlType = 'input';
       }

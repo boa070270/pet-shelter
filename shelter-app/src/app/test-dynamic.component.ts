@@ -43,7 +43,7 @@ export class TestDynamicComponent implements OnInit {
         {
           childId: SwaggerNative.asString(),
           childDescription: SwaggerNative.asString(),
-          sex: SwaggerNative.asString( null, {enums: ['m', 'f']})
+          sex: SwaggerNative.asString( null, {enum: ['m', 'f']})
         })
       });
   @ViewChild('insertHere', {static: true}) insertHere: ElementRef<HTMLDivElement>;

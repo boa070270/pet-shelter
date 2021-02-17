@@ -184,7 +184,7 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
   tableSettings(): void {
     const extDate = ExtendedData.create({columns: this.displayedColumns}, false,
       new SwaggerObject(['columns'],
-        { columns: SwaggerNative.asString('list-builder', {enums: this.testTableService.columns})}),
+        { columns: SwaggerNative.asString('list-builder', {enum: this.testTableService.columns})}),
       'save_cancel', '');
     const dialogRef = this.dialogService.infoExtDialog(extDate, true);
     dialogRef.afterClosed().subscribe(v => {

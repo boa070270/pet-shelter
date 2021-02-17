@@ -109,8 +109,8 @@ export class SwaggerNativeComponent implements OnInit, OnChanges, OnDestroy, Swa
       const commonParams = {required: this.required, caption: ui.caption, hint: ui.description, name: this.propertyId};
       let componentName = swagger.controlType;
       if (!componentName) {
-        if (constrictions.enums) {
-          componentName = constrictions.enums.length < 4 ? 'radio' : 'select';
+        if (constrictions.enum) {
+          componentName = constrictions.enum.length < 4 ? 'radio' : 'select';
         }
         if (swagger.type === 'string' || swagger.type === 'number' || swagger.type === 'integer') {
           componentName = 'input';
@@ -128,7 +128,7 @@ export class SwaggerNativeComponent implements OnInit, OnChanges, OnDestroy, Swa
           inst.extraParams = {placeholder: ui.placeHolder, tooltip: ui.toolTip,
             leadingIcon: ui.leadingIcon, trailingIcon: ui.trailingIcon, type: constrictions.format};
         } else if (inst instanceof CheckboxControlComponent || inst instanceof ListBuilderComponent) {
-          inst.extraParams = {tooltips: constrictions.enumTooltips, options: constrictions.enums, titles: constrictions.enumDescriptions};
+          inst.extraParams = {tooltips: constrictions.enumTooltips, options: constrictions.enum, titles: constrictions.enumDescriptions};
         }
       }
     } else {

@@ -1819,6 +1819,7 @@ definitions:
             status:
                 $ref: '#/definitions/StatusType'
     IdResponse:
+        type: object
         properties:
             data:
                 type: object
@@ -1899,6 +1900,7 @@ definitions:
             status:
                 $ref: '#/definitions/StatusType'
     FieldType:
+        type: object
         required:
             - name
             - type
@@ -1925,6 +1927,7 @@ definitions:
                 description: input an enum definition as words separated by a comma
                 example: one, two, three
     FieldsResponse:
+        type: object
         properties:
             data:
                 type: object
@@ -1998,6 +2001,7 @@ definitions:
             status:
                 $ref: '#/definitions/StatusType'
     FileType:
+        type: object
         properties:
             id:
                 type: string
@@ -2016,6 +2020,7 @@ definitions:
             numberOfReferences:
                 type: number
     FileResponse:
+        type: object
         properties:
             data:
                 type: object
@@ -2039,6 +2044,7 @@ definitions:
             status:
                 $ref: '#/definitions/StatusType'
     FilesResponse:
+        type: object
         properties:
             data:
                 type: array
@@ -2093,6 +2099,7 @@ definitions:
             status:
                 $ref: '#/definitions/StatusType'
     BannerType:
+        type: object
         required:
             - score
         properties:
@@ -2109,6 +2116,7 @@ definitions:
             ref:
                 $ref: '#/definitions/ReferenceType'
     BannersResponse:
+        type: object
         properties:
             data:
                 type: array
@@ -2117,6 +2125,7 @@ definitions:
             status:
                 $ref: '#/definitions/StatusType'
     FieldValueType:
+        type: object
         description: to transport the value of predefined FieldType. The value is encoded to string before transport and back after receive
         required:
             - name
@@ -2127,6 +2136,7 @@ definitions:
             value:
                 type: string
     PetType:
+        type: object
         properties:
             id:
                 type: string
@@ -2139,6 +2149,7 @@ definitions:
                 items:
                     $ref: '#/definitions/ReferenceType'
     PetTypeResponse:
+        type: object
         properties:
             data:
                 $ref: '#/definitions/PetType'

@@ -37,9 +37,9 @@ class Waste {
         if (!native.constrictions.readOnly) {
           result.ui.disabled = true;
         }
-        if (!native.constrictions.enums) {
-          result.ui.control = native.constrictions.enums.length <= 4 ? 'radio' : 'select';
-          result.ui.options = native.constrictions.enums;
+        if (!native.constrictions.enum) {
+          result.ui.control = native.constrictions.enum.length <= 4 ? 'radio' : 'select';
+          result.ui.options = native.constrictions.enum;
         }
         result.ui.controlDefault = native.constrictions.default || null;
       }
