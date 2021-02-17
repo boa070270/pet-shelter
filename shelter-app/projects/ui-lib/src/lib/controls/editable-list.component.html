@@ -1,0 +1,17 @@
+<label>
+  <span class="ui-input-title" *ngIf="pCaption">{{pCaption}}</span>
+  <div class="list-builder-panel">
+    <div class="list-builder-control">
+      <button [title]="titleAdd" [disabled]="disabled || hasEmpty()" (click)="onAdd()">+</button>
+      <button [title]="titleRemove" [disabled]="disabled || result.getArrayValues().length === 0" (click)="onRemove()">-</button>
+      <button class="gm-keyboard_arrow_up" [title]="titleUp" [disabled]="disabled || result.getArrayValues().length === 0" (click)="onUp()"></button>
+      <button class="gm-keyboard_arrow_down" [title]="titleDown" [disabled]="disabled || result.getArrayValues().length === 0" (click)="onDown()"></button>
+    </div>
+    <div class="list-builder-panel-right">
+      <lib-list-select [options]="list" [titles]="titles" [tooltips]="tooltips"
+                       [multiple]="false"
+      ></lib-list-select>
+    </div>
+  </div>
+</label>
+<span class="hint">{{pHint}}</span>
