@@ -7,10 +7,11 @@ import {Directionality} from '@angular/cdk/bidi';
 import {CheckboxParameters} from './checkbox-control.component';
 import {ListSelectComponent} from './list-select.component';
 import {coerceArray} from '@angular/cdk/coercion';
-import {DialogService} from '../dialog-service';
+import {DialogRef, DialogService} from '../dialog-service';
 
 const DEF_REMOVE_TITLES: TitleType[] = [{lang: 'en', title: 'Remove'}, {lang: 'uk', title: 'Видалити'}];
-const DEF_ADD_TITLES: TitleType[] = [{lang: 'en', title: 'Add'}, {lang: 'uk', title: 'Добавити'}];
+const DEF_ADD_TITLES: TitleType[] = [{lang: 'en', title: 'Add'}, {lang: 'uk', title: 'Додати'}];
+const DEF_EDIT_TITLES: TitleType[] = [{lang: 'en', title: 'Edit'}, {lang: 'uk', title: 'Змінити'}];
 const DEF_UP_TITLES: TitleType[] = [{lang: 'en', title: 'Up'}, {lang: 'uk', title: 'Вгору'}];
 const DEF_DOWN_TITLES: TitleType[] = [{lang: 'en', title: 'Down'}, {lang: 'uk', title: 'Вниз'}];
 
@@ -24,8 +25,10 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
   // tslint:disable-next-line:variable-name
   private _extraParams: CheckboxParameters = {};
   list: string[] = [];
+  selected: string;
   titleRemove: string;
   titleAdd: string;
+  titleEdit: string;
   titleUp: string;
   titleDown: string;
   @Input()
@@ -77,6 +80,7 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
     this.result.setDisabledState(this.disabled);
 
     this.result.registerOnChange(change => {
+      this.selected = change;
       this.emitChange(change);
       return {};
     });
@@ -87,6 +91,7 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
   }
   buttonTitles(): void {
     this.titleAdd = this.systemLang.getTitle(DEF_ADD_TITLES);
+    this.titleEdit = this.systemLang.getTitle(DEF_EDIT_TITLES);
     this.titleRemove = this.systemLang.getTitle(DEF_REMOVE_TITLES);
     this.titleDown = this.systemLang.getTitle(DEF_DOWN_TITLES);
     this.titleUp = this.systemLang.getTitle(DEF_UP_TITLES);
@@ -126,13 +131,18 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
   }
 
   onAdd(): void {
-    // this.list.push nothing, draw empty, on empty change save in list
-    // this.list = this.list.concat(this.availableList.filter(v => this.available.values[v]));
-    // this.available.clearAll();
-    // if (!this.hasEmpty()) {
-    //   this.list.push('');
-    //   // open dialog, on dialog close change '' to new name, or somehow allow to change name here
-    // }
+    this.openDialog((v) => {
+      this.list.push(v.name);
+    });
+  }
+
+  onEdit(): void {
+    this.openDialog((v) => {
+      this.list.push(v.name);
+    }, this.selected);
+  }
+
+  openDialog(f, data?): void {
     const extData = new ExtendedData();
     extData.action = 'save_cancel';
     extData.caption = 'Please provide key name!';
@@ -144,15 +154,13 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
       },
       null,
       ['name']);
+    if (data) {
+      extData.data = {name: data};
+    }
     const dialogRef = this.dialogService.warnExtDialog(extData, true);
-    console.log('TopMenuPageComponent.openDialog', dialogRef);
-    dialogRef.afterOpened().subscribe(v => {
-      console.log('EditableListComponent.onAdd.afterOpened', v);
-    });
     dialogRef.afterClosed().subscribe(v => {
-      console.log('EditableListComponent.onAdd.afterClosed', v);
       if (v) {
-        this.list.push(v.name);
+        f(v);
       }
       this.render();
       this.emitChange(this.list);
@@ -160,8 +168,6 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
   }
 
   onRemove(): void {
-    // console.log(this.result);
-    // values[first] === true - this value - no
     this.list = this.list.filter(v => !this.result.values[v]);
     this.result.clearAll();
     this.render();

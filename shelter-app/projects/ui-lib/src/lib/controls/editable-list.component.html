@@ -3,6 +3,7 @@
   <div class="list-builder-panel">
     <div class="list-builder-control">
       <button [title]="titleAdd" [disabled]="disabled || hasEmpty()" (click)="onAdd()">+</button>
+      <button [title]="titleEdit" [disabled]="disabled || !selected" (click)="onEdit()">{{titleEdit}}</button>
       <button [title]="titleRemove" [disabled]="disabled || result.getArrayValues().length === 0" (click)="onRemove()">-</button>
       <button class="gm-keyboard_arrow_up" [title]="titleUp" [disabled]="disabled || result.getArrayValues().length === 0" (click)="onUp()"></button>
       <button class="gm-keyboard_arrow_down" [title]="titleDown" [disabled]="disabled || result.getArrayValues().length === 0" (click)="onDown()"></button>
