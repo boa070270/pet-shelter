@@ -1,5 +1,12 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {PeriodicElement, SwaggerFormService, SwaggerNative, SwaggerObject, TableProviderService} from 'ui-lib';
+import {
+  ArrayDataSource,
+  PeriodicElement,
+  SwaggerFormService,
+  SwaggerNative,
+  SwaggerObject,
+  TableProviderService
+} from 'ui-lib';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {DataSource} from '@angular/cdk/collections';
 
@@ -52,7 +59,7 @@ export class TestDynamicComponent implements OnInit {
   constructor(private swaggerFormService: SwaggerFormService, private tableProviderService: TableProviderService) {
     swaggerFormService.addSchemaIfNotExists('test', this.swagger);
     tableProviderService.setTableSwagger('test', TableSwagger);
-    tableProviderService.setDataSource('test', new ExampleDataSource());
+    tableProviderService.setDataSource('test', new ArrayDataSource(tableDataSet));
   }
 
   ngOnInit(): void {
@@ -90,15 +97,3 @@ const tableDataSet = [
   {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
   {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
 ];
-
-export class ExampleDataSource extends DataSource<any> {
-  /** Stream of data that is provided to the table. */
-  data = new BehaviorSubject<any[]>(tableDataSet);
-
-  /** Connect function called by the table to retrieve one stream containing the data to render. */
-  connect(): Observable<PeriodicElement[]> {
-    return this.data;
-  }
-
-  disconnect(): void {}
-}

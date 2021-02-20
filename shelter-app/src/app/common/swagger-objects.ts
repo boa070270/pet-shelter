@@ -4,22 +4,22 @@ import {
   SwaggerObject,
   swaggerUI,
   SwaggerNativeBoolean,
-  SwaggerArray, SwaggerNativeNumber
+  SwaggerArray, SwaggerNativeNumber, SwaggerNative
 } from 'ui-lib';
 
-export const StatusType = new SwaggerObject(
+export const SwaggerStatusType = new SwaggerObject(
   ['code', 'message'],
   {
-    code: new SwaggerNativeInteger(),
+    code: SwaggerNative.asInteger(),
     details: new SwaggerObject([], {}),
-    message: new SwaggerNativeString()
+    message: SwaggerNative.asString()
   }
 );
 
-export const LanguageType = new SwaggerObject(
+export const SwaggerLanguageType = new SwaggerObject(
   ['lang', 'displayName', 'rate'],
   {
-    lang: new SwaggerNativeString(
+    lang: SwaggerNative.asString(
       'input',
       {minLength: 2, maxLength: 6},
       swaggerUI(
@@ -29,7 +29,7 @@ export const LanguageType = new SwaggerObject(
         [{lang: 'en', title: 'enter placeholder'}, {lang: 'uk', title: 'enter placeholder'}],
       )
     ),
-    displayName: new SwaggerNativeString(
+    displayName: SwaggerNative.asString(
       'input',
       {minLength: 3, maxLength: 16},
       swaggerUI(
@@ -39,7 +39,7 @@ export const LanguageType = new SwaggerObject(
         [{lang: 'en', title: 'enter placeholder'}, {lang: 'uk', title: 'enter placeholder'}],
       )
     ),
-    rate: new SwaggerNativeInteger(
+    rate: SwaggerNative.asInteger(
       'input',
       {minimum: 0, maximum: 99},
       swaggerUI(
@@ -52,48 +52,48 @@ export const LanguageType = new SwaggerObject(
   }
 );
 
-export const MenuType = new SwaggerObject(
+export const SwaggerMenuType = new SwaggerObject(
   ['path', 'component', 'role', 'position', 'parentId'],
   {
-    path: new SwaggerNativeString(),
-    component: new SwaggerNativeString(),
-    role: new SwaggerNativeString(),
-    position: new SwaggerNativeInteger(),
-    parentId: new SwaggerNativeString()
+    path: SwaggerNative.asString(),
+    component: SwaggerNative.asString(),
+    role: SwaggerNative.asString(),
+    position: SwaggerNative.asInteger(),
+    parentId: SwaggerNative.asString()
   },
   swaggerUI(),
   ['path', 'component']
 );
-export const TitleSwaggerType = new SwaggerObject(
+export const SwaggerTitleSwaggerType = new SwaggerObject(
   ['id', 'lang', 'title'],
   {
-    id: new SwaggerNativeString(),
-    lang: new SwaggerNativeString(),
-    title: new SwaggerNativeString()
+    id: SwaggerNative.asString(),
+    lang: SwaggerNative.asString(),
+    title: SwaggerNative.asString()
   },
   {},
   ['id', 'lang', 'title']
 );
-export const FieldType = new SwaggerObject(
+export const SwaggerFieldType = new SwaggerObject(
   [ 'name', 'type', 'subtype', 'order', 'enumValues'],
   {
-    name: new SwaggerNativeString(
+    name: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    type: new SwaggerNativeString(
+    type: SwaggerNative.asString(
       undefined,
       { enum: [ 'number', 'string', 'enum', 'date']},
       swaggerUI()),
-    subtype: new SwaggerNativeString(
+    subtype: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    order: new SwaggerNativeInteger(
+    order: SwaggerNative.asInteger(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'define the order of displayed fields'}])),
-    enumValues: new SwaggerNativeString(
+    enumValues: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'input an enum definition as words separated by a comma', }, ])),
@@ -101,7 +101,7 @@ export const FieldType = new SwaggerObject(
   },
   swaggerUI(),
   [ 'name', 'type', ]);
-export const FieldsResponse = new SwaggerObject(
+export const SwaggerFieldsResponse = new SwaggerObject(
   [ 'data', 'status', ],
   {
     data: new SwaggerObject(
@@ -124,22 +124,22 @@ export const FieldsResponse = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const ReferenceType = new SwaggerObject(
+export const SwaggerReferenceType = new SwaggerObject(
   [ 'refId', 'targetUrl', 'mimeType', 'tooltip', ],
   {
-    refId: new SwaggerNativeString(
+    refId: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'file id', }, ])),
-    targetUrl: new SwaggerNativeString(
+    targetUrl: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'the URL that was used as href in anchor tag', }, ])),
-    mimeType: new SwaggerNativeString(
+    mimeType: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    tooltip: new SwaggerNativeString(
+    tooltip: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'descriptions of resource', }, ])),
@@ -147,62 +147,62 @@ export const ReferenceType = new SwaggerObject(
   },
   swaggerUI(null, [ { lang: 'en', title: 'expose file as reference', }, ]),
   [ 'refId', ]);
-export const PageType = new SwaggerObject(
+export const SwaggerPageType = new SwaggerObject(
   [ 'id', 'lang', 'title', 'summary', 'body', 'score', 'draft', 'tags', 'restriction', 'menuId', 'created', 'ref', ],
   {
-    id: new SwaggerNativeString(
+    id: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    lang: new SwaggerNativeString(
+    lang: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'page locale', }, ])),
-    title: new SwaggerNativeString(
+    title: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'page\'s title', }, ])),
-    summary: new SwaggerNativeString(
+    summary: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'a summary of this page', }, ])),
-    body: new SwaggerNativeString(
+    body: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'page\'s body', }, ])),
-    score: new SwaggerNativeInteger(
+    score: SwaggerNative.asInteger(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'can be use as position/order', }, ])),
-    draft: new SwaggerNativeBoolean(
+    draft: SwaggerNative.asBoolean(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'mark page as a draft', }, ])),
-    tags: new SwaggerNativeString(
+    tags: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'set of tags separated by comma defines what menu will expose this page', }, ])),
-    restriction: new SwaggerNativeString(
+    restriction: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'you can restrict the access to this page', }, ])),
-    menuId: new SwaggerNativeString(
+    menuId: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'bind a page to menu', }, ])),
-    created: new SwaggerNativeString(
+    created: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
     ref: new SwaggerArray(
-      undefined,
+      SwaggerReferenceType,
       {},
       swaggerUI()),
 
   },
   swaggerUI(),
   null);
-export const PageResponse = new SwaggerObject(
+export const SwaggerPageResponse = new SwaggerObject(
   [ 'data', 'status', ],
   {
     data: undefined,
@@ -211,7 +211,7 @@ export const PageResponse = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const PagesResponse = new SwaggerObject(
+export const SwaggerPagesResponse = new SwaggerObject(
   [ 'data', 'status', ],
   {
     data: new SwaggerArray(
@@ -223,38 +223,38 @@ export const PagesResponse = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const FileType = new SwaggerObject(
+export const SwaggerFileType = new SwaggerObject(
   [ 'id', 'originalName', 'encoding', 'mimeType', 'size', 'created', 'comment', 'numberOfReferences', ],
   {
-    id: new SwaggerNativeString(
+    id: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    originalName: new SwaggerNativeString(
+    originalName: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    encoding: new SwaggerNativeString(
+    encoding: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    mimeType: new SwaggerNativeString(
+    mimeType: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    size: new SwaggerNativeString(
+    size: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    created: new SwaggerNativeString(
+    created: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    comment: new SwaggerNativeString(
+    comment: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    numberOfReferences: new SwaggerNativeNumber(
+    numberOfReferences: SwaggerNative.asNumber(
       undefined,
       {},
       swaggerUI()),
@@ -262,7 +262,7 @@ export const FileType = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const FileResponse = new SwaggerObject(
+export const SwaggerFileResponse = new SwaggerObject(
   [ 'data', 'status', ],
   {
     data: new SwaggerObject(
@@ -273,15 +273,15 @@ export const FileResponse = new SwaggerObject(
           new SwaggerObject(
             [ 'refId', 'refType', 'refName', ],
             {
-              refId: new SwaggerNativeString(
+              refId: SwaggerNative.asString(
                 undefined,
                 {},
                 swaggerUI()),
-              refType: new SwaggerNativeString(
+              refType: SwaggerNative.asString(
                 undefined,
                 { enum: [ 'banner', 'page', 'pet', ], },
                 swaggerUI()),
-              refName: new SwaggerNativeString(
+              refName: SwaggerNative.asString(
                 undefined,
                 {},
                 swaggerUI()),
@@ -300,7 +300,7 @@ export const FileResponse = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const FilesResponse = new SwaggerObject(
+export const SwaggerFilesResponse = new SwaggerObject(
   [ 'data', 'status', ],
   {
     data: new SwaggerArray(
@@ -312,26 +312,26 @@ export const FilesResponse = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const CarouselType = new SwaggerObject(
+export const SwaggerCarouselType = new SwaggerObject(
   [ 'assetId', 'targetUrl', 'mimeType', 'tooltip', 'resource', ],
   {
-    assetId: new SwaggerNativeString(
+    assetId: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    targetUrl: new SwaggerNativeString(
+    targetUrl: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'can be url to external resource or id of internal resource', }, ])),
-    mimeType: new SwaggerNativeString(
+    mimeType: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    tooltip: new SwaggerNativeString(
+    tooltip: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'descriptions of resource', }, ])),
-    resource: new SwaggerNativeString(
+    resource: SwaggerNative.asString(
       undefined,
       { enum: [ 'banner', 'page', 'pet', ], },
       swaggerUI()),
@@ -339,7 +339,7 @@ export const CarouselType = new SwaggerObject(
   },
   swaggerUI(null, [ { lang: 'en', title: 'expose references of banners, pets, pages', }, ]),
   null);
-export const CarouselResponse = new SwaggerObject(
+export const SwaggerCarouselResponse = new SwaggerObject(
   [ 'data', 'status', ],
   {
     data: new SwaggerArray(
@@ -351,18 +351,18 @@ export const CarouselResponse = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const BannerType = new SwaggerObject(
+export const SwaggerBannerType = new SwaggerObject(
   [ 'id', 'score', 'lang', 'ref', ],
   {
-    id: new SwaggerNativeString(
+    id: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    score: new SwaggerNativeInteger(
+    score: SwaggerNative.asInteger(
       undefined,
       { default: null, },
       swaggerUI(null, [ { lang: 'en', title: 'can be use as position/order', }, ])),
-    lang: new SwaggerNativeString(
+    lang: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'locales are sequenced in line by comma', }, ])),
@@ -371,7 +371,7 @@ export const BannerType = new SwaggerObject(
   },
   swaggerUI(),
   [ 'score', ]);
-export const BannersResponse = new SwaggerObject(
+export const SwaggerBannersResponse = new SwaggerObject(
   [ 'data', 'status', ],
   {
     data: new SwaggerArray(
@@ -383,14 +383,14 @@ export const BannersResponse = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const FieldValueType = new SwaggerObject(
+export const SwaggerFieldValueType = new SwaggerObject(
   [ 'name', 'value', ],
   {
-    name: new SwaggerNativeString(
+    name: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    value: new SwaggerNativeString(
+    value: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
@@ -398,10 +398,10 @@ export const FieldValueType = new SwaggerObject(
   },
   swaggerUI(null, [ { lang: 'en', title: 'to transport the value of predefined FieldType. The value is encoded to string before transport and back after receive', }, ]),
   [ 'name', 'value', ]);
-export const PetType = new SwaggerObject(
+export const SwaggerPetType = new SwaggerObject(
   [ 'id', 'fields', 'ref', ],
   {
-    id: new SwaggerNativeString(
+    id: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
@@ -417,7 +417,7 @@ export const PetType = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const PetTypeResponse = new SwaggerObject(
+export const SwaggerPetTypeResponse = new SwaggerObject(
   [ 'data', 'status', ],
   {
     data: undefined,
@@ -426,46 +426,46 @@ export const PetTypeResponse = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const SearchType = new SwaggerObject(
+export const SwaggerSearchType = new SwaggerObject(
   [ 'id', 'resource', 'lang', 'title', 'summary', 'body', 'score', 'draft', 'tags', 'restriction', 'ref', 'fields', 'originalName', 'mimeType', 'created', 'comment', ],
   {
-    id: new SwaggerNativeString(
+    id: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    resource: new SwaggerNativeString(
+    resource: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    lang: new SwaggerNativeString(
+    lang: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'page locale', }, ])),
-    title: new SwaggerNativeString(
+    title: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'page\'s title', }, ])),
-    summary: new SwaggerNativeString(
+    summary: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'a summary of this page', }, ])),
-    body: new SwaggerNativeString(
+    body: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'page\'s body', }, ])),
-    score: new SwaggerNativeInteger(
+    score: SwaggerNative.asInteger(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'can be use as position/order', }, ])),
-    draft: new SwaggerNativeBoolean(
+    draft: SwaggerNative.asBoolean(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'mark page as a draft', }, ])),
-    tags: new SwaggerNativeString(
+    tags: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'set of tags separated by comma defines what menu will expose this page', }, ])),
-    restriction: new SwaggerNativeString(
+    restriction: SwaggerNative.asString(
       undefined,
       { enum: [ 'admin', 'writer', 'public', ], },
       swaggerUI(null, [ { lang: 'en', title: 'you can restrict the access to this page', }, ])),
@@ -477,19 +477,19 @@ export const SearchType = new SwaggerObject(
       undefined,
       {},
       swaggerUI()),
-    originalName: new SwaggerNativeString(
+    originalName: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    mimeType: new SwaggerNativeString(
+    mimeType: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    created: new SwaggerNativeString(
+    created: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    comment: new SwaggerNativeString(
+    comment: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
@@ -497,13 +497,13 @@ export const SearchType = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const SearchResponse = new SwaggerObject(
+export const SwaggerSearchResponse = new SwaggerObject(
   [ 'data', 'status', ],
   {
     data: new SwaggerObject(
       [ 'scrollId', 'data', ],
       {
-        scrollId: new SwaggerNativeString(
+        scrollId: SwaggerNative.asString(
           undefined,
           {},
           swaggerUI()),
@@ -520,10 +520,10 @@ export const SearchResponse = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const QueryType = new SwaggerObject(
+export const SwaggerQueryType = new SwaggerObject(
   [ 'operator', 'fields', ],
   {
-    operator: new SwaggerNativeString(
+    operator: SwaggerNative.asString(
       undefined,
       { enum: [ 'and', 'or', ], default: 'and', },
       swaggerUI()),
@@ -535,33 +535,33 @@ export const QueryType = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const UserType = new SwaggerObject(
+export const SwaggerUserType = new SwaggerObject(
   [ 'login', 'authType', 'password', 'role', 'created', 'enabled', ],
   {
-    login: new SwaggerNativeString(
+    login: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    authType: new SwaggerNativeString(
+    authType: SwaggerNative.asString(
       undefined,
       { enum: [ 'basic', 'apiKey', 'oauth2', ], },
       swaggerUI()),
-    password: new SwaggerNativeString(
+    password: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
     role: new SwaggerArray(
-      new SwaggerNativeString(
+      SwaggerNative.asString(
         undefined,
         { enum: [ 'admin', 'writer', 'public', ], },
         swaggerUI()),
       {},
       swaggerUI()),
-    created: new SwaggerNativeString(
+    created: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    enabled: new SwaggerNativeBoolean(
+    enabled: SwaggerNative.asBoolean(
       undefined,
       {},
       swaggerUI()),
@@ -581,26 +581,26 @@ export const UsersResponse = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const VoteType = new SwaggerObject(
+export const SwaggerVoteType = new SwaggerObject(
   [ 'who', 'resId', 'voteId', 'vote', 'count', ],
   {
-    who: new SwaggerNativeString(
+    who: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    resId: new SwaggerNativeString(
+    resId: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    voteId: new SwaggerNativeNumber(
+    voteId: SwaggerNative.asNumber(
       undefined,
       {},
       swaggerUI()),
-    vote: new SwaggerNativeString(
+    vote: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    count: new SwaggerNativeNumber(
+    count: SwaggerNative.asNumber(
       undefined,
       {},
       swaggerUI()),
@@ -608,7 +608,7 @@ export const VoteType = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const VotesResponse = new SwaggerObject(
+export const SwaggerVotesResponse = new SwaggerObject(
   [ 'data', 'status', ],
   {
     data: new SwaggerArray(
@@ -620,34 +620,34 @@ export const VotesResponse = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const CommentType = new SwaggerObject(
+export const SwaggerCommentType = new SwaggerObject(
   [ 'id', 'created', 'resId', 'nickName', 'commentId', 'comment', 'isMy', 'vote', 'numberOf', ],
   {
-    id: new SwaggerNativeString(
+    id: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    created: new SwaggerNativeString(
+    created: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    resId: new SwaggerNativeString(
+    resId: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    nickName: new SwaggerNativeString(
+    nickName: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    commentId: new SwaggerNativeString(
+    commentId: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    comment: new SwaggerNativeString(
+    comment: SwaggerNative.asString(
       undefined,
       {},
       swaggerUI()),
-    isMy: new SwaggerNativeBoolean(
+    isMy: SwaggerNative.asBoolean(
       undefined,
       {},
       swaggerUI()),
@@ -655,7 +655,7 @@ export const CommentType = new SwaggerObject(
       undefined,
       {},
       swaggerUI()),
-    numberOf: new SwaggerNativeInteger(
+    numberOf: SwaggerNative.asInteger(
       undefined,
       {},
       swaggerUI()),
@@ -663,17 +663,17 @@ export const CommentType = new SwaggerObject(
   },
   swaggerUI(),
   null);
-export const CommentsResponse = new SwaggerObject(
+export const SwaggerCommentsResponse = new SwaggerObject(
   [ 'data', 'status', ],
   {
     data: new SwaggerObject(
       [ 'lastComment', 'numberOf', 'responses', ],
       {
-        lastComment: new SwaggerNativeString(
+        lastComment: SwaggerNative.asString(
           undefined,
           {},
           swaggerUI()),
-        numberOf: new SwaggerNativeInteger(
+        numberOf: SwaggerNative.asInteger(
           undefined,
           {},
           swaggerUI()),

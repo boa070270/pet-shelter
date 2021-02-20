@@ -3,29 +3,44 @@
   make filter-dialog-component
   show this dialog on showDialogFilter instead simple one input
 
-- BUG! on test table occurs error field position not found?
-
-- BUG! Swagger! there isn't applied "disable". The view dialog on test table allow editing
-
 - Task! Swagger! Need to provide property "immutable", that do not allow edit field if it has parameter.
 
 - Task! Swagger! What do I need to do with forms that need dynamically change its content?
 
 - Task! Table! I want extend status bar to show number of all rows and number of filtered rows
 
-Done: - Task! DataSource need to know how update/add/delete rows
-
-Done: Table! need to ask on delete
-
 - Task! Exclude material
-
-Done: BUG! The dialog do not work!
-Done: Task! needs text formatting function
+  - Task! Change AuthDialog (it uses material)
+  - Task! Change AppPage
 
 - Task! table-component needs to be readable only
-- Task! table-component needs to take custom form to edit/view/add
+- BUG! Swagger form do not validate number, allow input string
+  - Form does not show errors!
 
-Task! need to takeout all configurations texts to a naw service, than this service will take this texts from backend
+- Task! Is there enough one form of field in the swagger? Let's look at the field that represent <img>,
+to the edit mode we need input to fill the src, but when we in the view mode maybe we need this picture..
+What is SwaggerObject, what a role it completes?
+  - it describes data that we need collect through SwaggerForm
+  - it describes how we present some data?
+  e.g. Dynamic page:
+  <our-tag-1 swagger="swagger-id"/> we need swagger here because we need fill the form that describes what data will be displayed.
+  So through SwaggerObject and SwaggerForm we allow user to dynamically fill the page.
+  But what is the table? Table also is a presentation component, it also needs swagger to describe what and how it would present.
+
+- Task! What do with table that reference to another table?
+
+
+
+DONE! - BUG! on test table occurs error field position not found?
+DONE! - BUG! Swagger! there isn't applied "disable". The view dialog on test table allow editing
+DONE! - Task! DataSource need to know how update/add/delete rows
+DONE! Table! need to ask on delete
+DONE! BUG! The dialog do not work!
+DONE! Task! needs text formatting function
+DONE!- Task! table-component needs to take custom form to edit/view/add
+DONE!- Task! need to takeout all configurations texts to a new service, than this service will take this texts from backend
   - TableComponent
+DONE! - BUG! There are errors in MainDataSource:
+  DONE! - workers don't deleted! If there are error!
+  DONE! - on banner is incorrect behavior, we see the same data when change paging. Paging become 10, there are not so many banners.
 
-BUG! Swagger form do not validate number, allow input string

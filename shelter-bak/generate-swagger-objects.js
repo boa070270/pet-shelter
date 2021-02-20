@@ -61,22 +61,22 @@ function writeAsStr(obj) {
 function writeProperty(value, pad) {
     switch (value.type) {
     case 'string':
-        return 'new SwaggerNativeString(\n'+
+        return 'SwaggerNative.asString(\n'+
             `${padLeft(pad)}${value.controlType},\n`+
             `${padLeft(pad)}${writeAsStr(value.constraints)},\n`+
             `${writeUI(value.ui, pad)})`;
     case 'number':
-        return 'new SwaggerNativeNumber(\n'+
+        return 'SwaggerNative.asNumber(\n'+
             `${padLeft(pad)}${value.controlType},\n`+
             `${padLeft(pad)}${writeAsStr(value.constraints)},\n`+
             `${writeUI(value.ui, pad)})`;
     case 'integer':
-        return 'new SwaggerNativeInteger(\n'+
+        return 'SwaggerNative.asInteger(\n'+
             `${padLeft(pad)}${value.controlType},\n`+
             `${padLeft(pad)}${writeAsStr(value.constraints)},\n`+
             `${writeUI(value.ui, pad)})`;
     case 'boolean':
-        return 'new SwaggerNativeBoolean(\n'+
+        return 'SwaggerNative.asBoolean(\n'+
             `${padLeft(pad)}${value.controlType},\n`+
             `${padLeft(pad)}${writeAsStr(value.constraints)},\n`+
             `${writeUI(value.ui, pad)})`;

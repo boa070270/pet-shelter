@@ -3,7 +3,7 @@ import {
   coerceToSwaggerArray,
   coerceToSwaggerNative,
   coerceToSwaggerObject,
-  CommonConstrictions,
+  CommonConstrictions, SwaggerArray,
   SwaggerCustomUI,
   SwaggerGroupComponent,
   SwaggerNative,
@@ -12,7 +12,7 @@ import {
 } from '../shared';
 import {
   AbstractControl,
-  ControlValueAccessor,
+  ControlValueAccessor, FormArray,
   FormControl,
   FormGroup,
   NG_VALUE_ACCESSOR,
@@ -37,8 +37,7 @@ export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
                             [(ngModel)]="fld.propertyId" [nameControl]="fld.propertyId"
                             [pFormGroup]="formGroup" *ngSwitchCase="'object'"></lib-swagger-form>
           <lib-swagger-array [propertyId]="fld.propertyId" [swagger]="swagger.properties[fld.propertyId]" [required]="fld.required"
-                             [(ngModel)]="fld.propertyId" [nameControl]="fld.propertyId"
-                             [pFormGroup]="formGroup" *ngSwitchCase="'array'"></lib-swagger-array>
+                             [pFormGroup]="formGroup" *ngSwitchCase="'array'" [formControl]="formGroup.get(fld.propertyId)"></lib-swagger-array>
         </ng-container>
       </ng-container>
     </div>`,
@@ -55,6 +54,7 @@ export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDe
   @Input() readOnly: boolean;
   properties: Array<{propertyId: string, controlType: string, required: boolean, control?: AbstractControl}> = [];
   formGroup: FormGroup;
+  disabled: boolean;
 
   onChange = (_: any) => {};
   onTouched = () => {};
@@ -64,7 +64,7 @@ export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDe
 
   ngAfterContentInit(): void {
     this.properties.forEach(p => {
-      if (p.controlType === 'native') {
+      if (p.controlType !== 'object') {
         this.formGroup.addControl(p.propertyId, p.control);
       }
     });
@@ -109,12 +109,13 @@ export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDe
   }
 
   setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
   }
 
   writeValue(obj: any): void {
     console.log('SwaggerFormComponent.writeValue', obj);
     if (typeof obj === 'object' && obj !== null) {
-      this.formGroup.setValue(obj);
+      this.formGroup.patchValue(obj);
     }
   }
 
@@ -132,6 +133,7 @@ export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDe
           p.controlType = 'object';
         } else if (coerceToSwaggerArray(property)) {
           p.controlType = 'array';
+          p.control = this.makeArrayControl((property as SwaggerArray).itemsType, required.includes(propertyId));
         } else {
           continue;
         }
@@ -147,6 +149,13 @@ export class SwaggerFormComponent implements OnInit, SwaggerGroupComponent, OnDe
       validators.push(Validators.required);
     }
     return new FormControl(constrictions.default, validators, ui.asyncValidator);
+  }
+
+  makeArrayControl(swagger: SwaggerNative | SwaggerObject, required): FormControl {
+    if (this.swagger) {
+      // FormArray doesn't have registerOnChange, so we need to use simple FormControl
+      return new FormControl();
+    }
   }
 
 }

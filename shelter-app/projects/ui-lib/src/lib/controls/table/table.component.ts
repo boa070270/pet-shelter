@@ -1,7 +1,7 @@
 import {
   Component,
   ElementRef,
-  EventEmitter,
+  EventEmitter, forwardRef,
   Input,
   OnDestroy,
   OnInit,
@@ -31,6 +31,7 @@ import {BehaviorSubject, merge} from 'rxjs';
 import {Directionality} from '@angular/cdk/bidi';
 import {reduce} from 'rxjs/operators';
 import {ComponentType} from '@angular/cdk/overlay';
+import {NG_VALUE_ACCESSOR} from "@angular/forms";
 
 // i18n
 const I18N: I18NType = {
@@ -63,10 +64,14 @@ const I18N: I18NType = {
     ]
 };
 const DIALOG_SEARCH = new SwaggerObject(['search'], { search: SwaggerNative.asString()});
+
 @Component({
   selector: 'lib-table',
   templateUrl: './table.component.html',
-  styleUrls: ['./table.component.scss']
+  styleUrls: ['./table.component.scss'],
+  providers: [
+    {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => TableComponent), multi: true}
+  ]
 })
 export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
   readonly PagingSize = PagingSize;
@@ -104,7 +109,7 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
   @ViewChild('dlg') dlgTemplate: TemplateRef<any>;
   pDisplayedNames: {[column: string]: string};
   get selectedRows(): any[] {
-    return this.cdkDataSource.selectedRows;
+    return (this.cdkDataSource || {}).selectedRows || [];
   }
   orderIcons = {};
   get order(): IOrder[] {
@@ -127,14 +132,14 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
   private dialogTimer: any = null;
 
   constructor(public systemLang: SystemLang,
-              protected testTableService: TableProviderService,
+              // protected testTableService: TableProviderService,
               protected dialogService: DialogService,
               protected directionality: Directionality,
               dictionary: DictionaryService) {
     // TODO IE doesn't support assign, how angular solves this
-    super(systemLang, directionality, Object.assign({}, I18N/*, dictionary.getDictionary('COMPONENTS') || {}.table */));
-    this.swagger = testTableService.swagger;
-    this.dataSource = testTableService.datasource;
+    super(systemLang, directionality, Object.assign({}, I18N, (dictionary.getDictionary('COMPONENTS') || {}).TableComponent));
+    // this.swagger = testTableService.swagger;
+    // this.dataSource = testTableService.datasource;
   }
   onChangeLang(): void {
     super.onChangeLang();
@@ -180,11 +185,16 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
     this.dataSource = null;
     this.closeDialog();
   }
+  writeValue(obj: any): void {
+    if (this.dataSource && Array.isArray(obj)) {
+      this.dataSource.setData(obj);
+    }
+  }
 
   tableSettings(): void {
     const extDate = ExtendedData.create({columns: this.displayedColumns}, false,
       new SwaggerObject(['columns'],
-        { columns: SwaggerNative.asString('list-builder', {enum: this.testTableService.columns})}),
+        { columns: SwaggerNative.asString('list-builder', {enum: this.swagger.orderControls})}), // TODO!!!
       'save_cancel', '');
     const dialogRef = this.dialogService.infoExtDialog(extDate, true);
     dialogRef.afterClosed().subscribe(v => {
@@ -231,11 +241,13 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
     } else {
       this.selectedRows.push(row);
     }
+    this.snakeDialog();
+  }
+  snakeDialog(): void {
     this.closeDialog();
     this.dialogRef = this.dialogService.snakeFromTemplate(this.dlgTemplate);
     this.dialogTimer = setTimeout(() => { this.closeDialog(); }, 5000);
   }
-
   clearSelect(): void {
     this.cdkDataSource.clearSelectedRows();
     this.closeDialog();

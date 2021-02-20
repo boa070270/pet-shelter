@@ -51,8 +51,9 @@ export class SwaggerNativeComponent implements OnInit, OnChanges, OnDestroy, Swa
   private componentRef: ComponentRef<BaseComponent>;
   private statusSubs: Subscription;
   private formControl: AbstractControl;
+  disabled: boolean;
 
-  constructor(private componentsPlugin: ComponentsPluginService) {
+  constructor(protected componentsPlugin: ComponentsPluginService) {
   }
 
   writeValue(obj: any): void {
@@ -71,6 +72,7 @@ export class SwaggerNativeComponent implements OnInit, OnChanges, OnDestroy, Swa
     }
   }
   setDisabledState?(isDisabled: boolean): void {
+    this.disabled = isDisabled;
     if (this.componentRef) {
       this.componentRef.instance.setDisabledState(isDisabled);
     }
@@ -101,7 +103,7 @@ export class SwaggerNativeComponent implements OnInit, OnChanges, OnDestroy, Swa
     }
   }
 
-  private defineControlType(): void {
+  protected defineControlType(): void {
     const swagger = this.swagger as SwaggerNative;
     if (swagger) {
       const constrictions = swagger.constrictions || {} as CommonConstrictions;

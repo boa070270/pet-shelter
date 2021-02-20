@@ -6,7 +6,7 @@
           <select [(ngModel)]="pageSize" title="Some title">
             <option *ngFor="let o of PagingSize">{{o}}</option>
           </select>
-          <button (click)="tableSettings()" class="gm-view_column" [title]="i18n.settings"></button>
+          <button (click)="snakeDialog()" class="gm-settings" [title]="i18n.settings"></button>
         </div>
         <strong>{{pCaption}}</strong>
         <label>

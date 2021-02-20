@@ -10,7 +10,7 @@ export interface CommonConstrictions {
   enumTooltips?: string[] | TitleType[];
   enumMulti?: boolean; // TODO This can be used in case swagger property has type array and simple type as item (with option uniqueItems)
   default?: boolean | number | string;
-  format?: 'date' | 'date-time' | 'password' | 'byte' | 'binary' | 'email' | 'uuid' | 'uri' | 'hostname' | 'ipv4' | 'ipv6';
+  format?: 'date' | 'date-time' | 'password' | 'byte' | 'binary' | 'email' | 'uuid' | 'uri' | 'hostname' | 'ipv4' | 'ipv6' | 'file';
 }
 
 export interface NumberConstrictions extends CommonConstrictions {
@@ -52,13 +52,14 @@ export function swaggerUI(caption?: string | TitleType[], description?: string |
                           leadingIcon?: string, trailingIcon?: string): SwaggerCustomUI {
   return {description, caption, placeHolder, toolTip, leadingIcon, trailingIcon};
 }
-export type SwaggerNativeTypes = 'string' | 'number' | 'integer' | 'boolean';
+export type SwaggerNativeTypes = 'string' | 'number' | 'integer' | 'boolean' | 'file';
 export function validNativeType(str: string): boolean {
   switch (str) {
     case 'string':
     case 'number':
     case 'integer':
     case 'boolean':
+    case 'file':
       return true;
   }
   return false;
@@ -101,7 +102,7 @@ export abstract class SwaggerNative extends SwaggerSchema {
   protected _type: SwaggerNativeTypes;
   protected ctrlType: string;
   protected constraints: CommonConstrictions;
-  statis;   static asString(controlType?: string, constraints?: StringConstrictions, ui?: SwaggerCustomUI): SwaggerNative {
+  static asString(controlType?: string, constraints?: StringConstrictions, ui?: SwaggerCustomUI): SwaggerNative {
     return new SwaggerNativeString(controlType, constraints, ui);
   }
   static asNumber(controlType?: string, constraints?: NumberConstrictions, ui?: SwaggerCustomUI): SwaggerNative {
@@ -112,6 +113,9 @@ export abstract class SwaggerNative extends SwaggerSchema {
   }
   static asBoolean(controlType?: string, constraints?: CommonConstrictions, ui?: SwaggerCustomUI): SwaggerNative {
     return new SwaggerNativeBoolean(controlType, constraints, ui);
+  }
+  static asFile(): SwaggerNative {
+    return new SwaggerNativeFile();
   }
   static parse(obj: any): SwaggerNative {
     if (typeof obj === 'object' && obj !== null) {
@@ -128,6 +132,8 @@ export abstract class SwaggerNative extends SwaggerSchema {
           return SwaggerNative.asInteger(controlType, constrictions, ui);
         case 'boolean':
           return SwaggerNative.asBoolean(controlType, constrictions, ui);
+        case 'file':
+          return SwaggerNative.asFile();
       }
     }
     return null;
@@ -196,8 +202,8 @@ export class SwaggerObject extends SwaggerSchema {
   }
   constructor(orderCtrl: string[], properties: { [key: string]: SwaggerSchema }, ui?: SwaggerCustomUI, required?: string[]) {
     super(ui);
-    this.orderCtrl = orderCtrl || [];
     this.props = properties || {};
+    this.orderCtrl = orderCtrl || Object.keys(this.props).filter(() => true);
     this.needs = required || [];
   }
   static parse(schema: any): SwaggerObject {
@@ -283,6 +289,20 @@ export class SwaggerNativeString extends SwaggerNative {
   }
   compare(p1: string, p2: string): number {
     return p1.localeCompare(p2);
+  }
+}
+export class SwaggerNativeFile extends SwaggerNative {
+  constructor() {
+    super();
+    this._type = 'file';
+  }
+  compare(p1: File, p2: File): number {
+    if (!p1 && p2) {
+      return -1;
+    } else if (p1 && !p2) {
+      return 1;
+    }
+    return p1.name.localeCompare(p2.name); // TODO
   }
 }
 

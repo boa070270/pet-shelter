@@ -21,6 +21,7 @@ import {ShelterCommonModule} from '../common/common.module';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {FormsModule as MatFormsModule} from '@angular/forms';
+import {ControlsModule} from 'ui-lib';
 
 
 @NgModule({
@@ -35,21 +36,22 @@ import {FormsModule as MatFormsModule} from '@angular/forms';
     PageTableComponent,
     UserTableComponent,
   ],
-  imports: [
-    CommonModule,
-    AdminRoutingModule,
-    UiLibModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    FormsModule,
-    AngularWysiwygEditorLibModule,
-    MatExpansionModule,
-    ShelterCommonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    FormsModule,
-    MatFormsModule
-  ]
+    imports: [
+        CommonModule,
+        AdminRoutingModule,
+        UiLibModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        FormsModule,
+        AngularWysiwygEditorLibModule,
+        MatExpansionModule,
+        ShelterCommonModule,
+        MatFormFieldModule,
+        MatInputModule,
+        FormsModule,
+        MatFormsModule,
+        ControlsModule
+    ]
 })
 export class AdminModule { }

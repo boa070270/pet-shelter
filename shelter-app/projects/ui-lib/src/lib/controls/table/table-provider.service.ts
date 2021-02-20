@@ -1,17 +1,12 @@
 import { Injectable } from '@angular/core';
-import {DataSource} from '@angular/cdk/collections';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {SwaggerNative, SwaggerObject, swaggerUI, ArrayDataSource} from '../../shared';
+import {SwaggerNative, SwaggerObject, swaggerUI, ArrayDataSource, AbstractDataSource} from '../../shared';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TableProviderService {
-  private tableDefs = {};
-  private tableData = {};
-  columns = ['position', 'name', 'weight', 'symbol', 'colA', 'colB', 'colC', 'colD', 'colE'];
-  datasource = new ArrayDataSource(ELEMENT_DATA);
-  swagger = Swagger;
+  private tableDefs = {test: Swagger};
+  private tableData = {test: new ArrayDataSource(ELEMENT_DATA)};
   constructor() { }
   setTableSwagger(name: string, swagger: SwaggerObject): void {
     this.tableDefs[name] = swagger;
@@ -19,11 +14,11 @@ export class TableProviderService {
   getTableSwagger(name): SwaggerObject {
     return this.tableDefs[name];
   }
-  setDataSource(name: string, dataSource: DataSource<any>): void {
+  setDataSource(name: string, dataSource: AbstractDataSource<any>): void {
     this.tableData[name] = dataSource;
   }
-  getDataSource(name: string): DataSource<any> {
-    return this.tableData[name];
+  getDataSource(name: string): AbstractDataSource<any> {
+    return this.tableData[name] || ArrayDataSource.EmptyDS();
   }
 }
 export interface PeriodicElement {

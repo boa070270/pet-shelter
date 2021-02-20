@@ -33,7 +33,7 @@ function validationError(err, req, res, next) {
     if(!err) {
         next();
     } else {
-        log.error('Validation error: %s, body: %o', err, req.body);
+        log.error('Validation error: %o, body: %o', err, req.body);
         writeResponseError(res, err, req);
     }
 }

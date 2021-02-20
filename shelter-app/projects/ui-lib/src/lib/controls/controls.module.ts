@@ -15,6 +15,7 @@ import {ListBuilderComponent} from './list-builder.component';
 import {ListSelectComponent} from './list-select.component';
 import { BidiModule } from '@angular/cdk/bidi';
 import { ChoiceFormatPipe } from './choice-format.pipe';
+import { UploadFilesComponent } from './upload-files.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { ChoiceFormatPipe } from './choice-format.pipe';
     ListBuilderComponent,
     ListSelectComponent,
     ChoiceFormatPipe,
+    UploadFilesComponent,
   ],
   imports: [
     CommonModule,
@@ -46,6 +48,7 @@ import { ChoiceFormatPipe } from './choice-format.pipe';
     ListSelectComponent,
     TitleTypeControlComponent,
     TableComponent,
+    UploadFilesComponent,
   ]
 })
 export class ControlsModule {
@@ -71,6 +74,7 @@ export class ControlsModule {
     componentsPlugin.addPlugin('lib-title-type-control', {component: TitleTypeControlComponent, schema: null });
     componentsPlugin.addPlugin('title-type', {component: TitleTypeControlComponent, schema: null });
     componentsPlugin.addPlugin('lib-table', {component: TableComponent, schema: null });
+    componentsPlugin.addPlugin('lib-upload-files', {component: UploadFilesComponent, schema: null });
   }
 }
 // const BASE_PROPERTIES: {

@@ -1,0 +1,322 @@
+import {BasicService} from './basic.service';
+import {
+  AbstractDataSource,
+  DataExpectedResult,
+  DataService,
+  IFilter,
+  IOrder,
+  LanguageType,
+  MainDataSource
+} from 'ui-lib';
+import {Observable, of} from 'rxjs';
+import {ListRange} from '@angular/cdk/collections';
+import {map} from 'rxjs/operators';
+import {Injectable, OnDestroy} from '@angular/core';
+import {
+  BannerType,
+  FieldTypeTypeEnum,
+  FieldTypeUI,
+  FileType,
+  MenuTypeUI,
+  PageType,
+  PetType,
+  UserType
+} from './common/types';
+
+class LanguageDataService extends DataService<LanguageType> {
+  constructor(private basicService: BasicService) {
+    super();
+  }
+  deleteData(row: LanguageType): Observable<DataExpectedResult<LanguageType>> {
+    return this.basicService.deleteLanguage(row.lang).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  insertData(row: LanguageType): Observable<DataExpectedResult<LanguageType>> {
+    return this.basicService.upsertLanguage(row).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  obtainData(lstRange?: ListRange, query?: IFilter, order?: IOrder[]): Observable<DataExpectedResult<LanguageType>> {
+    return this.basicService.selectLanguage().pipe(
+      map(r => {
+        const data = r.body.data;
+        return {responseTime: new Date(r.headers.get('Date')), data, totalFiltered: data.length, totalAll: data.length};
+      })
+    );
+  }
+  updateData(row: LanguageType): Observable<DataExpectedResult<LanguageType>> {
+    return this.insertData(row);
+  }
+}
+class MenuDataService extends DataService<MenuTypeUI> {
+  constructor(private basicService: BasicService) {
+    super();
+  }
+  deleteData(row: MenuTypeUI): Observable<DataExpectedResult<MenuTypeUI>> {
+    return this.basicService.deleteMenu2(row.path).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  insertData(row: MenuTypeUI): Observable<DataExpectedResult<MenuTypeUI>> {
+    const title = row.title;
+    const menu = Object.assign({}, row);
+    delete menu.title;
+    return this.basicService.upsetMenu2(menu, title).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  obtainData(lstRange?: ListRange, query?: IFilter, order?: IOrder[]): Observable<DataExpectedResult<MenuTypeUI>> {
+    return this.basicService.getMenus2().pipe(
+      map(r => {
+        const {menus, titles} = r.body.data;
+        const data = menus.map( m => {
+          const {path, component, role, position, parentId} = m;
+          return {path, component, role, position, parentId, title: titles.filter( t => t.id = path)};
+        });
+        return {responseTime: new Date(r.headers.get('Date')), data, totalFiltered: data.length, totalAll: data.length};
+      })
+    );
+  }
+  updateData(row: MenuTypeUI): Observable<DataExpectedResult<MenuTypeUI>> {
+    return this.insertData(row);
+  }
+}
+class FieldDataService extends DataService<FieldTypeUI> {
+  constructor(private basicService: BasicService) {
+    super();
+  }
+  deleteData(row: FieldTypeUI): Observable<DataExpectedResult<FieldTypeUI>> {
+    return this.basicService.deleteField2(row.name).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  insertData(row: FieldTypeUI): Observable<DataExpectedResult<FieldTypeUI>> {
+    const titles = row.title;
+    const field = Object.assign({}, row);
+    delete field.title;
+    return this.basicService.addField2({field, titles}).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  obtainData(lstRange?: ListRange, query?: IFilter, orders?: IOrder[]): Observable<DataExpectedResult<FieldTypeUI>> {
+    return this.basicService.getFields2().pipe(map( r => {
+      const {fields, titles} = r.body.data;
+      const data = fields.map( f => {
+        const {name, type, subtype, enumValues, order} = f;
+        return {name, type, subtype, enumValues, order, title: titles.filter( t => t.id = name)};
+      });
+      return {responseTime: new Date(r.headers.get('Date')), data, totalFiltered: data.length, totalAll: data.length};
+    }));
+  }
+  updateData(row: FieldTypeUI): Observable<DataExpectedResult<FieldTypeUI>> {
+    return this.insertData(row);
+  }
+}
+class PetDataService extends DataService<PetType> {
+  constructor(private basicService: BasicService) {
+    super();
+  }
+  deleteData(row: PetType): Observable<DataExpectedResult<PetType>> {
+    return this.basicService.deletePet2(row.id).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  insertData(row: PetType): Observable<DataExpectedResult<PetType>> {
+    return this.basicService.addPet2(row).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  obtainData(lstRange?: ListRange, query?: IFilter, order?: IOrder[]): Observable<DataExpectedResult<PetType>> {
+    return this.basicService.getPets2().pipe(
+      map( r => {
+        const data = r.body.data;
+        return {responseTime: new Date(r.headers.get('Date')), data, totalFiltered: data.length, totalAll: data.length};
+      })
+    );
+  }
+  updateData(row: PetType): Observable<DataExpectedResult<PetType>> {
+    return this.basicService.updatePet2(row).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+}
+class FileDataService extends DataService<FileType> {
+  constructor(private basicService: BasicService) {
+    super();
+  }
+  deleteData(row: FileType): Observable<DataExpectedResult<FileType>> {
+    return this.basicService.deleteFile2(row.id).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  obtainData(lstRange?: ListRange, query?: IFilter, order?: IOrder[]): Observable<DataExpectedResult<FileType>> {
+    return this.basicService.getFiles2().pipe(
+      map( r => {
+        const data = r.body.data;
+        return {responseTime: new Date(r.headers.get('Date')), data, totalFiltered: data.length, totalAll: data.length};
+      })
+    );
+  }
+  insertData(row: FileType): Observable<DataExpectedResult<FileType>> {
+    return of({responseTime: new Date(0), data: [], totalFiltered: -1, totalAll: -1});
+  }
+  updateData(row: FileType): Observable<DataExpectedResult<FileType>> {
+    return of({responseTime: new Date(0), data: [], totalFiltered: -1, totalAll: -1});
+  }
+}
+class BannerDataService extends DataService<BannerType> {
+  constructor(private basicService: BasicService) {
+    super();
+  }
+  deleteData(row: BannerType): Observable<DataExpectedResult<BannerType>> {
+    return this.basicService.deleteBanner2(row.id).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  insertData(row: BannerType): Observable<DataExpectedResult<BannerType>> {
+    return this.basicService.addBanner2(row).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  obtainData(lstRange?: ListRange, query?: IFilter, order?: IOrder[]): Observable<DataExpectedResult<BannerType>> {
+    return this.basicService.getBanners2().pipe(
+      map( r => {
+        const data = r.body.data;
+        return {responseTime: new Date(r.headers.get('Date')), data, totalFiltered: data.length, totalAll: data.length};
+      })
+    );
+  }
+  updateData(row: BannerType): Observable<DataExpectedResult<BannerType>> {
+    return this.basicService.updateBanner2(row).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+}
+class PageDataService extends DataService<PageType> {
+  constructor(private basicService: BasicService) {
+    super();
+  }
+  deleteData(row: PageType): Observable<DataExpectedResult<PageType>> {
+    return this.basicService.deletePage2(row.id).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  insertData(row: PageType): Observable<DataExpectedResult<PageType>> {
+    return this.basicService.addPage2(row).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  obtainData(lstRange?: ListRange, query?: IFilter, order?: IOrder[]): Observable<DataExpectedResult<PageType>> {
+    return this.basicService.getPages2().pipe(
+      map(r => {
+        const data = r.body.data;
+        return {responseTime: new Date(r.headers.get('Date')), data, totalFiltered: data.length, totalAll: data.length};
+      })
+    );
+  }
+  updateData(row: PageType): Observable<DataExpectedResult<PageType>> {
+    return this.basicService.updatePage2(row).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+}
+class UserDataService extends DataService<UserType> {
+  constructor(private basicService: BasicService) {
+    super();
+  }
+  deleteData(row: UserType): Observable<DataExpectedResult<UserType>> {
+    return this.basicService.deleteUser2(row.login).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  insertData(row: UserType): Observable<DataExpectedResult<UserType>> {
+    return this.basicService.addUser2(row).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+  obtainData(lstRange: ListRange | undefined, query: IFilter | undefined, order: IOrder[] | undefined): Observable<DataExpectedResult<UserType>> {
+    return this.basicService.getUsers2().pipe(
+      map(r => {
+        const data = r.body.data;
+        return {responseTime: new Date(r.headers.get('Date')), data, totalFiltered: data.length, totalAll: data.length};
+      })
+    );
+  }
+  updateData(row: UserType): Observable<DataExpectedResult<UserType>> {
+    return this.basicService.updateUser2(row).pipe(
+      map(r => {
+        return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
+      })
+    );
+  }
+}
+const ALL_EQUAL = () => true;
+@Injectable({
+  providedIn: 'root'
+})
+export class DataSources implements OnDestroy {
+  readonly Language: AbstractDataSource<LanguageType>;
+  readonly Menu: AbstractDataSource<MenuTypeUI>;
+  readonly Fields: AbstractDataSource<FieldTypeUI>;
+  readonly Pets: AbstractDataSource<PetType>;
+  readonly Files: AbstractDataSource<FileType>;
+  readonly Banners: AbstractDataSource<BannerType>;
+  readonly Pages: AbstractDataSource<PageType>;
+  readonly Users: AbstractDataSource<UserType>;
+  constructor(basicService: BasicService) {
+    this.Language = new MainDataSource(new LanguageDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
+    this.Menu = new MainDataSource(new MenuDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
+    this.Fields = new MainDataSource(new FieldDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
+    this.Pets = new MainDataSource(new PetDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
+    this.Files = new MainDataSource(new FileDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
+    this.Banners = new MainDataSource(new BannerDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
+    this.Pages = new MainDataSource(new PageDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
+    this.Users = new MainDataSource(new UserDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
+  }
+  ngOnDestroy(): void {
+    this.Language.destroy();
+    this.Menu.destroy();
+    this.Fields.destroy();
+    this.Pets.destroy();
+    this.Files.destroy();
+    this.Banners.destroy();
+    this.Pages.destroy();
+  }
+}

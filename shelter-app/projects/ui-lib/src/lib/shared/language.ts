@@ -10,7 +10,9 @@ export interface TitleType {
   lang: string;
   title: string;
 }
-export type I18NType = {[key: string]: string | TitleType[] | I18NType};
+export interface I18NType {
+  [key: string]: string | TitleType[];
+}
 
 export function isTitleType(title: TitleType, strict: boolean = false): boolean {
   return title && typeof title.lang === 'string' && typeof title.title === 'string' && (!strict || typeof title.id === 'string');

@@ -1,6 +1,6 @@
 import {CollectionViewer, DataSource, ListRange} from '@angular/cdk/collections';
-import {BehaviorSubject, ConnectableObservable, EMPTY, merge, Observable, of, Subject, Subscription} from 'rxjs';
-import {mapTo, publishLast, reduce, takeLast, tap} from 'rxjs/operators';
+import {BehaviorSubject, ConnectableObservable, merge, Observable, Observer, of, Subject, Subscription} from 'rxjs';
+import {publishLast, reduce, takeLast, tap} from 'rxjs/operators';
 import {changePage, equals as eqLstRange, newPageSize, sortOut} from './list-range-helper';
 
 export const PagingSize = [10, 20, 50, 100];
@@ -53,7 +53,7 @@ export interface DataExpectedResult<T> {
   responseTime: Date;
   scrollId?: string;
 }
-export declare abstract class DataService<T> {
+export abstract class DataService<T> {
   abstract obtainData(lstRange?: ListRange, query?: IFilter, order?: IOrder[]): Observable<DataExpectedResult<T>>;
   abstract deleteData(row: T): Observable<DataExpectedResult<T>>;
   abstract updateData(row: T): Observable<DataExpectedResult<T>>;
@@ -92,23 +92,26 @@ export abstract class AbstractDataSource<T> {
   protected lastModified: Date;
   protected total: number;
   protected equalData: (o1: any, o2: any) => boolean;
+
   get totalRecords(): number {
     return this.total || 0;
   }
-  protected constructor(protected minSize: number = 20,
-                        protected maxSize: number = 200,
-                        protected equalsOrder: (o1: any, o2: any) => boolean = simpleEquals,
+
+  protected constructor(protected equalsOrder: (o1: any, o2: any) => boolean = simpleEquals,
                         protected equalsFilter: (f1: any, f2: any) => boolean = simpleEquals,
                         protected compareData?: (d1: T, d2: T) => number) {
     this.data = [];
+    this.lastModified = new Date(0);
     this.equalData = this.compareData ? (p1, p2) => this.compareData(p1, p2) === 0 : simpleEquals;
   }
+
   registerDS(): CdkDataSource<T> {
     const ds = new CdkDataSource<T>(this);
     // TODO I don't like that we stored data in this.dada, then part of it in BehaviorSubject and then part in Table
     this.consumers.set(ds, new BehaviorSubject([]));
     return ds;
   }
+
   unregisterDS(ds: CdkDataSource<T>): void {
     const subj = this.consumers.get(ds);
     if (subj && !subj.isStopped) {
@@ -116,50 +119,25 @@ export abstract class AbstractDataSource<T> {
     }
     this.consumers.delete(ds);
   }
+
   getConsumer(ds: CdkDataSource<T>): Subject<T[]> {
     return this.consumers.get(ds);
   }
+
   obtainPage(ds: CdkDataSource<T>, force?: boolean): void {
-    const subject = this.consumers.get(ds);
-    this.updateSubject(subject, ds.lstRange, ds.queryParams, ds.orderParams, force);
-  }
-  protected abstract updateSubject(subject: Subject<T[]>, lst: ListRange, queryParams: any, orderParams: IOrder[], force?: boolean): void;
-
-  deleteRow(row: any): Observable<DataExpectedResult<T>> {
-    console.log('deleteRow', row);
-    const i = this.data.indexOf(row);
-    if (i >= 0) {
-      this.data.splice(i, 1);
+    if (this.lastModified.getTime() < Date.now() - 5000) {
+      const observable = this.loadData(ds, force);
+      observable.subscribe(() => this.updateSubject(ds));
+    } else {
+      this.updateSubject(ds);
     }
-    return of({totalAll: this.total, totalFiltered: this.total, data: [], responseTime: this.lastModified});
   }
 
-  insertRow(row: any): Observable<DataExpectedResult<T>> {
-    console.log('insertRow', row);
-    this.data.push(row);
-    return of({totalAll: this.total, totalFiltered: this.total, data: [], responseTime: this.lastModified});
-  }
+  protected abstract loadData(ds: CdkDataSource<T>, force?: boolean): Observable<any>;
 
-  updateRow(row: any): Observable<DataExpectedResult<T>> {
-    console.log('updateRow', row);
-    const i = this.data.indexOf(row);
-    this.data[i] = row;
-    return of({totalAll: this.total, totalFiltered: this.total, data: [], responseTime: this.lastModified});
-  }
-}
-export class ArrayDataSource extends AbstractDataSource<any> {
-  constructor(data: any[],
-              protected minSize: number = 20,
-              protected maxSize: number = 200,
-              protected equalsOrder: (o1: any, o2: any) => boolean = simpleEquals,
-              protected equalsFilter: (f1: any, f2: any) => boolean = simpleEquals,
-              protected compareData?: (d1: any, d2: any) => number) {
-    super(minSize, maxSize, equalsOrder, equalsFilter, compareData);
-    this.data = data || [];
-    this.total = this.data.length;
-  }
-  protected updateSubject(subject: Subject<any[]>, lst: ListRange, queryParams: any, orderParams: IOrder[],
-                          force: boolean | undefined): void {
+  protected updateSubject(ds: CdkDataSource<T>): void {
+    const subject = this.consumers.get(ds);
+    const {lstRange, queryParams, orderParams} = ds;
     let compare: (p1: any, p2: any) => number = () => 1;
     let filter: (p: any) => boolean = () => true;
     const compareData = this.compareData ? this.compareData : simpleCompare;
@@ -188,8 +166,66 @@ export class ArrayDataSource extends AbstractDataSource<any> {
         }
       };
     }
-    const d = this.data.filter(filter).sort(compare).slice(lst.start, lst.end);
+    const d = this.data.filter(filter).sort(compare).slice(lstRange.start, lstRange.end);
     subject.next(d);
+  }
+
+  deleteRow(consumer: CdkDataSource<T>, row: any): Observable<DataExpectedResult<T>> {
+    console.log('deleteRow', row);
+    const i = this.data.indexOf(row);
+    if (i >= 0) {
+      this.data.splice(i, 1);
+    }
+    this.updateConsumers(consumer);
+    return of({totalAll: this.total, totalFiltered: this.total, data: [], responseTime: this.lastModified});
+  }
+
+  insertRow(consumer: CdkDataSource<T>, row: any): Observable<DataExpectedResult<T>> {
+    console.log('insertRow', row);
+    this.data.push(row);
+    this.updateConsumers(consumer);
+    return of({totalAll: this.total, totalFiltered: this.total, data: [], responseTime: this.lastModified});
+  }
+
+  updateRow(consumer: CdkDataSource<T>, row: any): Observable<DataExpectedResult<T>> {
+    console.log('updateRow', row);
+    const i = this.data.indexOf(row);
+    this.data[i] = row;
+    this.updateConsumers(consumer);
+    return of({totalAll: this.total, totalFiltered: this.total, data: [], responseTime: this.lastModified});
+  }
+
+  protected updateConsumers(who: CdkDataSource<T>): void {
+    this.consumers.forEach((value, key) => {
+      if (key !== who) {
+        this.updateSubject(key);
+      }
+    });
+  }
+
+  destroy(): void {
+  }
+
+  abstract setData(data: any[]): void;
+}
+export class ArrayDataSource extends AbstractDataSource<any> {
+  constructor(data: any[],
+              protected equalsOrder: (o1: any, o2: any) => boolean = simpleEquals,
+              protected equalsFilter: (f1: any, f2: any) => boolean = simpleEquals,
+              protected compareData?: (d1: any, d2: any) => number) {
+    super(equalsOrder, equalsFilter, compareData);
+    this.data = data || [];
+    this.total = this.data.length;
+  }
+  static EmptyDS(): ArrayDataSource {
+    return new ArrayDataSource([]);
+  }
+  protected loadData(ds: CdkDataSource<any>, force?: boolean): Observable<any> {
+    return of(true);
+  }
+  setData(data: any[]): void {
+    this.data = data;
+    this.updateConsumers(null);
   }
 }
 /**
@@ -200,7 +236,7 @@ export class ArrayDataSource extends AbstractDataSource<any> {
  *    - queries that do not have filter nor sort can obtain a result from cache
  */
 export class MainDataSource<T> extends AbstractDataSource<T>{
-  private readonly workers: LoaderWorker<T>[];
+  private readonly workers: LoaderWorker<T>[] = [];
   // private subscription: Subscription; TODO need to unsubscribe all waste
   private externalModified: boolean;
 
@@ -210,8 +246,8 @@ export class MainDataSource<T> extends AbstractDataSource<T>{
               protected equalsOrder: (o1: any, o2: any) => boolean = simpleEquals,
               protected equalsFilter: (f1: any, f2: any) => boolean = simpleEquals,
               protected compareData?: (d1: T, d2: T) => number) {
-    super(minSize, maxSize, equalsOrder, equalsFilter, compareData);
-    this.makeWorker({start: 0, end: 20});
+    super(equalsOrder, equalsFilter, compareData);
+    // this.makeWorker({start: 0, end: 20});
   }
 
   private makeWorker(lstRange: ListRange, query?: any, order?: any): LoaderWorker<T> {
@@ -222,12 +258,13 @@ export class MainDataSource<T> extends AbstractDataSource<T>{
         tap(d => {
           this.concatDate(d);
         }),
-        mapTo(true),
         publishLast()
       )
     };
     this.workers.push(worker);
-    (worker.work as ConnectableObservable<DataExpectedResult<T>>).connect();
+    if (typeof (worker.work as any).connect === 'function') {
+      (worker.work as ConnectableObservable<DataExpectedResult<T>>).connect();
+    }
     return worker;
   }
   private cleanWorkers(): void {
@@ -236,16 +273,29 @@ export class MainDataSource<T> extends AbstractDataSource<T>{
       const ixn = this.workers.findIndex(w => w === worker);
       if (ixn >= 0) {
         this.workers.splice(ixn, 1);
+        console.log('MainDataSource.cleanWorker 1');
       }
     }
   }
-  protected updateSubject(subject: Subject<T[]>, lst: ListRange, queryParams: any, orderParams: IOrder[], force?: boolean): void {
+
+  setData(data: any[]): void {}
+
+  protected loadData(ds: CdkDataSource<T>, force?: boolean): Observable<any> {
+    const {lstRange, queryParams, orderParams} = ds;
     if (force) {
-      const worker = this.makeWorker(lst, queryParams, orderParams);
-      worker.work.subscribe((d) => {
-        subject.next(d.data);
-        worker.subscriptions--;
-        this.cleanWorkers();
+      const worker = this.makeWorker(lstRange, queryParams, orderParams);
+      return new Observable(subscriber => {
+        worker.work.subscribe(() => {
+          subscriber.next(true);
+          subscriber.complete();
+        },
+          error => {
+            console.log(error);
+          },
+          () => {
+            worker.subscriptions--;
+            this.cleanWorkers();
+          });
       });
     } else {
       let usesData = false;
@@ -256,15 +306,15 @@ export class MainDataSource<T> extends AbstractDataSource<T>{
         available.push({start: 0, end: this.data.length});
         usesData = true;
       }
-      const {present, absent} = sortOut(lst, available);
+      const {present, absent} = sortOut(lstRange, available);
       const workers = this.workers.filter(w => present.find(p => eqLstRange(w.lstRange, p)));
       workers.forEach(w => w.subscriptions++); // say that we uses these workers
       for (const r of absent) {
         workers.push(this.makeWorker(r, queryParams, orderParams));
       }
       const src = workers.map(w => w.work);
-      if (usesData && lst.start < this.data.length) {
-        const data = this.data.slice(lst.start, lst.end < this.data.length ? lst.end : this.data.length);
+      if (usesData && lstRange.start < this.data.length) {
+        const data = this.data.slice(lstRange.start, lstRange.end < this.data.length ? lstRange.end : this.data.length);
         src.unshift(of({data, responseTime: this.lastModified, totalAll: this.total, totalFiltered: 0, scrollId: undefined}));
       }
       const worker = merge(...src, 1)
@@ -280,11 +330,20 @@ export class MainDataSource<T> extends AbstractDataSource<T>{
             },
             {data: [], total: 0, lastModified: new Date(0), scrollId: ''}),
           );
-      worker.subscribe(d => {
-        subject.next(d.data);
+      return new Observable(subscriber => {
+        worker.subscribe(() => {
+          subscriber.next(true);
+          subscriber.complete();
+        },
+          error => {
+            console.log(error);
+          },
+          () => {
+            workers.forEach(w => w.subscriptions--);
+            this.cleanWorkers();
+          });
       });
-      workers.forEach(w => w.subscriptions--);
-      this.cleanWorkers();
+
     }
   }
   private updateCounters(r: DataExpectedResult<T>): void {
@@ -304,28 +363,26 @@ export class MainDataSource<T> extends AbstractDataSource<T>{
       }
     });
   }
-  private _update(d: T[]): void {
-  }
-  deleteRow(row: any): Observable<DataExpectedResult<T>> {
-    super.deleteRow(row);
+  deleteRow(consumer: CdkDataSource<T>, row: any): Observable<DataExpectedResult<T>> {
     return this.dataService.deleteData(row)
       .pipe(
-        tap( r => this.updateCounters(r))
+        tap( r => this.updateCounters(r)),
+        tap(() => super.deleteRow(consumer, row))
       );
   }
-  insertRow(row: any): Observable<DataExpectedResult<T>> {
-    super.insertRow(row);
+  insertRow(consumer: CdkDataSource<T>, row: any): Observable<DataExpectedResult<T>> {
     return this.dataService.insertData(row)
       .pipe(
-        tap( r => this.updateCounters(r))
+        tap( r => this.updateCounters(r)),
+        tap(() => super.insertRow(consumer, row))
       );
   }
 
-  updateRow(row: any): Observable<DataExpectedResult<T>> {
-    super.updateRow(row);
+  updateRow(consumer: CdkDataSource<T>, row: any): Observable<DataExpectedResult<T>> {
     return this.dataService.updateData(row)
       .pipe(
-        tap( r => this.updateCounters(r))
+        tap( r => this.updateCounters(r)),
+        tap(() => super.updateRow(consumer, row))
       );
   }
 }
@@ -345,7 +402,7 @@ export class CdkDataSource<T> extends DataSource<T> {
     if (pos < 1) {
       this.curPage = 0;
     } else if (pos > this.maxPage) {
-      this.curPage = this.pageSize - 1;
+      this.curPage = this.maxPage - 1;
     } else {
       this.curPage = pos - 1;
     }
@@ -401,17 +458,17 @@ export class CdkDataSource<T> extends DataSource<T> {
     this.main.obtainPage(this);
   }
   updateRow(row: T): Observable<DataExpectedResult<T>> {
-    return this.main.updateRow(row).pipe(
+    return this.main.updateRow(this, row).pipe(
       tap(() => this.main.obtainPage(this))
     );
   }
   insertRow(row: T): Observable<DataExpectedResult<T>> {
-    return this.main.insertRow(row).pipe(
+    return this.main.insertRow(this, row).pipe(
       tap(() => this.main.obtainPage(this))
     );
   }
   deleteRow(row: T): Observable<DataExpectedResult<T>> {
-    return this.main.deleteRow(row).pipe(
+    return this.main.deleteRow(this, row).pipe(
       tap(() => {
         this.main.obtainPage(this);
         this.selectedRows = [];

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import {CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router} from '@angular/router';
 import { Observable } from 'rxjs';
-import {AuthorizationService} from "./authorization.service";
-import {SystemMenuService} from "./system-menu.service";
-import {UserTypeRoleEnum} from "./common/types";
+import {AuthorizationService} from './authorization.service';
+import {SystemMenuService} from './system-menu.service';
+import {UserTypeRoleEnum} from './common/types';
 
 @Injectable({
   providedIn: 'root'

@@ -1,0 +1,11 @@
+.upload-files {
+  border: 1px solid blue;
+  display: block;
+  position: relative;
+  min-height: 100px;
+  min-width: 200px;
+  text-align: center;
+  &-container {
+    text-align: left;
+  }
+}
