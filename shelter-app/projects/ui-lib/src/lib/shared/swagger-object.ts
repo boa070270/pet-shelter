@@ -101,7 +101,7 @@ export abstract class SwaggerNative extends SwaggerSchema {
   protected _type: SwaggerNativeTypes;
   protected ctrlType: string;
   protected constraints: CommonConstrictions;
-  statis;   static asString(controlType?: string, constraints?: StringConstrictions, ui?: SwaggerCustomUI): SwaggerNative {
+  static asString(controlType?: string, constraints?: StringConstrictions, ui?: SwaggerCustomUI): SwaggerNative {
     return new SwaggerNativeString(controlType, constraints, ui);
   }
   static asNumber(controlType?: string, constraints?: NumberConstrictions, ui?: SwaggerCustomUI): SwaggerNative {

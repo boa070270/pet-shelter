@@ -15,6 +15,8 @@ import {ListBuilderComponent} from './list-builder.component';
 import {ListSelectComponent} from './list-select.component';
 import { BidiModule } from '@angular/cdk/bidi';
 import { EditableListComponent } from './editable-list.component';
+import { SwaggerBuilderComponent } from './swagger-builder.component';
+import {SwaggerFormModule} from "../swagger-form";
 
 @NgModule({
   declarations: [
@@ -29,12 +31,14 @@ import { EditableListComponent } from './editable-list.component';
     ListBuilderComponent,
     ListSelectComponent,
     EditableListComponent,
+    SwaggerBuilderComponent,
   ],
   imports: [
     CommonModule,
     FormsModule,
     CdkTableModule,
-    BidiModule
+    BidiModule,
+    SwaggerFormModule
   ],
   exports: [
     CheckboxControlComponent,
@@ -47,6 +51,7 @@ import { EditableListComponent } from './editable-list.component';
     TitleTypeControlComponent,
     TableComponent,
     EditableListComponent,
+    SwaggerBuilderComponent,
   ]
 })
 export class ControlsModule {

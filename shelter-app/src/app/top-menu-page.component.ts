@@ -190,6 +190,22 @@ export class TopMenuPageComponent implements OnInit {
           sex: SwaggerNative.asString(null, {enums: ['m', 'f']})
         })
       });
+  swaggerOption = [{
+    orderControls: ['id', 'description', 'child'],
+    properties: {
+      id: SwaggerNative.asString(),
+      description: SwaggerNative.asString(),
+      child: new SwaggerObject(
+        ['childId', 'childDescription', 'sex'],
+        {
+          childId: SwaggerNative.asString(),
+          childDescription: SwaggerNative.asString(),
+          sex: SwaggerNative.asString(null, {enums: ['m', 'f']})
+        })
+    },
+    ui: null,
+    required: ['id']
+  }];
   /******* Table *******/
   tableDataSet = [
     {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
