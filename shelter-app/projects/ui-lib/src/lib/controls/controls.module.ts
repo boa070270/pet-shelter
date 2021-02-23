@@ -16,6 +16,7 @@ import {ListSelectComponent} from './list-select.component';
 import { BidiModule } from '@angular/cdk/bidi';
 import { ChoiceFormatPipe } from './choice-format.pipe';
 import { UploadFilesComponent } from './upload-files.component';
+import { TextareaControlComponent } from './textarea-control.component';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { UploadFilesComponent } from './upload-files.component';
     ListSelectComponent,
     ChoiceFormatPipe,
     UploadFilesComponent,
+    TextareaControlComponent,
   ],
   imports: [
     CommonModule,
@@ -49,6 +51,7 @@ import { UploadFilesComponent } from './upload-files.component';
     TitleTypeControlComponent,
     TableComponent,
     UploadFilesComponent,
+    TextareaControlComponent,
   ]
 })
 export class ControlsModule {

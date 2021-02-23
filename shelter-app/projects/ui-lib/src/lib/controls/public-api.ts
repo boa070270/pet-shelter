@@ -12,3 +12,4 @@ export * from './table/table.component';
 export * from './table/table-provider.service';
 export * from './choice-format.pipe';
 export * from './upload-files.component';
+export * from './textarea-control.component';

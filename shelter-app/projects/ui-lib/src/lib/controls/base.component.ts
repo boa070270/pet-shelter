@@ -9,7 +9,7 @@ export interface CommonParameters {
   id?: string;
   name?: string;
   hint?: string | TitleType[];
-  error?: string | TitleType[];
+  error?: Array<string | TitleType>;
   caption?: string | TitleType[];
   hidden?: boolean;
   disabled?: boolean;
@@ -51,23 +51,18 @@ export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValue
   @Input()
   set hint(p: string | TitleType[]) {
     this.common.hint = p;
-  }
-  get hint(): string | TitleType[] {
-    return this.common.hint || null;
+    this.pHint = this.doIfNeedI18n(p) as string;
   }
   @Input()
-  set error(p: string | TitleType[]) {
+  set error(p: Array<string | TitleType>) {
     this.common.error = p;
-  }
-  get error(): string | TitleType[] {
-    return this.common.error;
+    const err = this.doIfNeedI18n(p, {});
+    this.pError = err ? Object.values(err) : null;
   }
   @Input()
   set caption(p: string | TitleType[]) {
     this.common.caption = p;
-  }
-  get caption(): string | TitleType[] {
-    return this.common.caption;
+    this.pCaption = this.doIfNeedI18n(this.common.caption);
   }
   @Input()
   set hidden(p: boolean) {
@@ -93,7 +88,7 @@ export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValue
   dir: string;
   pHint: string;
   pCaption: string;
-  pError: string;
+  pError: string[];
   i18n: any;
   private subsLang: Subscription;
   private subsDir: Subscription;
@@ -126,24 +121,16 @@ export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValue
     if (changes.name) {
       console.log('BaseControlComponent.ngOnChanges was changed name');
     }
-    if (changes.hint) {
-      this.pHint = this.doIfNeedI18n(this.hint) as string;
-    }
-    if (changes.caption) {
-      this.pCaption = this.doIfNeedI18n(this.caption);
-    }
-    if (changes.error) {
-      this.pError = this.doIfNeedI18n(this.error);
-    }
   }
   ngOnDestroy(): void {
       this.subsLang.unsubscribe();
       this.subsDir.unsubscribe();
   }
   onChangeLang(): void {
-    this.pHint = this.doIfNeedI18n(this.hint) as string;
-    this.pCaption = this.doIfNeedI18n(this.caption);
-    this.pError = this.doIfNeedI18n(this.error);
+    this.pHint = this.doIfNeedI18n(this.common.hint) as string;
+    this.pCaption = this.doIfNeedI18n(this.common.caption);
+    const err = this.doIfNeedI18n(this.common.error, {});
+    this.pError = err ? Object.values(err) : null;
     this.i18n = this.systemLang.i18n(this.i18NCfg);
   }
 

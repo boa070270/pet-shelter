@@ -5,36 +5,36 @@
   --columns: attr(cols string);
   display: block;
   position: relative;
-  padding: {
-    top: 2px;
-    bottom: 2px;
-    left: 0;
-    right: 0;
-  };
-  margin: 0;
+padding: {
+  top: 2px;
+  bottom: 2px;
+  left: 0;
+  right: 0;
+};
+margin: 0;
 }
 
 .ui-input {
   display: block;
   position: relative;
 
-  label {
-    display: block;
-    position: relative;
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
-    margin: {
-      top: 4px;
-      bottom: 4px;
-    };
-  }
+label {
+  display: block;
+  position: relative;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+margin: {
+  top: 4px;
+  bottom: 4px;
+};
+}
 }
 .ui-input-icons {
   display: block;
-  &::before {
-    font-size: 80%;
-  }
+&::before {
+   font-size: 80%;
+ }
 }
 .ui-input-title {
   display: block;
@@ -57,7 +57,7 @@
 .ui-input-empty {
   top: 0;
   font-size: inherit;
-  //color: inherit;
+//color: inherit;
 }
 .ui-input-icon-place {
   left: 1.2em;
@@ -85,44 +85,44 @@
   appearance: none;
   margin: 0;
   padding: 0;
-  border: {
-    bottom: {
-      color: #007BFF;
-      style: solid;
-      width: 1px;
-    };
-  };
-  -webkit-border-image: none;
+border: {
+bottom: {
+  color: #007BFF;
+  style: solid;
+  width: 1px;
+};
+};
+-webkit-border-image: none;
 
-  &::placeholder {
-    color: transparent;
-    font: inherit;
+&::placeholder {
+   color: transparent;
+   font: inherit;
+ }
+
+&:focus {
+   outline: none;
+   border-bottom-color: #00c8f0;
+   -webkit-border-image: none;
+&::placeholder {
+   color: gray;
+ }
+
+& ~ .ui-input-title {
+    top: -30%;
+    color: #00c8f0;
+    font-size: x-small;
   }
+}
 
-  &:focus {
-    outline: none;
-    border-bottom-color: #00c8f0;
-    -webkit-border-image: none;
-    &::placeholder {
-      color: gray;
-    }
+&:invalid {
+   border-bottom-color: red;
 
-    & ~ .ui-input-title {
-      top: -30%;
-      color: #00c8f0;
-      font-size: x-small;
-    }
-  }
+~ .ui-input-error {
+  display: block;
+}
 
-  &:invalid {
-    border-bottom-color: red;
-
-    ~ .ui-input-error {
-      display: block;
-    }
-
-    ~ .ui-input-hint {
-      display: none;
-    }
-  }
+~ .ui-input-hint {
+  display: none;
+}
+}
 }

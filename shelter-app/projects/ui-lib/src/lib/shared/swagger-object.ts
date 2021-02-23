@@ -1,8 +1,14 @@
 import {TitleType} from './index';
 import {AsyncValidatorFn, FormGroup, ValidatorFn} from '@angular/forms';
 
-export interface CommonConstrictions {
+export interface BaseConstrictions {
+  control?: string; // name of UI control that is described through ComponentPluginService
+  validators?: ValidatorFn[];
+  asyncValidator?: AsyncValidatorFn[];
+}
+export interface NativeConstrictions extends BaseConstrictions {
   readOnly?: boolean;
+  immutable?: boolean; // this isn't Swagger format. It doesn't allow modifying when doesn't empty
   writeOnly?: boolean; // Maybe will be removed, has not any sense on client-side
   nullable?: boolean; // TODO Make a decision how to use it (maybe always required if true)
   enum?: number[] | string[];
@@ -10,10 +16,11 @@ export interface CommonConstrictions {
   enumTooltips?: string[] | TitleType[];
   enumMulti?: boolean; // TODO This can be used in case swagger property has type array and simple type as item (with option uniqueItems)
   default?: boolean | number | string;
-  format?: 'date' | 'date-time' | 'password' | 'byte' | 'binary' | 'email' | 'uuid' | 'uri' | 'hostname' | 'ipv4' | 'ipv6' | 'file';
+  format?: 'date' | 'date-time' | 'password' | 'byte' | 'binary' | 'email' | 'uuid' | 'uri' | 'hostname' | 'ipv4'
+    | 'ipv6' | 'color' | 'datetime-local' | 'month' | 'number' | 'search' | 'tel' | 'text' | 'time' | 'week';
 }
 
-export interface NumberConstrictions extends CommonConstrictions {
+export interface NumberConstrictions extends NativeConstrictions {
   minimum?: number;
   maximum?: number;
   exclusiveMinimum?: number;
@@ -21,12 +28,12 @@ export interface NumberConstrictions extends CommonConstrictions {
   multipleOf?: number;
 }
 
-export interface StringConstrictions extends CommonConstrictions {
+export interface StringConstrictions extends NativeConstrictions {
   minLength?: number;
   maxLength?: number;
   pattern?: RegExp;
 }
-export interface ArrayConstrictions {
+export interface ArrayConstrictions extends BaseConstrictions {
   minItems?: number;
   maxItems?: number;
   uniqueItems?: boolean;
@@ -36,21 +43,19 @@ export interface ArrayConstrictions {
  * "description" can be obtained from swagger
  * other properties need handle work
  */
-export interface SwaggerCustomUI {
+export interface SwaggerUI {
   description?: string | TitleType[]; // this property is used as hint
   caption?: string | TitleType[];
   toolTip?: string | TitleType[];
   placeHolder?: string | TitleType[];
-  validators?: ValidatorFn[];
-  asyncValidator?: AsyncValidatorFn[];
   leadingIcon?: string;
   trailingIcon?: string;
   nameAsCaption?: boolean;
 }
 export function swaggerUI(caption?: string | TitleType[], description?: string | TitleType[],
                           toolTip?: string | TitleType[], placeHolder?: string | TitleType[],
-                          leadingIcon?: string, trailingIcon?: string): SwaggerCustomUI {
-  return {description, caption, placeHolder, toolTip, leadingIcon, trailingIcon};
+                          leadingIcon?: string, trailingIcon?: string, nameAsCaption?: boolean): SwaggerUI {
+  return {description, caption, placeHolder, toolTip, leadingIcon, trailingIcon, nameAsCaption};
 }
 export type SwaggerNativeTypes = 'string' | 'number' | 'integer' | 'boolean' | 'file';
 export function validNativeType(str: string): boolean {
@@ -66,52 +71,55 @@ export function validNativeType(str: string): boolean {
 }
 export abstract class SwaggerSchema {
   // tslint:disable-next-line:variable-name
-  protected _ui: SwaggerCustomUI;
-  get ui(): SwaggerCustomUI {
+  protected _ui: SwaggerUI;
+  // tslint:disable-next-line:variable-name
+  protected _constrain: BaseConstrictions;
+  get ui(): SwaggerUI {
     return this._ui;
   }
-  protected constructor(ui?: SwaggerCustomUI) {
-    this._ui = ui;
+  get constrictions(): BaseConstrictions {
+    return this._constrain;
+  }
+  protected constructor(constraints?: BaseConstrictions, ui?: SwaggerUI) {
+    this._ui = ui || {};
+    this._constrain = constraints || {};
   }
   abstract stringify(): string;
 }
 export abstract class SwaggerNative extends SwaggerSchema {
+  // tslint:disable-next-line:variable-name
+  protected _type: SwaggerNativeTypes;
   get type(): SwaggerNativeTypes {
     return this._type;
   }
   get controlType(): string {
-    return this.ctrlType;
+    return this.constrictions.control;
   }
-  get constrictions(): CommonConstrictions {
-    return this.constraints;
+  get constrictions(): NativeConstrictions {
+    return this._constrain;
   }
-  protected constructor(controlType?: string, constraints?: StringConstrictions, ui?: SwaggerCustomUI) {
-    super(ui);
-    this.constraints = constraints;
+  protected constructor(controlType?: string, constraints?: StringConstrictions, ui?: SwaggerUI) {
+    super(constraints, ui);
     if (controlType) {
-      this.ctrlType = controlType;
+      this._constrain.control = controlType;
     } else {
-      if (constraints && constraints.enum) {
-        this.ctrlType = constraints.enum.length < 4 ? 'radio' : 'select';
+      if (this.constrictions.enum) {
+        this._constrain.control = this.constrictions.enum.length < 4 ? 'radio' : 'select';
       } else {
-        this.ctrlType = 'input';
+        this._constrain.control = 'input';
       }
     }
   }
-  // tslint:disable-next-line:variable-name
-  protected _type: SwaggerNativeTypes;
-  protected ctrlType: string;
-  protected constraints: CommonConstrictions;
-  static asString(controlType?: string, constraints?: StringConstrictions, ui?: SwaggerCustomUI): SwaggerNative {
+  static asString(controlType?: string, constraints?: StringConstrictions, ui?: SwaggerUI): SwaggerNative {
     return new SwaggerNativeString(controlType, constraints, ui);
   }
-  static asNumber(controlType?: string, constraints?: NumberConstrictions, ui?: SwaggerCustomUI): SwaggerNative {
+  static asNumber(controlType?: string, constraints?: NumberConstrictions, ui?: SwaggerUI): SwaggerNative {
     return new SwaggerNativeNumber(controlType, constraints, ui);
   }
-  static asInteger(controlType?: string, constraints?: NumberConstrictions, ui?: SwaggerCustomUI): SwaggerNative {
+  static asInteger(controlType?: string, constraints?: NumberConstrictions, ui?: SwaggerUI): SwaggerNative {
     return new SwaggerNativeInteger(controlType, constraints, ui);
   }
-  static asBoolean(controlType?: string, constraints?: CommonConstrictions, ui?: SwaggerCustomUI): SwaggerNative {
+  static asBoolean(controlType?: string, constraints?: NativeConstrictions, ui?: SwaggerUI): SwaggerNative {
     return new SwaggerNativeBoolean(controlType, constraints, ui);
   }
   static asFile(): SwaggerNative {
@@ -149,22 +157,20 @@ export abstract class SwaggerNative extends SwaggerSchema {
   abstract compare(p1: any, p2: any): number;
 }
 export class SwaggerArray extends SwaggerSchema {
-  protected items: SwaggerNative | SwaggerObject;
-  get itemsType(): SwaggerNative | SwaggerObject {
-    return this.items;
+  // tslint:disable-next-line:variable-name
+  protected _items: SwaggerNative | SwaggerObject;
+  get items(): SwaggerNative | SwaggerObject {
+    return this._items;
   }
-  protected constraints: ArrayConstrictions;
   get constrictions(): ArrayConstrictions {
-    return this.constraints;
+    return this._constrain;
   }
-  constructor(items: SwaggerNative | SwaggerObject, constraints?: ArrayConstrictions, ui?: SwaggerCustomUI) {
-    super(ui);
-    this.items = items;
-    this.constraints = constraints;
-    this._ui = ui;
+  constructor(items: SwaggerNative | SwaggerObject, constraints?: ArrayConstrictions, ui?: SwaggerUI) {
+    super(constraints, ui);
+    this._items = items;
   }
   static parse(obj: any): SwaggerArray {
-    const itemsType = obj.itemsType;
+    const itemsType = obj.items;
     if (typeof itemsType === 'object' && itemsType !== null) {
       let items: SwaggerNative | SwaggerObject = SwaggerNative.parse(itemsType);
       if (!items) {
@@ -177,7 +183,7 @@ export class SwaggerArray extends SwaggerSchema {
     return null;
   }
   stringify(): string {
-    return `{"itemsType":"${this.itemsType}","constrictions":"${this.constrictions}","ui":"${this.ui}"`;
+    return `{"itemsType":"${this.items}","constrictions":"${this.constrictions}","ui":"${this.ui}"`;
   }
 }
 export class SwaggerObject extends SwaggerSchema {
@@ -200,8 +206,9 @@ export class SwaggerObject extends SwaggerSchema {
   get required(): string[] {
     return this.needs;
   }
-  constructor(orderCtrl: string[], properties: { [key: string]: SwaggerSchema }, ui?: SwaggerCustomUI, required?: string[]) {
-    super(ui);
+  constructor(orderCtrl: string[], properties: { [key: string]: SwaggerSchema }, ui?: SwaggerUI, required?: string[],
+              constraints?: BaseConstrictions) {
+    super(constraints, ui);
     this.props = properties || {};
     this.orderCtrl = orderCtrl || Object.keys(this.props).filter(() => true);
     this.needs = required || [];
@@ -249,12 +256,9 @@ export class SwaggerObject extends SwaggerSchema {
 }
 
 export class SwaggerNativeBoolean extends SwaggerNative {
-  constructor(controlType?: string, constraints?: CommonConstrictions, ui?: SwaggerCustomUI) {
-    super(controlType, constraints, ui);
+  constructor(controlType?: string, constraints?: NativeConstrictions, ui?: SwaggerUI) {
+    super(controlType || 'boolean', constraints, ui);
     this._type = 'boolean';
-    if (!controlType) {
-      this.ctrlType = 'boolean';
-    }
   }
   // assume that false < true
   compare(p1: boolean, p2: boolean): number {
@@ -265,7 +269,10 @@ export class SwaggerNativeBoolean extends SwaggerNative {
   }
 }
 export class SwaggerNativeNumber extends SwaggerNative {
-  constructor(controlType?: string, constraints?: NumberConstrictions, ui?: SwaggerCustomUI) {
+  get constrictions(): NumberConstrictions {
+    return this._constrain;
+  }
+  constructor(controlType?: string, constraints?: NumberConstrictions, ui?: SwaggerUI) {
     super(controlType, constraints, ui);
     this._type = 'number';
   }
@@ -273,8 +280,8 @@ export class SwaggerNativeNumber extends SwaggerNative {
     return p1 - p2;
   }
 }
-export class SwaggerNativeInteger extends SwaggerNative {
-  constructor(controlType?: string, constraints?: NumberConstrictions, ui?: SwaggerCustomUI) {
+export class SwaggerNativeInteger extends SwaggerNativeNumber {
+  constructor(controlType?: string, constraints?: NumberConstrictions, ui?: SwaggerUI) {
     super(controlType, constraints, ui);
     this._type = 'integer';
   }
@@ -283,7 +290,10 @@ export class SwaggerNativeInteger extends SwaggerNative {
   }
 }
 export class SwaggerNativeString extends SwaggerNative {
-  constructor(controlType?: string, constraints?: StringConstrictions, ui?: SwaggerCustomUI) {
+  get constrictions(): StringConstrictions {
+    return this._constrain;
+  }
+  constructor(controlType?: string, constraints?: StringConstrictions, ui?: SwaggerUI) {
     super(controlType, constraints, ui);
     this._type = 'string';
   }
@@ -292,8 +302,8 @@ export class SwaggerNativeString extends SwaggerNative {
   }
 }
 export class SwaggerNativeFile extends SwaggerNative {
-  constructor() {
-    super();
+  constructor(controlType?: string, constraints?: StringConstrictions, ui?: SwaggerUI) {
+    super(controlType, constraints, ui);
     this._type = 'file';
   }
   compare(p1: File, p2: File): number {
@@ -324,8 +334,8 @@ export function coerceToSwaggerArray(obj: SwaggerSchema): SwaggerArray {
 export function coerceToSwaggerObject(obj: SwaggerSchema): SwaggerObject {
   return (obj instanceof SwaggerObject) ? obj : null;
 }
-export function mergeCustomUI(dest: SwaggerCustomUI, source: SwaggerCustomUI): SwaggerCustomUI {
-  const ui = dest || {} as SwaggerCustomUI;
+export function mergeCustomUI(dest: SwaggerUI, source: SwaggerUI): SwaggerUI {
+  const ui = dest || {} as SwaggerUI;
   if (source) {
     ui.description = source.description || ui.description;
     ui.caption = source.caption || ui.caption;

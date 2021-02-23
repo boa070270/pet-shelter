@@ -1,0 +1,12 @@
+<div class="carousel-container">
+  <div class="carousel-items-holder">
+    <table cdk-table>
+      <ng-container *ngFor="let col of allColumns" cdkColumnDef="{{col}}" >
+        <td cdk-cell *cdkCellDef="let element">
+          <!-- ng-template [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{$implicit:element[col]}"></ng-template -->
+        </td>
+      </ng-container>
+      <tr cdk-row *cdkRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+</div>

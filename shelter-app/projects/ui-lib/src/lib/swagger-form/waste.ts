@@ -4,12 +4,12 @@ import {
   coerceToSwaggerNative,
   coerceToSwaggerObject, mergeCustomUI,
   NumberConstrictions,
-  StringConstrictions, SwaggerCustomUI,
+  StringConstrictions, SwaggerUI,
   SwaggerSchema
 } from '../shared/swagger-object';
 import {AbstractControl, FormControl, FormGroup, Validators} from '@angular/forms';
 
-interface UI extends SwaggerCustomUI {
+interface UI extends SwaggerUI {
   disabled?: boolean;
   control?: string;
   controlType?: string;
@@ -119,13 +119,13 @@ class Waste {
   protected static processArray(swg: SwaggerSchema): ProcessResult {
     const arr = coerceToSwaggerArray(swg);
     if (arr) {
-      let result = Waste.processNative(arr.itemsType);
+      let result = Waste.processNative(arr.items);
       if (result) {
         result.ui = mergeCustomUI(result.ui, arr.ui);
         return result;
       }
 
-      result = Waste.processNative(arr.itemsType);
+      result = Waste.processNative(arr.items);
       if (result) {
         const ui: UI = arr.ui || {};
         ui.children[0] = result.ui;

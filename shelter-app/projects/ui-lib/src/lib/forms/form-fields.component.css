@@ -1,9 +1,0 @@
-:host {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-:host > div {
-  margin: 3px;
-  display: flex;
-}

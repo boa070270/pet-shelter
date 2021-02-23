@@ -1,7 +1,11 @@
 import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {ShowMediaDialogComponent} from './show-media-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
-import {ShowMediaType} from './ui-types';
+
+export interface ShowMediaType {
+  mediaType: string;
+  mediaURI: string;
+}
 
 @Component({
   selector: 'lib-show-value',

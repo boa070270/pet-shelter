@@ -1,12 +1,17 @@
 import {Injectable, OnDestroy} from '@angular/core';
 import {HttpClient, HttpEvent, HttpHeaders, HttpResponse} from '@angular/common/http';
 import {Observable, Subscription} from 'rxjs';
-import {AbstractDataSource, BaseDataSource, BrowserStorageService} from 'ui-lib';
+import {
+  BrowserStorageService,
+  CommentResponse,
+  LanguageType as UILanguageType,
+  ObtainSystemLanguage,
+  VoteType
+} from 'ui-lib';
 import {map, tap} from 'rxjs/operators';
 import {
   BannerType,
-  CarouselType, CommentType,
-  convertFieldsToFieldArray,
+  CarouselType,
   FieldAndTitlesType,
   FieldsAndTitlesType,
   FileDetailsType,
@@ -15,17 +20,16 @@ import {
   LanguageType,
   MenuAndTitlesType,
   MenusAndTitlesType,
-  MenuType, MenuTypeUI,
+  MenuType,
   PageType,
   PetType,
   QueryType,
   Response,
   SearchResult,
-  TitleType, UserType,
+  TitleType,
+  UserType,
 } from './common/types';
-import {fromPromise} from 'rxjs/internal-compatibility';
 import {AuthorizationService} from './authorization.service';
-import {CommentResponse, ObtainSystemLanguage, LanguageType as UILanguageType, VoteType} from 'ui-lib';
 
 const API_URL = '/api/v1';
 
@@ -34,9 +38,6 @@ const API_URL = '/api/v1';
 })
 export class BasicService implements ObtainSystemLanguage, OnDestroy {
 
-  private dataSourceLang: DataSourceLang;
-  private dataSourceFiles: DataSourceFiles;
-  private dataSourceFields: DataSourceFields;
   private authHeaders: Array<{name: string, value: string | string[]}>;
   private authSubscription: Subscription;
   private clientId: string;
@@ -342,6 +343,25 @@ export class BasicService implements ObtainSystemLanguage, OnDestroy {
       return resp.body;
     }), map(resp => resp.data.id));
   }
+  getCarousel2(resource: string, lang?: string, count?: number, offset?: number): Observable<HttpResponse<Response<CarouselType[]>>> {
+    let path = `/carousel/${resource}`;
+    const params = [];
+    if (lang) {
+      params.push('lang=' + lang);
+    }
+    if (count) {
+      params.push('count=' + count);
+    }
+    if (offset + 1 > 0) {
+      params.push('offset=' + offset);
+    }
+    if (params.length > 0) {
+      path = path + '?' + params.join('&');
+    }
+    return this.http.get<HttpResponse<Response<CarouselType[]>>>(API_URL + path, this.httpOptions()).pipe(
+      tap(r => this.setClientId(r.headers.get('x-client-id')))
+    );
+  }
   getBanners2(): Observable<HttpResponse<Response<BannerType[]>>> {
     return this.http.get<HttpResponse<Response<BannerType[]>>>(API_URL + '/banners', this.httpOptions()).pipe(
       tap(r => this.setClientId(r.headers.get('x-client-id')))
@@ -574,101 +594,5 @@ export class BasicService implements ObtainSystemLanguage, OnDestroy {
       return resp.body;
     }), map(resp => resp.data.id));
   }
-  // common datasource
-  getLangDataSource(): DataSourceLang {
-    if (!this.dataSourceLang) {
-      this.dataSourceLang = new DataSourceLang(this);
-    }
-    return this.dataSourceLang;
-  }
-  getFilesDataSource(): DataSourceFiles {
-    if (!this.dataSourceFiles) {
-      this.dataSourceFiles = new DataSourceFiles(this);
-    }
-    return this.dataSourceFiles;
-  }
-  getFieldsDataSource(): DataSourceFields {
-    if (!this.dataSourceFields) {
-      this.dataSourceFields = new DataSourceFields(this);
-    }
-    return this.dataSourceFields;
-  }
 }
 
-class DataSourceLang extends BaseDataSource<LanguageType> {
-
-  constructor(private service: BasicService) {
-    super(service.getLangs());
-  }
-
-  delete(rows: LanguageType[]): Observable<any> {
-    const promises = [];
-    for (const r of rows) {
-      promises.push(this.service.deleteLang(r.lang).toPromise());
-    }
-    return fromPromise(Promise.all(promises));
-  }
-
-  insert(row: LanguageType): Observable<any> {
-    return this.service.upsetLang(row);
-  }
-
-  update(row: LanguageType): Observable<any> {
-    return this.service.upsetLang(row);
-  }
-
-  refresh(): void {
-    this._dataStream.newSource(this.service.getLangs());
-  }
-}
-
-class DataSourceFiles extends BaseDataSource<FileType>{
-
-  constructor(private service: BasicService) {
-    super(service.getFiles());
-  }
-
-  delete(rows: FileType[]): Observable<any> {
-    const promises = [];
-    for (const file of rows) {
-      promises.push(this.service.deleteFile(file.id).toPromise());
-    }
-    return fromPromise(Promise.all(promises));
-  }
-
-  refresh(): void {
-    this._dataStream.newSource(this.service.getFiles());
-  }
-  getFile(id: string): Observable<FileDetailsType> {
-    return this.service.getFile(id);
-  }
-}
-
-class DataSourceFields extends BaseDataSource<FieldAndTitlesType>{
-
-  constructor(private service: BasicService) {
-    super(service.getFields().pipe(map(value => convertFieldsToFieldArray(value))));
-  }
-
-  delete(rows: FieldAndTitlesType[]): Observable<any> {
-    const promises = [];
-    for (const r of rows) {
-      promises.push(this.service.deleteField(r.field.name).toPromise());
-    }
-    return fromPromise(Promise.all(promises));
-  }
-
-  insert(row: FieldAndTitlesType): Observable<any> {
-    return this.service.addField(row);
-  }
-
-  update(row: FieldAndTitlesType): Observable<any> {
-    return this.service.addField(row);
-  }
-
-  refresh(): void {
-    this._dataStream.newSource(
-      this.service.getFields().pipe(map(value => convertFieldsToFieldArray(value)))
-    );
-  }
-}

@@ -1,7 +1,9 @@
 import {
+  AfterContentInit, AfterViewInit,
   Component,
   ElementRef,
-  EventEmitter, forwardRef,
+  EventEmitter,
+  forwardRef,
   Input,
   OnDestroy,
   OnInit,
@@ -9,7 +11,6 @@ import {
   TemplateRef,
   ViewChild
 } from '@angular/core';
-import {TableProviderService} from './table-provider.service';
 import {DialogRef, DialogService} from '../../dialog-service';
 import {
   AbstractDataSource,
@@ -19,10 +20,11 @@ import {
   DictionaryService,
   ExtendedData,
   I18NType,
-  IOrder,
+  IOrder, Paging,
   PagingSize,
   SwaggerNative,
-  SwaggerObject, TitleType
+  SwaggerObject,
+  TitleType
 } from '../../shared';
 import {SystemLang} from '../../i18n';
 import {BaseComponent} from '../base.component';
@@ -31,7 +33,7 @@ import {BehaviorSubject, merge} from 'rxjs';
 import {Directionality} from '@angular/cdk/bidi';
 import {reduce} from 'rxjs/operators';
 import {ComponentType} from '@angular/cdk/overlay';
-import {NG_VALUE_ACCESSOR} from "@angular/forms";
+import {NG_VALUE_ACCESSOR} from '@angular/forms';
 
 // i18n
 const I18N: I18NType = {
@@ -73,15 +75,13 @@ const DIALOG_SEARCH = new SwaggerObject(['search'], { search: SwaggerNative.asSt
     {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => TableComponent), multi: true}
   ]
 })
-export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
+export class TableComponent extends BaseComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly PagingSize = PagingSize;
   get pageSize(): number {
-    return (this.cdkDataSource || {}).pageSize;
+    return this.paging.pageSize;
   }
   set pageSize(p: number) {
-    if (this.cdkDataSource) {
-      this.cdkDataSource.pageSize = p;
-    }
+    this.paging.pageSize = p;
   }
 
   @Input()
@@ -100,7 +100,7 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
   customActions: Array<{icon: string, tooltip: string | TitleType[], command: string}> = [];
   @Output()
   tableEvent: EventEmitter<{cmd: string, rows: any[]}> = new EventEmitter<{cmd: string; rows: any[]}>();
-  private cdkDataSource: CdkDataSource<any>;
+  private cdkDataSource: CdkDataSource<any, any>;
   displayedColumns: string[];
   allColumns: string[];
   actions: Array<{icon: string, tooltip: string, command: string}> = [];
@@ -116,18 +116,10 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
     return (this.cdkDataSource || {}).orderParams || [];
   }
   get maxPage(): number {
-    return (this.cdkDataSource || {}).maxPage;
-  }
-  get currentPage(): number {
-    return (this.cdkDataSource || {}).currentPage;
-  }
-  set currentPage(n: number) {
-    if (this.cdkDataSource) {
-      this.cdkDataSource.currentPage = n;
-    }
+    return this.paging.maxPage;
   }
   private currentRow = null;
-  private tableViewChange: BehaviorSubject<{ start: number; end: number }>; // needs to use table.viewChange directly
+  private paging: Paging;
   private dialogRef: DialogRef<any> = null;
   private dialogTimer: any = null;
 
@@ -177,8 +169,12 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
     super.ngOnInit();
     this.cdkDataSource = this.dataSource.registerDS();
     this.cdkTable.dataSource = this.cdkDataSource;
-    this.tableViewChange = this.cdkTable.viewChange;
+    this.paging = new Paging(this.cdkTable.viewChange);
   }
+  ngAfterViewInit(): void {
+    this.paging.setPage(0);
+  }
+
   ngOnDestroy(): void {
     super.ngOnDestroy();
     this.dataSource.unregisterDS(this.cdkDataSource);
@@ -342,11 +338,14 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy {
     }
     this.cdkDataSource.sort(this.order);
   }
-  changePage(n: number): void {
-    this.currentPage = n;
+  set page(n: number) {
+    this.paging.setPage(n);
+  }
+  get page(): number {
+    return this.paging.page;
   }
   incPage(n: number): void {
-    this.currentPage += n;
+    this.paging.incrementPage(n);
   }
 
 }

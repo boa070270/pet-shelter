@@ -12,16 +12,7 @@ import {Observable, of} from 'rxjs';
 import {ListRange} from '@angular/cdk/collections';
 import {map} from 'rxjs/operators';
 import {Injectable, OnDestroy} from '@angular/core';
-import {
-  BannerType,
-  FieldTypeTypeEnum,
-  FieldTypeUI,
-  FileType,
-  MenuTypeUI,
-  PageType,
-  PetType,
-  UserType
-} from './common/types';
+import {BannerType, CarouselType, FieldTypeUI, FileType, MenuTypeUI, PageType, PetType, UserType} from './common/types';
 
 class LanguageDataService extends DataService<LanguageType> {
   constructor(private basicService: BasicService) {
@@ -271,7 +262,7 @@ class UserDataService extends DataService<UserType> {
       })
     );
   }
-  obtainData(lstRange: ListRange | undefined, query: IFilter | undefined, order: IOrder[] | undefined): Observable<DataExpectedResult<UserType>> {
+  obtainData(lstRange?: ListRange, query?: IFilter, order?: IOrder[]): Observable<DataExpectedResult<UserType>> {
     return this.basicService.getUsers2().pipe(
       map(r => {
         const data = r.body.data;
@@ -287,6 +278,33 @@ class UserDataService extends DataService<UserType> {
     );
   }
 }
+class CarouselDataService extends DataService<CarouselType> {
+  constructor(private basicService: BasicService) {
+    super();
+  }
+  deleteData(row: CarouselType): Observable<DataExpectedResult<CarouselType>> {
+    throw new Error('Invalid call');
+  }
+  insertData(row: CarouselType): Observable<DataExpectedResult<CarouselType>> {
+    throw new Error('Invalid call');
+  }
+  obtainData(lstRange?: ListRange, query?: IFilter, order?: IOrder[]): Observable<DataExpectedResult<CarouselType>> {
+    const resource = (query && query.external) ? query.external.resource : 'banner';
+    const lang = (query && query.external) ? query.external.lang : undefined;
+    const numOf = lstRange ? lstRange.end - lstRange.start : 100;
+    const offset = lstRange ? lstRange.start : 0;
+    return this.basicService.getCarousel2(resource, lang, numOf, offset).pipe(
+      map(r => {
+        const data = r.body.data;
+        return {responseTime: new Date(r.headers.get('Date')), data, totalFiltered: data.length, totalAll: data.length};
+      })
+    );
+  }
+  updateData(row: CarouselType): Observable<DataExpectedResult<CarouselType>> {
+    throw new Error('Invalid call');
+  }
+}
+
 const ALL_EQUAL = () => true;
 @Injectable({
   providedIn: 'root'
@@ -300,6 +318,7 @@ export class DataSources implements OnDestroy {
   readonly Banners: AbstractDataSource<BannerType>;
   readonly Pages: AbstractDataSource<PageType>;
   readonly Users: AbstractDataSource<UserType>;
+  readonly Carousel: AbstractDataSource<CarouselType>;
   constructor(basicService: BasicService) {
     this.Language = new MainDataSource(new LanguageDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
     this.Menu = new MainDataSource(new MenuDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
@@ -309,6 +328,7 @@ export class DataSources implements OnDestroy {
     this.Banners = new MainDataSource(new BannerDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
     this.Pages = new MainDataSource(new PageDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
     this.Users = new MainDataSource(new UserDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
+    this.Carousel = new MainDataSource(new CarouselDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
   }
   ngOnDestroy(): void {
     this.Language.destroy();
@@ -318,5 +338,6 @@ export class DataSources implements OnDestroy {
     this.Files.destroy();
     this.Banners.destroy();
     this.Pages.destroy();
+    this.Carousel.destroy();
   }
 }

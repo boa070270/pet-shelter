@@ -27,11 +27,11 @@
   <div class="table-status-bar">
     <span> {{i18n.selected | choiceFormat:selectedRows.length}}</span>
     <span *ngIf="maxPage > 1">
-        <button (click)="currentPage = 0" [title]="i18n.first"> << </button>
+        <button (click)="page = 0" [title]="i18n.first"> << </button>
         <button (click)="incPage(-1)" [title]="i18n.prev"> < </button>
-        <input type="number" [(ngModel)]="currentPage" [min]="1" [max]="maxPage">
+        <input type="number" [(ngModel)]="page" [min]="1" [max]="maxPage">
         <button (click)="incPage(1)"  [title]="i18n.next"> > </button>
-        <button (click)="changePage(maxPage)"  [title]="i18n.last"> >> </button>
+        <button (click)="page = maxPage"  [title]="i18n.last"> >> </button>
       </span>
   </div>
   <span class="hint">{{pHint}}</span>
@@ -45,5 +45,5 @@
   <button (click)="viewRow()" class="gm-tv" [title]="i18n.viewRow"></button>
   <button (click)="addRow()" class="gm-add" [title]="i18n.addRow"></button>
   <button (click)="deleteRows()" class="gm-delete" [title]="i18n.deleteRows"></button>
-  <button *ngFor="let act of actions" (click)="currentRow(act.command)" class="{{act.icon}}" [title]="act.tooltip"></button>
+  <button *ngFor="let act of actions" (click)="customAction(act.command)" class="{{act.icon}}" [title]="act.tooltip"></button>
 </ng-template>

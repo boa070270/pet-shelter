@@ -2,10 +2,8 @@ import {Component, Input, OnInit} from '@angular/core';
 import {FieldValueType, PetType} from './types';
 import {BasicService} from '../basic.service';
 import {FieldsService} from '../fields.service';
-import {AbstractDataSource, BaseDataSource, ShowMediaType, UIDataSource} from 'ui-lib';
-import {SystemLang} from 'ui-lib';
+import {AbstractDataSource, ArrayDataSource, ShowMediaType, SystemLang} from 'ui-lib';
 import {ActivatedRoute} from '@angular/router';
-import {of} from 'rxjs';
 
 @Component({
   selector: 'app-pet',
@@ -15,7 +13,7 @@ import {of} from 'rxjs';
 export class PetComponent implements OnInit {
   @Input() data: PetType;
   @Input('petId') id: string;
-  datasource: UIDataSource<ShowMediaType>;
+  datasource: AbstractDataSource<ShowMediaType>;
   petsData: FieldValueType[];
 
   constructor(private service: BasicService, private route: ActivatedRoute,
@@ -45,20 +43,13 @@ export class PetComponent implements OnInit {
         this.petsData = data;
       }
       if (refs) {
-        this.datasource = new MediaDataSource(of(refs.map(v => ({
+        this.datasource = new ArrayDataSource(refs.map(v => ({
           mediaType: v.mimeType,
           mediaURI: `/api/v1/assets/${v.refId}`
-        }))));
+        })));
       }
     } else {
-      this.datasource = new MediaDataSource(of([]));
+      this.datasource = new ArrayDataSource([]);
     }
-  }
-}
-class MediaDataSource extends BaseDataSource<ShowMediaType> {
-  constructor(obs) {
-    super(obs);
-  }
-  refresh(): void {
   }
 }

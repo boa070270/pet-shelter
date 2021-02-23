@@ -3,8 +3,6 @@
   make filter-dialog-component
   show this dialog on showDialogFilter instead simple one input
 
-- Task! Swagger! Need to provide property "immutable", that do not allow edit field if it has parameter.
-
 - Task! Swagger! What do I need to do with forms that need dynamically change its content?
 
 - Task! Table! I want extend status bar to show number of all rows and number of filtered rows
@@ -14,8 +12,7 @@
   - Task! Change AppPage
 
 - Task! table-component needs to be readable only
-- BUG! Swagger form do not validate number, allow input string
-  - Form does not show errors!
+- Task! Swagger form do not validate number, allow input string
 
 - Task! Is there enough one form of field in the swagger? Let's look at the field that represent <img>,
 to the edit mode we need input to fill the src, but when we in the view mode maybe we need this picture..
@@ -31,6 +28,8 @@ What is SwaggerObject, what a role it completes?
 
 
 
+DONE! - Task! Swagger! Need to provide property "immutable", that do not allow edit field if it has parameter.
+DONE!  - Form does not show errors!
 DONE! - BUG! on test table occurs error field position not found?
 DONE! - BUG! Swagger! there isn't applied "disable". The view dialog on test table allow editing
 DONE! - Task! DataSource need to know how update/add/delete rows

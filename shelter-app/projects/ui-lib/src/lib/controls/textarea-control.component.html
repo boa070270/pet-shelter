@@ -1,22 +1,17 @@
 <div class="ui-input">
   <label class="ui-input-icons" [ngClass]="iconsClass">
-    <input [type]="type" (blur)="onBlur()"
+    <textarea (blur)="onBlur()"
            [placeholder]="pPlaceholder"
            [accessKey]="accessKey"
            [dir]="dir"
            [hidden]="hidden"
            [disabled]="disabled"
            [name]="name"
-           [formTarget]="formTarget"
-           [formAction]="formAction"
-           [formNoValidate]="formNoValidate"
-           [formMethod]="formMethod"
-           [formEnctype]="formEnctype"
            [autofocus]="autofocus"
            [tabIndex]="tabIndex"
            [(ngModel)]="value"
            (change)="onChange($event)"
-    >
+    ></textarea>
     <span class="ui-input-title" [ngClass]="{'ui-input-empty': !value, 'ui-input-icon-place': !!leadingIcon}" >{{pCaption}}</span>
     <span class="ui-input-hint" *ngIf="!!pHint">{{pHint}}</span>
     <ng-container *ngFor="let err of pError">

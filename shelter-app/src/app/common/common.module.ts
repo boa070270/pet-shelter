@@ -13,7 +13,6 @@ import {TabletPetComponent} from './tablet-pet.component';
 import {TabletPageComponent} from './tablet-page.component';
 import {CarouselComponent} from './plugins/carousel.component';
 import {RouterModule} from '@angular/router';
-import {MyButtonComponent} from './my-button.component';
 import {SearchTypeComponent} from './search-type.component';
 import {BreadcrumbsComponent} from './breadcrumbs.component';
 import { LengthenListComponent } from './plugins/lengthen-list.component';
@@ -31,7 +30,6 @@ import {SurveyModule} from 'ui-lib';
     TabletPetComponent,
     TabletPageComponent,
     CarouselComponent,
-    MyButtonComponent,
     SearchTypeComponent,
     BreadcrumbsComponent,
     LengthenListComponent,
