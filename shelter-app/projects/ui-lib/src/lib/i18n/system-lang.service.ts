@@ -89,5 +89,6 @@ export class SystemLang implements OnDestroy {
       }
       return result;
     }
+    return {};
   }
 }

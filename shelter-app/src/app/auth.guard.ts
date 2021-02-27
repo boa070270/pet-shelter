@@ -17,17 +17,13 @@ export class AuthGuard implements CanActivate {
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     const url = state.url;
-    const roles = this.authService.getRoles() || [];
     const menu = this.systemMenu.getMenu(url);
     const mRole = (menu && menu.role) ? menu.role.split(',') : [];
     if (mRole.find( v => v === UserTypeRoleEnum.public)) {
       return true;
     }
-    if (mRole.find(v => roles.includes(v))) {
-      return true;
-    }
-    this.authService.redirectUrl = url;
-    return this.router.parseUrl('/login');
+    return this.authService.hasRight(mRole);
+    // return this.router.parseUrl('/login');
   }
 
 }

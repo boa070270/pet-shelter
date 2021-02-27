@@ -568,7 +568,7 @@ CREATE TABLE IF NOT EXISTS public.comments
 create index if not exists idx_comments_res_id on public.comments (res_id);
 CREATE TABLE IF NOT EXISTS public.browsers
 (
-    browser_id varchar(36) primary key,
+    browser_id uuid primary key,
     remote_ip varchar(64),
     enabled boolean default true,
     created timestamptz default now(),

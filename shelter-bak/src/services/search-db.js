@@ -24,29 +24,33 @@ class SearchDb {
             q = 'lang:'+lang + ' AND ( '+ q + ')';
         }
         let result;
-        if (index === 'page') {
-            result = await esPool.searchPage(q, size, from);
-        } else if (index === 'pet') {
-            result = await esPool.searchPets(q, size, from);
-        } else if (index === 'asset') {
-            result = await esPool.searchAssets(q, size, from);
-        } else {
-            result = await esPool.search(q, size, from);
-        }
-        const total = result.hits.total.value;
-        if (result.hits.hits.length > 0) {
-            const scrollId = result._scroll_id;
-            const hits = result.hits.hits;
-            const data = {scrollId, data: [], total};
-            for (const hit of hits) {
-                const item = hit._source;
-                item.id = hit._id;
-                item.resource = hit._type;
-                data.data.push(item);
+        try {
+            if (index === 'page') {
+                result = await esPool.searchPage(q, size, from);
+            } else if (index === 'pet') {
+                result = await esPool.searchPets(q, size, from);
+            } else if (index === 'asset') {
+                result = await esPool.searchAssets(q, size, from);
+            } else {
+                result = await esPool.search(q, size, from);
             }
-            return data;
+            const total = result.hits.total.value;
+            if (result.hits.hits.length > 0) {
+                const scrollId = result._scroll_id;
+                const hits = result.hits.hits;
+                const data = {scrollId, data: [], total};
+                for (const hit of hits) {
+                    const item = hit._source;
+                    item.id = hit._id;
+                    item.resource = hit._type;
+                    data.data.push(item);
+                }
+                return data;
+            }
+        } catch (e) {
+            log.error('Obtain data from ES', e);
+            return {data: [], total: 0};
         }
-        return {data:[], total};
     }
     /**
      * Search by all site

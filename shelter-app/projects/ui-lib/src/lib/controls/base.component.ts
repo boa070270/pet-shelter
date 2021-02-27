@@ -4,6 +4,7 @@ import {Subscription} from 'rxjs';
 import {distinctTitleId, I18NType, isTitleType, TitleType} from '../shared';
 import {ControlValueAccessor} from '@angular/forms';
 import {Directionality} from '@angular/cdk/bidi';
+import {AbstractComponent} from './abstract.component';
 
 export interface CommonParameters {
   id?: string;
@@ -21,7 +22,7 @@ export interface CommonParameters {
   template: '',
   providers: [{provide: 'i18NCfg', useValue: null}]
 })
-export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
+export class BaseComponent extends AbstractComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
   // tslint:disable-next-line:variable-name
   private _commons = {};
   @Input()
@@ -89,23 +90,15 @@ export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValue
   pHint: string;
   pCaption: string;
   pError: string[];
-  i18n: any;
-  private subsLang: Subscription;
   private subsDir: Subscription;
   protected change: (_: any) => {};
   protected touch: () => {};
-  private readonly i18NCfg: I18NType;
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality, @Inject('i18NCfg') i18NCfg?: I18NType) {
+  constructor(public systemLang: SystemLang, protected directionality: Directionality, @Inject('i18NCfg') public i18NCfg?: I18NType) {
+    super(systemLang, i18NCfg);
     this.dir = directionality.value;
-    this.i18NCfg = i18NCfg;
     this.subsDir = directionality.change.subscribe(d => {
       this.dir = d;
-    });
-    this.subsLang = systemLang.onChange().subscribe(l => {
-      if (typeof l === 'string') {
-        this.onChangeLang();
-      }
     });
   }
 
@@ -123,45 +116,14 @@ export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValue
     }
   }
   ngOnDestroy(): void {
-      this.subsLang.unsubscribe();
       this.subsDir.unsubscribe();
   }
   onChangeLang(): void {
+    super.onChangeLang();
     this.pHint = this.doIfNeedI18n(this.common.hint) as string;
     this.pCaption = this.doIfNeedI18n(this.common.caption);
     const err = this.doIfNeedI18n(this.common.error, {});
     this.pError = err ? Object.values(err) : null;
-    this.i18n = this.systemLang.i18n(this.i18NCfg);
-  }
-
-  /**
-   * Take a lang specific title if "what" is TitleType or TitleType[]
-   * @param what: expected "string" | TitleType[]
-   * @param holder - represent object where would be stored titles as id:title
-   */
-  doIfNeedI18n(what: any, holder?: {}): any {
-    if (typeof what === 'string') {
-      if (holder) {
-        holder[what] = what;
-      } else {
-        return what || '';
-      }
-    } else if (this.needI18n(what)) {
-      if (holder) {
-        const ids = distinctTitleId(what);
-        for (const id of ids) {
-          const titles = (what as TitleType[]).filter(t => t.id = id);
-          holder[id] = this.systemLang.getTitle(titles);
-        }
-      } else {
-        return this.systemLang.getTitle(what as TitleType[]);
-      }
-    }
-    return holder || '';
-  }
-
-  needI18n(what: any): boolean {
-    return (typeof what === 'object' !== null) && (isTitleType(what) || (Array.isArray(what) && isTitleType(what[0])));
   }
   protected emitChange(value: any): void {
     console.log('BaseControlComponent.emitChange', this, value);

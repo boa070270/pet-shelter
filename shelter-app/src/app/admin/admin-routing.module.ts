@@ -10,8 +10,7 @@ import {BannersTableComponent} from './banners-table.component';
 import {PageTableComponent} from './page-table.component';
 import {UserTableComponent} from './user-table.component';
 import { AdminComponent } from './admin.component';
-import {MenusAndTitlesType} from '../common/types';
-import {AuthGuard} from "../auth.guard";
+import {AuthGuard} from '../auth.guard';
 
 const routes: Routes = [
   {path: 'lang-table', component: LangTableComponent, canActivate: [AuthGuard]},

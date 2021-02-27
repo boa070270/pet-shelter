@@ -1,29 +1,10 @@
 <div class="search-content-container">
   <div class="search-toolbar">
-    <mat-form-field class="example-form-field">
-      <mat-label>Search input</mat-label>
-      <input matInput type="text" [(ngModel)]="query">
-      <button mat-button matSuffix mat-icon-button aria-label="Clear" [autofocus]="true" (click)="clickSearch()">
-        <mat-icon>search</mat-icon>
-      </button>
-    </mat-form-field>
-    <mat-button-toggle-group #group="matButtonToggleGroup">
-      <mat-button-toggle value="card" aria-label="Show as cards" [checked]="displayAs === 'card'" (click)="switchToCard()">
-        <mat-icon>view_module</mat-icon>
-      </mat-button-toggle>
-      <mat-button-toggle value="tablet" aria-label="Show as tablets" (click)="switchToTablet()">
-        <mat-icon>view_list</mat-icon>
-      </mat-button-toggle>
-    </mat-button-toggle-group>
-    <mat-form-field appearance="fill">
-      <mat-label>Select an place</mat-label>
-      <mat-select [(value)]="place">
-        <mat-option value="all">All</mat-option>
-        <mat-option value="page">Pages</mat-option>
-        <mat-option value="pet">Pets</mat-option>
-        <mat-option value="asset">Assets</mat-option>
-      </mat-select>
-    </mat-form-field>
+    <lib-input-control [caption]="i18n.searchCaption" [autofocus]="true" leadingIcon="gm-search"
+                       [placeholder]="i18n.searchPlaceholder" [hint]="i18n.searchDescription" [tooltip]="i18n.searchTooltip"
+                       [(ngModel)]="query"></lib-input-control>
+    <lib-select-control [hint]="" [caption]="i18n.displayCaption" [titles]="" [tooltips]="" [options]="" [(ngModel)]="displayAs"></lib-select-control>
+    <lib-select-control [hint]="" [caption]="" [titles]="" [tooltips]="" [options]="" [(ngModel)]="place"></lib-select-control>
   </div>
   <app-lengthen-list [resource]="place" [defLang]="'auto'" [displayAs]="displayAs" [query]="queryOut"></app-lengthen-list>
 </div>

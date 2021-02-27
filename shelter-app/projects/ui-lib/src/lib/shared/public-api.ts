@@ -10,3 +10,4 @@ export * from './cdk-data-source';
 export * from './dictionary.service';
 export * from './utils';
 export * from './paging';
+export * from './menu.service';

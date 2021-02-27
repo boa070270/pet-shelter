@@ -1,8 +1,30 @@
 import {TitleType} from './index';
 import {AsyncValidatorFn, FormGroup, ValidatorFn} from '@angular/forms';
 
+/**
+ * The Form can be dynamic. To describe its behavior I provide these rules:
+ * behavior: {
+ *   [field: string]: Rule[]
+ * }
+ * Rule: {c: Condition, hide?:[fields,], show?:[fields,], disable?:[fields,], enable?:[fields,]}
+ * Condition: <value | >value | [,]!value | [,]=value
+ * you can use coma to define sequence of value, e.g. ,=one,two,three - this condition is true when value of field is one, or two, or three
+ */
+export interface Rule {
+  c: string; // string that start with: '<' | '>' | ',!' | '!' | ',=' | '=';
+  hide?: string[];
+  show?: string[];
+  disable?: string[];
+  enable?: string[];
+}
+
 export interface BaseConstrictions {
-  control?: string; // name of UI control that is described through ComponentPluginService
+  /**
+   * name of UI control that is described through ComponentPluginService
+   * For SwaggerNative the data exchange completes through ControlValueAccessor,
+   * but for SwaggerObject there are converting functions
+   */
+  control?: string;
   validators?: ValidatorFn[];
   asyncValidator?: AsyncValidatorFn[];
 }
@@ -19,7 +41,6 @@ export interface NativeConstrictions extends BaseConstrictions {
   format?: 'date' | 'date-time' | 'password' | 'byte' | 'binary' | 'email' | 'uuid' | 'uri' | 'hostname' | 'ipv4'
     | 'ipv6' | 'color' | 'datetime-local' | 'month' | 'number' | 'search' | 'tel' | 'text' | 'time' | 'week';
 }
-
 export interface NumberConstrictions extends NativeConstrictions {
   minimum?: number;
   maximum?: number;
@@ -38,7 +59,23 @@ export interface ArrayConstrictions extends BaseConstrictions {
   maxItems?: number;
   uniqueItems?: boolean;
 }
-
+export interface ObjectConstrictions extends BaseConstrictions {
+  /**
+   * this property allows ordering controls on the edit form
+   * after generation from a swagger file need to check this order
+   */
+  orderCtrl: string[];
+  /**
+   * A function that converts data to expected form
+   * @param d
+   */
+  toFrm: (d: any) => any;
+  /**
+   * A function that converts data from form
+   * @param f
+   */
+  fromFrm: (f: any) => any;
+}
 /**
  * "description" can be obtained from swagger
  * other properties need handle work
@@ -188,12 +225,14 @@ export class SwaggerArray extends SwaggerSchema {
 }
 export class SwaggerObject extends SwaggerSchema {
   /**
-   * this property allows ordering controls on the edit form
-   * after generation from a swagger file need to check this order
+   * see Rule
+   * @protected
    */
-  protected orderCtrl: string[];
+  get behavior(): {[field: string]: Rule[]} {
+    return this.rules;
+  }
   get orderControls(): string[] {
-    return this.orderCtrl;
+    return (this._constrain as ObjectConstrictions).orderCtrl;
   }
   protected props: { [key: string]: SwaggerSchema };
   get properties(): { [key: string]: SwaggerSchema } {
@@ -207,10 +246,10 @@ export class SwaggerObject extends SwaggerSchema {
     return this.needs;
   }
   constructor(orderCtrl: string[], properties: { [key: string]: SwaggerSchema }, ui?: SwaggerUI, required?: string[],
-              constraints?: BaseConstrictions) {
+              constraints?: ObjectConstrictions, private rules?: {[field: string]: Rule[]}) {
     super(constraints, ui);
     this.props = properties || {};
-    this.orderCtrl = orderCtrl || Object.keys(this.props).filter(() => true);
+    (this._constrain as ObjectConstrictions).orderCtrl = orderCtrl || Object.keys(this.props).filter(() => true);
     this.needs = required || [];
   }
   static parse(schema: any): SwaggerObject {

@@ -17,10 +17,12 @@ export class CarouselComponent<T> implements OnInit, OnDestroy {
   @Input() showNumberItems = 1;
   @Input() fixCount: boolean;
   @ViewChild(CdkTable, {static: true}) cdkTable: CdkTable<any>;
-  allColumns: string[] = ['c0','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15','c16','c17','c18','c19','c20'];
+  // tslint:disable-next-line:max-line-length
+  allColumns: string[] = [];
   displayedColumns: string[] = [];
   private intervalID: Subscription;
   private subs1: Subscription;
+  private recordSubs: Subscription;
   first = -1;
   cycles = 0;
 
@@ -32,17 +34,29 @@ export class CarouselComponent<T> implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.cdkDataSource.trIn = (d) => {
         const res = {};
+        const columns = [];
         for (let i = 0; i < this.showNumberItems * 2; ++i) {
-          res['с' + i] = d[i];
-          this.allColumns.push('с' + i);
-          if (i < this.showNumberItems) {
-            this.displayedColumns.push('с' + i);
+          if (d[i] === undefined) {
+            break;
           }
+          columns[i] = 'с' + i;
+          res['с' + i] = d[i];
         }
+        this.displayedColumns = columns;
         return [res];
     };
     this.cdkTable.dataSource = this.cdkDataSource;
-    this.paging = new CyclePaging(this.cdkTable.viewChange);
+    // this.recordSubs = this.cdkDataSource.totalRecords.subscribe( (rs) => {
+    //   const columns = [];
+    //   for (let i = 0; i < rs; ++i) {
+    //     columns[i] = 'с' + i;
+    //   }
+    //   this.displayedColumns = columns;
+    // });
+    for (let i = 0; i < this.showNumberItems * 2; ++i) {
+      this.allColumns[i] = 'c' + i;
+    }
+    this.paging = new CyclePaging(this.cdkTable.viewChange, this.cdkDataSource.totalRecords);
     this.paging.pageSize = this.showNumberItems * 2;
     this.cycleSlice = new CycleSlice(this.allColumns, this.showNumberItems);
     this.onResize();
@@ -53,6 +67,7 @@ export class CarouselComponent<T> implements OnInit, OnDestroy {
     if (this.intervalID) {
       this.intervalID.unsubscribe();
     }
+    this.paging.destroy();
   }
   refresh(): void {
     if (this.cycles > 3) {

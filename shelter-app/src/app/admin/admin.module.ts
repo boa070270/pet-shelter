@@ -11,10 +11,9 @@ import {PetsTableComponent} from './pets-table.component';
 import {BannersTableComponent} from './banners-table.component';
 import {PageTableComponent} from './page-table.component';
 import {UserTableComponent} from './user-table.component';
-import {UiLibModule} from 'ui-lib';
+import {ControlsModule, UiLibModule} from 'ui-lib';
 import {AngularWysiwygEditorLibModule} from '@bilousd/angular-wysiwyg-editor-lib';
 import {ShelterCommonModule} from '../common/common.module';
-import {ControlsModule} from 'ui-lib';
 import {FormsModule} from '@angular/forms';
 
 
@@ -39,7 +38,7 @@ import {FormsModule} from '@angular/forms';
     ShelterCommonModule,
     FormsModule,
     ControlsModule,
-    FormsModule
+    FormsModule,
   ]
 })
 export class AdminModule { }

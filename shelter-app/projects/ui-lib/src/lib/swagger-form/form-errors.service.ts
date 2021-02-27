@@ -38,7 +38,7 @@ const I18N: I18NType = {
 export class FormErrorsService {
   private readonly i18n;
   constructor(private dictionary: DictionaryService) {
-    this.i18n = Object.assign({}, I18N, (dictionary.getDictionary('COMPONENTS') || {}).FormErrorsService);
+    this.i18n = dictionary.getLibDictionary('FormErrorsService', I18N);
   }
   getError(err: ValidationErrors): Array<string | TitleType> {
     if (err) {

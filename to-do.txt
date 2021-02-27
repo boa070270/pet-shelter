@@ -13,8 +13,12 @@
 
 - Task! table-component needs to be readable only
 - Task! Swagger form do not validate number, allow input string
+- Task! What do with table that reference to another table?
+- Task? SwaggerObject, maybe move required to constriction?
 
-- Task! Is there enough one form of field in the swagger? Let's look at the field that represent <img>,
+
+
+DONE! Task! Is there enough one form of field in the swagger? Let's look at the field that represent <img>,
 to the edit mode we need input to fill the src, but when we in the view mode maybe we need this picture..
 What is SwaggerObject, what a role it completes?
   - it describes data that we need collect through SwaggerForm
@@ -24,9 +28,13 @@ What is SwaggerObject, what a role it completes?
   So through SwaggerObject and SwaggerForm we allow user to dynamically fill the page.
   But what is the table? Table also is a presentation component, it also needs swagger to describe what and how it would present.
 
-- Task! What do with table that reference to another table?
-
-
+  Decision: The Form can be dynamical. To describe its behavior I provide these rules:
+  behavior: {
+    [field: string]: Rule[] //field can be this form or children form, for children use format field.field
+  }
+  Rule: {c: Condition, hide?:[fields,], show?:[fields,], disable?:[fields,], enable?:[fields,]}
+  Condition: [,]<value | >value | !value | =value
+    you can use coma to define sequence of value, e.g. ,=one,two,three - this condition is true when value of field is one, or two, or three
 
 DONE! - Task! Swagger! Need to provide property "immutable", that do not allow edit field if it has parameter.
 DONE!  - Form does not show errors!

@@ -1,10 +1,10 @@
-import {AfterContentInit, Component, forwardRef, Inject, Input, OnDestroy, OnInit} from '@angular/core';
+import {AfterContentInit, Component, forwardRef, Input, OnDestroy, OnInit} from '@angular/core';
 import {
   coerceToSwaggerArray,
   coerceToSwaggerNative,
   coerceToSwaggerObject,
-  I18NType,
   NativeConstrictions,
+  Rule,
   SwaggerArray,
   SwaggerGroupComponent,
   SwaggerNative,
@@ -35,7 +35,7 @@ export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
       <ng-container *ngFor="let fld of properties">
         <ng-container [ngSwitch]="fld.controlType">
           <lib-swagger-native [propertyId]="fld.propertyId" [swagger]="swaggerProperties[fld.propertyId]" [required]="fld.required"
-                              [pFormGroup]="formGroup" *ngSwitchCase="'native'" [formControl]="getFormControl(fld.propertyId)" ></lib-swagger-native>
+                              [pFormGroup]="formGroup" *ngSwitchCase="'native'" [formControl]="getFormControl(fld.propertyId)" [ngStyle]="fld.style"></lib-swagger-native>
           <lib-swagger-form [propertyId]="fld.propertyId" [swagger]="swaggerProperties[fld.propertyId]" [required]="fld.required"
                             [(ngModel)]="fld.propertyId" [nameControl]="fld.propertyId"
                             [pFormGroup]="formGroup" *ngSwitchCase="'object'"></lib-swagger-form>
@@ -51,10 +51,13 @@ export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
 export class SwaggerFormComponent extends BaseSwaggerComponent implements OnInit, SwaggerGroupComponent, AfterContentInit, OnDestroy, ControlValueAccessor {
   @Input() nameControl: string;
   @Input() readOnly: boolean;
-  properties: Array<{propertyId: string, controlType: string, required: boolean, control?: AbstractControl}> = [];
+  properties: Array<{propertyId: string, controlType: string, required: boolean, control?: AbstractControl, style?: any}> = [];
   formGroup: FormGroup;
   get swaggerProperties(): any {
     return (this._swagger as SwaggerObject).properties;
+  }
+  get behavior(): { [field: string]: Rule[]; } {
+    return (this._swagger as SwaggerObject).behavior;
   }
   getFormControl(name: string): FormControl {
     return this.formGroup.get(name) as FormControl;
@@ -72,6 +75,9 @@ export class SwaggerFormComponent extends BaseSwaggerComponent implements OnInit
     });
     if (this.readOnly) {
       this.formGroup.disable();
+    }
+    if (this.swagger && this.behavior) {
+      this.formGroup.valueChanges.subscribe(d => this.applyRules(d));
     }
   }
 
@@ -130,10 +136,107 @@ export class SwaggerFormComponent extends BaseSwaggerComponent implements OnInit
   }
 
   makeArrayControl(swagger: SwaggerNative | SwaggerObject, required): FormControl {
-    if (this.swagger) {
+    if (swagger) {
       // FormArray doesn't have registerOnChange, so we need to use simple FormControl
       return new FormControl();
     }
   }
 
+  private applyRules(d: any): void {
+    Object.keys(this.behavior).forEach( r => {
+      const rules = this.behavior[r];
+      const value = '' + d[r];
+      for (const rule of rules) {
+        if (rule.c) {
+          let cond: string;
+          let seq = false;
+          let expect: string;
+          if (rule.c.charAt(0) === ',') {
+            seq = true;
+            cond = rule.c.charAt(1);
+            expect = rule.c.substring(2);
+          } else {
+            cond = rule.c.charAt(0);
+            expect = rule.c.substring(1);
+          }
+          switch (cond) {
+            case '<':
+              if (value < expect) {
+                this.applyRule(rule);
+              }
+              break;
+            case '>':
+              if (value > expect) {
+                this.applyRule(rule);
+              }
+              break;
+            case '!':
+              if (seq) {
+                const ex = expect.split(',');
+                for (const e of ex) {
+                  if (value !== e) {
+                    this.applyRule(rule);
+                    break;
+                  }
+                }
+              } else {
+                if (value !== expect) {
+                  this.applyRule(rule);
+                }
+              }
+              break;
+            case '=':
+              if (seq) {
+                const ex = expect.split(',');
+                for (const e of ex) {
+                  if (value === e) {
+                    this.applyRule(rule);
+                    break;
+                  }
+                }
+              } else {
+                if (value === expect) {
+                  this.applyRule(rule);
+                }
+              }
+              break;
+          }
+        }
+      }
+    });
+  }
+  private applyRule(r: Rule): void {
+    if (Array.isArray(r.disable)) {
+      for (const fld of r.disable) {
+        const ctrl = this.formGroup.get(fld);
+        if (ctrl) {
+          ctrl.disable();
+        }
+      }
+    }
+    if (Array.isArray(r.enable)) {
+      for (const fld of r.enable) {
+        const ctrl = this.formGroup.get(fld);
+        if (ctrl) {
+          ctrl.enable();
+        }
+      }
+    }
+    if (Array.isArray(r.hide)) {
+      for (const fld of r.hide) {
+        const p = this.properties.find(f => f.propertyId === fld);
+        if (p) {
+          p.style = {display: 'none'}; // {visibility: 'collapse'};
+        }
+      }
+    }
+    if (Array.isArray(r.show)) {
+      for (const fld of r.show) {
+        const p = this.properties.find(f => f.propertyId === fld);
+        if (p) {
+          p.style = null;
+        }
+      }
+    }
+  }
 }

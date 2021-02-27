@@ -1,5 +1,5 @@
 import {
-  AfterContentInit, AfterViewInit,
+  AfterViewInit,
   Component,
   ElementRef,
   EventEmitter,
@@ -20,7 +20,8 @@ import {
   DictionaryService,
   ExtendedData,
   I18NType,
-  IOrder, Paging,
+  IOrder,
+  Paging,
   PagingSize,
   SwaggerNative,
   SwaggerObject,
@@ -29,9 +30,8 @@ import {
 import {SystemLang} from '../../i18n';
 import {BaseComponent} from '../base.component';
 import {CdkTable} from '@angular/cdk/table';
-import {BehaviorSubject, merge} from 'rxjs';
+import {zip} from 'rxjs';
 import {Directionality} from '@angular/cdk/bidi';
-import {reduce} from 'rxjs/operators';
 import {ComponentType} from '@angular/cdk/overlay';
 import {NG_VALUE_ACCESSOR} from '@angular/forms';
 
@@ -81,13 +81,13 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
     return this.paging.pageSize;
   }
   set pageSize(p: number) {
-    this.paging.pageSize = p;
+    this.paging.pageSize = p * 1;
   }
 
   @Input()
   swagger: SwaggerObject;
   @Input()
-  displayedNames: I18NType;
+  displayedNames: I18NType = {};
   @Input()
   dataSource: AbstractDataSource<any>;
   @Input()
@@ -101,7 +101,7 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
   @Output()
   tableEvent: EventEmitter<{cmd: string, rows: any[]}> = new EventEmitter<{cmd: string; rows: any[]}>();
   private cdkDataSource: CdkDataSource<any, any>;
-  displayedColumns: string[];
+  displayedColumns: string[] = [];
   allColumns: string[];
   actions: Array<{icon: string, tooltip: string, command: string}> = [];
   @ViewChild(CdkTable, {static: true}) cdkTable: CdkTable<any>;
@@ -124,14 +124,11 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
   private dialogTimer: any = null;
 
   constructor(public systemLang: SystemLang,
-              // protected testTableService: TableProviderService,
               protected dialogService: DialogService,
               protected directionality: Directionality,
               dictionary: DictionaryService) {
     // TODO IE doesn't support assign, how angular solves this
-    super(systemLang, directionality, Object.assign({}, I18N, (dictionary.getDictionary('COMPONENTS') || {}).TableComponent));
-    // this.swagger = testTableService.swagger;
-    // this.dataSource = testTableService.datasource;
+    super(systemLang, directionality, dictionary.getLibDictionary('TableComponent', I18N));
   }
   onChangeLang(): void {
     super.onChangeLang();
@@ -149,8 +146,6 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
   ngOnInit(): void {
     if (this.swagger) {
       this.allColumns = [];
-      this.displayedColumns = [];
-      this.displayedNames = {};
       for (const [key, value] of Object.entries(this.swagger.properties)) {
         if (coerceToSwaggerNative(value)) {
           const native = value as SwaggerNative;
@@ -169,7 +164,7 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
     super.ngOnInit();
     this.cdkDataSource = this.dataSource.registerDS();
     this.cdkTable.dataSource = this.cdkDataSource;
-    this.paging = new Paging(this.cdkTable.viewChange);
+    this.paging = new Paging(this.cdkTable.viewChange, this.cdkDataSource.totalRecords);
   }
   ngAfterViewInit(): void {
     this.paging.setPage(0);
@@ -180,6 +175,7 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
     this.dataSource.unregisterDS(this.cdkDataSource);
     this.dataSource = null;
     this.closeDialog();
+    this.paging.destroy();
   }
   writeValue(obj: any): void {
     if (this.dataSource && Array.isArray(obj)) {
@@ -241,7 +237,7 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
   }
   snakeDialog(): void {
     this.closeDialog();
-    this.dialogRef = this.dialogService.snakeFromTemplate(this.dlgTemplate);
+    this.dialogRef = this.dialogService.snake(this.dlgTemplate);
     this.dialogTimer = setTimeout(() => { this.closeDialog(); }, 5000);
   }
   clearSelect(): void {
@@ -310,10 +306,9 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
            for (const row of this.selectedRows) {
              observers.push(this.cdkDataSource.deleteRow(row));
            }
-           merge(...observers, 2).pipe(
-             reduce((ac) => ac + 1, 0)
-           ).subscribe( n => {
-             this.dialogService.snakeInfo(choiceFormat(this.i18n.deleted, n));
+           zip(...observers)
+             .subscribe( n => {
+             this.dialogService.snakeInfo(choiceFormat(this.i18n.deleted, n.length));
            });
          }
       });
@@ -339,10 +334,10 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
     this.cdkDataSource.sort(this.order);
   }
   set page(n: number) {
-    this.paging.setPage(n);
+    this.paging.setPage(n - 1);
   }
   get page(): number {
-    return this.paging.page;
+    return this.paging.page + 1;
   }
   incPage(n: number): void {
     this.paging.incrementPage(n);

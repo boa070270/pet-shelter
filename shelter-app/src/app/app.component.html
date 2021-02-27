@@ -1,35 +1,7 @@
-<mat-toolbar class="fixed-top" color="primary" style="padding: 0">
-  <button mat-icon-button class="example-icon" aria-label="Show side nav" (click)="sideNav.toggle()">
-    <mat-icon>more_vert</mat-icon>
-  </button>
-  <a [routerLink]="'/'" style="display: flex">
-  <img src="/assets/img/logo.jpg" class="clip-img">
-  </a>
-  <span>Shelter Pet</span>
-  <span class="toolbar-spacer"></span>
-
-  <mat-form-field appearance="standard" class="toolbar-select">
-    <mat-label>Language</mat-label>
-    <select matNativeControl (input)="onSelectLang($event)">
-      <option value="{{lang.lang}}" *ngFor="let lang of languages" [selected]="lang.lang === systemLang.getLocale()">{{lang.displayName}}</option>
-    </select>
-  </mat-form-field>
-
-  <app-menu [menuTree]="menuTree" [oneButton]="humMenu"></app-menu>
-</mat-toolbar>
-<mat-sidenav-container [autosize]="true" class="main-content">
-  <mat-sidenav #sideNav [mode]="humMenu ? 'over' : 'push'"
-               fixedInViewport="true">
+<lib-navbar></lib-navbar>
+<ng-template #sidebar>
     <div class="left-side-nav" >
-      <div>
-        <mat-form-field class="example-form-field">
-          <mat-label>Search input</mat-label>
-          <input matInput type="text" [(ngModel)]="searchText">
-          <button mat-button mat-raised-button matSuffix mat-icon-button aria-label="Clear" (click)="searchPagesAndPet($event)">
-            <mat-icon>search</mat-icon>
-          </button>
-        </mat-form-field>
-      </div>
+      <lib-input-control [(ngModel)]="searchText" type="text" class="navbar-search" (focusout)="searchPagesAndPet()"></lib-input-control>
       <span>
         <lib-link href="/about" faIcon="contact_mail">
           <p>г. Запорожье, ул. 40 лет Советской Украины 38-а<br>
@@ -50,10 +22,7 @@
         <lib-link href="https://www.youtube.com/channel/UC7qPNNMWdoPIuIly4MJviEQ">Наш канал на YouTube</lib-link>
       </span>
     </div>
-  </mat-sidenav>
-  <mat-sidenav-content >
-    <div class="app-container">
-      <router-outlet></router-outlet>
-    </div>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+</ng-template>
+<div class="app-container">
+  <router-outlet></router-outlet>
+</div>

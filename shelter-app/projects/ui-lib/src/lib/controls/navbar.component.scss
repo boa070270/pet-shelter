@@ -1,0 +1,26 @@
+.ui-navbar {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-auto-rows: 3em;
+  grid-template-columns: 1em 3em calc(100% - 6em) 1em 1em;
+}
+.clip-img {
+  clip-path: circle(46%);
+  max-height: 3em;
+  max-width: 3em;
+}
+@keyframes show-search { from { width: 0; } to { width: 60px} }
+@-webkit-keyframes show-search { from { width: 0 } to { width: 60px} }
+@keyframes hide-search { from { width: 60px } to { width: 0} }
+@-webkit-keyframes hide-search { from { width: 60px } to { width: 0} }
+
+.navbar-search {
+  visibility: hidden;
+  animation: hide-search 2s;
+  :focus {
+    visibility: visible;
+    width: 60px;
+    animation: show-search 2s;
+  }
+}

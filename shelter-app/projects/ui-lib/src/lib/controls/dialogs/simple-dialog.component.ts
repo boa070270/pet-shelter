@@ -1,23 +1,25 @@
 import {Component, Inject, OnDestroy, ViewChild} from '@angular/core';
-import {CdkDialogContainer, DIALOG_DATA, DialogRef} from '../dialog-service';
-import {SystemLang} from '../i18n';
-import {SwaggerObject, TitleType, ActionType, ExtendedData} from '../shared';
-import {SwaggerFormComponent} from '../swagger-form';
+import {SystemLang} from '../../i18n';
+import {SwaggerObject, TitleType, ActionType, ExtendedData, I18NType, DictionaryService} from '../../shared';
+import {SwaggerFormComponent} from '../../swagger-form';
 import {Subscription} from 'rxjs';
+import {AbstractComponent} from '../abstract.component';
+import {DialogRef, CdkDialogContainer, DIALOG_DATA} from '../../dialog-service';
 
-// i18n
-const DEF_TITLE_OK: TitleType[] = [{lang: 'en', title: 'Ok'}, {lang: 'uk', title: 'Tak'}];
-const DEF_TITLE_CANCEL: TitleType[] = [{lang: 'en', title: 'Cancel'}, {lang: 'uk', title: 'Відміна'}];
-const DEF_TITLE_YES: TitleType[] = [{lang: 'en', title: 'Yes'}, {lang: 'uk', title: 'Tak'}];
-const DEF_TITLE_NO: TitleType[] = [{lang: 'en', title: 'No'}, {lang: 'uk', title: 'Ні'}];
-const DEF_TITLE_SAVE: TitleType[] = [{lang: 'en', title: 'Save'}, {lang: 'uk', title: 'Зберегти'}];
+const I18N: I18NType = {
+  DEF_TITLE_OK: [{lang: 'en', title: 'Ok'}, {lang: 'uk', title: 'Tak'}],
+  DEF_TITLE_CANCEL: [{lang: 'en', title: 'Cancel'}, {lang: 'uk', title: 'Відміна'}],
+  DEF_TITLE_YES: [{lang: 'en', title: 'Yes'}, {lang: 'uk', title: 'Tak'}],
+  DEF_TITLE_NO: [{lang: 'en', title: 'No'}, {lang: 'uk', title: 'Ні'}],
+  DEF_TITLE_SAVE: [{lang: 'en', title: 'Save'}, {lang: 'uk', title: 'Зберегти'}]
+};
 
 @Component({
   selector: 'lib-simple-dialog',
   templateUrl: './simple-dialog.component.html',
   styleUrls: ['./simple-dialog.component.scss']
 })
-export class SimpleDialogComponent implements OnDestroy {
+export class SimpleDialogComponent extends AbstractComponent implements OnDestroy {
   needActionBlk: boolean;
   action: ActionType;
   swagger: SwaggerObject;
@@ -34,8 +36,9 @@ export class SimpleDialogComponent implements OnDestroy {
   constructor(protected dialogRef: DialogRef<any>,
               protected dialogContainer: CdkDialogContainer,
               @Inject(DIALOG_DATA) protected dialogData: any,
-              protected systemLang: SystemLang) {
-    console.log('SimpleDialogComponent.constructor', dialogRef, dialogContainer, dialogData);
+              public systemLang: SystemLang,
+              protected dictionary: DictionaryService) {
+    super(systemLang, dictionary.getLibDictionary('SimpleDialogComponent', I18N));
     this.needActionBlk = dialogRef.disableClose;
     if (dialogData instanceof ExtendedData) {
       this.needActionBlk = !!dialogData.action;
@@ -70,19 +73,19 @@ export class SimpleDialogComponent implements OnDestroy {
   prepareTitle(): void {
     switch (this.action) {
       case 'ok_cancel':
-        this.btnCancel = this.systemLang.getTitle(DEF_TITLE_CANCEL);
-        this.btnOk = this.systemLang.getTitle(DEF_TITLE_OK);
+        this.btnCancel = this.i18n.DEF_TITLE_CANCEL;
+        this.btnOk = this.i18n.DEF_TITLE_OK;
         break;
       case 'save_cancel':
-        this.btnCancel = this.systemLang.getTitle(DEF_TITLE_CANCEL);
-        this.btnOk = this.systemLang.getTitle(DEF_TITLE_SAVE);
+        this.btnCancel = this.i18n.DEF_TITLE_CANCEL;
+        this.btnOk = this.i18n.DEF_TITLE_SAVE;
         break;
       case 'yes_no':
-        this.btnCancel = this.systemLang.getTitle(DEF_TITLE_NO);
-        this.btnOk = this.systemLang.getTitle(DEF_TITLE_YES);
+        this.btnCancel = this.i18n.DEF_TITLE_NO;
+        this.btnOk = this.i18n.DEF_TITLE_YES;
         break;
       default:
-        this.btnOk = this.systemLang.getTitle(DEF_TITLE_OK);
+        this.btnOk = this.i18n.DEF_TITLE_OK;
     }
   }
   cancel(): void {

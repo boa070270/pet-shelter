@@ -1,129 +1,174 @@
-import {
-  SwaggerNativeString,
-  SwaggerNativeInteger,
-  SwaggerObject,
-  swaggerUI,
-  SwaggerNativeBoolean,
-  SwaggerArray, SwaggerNativeNumber, SwaggerNative
-} from 'ui-lib';
-
-export const SwaggerStatusType = new SwaggerObject(
-  ['code', 'message'],
-  {
-    code: SwaggerNative.asInteger(),
-    details: new SwaggerObject([], {}),
-    message: SwaggerNative.asString()
-  }
-);
-
+import {I18NType, SwaggerArray, SwaggerNative, SwaggerObject, swaggerUI} from 'ui-lib';
+const I18N_LANG = {
+  lang_caption: [{lang: 'en', title: 'Lang'}, {lang: 'uk', title: 'Мова'}],
+  lang_description: [{lang: 'en', title: 'Language code'}, {lang: 'uk', title: 'Коротка назва (en, uk)'}],
+  lang_tooltip: [{lang: 'en', title: 'enter tooltip'}, {lang: 'uk', title: 'enter tooltip'}],
+  lang_placeholder: [{lang: 'en', title: 'enter placeholder'}, {lang: 'uk', title: 'enter placeholder'}],
+  displayName_caption: [{lang: 'en', title: 'Display'}, {lang: 'uk', title: 'Відображати'}],
+  displayName_description: [{lang: 'en', title: 'Language code'}, {lang: 'uk', title: 'Коротка назва (en, uk)'}],
+  displayName_tooltip: [{lang: 'en', title: 'enter tooltip'}, {lang: 'uk', title: 'enter tooltip'}],
+  displayName_placeholder: [{lang: 'en', title: 'enter placeholder'}, {lang: 'uk', title: 'enter placeholder'}],
+  rate_caption: [{lang: 'en', title: 'Rate'}, {lang: 'uk', title: 'Важливість'}],
+  rate_description: [{lang: 'en', title: 'Language code'}, {lang: 'uk', title: 'Коротка назва (en, uk)'}],
+  rate_tooltip: [{lang: 'en', title: 'enter tooltip'}, {lang: 'uk', title: 'enter tooltip'}],
+  rate_placeholder: [{lang: 'en', title: 'enter placeholder'}, {lang: 'uk', title: 'enter placeholder'}]
+};
 export const SwaggerLanguageType = new SwaggerObject(
   ['lang', 'displayName', 'rate'],
   {
     lang: SwaggerNative.asString(
       'input',
-      {minLength: 2, maxLength: 6},
+      {minLength: 2, maxLength: 6, immutable: true},
       swaggerUI(
-        [{lang: 'en', title: 'Lang'}, {lang: 'uk', title: 'Мова'}],
-        [{lang: 'en', title: 'Language code'}, {lang: 'uk', title: 'Коротка назва (en, uk)'}],
-        [{lang: 'en', title: 'enter tooltip'}, {lang: 'uk', title: 'enter tooltip'}],
-        [{lang: 'en', title: 'enter placeholder'}, {lang: 'uk', title: 'enter placeholder'}],
+        I18N_LANG.lang_caption,
+        I18N_LANG.lang_description,
+        I18N_LANG.lang_tooltip,
+        I18N_LANG.lang_placeholder,
       )
     ),
     displayName: SwaggerNative.asString(
       'input',
       {minLength: 3, maxLength: 16},
       swaggerUI(
-        [{lang: 'en', title: 'Display'}, {lang: 'uk', title: 'Відображати'}],
-        [{lang: 'en', title: 'Language code'}, {lang: 'uk', title: 'Коротка назва (en, uk)'}],
-        [{lang: 'en', title: 'enter tooltip'}, {lang: 'uk', title: 'enter tooltip'}],
-        [{lang: 'en', title: 'enter placeholder'}, {lang: 'uk', title: 'enter placeholder'}],
+        I18N_LANG.displayName_caption,
+        I18N_LANG.displayName_description,
+        I18N_LANG.displayName_tooltip,
+        I18N_LANG.displayName_placeholder,
       )
     ),
     rate: SwaggerNative.asInteger(
       'input',
       {minimum: 0, maximum: 99},
       swaggerUI(
-        [{lang: 'en', title: 'Rate'}, {lang: 'uk', title: 'Важливість'}],
-        [{lang: 'en', title: 'Language code'}, {lang: 'uk', title: 'Коротка назва (en, uk)'}],
-        [{lang: 'en', title: 'enter tooltip'}, {lang: 'uk', title: 'enter tooltip'}],
-        [{lang: 'en', title: 'enter placeholder'}, {lang: 'uk', title: 'enter placeholder'}],
+        I18N_LANG.rate_caption,
+        I18N_LANG.rate_description,
+        I18N_LANG.rate_tooltip,
+        I18N_LANG.rate_placeholder,
       )
     )
   }
 );
-
+const I18N_MENU = {
+  path_caption: [{lang: 'en', title: 'Path'}, {lang: 'uk', title: 'Шлях'}],
+  path_description: [{lang: 'en', title: 'Path to the page'}, {lang: 'uk', title: 'Визначте шлях'}],
+  path_tooltip: [{lang: 'en', title: 'Input path to page'}, {lang: 'uk', title: 'Введіть шлях'}],
+  path_placeholder: [{lang: 'en', title: 'e.g: about'}, {lang: 'uk', title: 'приклад: about'}],
+  component_caption: [{lang: 'en', title: 'Title'}, {lang: 'uk', title: 'Назва'}],
+  component_description: [{lang: 'en', title: 'The name we will see in menu'}, {lang: 'uk', title: 'Назва яка відоражається'}],
+  component_tooltip: [{lang: 'en', title: 'Input the title'}, {lang: 'uk', title: 'Введіть назву'}],
+  component_placeholder: [{lang: 'en', title: 'e.g.: About us'}, {lang: 'uk', title: 'приклад: Про нас'}],
+  role_caption: [{lang: 'en', title: 'Role'}, {lang: 'uk', title: 'Доступ'}],
+  role_description: [{lang: 'en', title: 'Who can see this menu'}, {lang: 'uk', title: 'Визначте доступ'}],
+  role_tooltip: [{lang: 'en', title: 'Input role'}, {lang: 'uk', title: 'Введіть доступ'}],
+  role_placeholder: [{lang: 'en', title: 'public,writer,admin'}, {lang: 'uk', title: 'public,writer,admin'}],
+  position_caption: [{lang: 'en', title: 'Order'}, {lang: 'uk', title: 'Порядок'}],
+  position_description: [{lang: 'en', title: 'Define order of this menu'}, {lang: 'uk', title: 'Визначте порядок цього меню'}],
+  position_tooltip: [{lang: 'en', title: 'Input order'}, {lang: 'uk', title: 'Введіть число'}],
+  position_placeholder: [{lang: 'en', title: 'number'}, {lang: 'uk', title: '0'}],
+  parentId_caption: [{lang: 'en', title: 'Parent'}, {lang: 'uk', title: 'Верхній рівень'}],
+  parentId_description: [{lang: 'en', title: 'Define parent of this menu, leve empty if menu is top'},
+    {lang: 'uk', title: 'Визначте врехній рівень, залиште пустим якща меню верхнього рівня'}],
+  parentId_tooltip: [{lang: 'en', title: 'Input path of parent menu'}, {lang: 'uk', title: 'Ввдедіть шлях батьківського меню'}],
+  parentId_placeholder: [{lang: 'en', title: 'path of parent'}, {lang: 'uk', title: 'приклад: about'}],
+};
 export const SwaggerMenuType = new SwaggerObject(
   ['path', 'component', 'role', 'position', 'parentId'],
   {
-    path: SwaggerNative.asString(),
-    component: SwaggerNative.asString(),
-    role: SwaggerNative.asString(),
-    position: SwaggerNative.asInteger(),
-    parentId: SwaggerNative.asString()
+    path: SwaggerNative.asString(null, {minLength: 1, maxLength: 16, immutable: true},
+      swaggerUI(I18N_MENU.path_caption, I18N_MENU.path_description, I18N_MENU.path_tooltip, I18N_MENU.path_placeholder)),
+    component: SwaggerNative.asString(null, {minLength: 1, maxLength: 16},
+      // tslint:disable-next-line:max-line-length
+      swaggerUI(I18N_MENU.component_caption, I18N_MENU.component_description, I18N_MENU.component_tooltip, I18N_MENU.component_placeholder)),
+    role: SwaggerNative.asString(null, {minLength: 1, maxLength: 64},
+      swaggerUI(I18N_MENU.role_caption, I18N_MENU.role_description, I18N_MENU.role_tooltip, I18N_MENU.role_placeholder)),
+    position: SwaggerNative.asInteger(null, {},
+      swaggerUI(I18N_MENU.position_caption, I18N_MENU.position_description, I18N_MENU.position_tooltip, I18N_MENU.position_placeholder)),
+    parentId: SwaggerNative.asString(null, {minLength: 1, maxLength: 16},
+      swaggerUI(I18N_MENU.parentId_caption, I18N_MENU.parentId_description, I18N_MENU.parentId_tooltip, I18N_MENU.parentId_placeholder)),
   },
   swaggerUI(),
   ['path', 'component']
 );
+const I18N_TITLE = {
+  id_caption: [{lang: 'en', title: 'ID'}, {lang: 'uk', title: 'ID'}],
+  id_description: [{lang: 'en', title: 'Element\'s ID'}, {lang: 'uk', title: 'ID елементу'}],
+  id_tooltip: [{lang: 'en', title: 'Input ID'}, {lang: 'uk', title: 'ID'}],
+  id_placeholder: [{lang: 'en', title: 'ID'}, {lang: 'uk', title: 'ID'}],
+  lang_caption: [{lang: 'en', title: 'Lang'}, {lang: 'uk', title: 'Мова'}],
+  lang_description: [{lang: 'en', title: 'The lang of this title'}, {lang: 'uk', title: 'Виберіть мову'}],
+  lang_tooltip: [{lang: 'en', title: 'Select lang'}, {lang: 'uk', title: 'Виберіть мову'}],
+  lang_placeholder: [{lang: 'en', title: 'e.g: en'}, {lang: 'uk', title: 'приклад: uk'}],
+  title_caption: [{lang: 'en', title: 'Title'}, {lang: 'uk', title: 'Назва'}],
+  title_description: [{lang: 'en', title: 'The title will be displayed'}, {lang: 'uk', title: 'Назва'}],
+  title_tooltip: [{lang: 'en', title: 'Title'}, {lang: 'uk', title: 'Назва'}],
+  title_placeholder: [{lang: 'en', title: 'e.g: Title'}, {lang: 'uk', title: 'приклад: Назва'}],
+};
 export const SwaggerTitleSwaggerType = new SwaggerObject(
   ['id', 'lang', 'title'],
   {
-    id: SwaggerNative.asString(),
-    lang: SwaggerNative.asString(),
-    title: SwaggerNative.asString()
+    id: SwaggerNative.asString(null, {minLength: 1, maxLength: 16},
+      swaggerUI(I18N_TITLE.id_caption, I18N_TITLE.id_description, I18N_TITLE.id_tooltip, I18N_TITLE.id_placeholder)),
+    lang: SwaggerNative.asString(null, {minLength: 2, maxLength: 6},
+      swaggerUI(I18N_TITLE.lang_caption, I18N_TITLE.lang_description, I18N_TITLE.lang_tooltip, I18N_TITLE.lang_placeholder)),
+    title: SwaggerNative.asString(null, {minLength: 1, maxLength: 64},
+      swaggerUI(I18N_TITLE.title_caption, I18N_TITLE.title_description, I18N_TITLE.title_tooltip, I18N_TITLE.title_placeholder))
   },
   {},
   ['id', 'lang', 'title']
 );
+const I18N_FIELD = {
+  name_caption: [{lang: 'en', title: 'Name'}, {lang: 'uk', title: 'Назва'}],
+  name_description: [{lang: 'en', title: 'Field\'s name'}, {lang: 'uk', title: 'Назва поля'}],
+  name_tooltip: [{lang: 'en', title: 'Input name'}, {lang: 'uk', title: 'Введіть назву (англійською)'}],
+  name_placeholder: [{lang: 'en', title: 'name'}, {lang: 'uk', title: 'name'}],
+  type_caption: [{lang: 'en', title: 'Type'}, {lang: 'uk', title: 'Тип'}],
+  type_description: [{lang: 'en', title: 'Select Type'}, {lang: 'uk', title: 'Тип поля'}],
+  type_tooltip: [{lang: 'en', title: 'Type'}, {lang: 'uk', title: 'Тип'}],
+  type_placeholder: [{lang: 'en', title: 'Type'}, {lang: 'uk', title: 'Тип'}],
+  subtype_caption: [{lang: 'en', title: 'Subtype'}, {lang: 'uk', title: 'Підтип'}],
+  subtype_description: [{lang: 'en', title: 'Subtype'}, {lang: 'uk', title: 'Підтип'}],
+  subtype_tooltip: [{lang: 'en', title: 'Subtype'}, {lang: 'uk', title: 'Підтип'}],
+  subtype_placeholder: [{lang: 'en', title: 'Subtype'}, {lang: 'uk', title: 'підтип'}],
+  order_caption: [{lang: 'en', title: 'Order'}, {lang: 'uk', title: 'Порядок'}],
+  order_description: [{lang: 'en', title: 'Define order'}, {lang: 'uk', title: 'ВИзначте порядок цього поля'}],
+  order_tooltip: [{lang: 'en', title: 'Input order'}, {lang: 'uk', title: 'Порядок поля'}],
+  order_placeholder: [{lang: 'en', title: '0'}, {lang: 'uk', title: '0'}],
+  enumValues_caption: [{lang: 'en', title: 'Enum'}, {lang: 'uk', title: 'Перелік'}],
+  enumValues_description: [{lang: 'en', title: 'Input an enum definition as words separated by a comma'}, {lang: 'uk', title: 'Визначте перелік'}],
+  enumValues_tooltip: [{lang: 'en', title: 'Input enum'}, {lang: 'uk', title: 'Введіть значеня'}],
+  enumValues_placeholder: [{lang: 'en', title: 'one,two'}, {lang: 'uk', title: 'one,two'}],
+}
 export const SwaggerFieldType = new SwaggerObject(
   [ 'name', 'type', 'subtype', 'order', 'enumValues'],
   {
     name: SwaggerNative.asString(
       undefined,
-      {},
-      swaggerUI()),
+      {minLength: 1, maxLength: 10},
+      swaggerUI(I18N_FIELD.name_caption, I18N_FIELD.name_description, I18N_FIELD.name_tooltip, I18N_FIELD.name_placeholder)),
     type: SwaggerNative.asString(
       undefined,
       { enum: [ 'number', 'string', 'enum', 'date']},
-      swaggerUI()),
+      swaggerUI(I18N_FIELD.type_caption, I18N_FIELD.type_description, I18N_FIELD.type_tooltip, I18N_FIELD.type_placeholder)),
     subtype: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI()),
+      swaggerUI(I18N_FIELD.subtype_caption, I18N_FIELD.subtype_description, I18N_FIELD.subtype_tooltip, I18N_FIELD.subtype_placeholder)),
     order: SwaggerNative.asInteger(
       undefined,
       {},
-      swaggerUI(null, [ { lang: 'en', title: 'define the order of displayed fields'}])),
+      swaggerUI(I18N_FIELD.order_caption, I18N_FIELD.order_description, I18N_FIELD.order_tooltip, I18N_FIELD.order_placeholder)),
     enumValues: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI(null, [ { lang: 'en', title: 'input an enum definition as words separated by a comma', }, ])),
-
+      // tslint:disable-next-line:max-line-length
+      swaggerUI(I18N_FIELD.enumValues_caption, I18N_FIELD.enumValues_description, I18N_FIELD.enumValues_tooltip, I18N_FIELD.enumValues_placeholder)),
   },
   swaggerUI(),
-  [ 'name', 'type', ]);
-export const SwaggerFieldsResponse = new SwaggerObject(
-  [ 'data', 'status', ],
-  {
-    data: new SwaggerObject(
-      [ 'fields', 'titles', ],
-      {
-        fields: new SwaggerArray(
-          undefined,
-          {},
-          swaggerUI()),
-        titles: new SwaggerArray(
-          undefined,
-          {},
-          swaggerUI()),
+  [ 'name', 'type', ],
+  null,
+  {type: [{c: '=enum', show: ['enumValues']}, {c: '!enum', hide: ['enumValues']}]}
 
-      },
-      swaggerUI(),
-      [ 'fields', 'titles', ]),
-    status: undefined,
-
-  },
-  swaggerUI(),
-  null);
+);
 export const SwaggerReferenceType = new SwaggerObject(
   [ 'refId', 'targetUrl', 'mimeType', 'tooltip', ],
   {

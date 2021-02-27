@@ -2,11 +2,13 @@
   <div class="carousel-items-holder">
     <table cdk-table>
       <ng-container *ngFor="let col of allColumns" cdkColumnDef="{{col}}" >
-        <td cdk-cell *cdkCellDef="let element">
+        <th cdk-header-cell *cdkHeaderCellDef  > {{allColumns[col]}} </th>
+        <td cdk-cell *cdkCellDef="let element"> {{element[col]}}
           <!-- ng-template [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{$implicit:element[col]}"></ng-template -->
         </td>
       </ng-container>
-      <tr cdk-row *cdkRowDef="let row; columns: displayedColumns;"></tr>
+      <tr cdk-header-row *cdkHeaderRowDef="displayedColumns"></tr>
+      <tr cdk-row *cdkRowDef="let row; columns: displayedColumns;">{{allColumns|json}}</tr>
     </table>
   </div>
 </div>

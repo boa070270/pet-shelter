@@ -1,5 +1,5 @@
 import {CollectionViewer, DataSource, ListRange} from '@angular/cdk/collections';
-import {BehaviorSubject, ConnectableObservable, merge, Observable, of, Subject, Subscription} from 'rxjs';
+import {BehaviorSubject, ConnectableObservable, merge, Observable, of, Subject, Subscription, zip} from 'rxjs';
 import {map, publishLast, reduce, takeLast, tap} from 'rxjs/operators';
 import {equals as eqLstRange, sortOut} from './paging';
 
@@ -116,7 +116,10 @@ export abstract class AbstractDataSource<T> {
   }
 
   obtainPage<U>(ds: CdkDataSource<T, U>, force?: boolean): void {
-    if (this.lastModified.getTime() < Date.now() - 5000) {
+    if (force || this.lastModified.getTime() < Date.now() - 5000) {
+      if (force) {
+        this.data = [];
+      }
       const observable = this.loadData(ds, force);
       observable.subscribe(() => this.updateSubject(ds));
     } else {
@@ -162,9 +165,9 @@ export abstract class AbstractDataSource<T> {
 
   deleteRow<U>(ds: CdkDataSource<T, U>, row: U): Observable<DataExpectedResult<U>> {
     const r = ds.trOut([row]);
-    console.log('deleteRow', r[0]);
     const i = this.data.indexOf(r[0]);
     if (i >= 0) {
+      console.log('deletedRow', r[i]);
       this.data.splice(i, 1);
     }
     return this.delete(r[0]).pipe(
@@ -329,19 +332,7 @@ export class MainDataSource<T> extends AbstractDataSource<T>{
         const data = this.data.slice(lstRange.start, lstRange.end < this.data.length ? lstRange.end : this.data.length);
         src.unshift(of({data, responseTime: this.lastModified, totalAll: this.total.getValue(), totalFiltered: 0, scrollId: undefined}));
       }
-      const worker = merge(...src, 1)
-        .pipe(
-          reduce(
-            (ac, cur) => {
-              ac.data = ac.data.concat(cur.data);
-              if ( ac.lastModified.getTime() < cur.responseTime.getTime() ) {
-                ac.total = cur.totalAll;
-                ac.lastModified = cur.responseTime;
-              }
-              return ac;
-            },
-            {data: [], total: 0, lastModified: new Date(0), scrollId: ''}),
-          );
+      const worker = zip(...src);
       return new Observable(subscriber => {
         worker.subscribe(() => {
           subscriber.next(true);

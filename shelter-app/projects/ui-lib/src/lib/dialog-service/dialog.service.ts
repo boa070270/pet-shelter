@@ -86,60 +86,65 @@ export class DialogService implements OnDestroy {
     return this.openFromComponent(this.simpleDialogComponent,
       {data: extData, disableClose: modal || false, scrollStrategies: {block: true}});
   }
+
   infoExtDialog(extData: ExtendedData, modal?: boolean): DialogRef<any> {
     extData.iconColor = 'info-color';
     extData.icon = 'gm-info_outline';
     return this.openExtDialog(extData, modal);
   }
+
   warnExtDialog(extData: ExtendedData, modal?: boolean): DialogRef<any> {
     extData.iconColor = 'warn-color';
     extData.icon = 'gm-warning';
     return this.openExtDialog(extData, modal);
   }
+
   errorExtDialog(extData: ExtendedData, modal?: boolean): DialogRef<any> {
     extData.iconColor = 'error-color';
     extData.icon = 'gm-error';
     return this.openExtDialog(extData, modal);
   }
+
   infoMsgDialog(msg: string, modal?: boolean, action?: ActionType): DialogRef<any> {
     const extData = ExtendedData.create(msg, true, null, action);
     return this.infoExtDialog(extData, modal);
   }
+
   warnMsgDialog(msg: string, modal?: boolean, action?: ActionType): DialogRef<any> {
     const extData = ExtendedData.create(msg, true, null, action);
     return this.warnExtDialog(extData, modal);
   }
+
   errorMsgDialog(msg: string, modal?: boolean, action?: ActionType): DialogRef<any> {
     const extData = ExtendedData.create(msg, true, null, action);
     return this.errorExtDialog(extData, modal);
   }
+
   openSnakeBar(extData: ExtendedData): void {
-    const dlg = this.snakeFromComponent(this.snakeBarComponent, {data: extData, disableClose: false});
+    const dlg = this.snake(this.snakeBarComponent, {data: extData, disableClose: false});
     setTimeout(() => dlg.close(), 5000);
   }
+
   snakeInfo(msg: string): void {
     const extData = ExtendedData.create(msg, true, null, 'ok', '', 'gm-info_outline', 'info-color');
     this.openSnakeBar(extData);
   }
+
   snakeWarn(msg: string): void {
     const extData = ExtendedData.create(msg, true, null, 'ok', '', 'gm-warning', 'warn-color');
     this.openSnakeBar(extData);
   }
+
   snakeError(msg: string): void {
     const extData = ExtendedData.create(msg, true, null, 'ok', '', 'gm-error', 'error-color');
     this.openSnakeBar(extData);
   }
-  snakeFromComponent<T>(component: ComponentType<T>, config?: DialogConfig): DialogRef<any> {
+
+  snake<T>(compOrTemplate: ComponentType<T> | TemplateRef<T>, config?: DialogConfig): DialogRef<any> {
     const cfg = config || {};
     cfg.position = {bottom: '0'};
     cfg.hasBackdrop = false;
-    return this.openFromComponent(component, cfg);
-  }
-  snakeFromTemplate<T>(template: TemplateRef<T>, config?: DialogConfig): DialogRef<any> {
-    const cfg = config || {};
-    cfg.position = {bottom: '0'};
-    cfg.hasBackdrop = false;
-    return this.openFromTemplate(template, cfg);
+    return this.open(compOrTemplate, cfg);
   }
   /** Stream that emits when all dialogs are closed. */
   _getAfterAllClosed(): Observable<void> {
@@ -158,12 +163,21 @@ export class DialogService implements OnDestroy {
 
   /** Gets an open dialog by id. */
   getById(id: string): DialogRef<any> | undefined {
-    return this._openDialogs.find(ref  => ref.id === id);
+    return this._openDialogs.find(ref => ref.id === id);
   }
 
   /** Closes all open dialogs. */
   closeAll(): void {
     this.openDialogs.forEach(ref => ref.close());
+  }
+
+  sideLeft<T>(compOrTemplate: ComponentType<T> | TemplateRef<T>, config?: DialogConfig): DialogRef<any> {
+    const cfg = config || {};
+    cfg.position = {bottom: '0', left: '0', top: '0'};
+    cfg.height = '100%';
+    cfg.width = '80vw';
+    cfg.scrollStrategies = {block: true};
+    return this.open(compOrTemplate, cfg);
   }
 
   open<T>(compOrTemplate: ComponentType<T> | TemplateRef<T>, config?: DialogConfig): DialogRef<any> {
@@ -173,6 +187,7 @@ export class DialogService implements OnDestroy {
       return this.openFromComponent(compOrTemplate, config);
     }
   }
+
   /** Opens a dialog from a component. */
   openFromComponent<T>(component: ComponentType<T>, config?: DialogConfig): DialogRef<any> {
     config = this._applyConfigDefaults(config);

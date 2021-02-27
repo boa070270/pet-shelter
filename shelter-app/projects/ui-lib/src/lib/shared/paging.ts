@@ -1,4 +1,4 @@
-import {Subject} from 'rxjs';
+import {Observable, Subject, Subscription} from 'rxjs';
 import {ListRange} from '@angular/cdk/collections';
 
 export function equals(lst1: ListRange, lst2: ListRange): boolean {
@@ -81,11 +81,13 @@ export class Paging {
   // tslint:disable-next-line:variable-name
   private _pageSize = PagingSize[0];
   protected listRange: ListRange = {start: 0, end: 0};
+  private subs: Subscription;
   get pageSize(): number {
     return this._pageSize;
   }
   set pageSize(n: number) {
     if (n !== this._pageSize) {
+      this._pageSize = n;
       this.listRange = newPageSize(this.listRange, n);
       this.subject.next(this.listRange);
     }
@@ -113,16 +115,26 @@ export class Paging {
   get page(): number {
     return this.listRange.start / this._pageSize;
   }
-  constructor(protected subject: Subject<ListRange>) {
+
+  /**
+   * Create Paging
+   * @param subject - is used to send event to change page
+   * @param total - is used to obtain size of DataSource
+   */
+  constructor(protected subject: Subject<ListRange>, protected total: Observable<number>) {
+    this.subs = total.subscribe( n => this.size = n);
+  }
+  destroy(): void {
+    this.subs.unsubscribe();
   }
   incrementPage(n: number): void {
     const np = this.page + n;
-    if ( np >= 0 && np <= this.maxPage) {
+    if ( np >= 0 && np < this.maxPage) {
       this.toPage(np);
     }
   }
   setPage(n: number): void {
-    if (n !== this.page || this._size === 0) {
+    if (n >= 0 && n < this.maxPage && (n !== this.page || this._size === 0)) {
       this.toPage(n);
     }
   }
@@ -141,8 +153,8 @@ export class Paging {
  * next: [0..3)
  */
 export class CyclePaging extends Paging {
-  constructor(subject: Subject<ListRange>) {
-    super(subject);
+  constructor(subject: Subject<ListRange>, protected total: Observable<number>) {
+    super(subject, total);
   }
   next(): void {
     if (this.listRange.start + this.pageSize > this.size) {

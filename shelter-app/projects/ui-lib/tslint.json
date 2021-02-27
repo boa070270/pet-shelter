@@ -12,6 +12,10 @@
       "element",
       "lib",
       "kebab-case"
+    ],
+    "no-inferrable-types": [
+      true,
+      "ignore-properties"
     ]
   }
 }

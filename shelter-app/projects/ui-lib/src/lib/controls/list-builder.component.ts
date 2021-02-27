@@ -5,15 +5,16 @@ import {SystemLang} from '../i18n';
 import {coerceArray} from '@angular/cdk/coercion';
 import {ListSelectComponent} from './list-select.component';
 import {BaseComponent} from './base.component';
-import {TitleType} from '../shared';
+import {DictionaryService, TitleType} from '../shared';
 import {CheckboxParameters} from './checkbox-control.component';
 import {Directionality} from '@angular/cdk/bidi';
 
-// i18n
-const DEF_REMOVE_TITLES: TitleType[] = [{lang: 'en', title: 'Remove'}, {lang: 'uk', title: 'Видалити'}];
-const DEF_ADD_TITLES: TitleType[] = [{lang: 'en', title: 'Add'}, {lang: 'uk', title: 'Добавити'}];
-const DEF_UP_TITLES: TitleType[] = [{lang: 'en', title: 'Up'}, {lang: 'uk', title: 'Вгору'}];
-const DEF_DOWN_TITLES: TitleType[] = [{lang: 'en', title: 'Down'}, {lang: 'uk', title: 'Вниз'}];
+const I18N = {
+  REMOVE_TITLES: [{lang: 'en', title: 'Remove'}, {lang: 'uk', title: 'Видалити'}],
+  ADD_TITLES: [{lang: 'en', title: 'Add'}, {lang: 'uk', title: 'Добавити'}],
+  UP_TITLES: [{lang: 'en', title: 'Up'}, {lang: 'uk', title: 'Вгору'}],
+  DOWN_TITLES: [{lang: 'en', title: 'Down'}, {lang: 'uk', title: 'Вниз'}]
+};
 
 @Component({
   selector: 'lib-list-builder',
@@ -67,8 +68,9 @@ export class ListBuilderComponent extends BaseComponent implements OnInit, OnCha
   @ViewChild(SelectControlComponent, {static: true}) available: SelectControlComponent;
   @ViewChild(ListSelectComponent, {static: true}) result: ListSelectComponent;
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
-    super(systemLang, directionality);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality,
+              dictionary: DictionaryService) {
+    super(systemLang, directionality, dictionary.getLibDictionary('ListBuilderComponent', I18N));
   }
 
   ngOnInit(): void {
@@ -83,10 +85,10 @@ export class ListBuilderComponent extends BaseComponent implements OnInit, OnCha
     this.buttonTitles();
   }
   buttonTitles(): void {
-    this.titleAdd = this.systemLang.getTitle(DEF_ADD_TITLES);
-    this.titleRemove = this.systemLang.getTitle(DEF_REMOVE_TITLES);
-    this.titleDown = this.systemLang.getTitle(DEF_DOWN_TITLES);
-    this.titleUp = this.systemLang.getTitle(DEF_UP_TITLES);
+    this.titleAdd = this.systemLang.getTitle(this.i18n.ADD_TITLES);
+    this.titleRemove = this.systemLang.getTitle(this.i18n.REMOVE_TITLES);
+    this.titleDown = this.systemLang.getTitle(this.i18n.DOWN_TITLES);
+    this.titleUp = this.systemLang.getTitle(this.i18n.UP_TITLES);
   }
   render(): void {
     this.availableList = this.options.filter( v => !this.resultList.includes(v)).sort();

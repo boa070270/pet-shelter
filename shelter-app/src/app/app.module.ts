@@ -18,28 +18,15 @@ import {HttpClientModule} from '@angular/common/http';
 import { MainPageComponent } from './main-page.component';
 import { TopMenuPageComponent } from './top-menu-page.component';
 import { SubMenuPageComponent } from './sub-menu-page/sub-menu-page.component';
-import {MatToolbarModule} from '@angular/material/toolbar';
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
-import {MatSidenavModule} from '@angular/material/sidenav';
-import { MenuComponent } from './menu.component';
-import {MatMenuModule} from '@angular/material/menu';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatSelectModule} from '@angular/material/select';
-import {MatInputModule} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
-import {MatCardModule} from '@angular/material/card';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {AngularWysiwygEditorLibModule} from '@bilousd/angular-wysiwyg-editor-lib';
 import { SearchPageComponent } from './search-page.component';
-import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {ShelterCommonModule} from './common/common.module';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { MenuPageComponent } from './menu-page.component';
-import { LoginPageComponent } from './login-page.component';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {BasicService} from './basic.service';
 import { TestDynamicComponent } from './test-dynamic.component';
+import {OverlayModule} from '@angular/cdk/overlay';
 
 @NgModule({
     declarations: [
@@ -47,10 +34,8 @@ import { TestDynamicComponent } from './test-dynamic.component';
         MainPageComponent,
         TopMenuPageComponent,
         SubMenuPageComponent,
-        MenuComponent,
         SearchPageComponent,
         MenuPageComponent,
-        LoginPageComponent,
         TestDynamicComponent,
     ],
   imports: [
@@ -59,28 +44,17 @@ import { TestDynamicComponent } from './test-dynamic.component';
     AppRoutingModule,
     UiLibModule,
     HttpClientModule,
-    MatToolbarModule,
-    MatIconModule,
-    MatButtonModule,
-    MatSidenavModule,
-    MatMenuModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatInputModule,
     FormsModule,
-    MatCardModule,
     ScrollingModule,
     AngularWysiwygEditorLibModule,
-    MatButtonToggleModule,
     ShelterCommonModule,
-    MatProgressSpinnerModule,
-    FontAwesomeModule,
     SurveyModule,
     SharedModule,
     ControlsModule,
     SwaggerFormModule,
     UiElementsModule,
     DialogsModule,
+    OverlayModule
   ],
     providers: [
       {provide: 'ObtainSystemLanguage', useClass: BasicService},

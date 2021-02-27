@@ -1,10 +1,18 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  TemplateRef,
+  ViewChild
+} from '@angular/core';
 import {BasicService} from './basic.service';
 import {SystemLang} from 'ui-lib';
 import {Subscription} from 'rxjs';
 import {LanguageType, MenuTree} from './common/types';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
-import {MatSidenav} from '@angular/material/sidenav';
 import {Router} from '@angular/router';
 import {SystemMenuService} from './system-menu.service';
 
@@ -20,9 +28,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   private subscription: Subscription;
   private subscriptionLang: Subscription;
   arrow: string;
-  private toggleSnav = false;
-  toolbarStyle: string;
-  @ViewChild('sideNav') snav: MatSidenav;
+  @ViewChild('sidebar') sidebar: TemplateRef<any>;
   @ViewChild('sdnBtn') sdnBtn: ElementRef;
   searchText: string;
   humMenu = false;
@@ -81,25 +87,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       this.menuTree = this.systemMenu.menuTree();
     }
   }
-  onCloseSideNav(): void {
-    console.log('sideNavObserver complete:', this);
-    this.arrow = 'arrow_right';
-    this.styleSdn = undefined;
-    this.toggleSnav = false;
-    this.toolbarStyle = undefined;
-  }
-  sideToggle(): boolean {
-    this.toggleSnav = !this.toggleSnav;
-    this.snav.toggle(this.toggleSnav);
-    if (this.toggleSnav) {
-      this.styleSdn = `left: 200px;`;
-      this.arrow = 'arrow_left';
-      this.toolbarStyle = `margin-left: 200px; margin-right: -200px`;
-    }
-    return false;
-  }
 
-  searchPagesAndPet($event: MouseEvent): void {
+  searchPagesAndPet(): void {
     console.log(`search for ${this.searchText}`);
     this.router.navigate(['/search', {query: this.searchText}]);
   }

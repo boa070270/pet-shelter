@@ -1,5 +1,5 @@
-import {Component} from '@angular/core';
-import {AbstractDataSource} from 'ui-lib';
+import {Component, OnDestroy} from '@angular/core';
+import {AbstractComponent, AbstractDataSource, SystemLang} from 'ui-lib';
 // from x-payload
 import {BannerType} from '../common/types';
 import {SwaggerBannerType} from '../common/swagger-objects';
@@ -13,11 +13,12 @@ import {DataSources} from '../datasources';
   `,
   styleUrls: ['./banners-table.component.sass'] // TODO change to ...
 })
-export class BannersTableComponent {
+export class BannersTableComponent extends AbstractComponent implements OnDestroy {
   dataSource: AbstractDataSource<BannerType>;
   swagger = SwaggerBannerType;
 
-  constructor(datasources: DataSources) {
+  constructor(datasources: DataSources, public systemLang: SystemLang) {
+    super(systemLang, {});
     this.dataSource = datasources.Banners;
   }
 }

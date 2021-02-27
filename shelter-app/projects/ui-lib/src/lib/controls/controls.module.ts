@@ -17,6 +17,14 @@ import { BidiModule } from '@angular/cdk/bidi';
 import { ChoiceFormatPipe } from './choice-format.pipe';
 import { UploadFilesComponent } from './upload-files.component';
 import { TextareaControlComponent } from './textarea-control.component';
+import { AbstractComponent } from './abstract.component';
+import { ToolbarComponent } from './toolbar.component';
+import { NavbarComponent } from './navbar.component';
+import {RouterModule} from '@angular/router';
+import { MenuComponent } from './menu.component';
+import { SpinnerComponent } from './spinner.component';
+import {SimpleDialogComponent} from './dialogs/simple-dialog.component';
+import {SnakeBarComponent} from './dialogs/snake-bar.component';
 
 @NgModule({
   declarations: [
@@ -33,12 +41,20 @@ import { TextareaControlComponent } from './textarea-control.component';
     ChoiceFormatPipe,
     UploadFilesComponent,
     TextareaControlComponent,
+    AbstractComponent,
+    ToolbarComponent,
+    NavbarComponent,
+    MenuComponent,
+    SpinnerComponent,
+    SimpleDialogComponent,
+    SnakeBarComponent,
   ],
   imports: [
     CommonModule,
     FormsModule,
     CdkTableModule,
-    BidiModule
+    BidiModule,
+    RouterModule
   ],
   exports: [
     CheckboxControlComponent,
@@ -52,6 +68,13 @@ import { TextareaControlComponent } from './textarea-control.component';
     TableComponent,
     UploadFilesComponent,
     TextareaControlComponent,
+    AbstractComponent,
+    ToolbarComponent,
+    NavbarComponent,
+    MenuComponent,
+    SpinnerComponent,
+    SimpleDialogComponent,
+    SnakeBarComponent,
   ]
 })
 export class ControlsModule {
@@ -78,6 +101,8 @@ export class ControlsModule {
     componentsPlugin.addPlugin('title-type', {component: TitleTypeControlComponent, schema: null });
     componentsPlugin.addPlugin('lib-table', {component: TableComponent, schema: null });
     componentsPlugin.addPlugin('lib-upload-files', {component: UploadFilesComponent, schema: null });
+    componentsPlugin.addPlugin('simple-dialog', {component: SimpleDialogComponent, schema: null});
+    componentsPlugin.addPlugin('snake-bar', {component: SnakeBarComponent, schema: null});
   }
 }
 // const BASE_PROPERTIES: {

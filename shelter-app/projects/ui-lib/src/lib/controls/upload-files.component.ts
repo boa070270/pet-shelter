@@ -9,11 +9,11 @@ import {Directionality} from '@angular/cdk/bidi';
 const I18N: I18NType = {
   welcomeDropFile: [
     {lang: 'en', title: 'Drag one or more files to this Drop Zone ...'},
-    {lang: 'en', title: 'Перетягніть один або кілька файлів до цієї зони ...'}
+    {lang: 'uk', title: 'Перетягніть один або кілька файлів до цієї зони ...'}
   ],
   dlgCaption: [
     {lang: 'en', title: 'Select files'},
-    {lang: 'en', title: 'Виберіть файл'}
+    {lang: 'uk', title: 'Виберіть файл'}
   ],
 };
 @Component({
@@ -21,7 +21,11 @@ const I18N: I18NType = {
   template: `<div class="upload-files" (drop)="dropFiles($event)" (dragover)="dragOverHandler($event)">
     <span>{{i18n.welcomeDropFile}}</span><br>
     <div *ngFor="let file of files; let i = index" class="upload-files-container">
-      <button (click)="delete(i)" class="gm-delete"></button><span>{{file.name}}</span><br>
+      <button (click)="delete(i)" class="gm-delete"></button>
+      <label>
+        <span>{{file.name}}</span>
+        <progress max="100" value="{{progress[i]}}"> {{progress[i]}}% </progress>
+      </label>
     </div>
     <label>
         <input type="file" (change)="onSelectFile($event)" multiple [title]="i18n.dlgCaption">
@@ -34,9 +38,10 @@ export class UploadFilesComponent extends BaseComponent implements OnInit, Contr
   @Output()
   selected: EventEmitter<File[]> = new EventEmitter<File[]>();
   files: File[] = [];
+  progress: number[] = [];
   constructor(public systemLang: SystemLang, protected directionality: Directionality,
               private dialogService: DialogService, dictionary: DictionaryService) {
-    super(systemLang, directionality, Object.assign({}, I18N, (dictionary.getDictionary('COMPONENTS') || {}).fileUpload));
+    super(systemLang, directionality, dictionary.getLibDictionary('UploadFilesComponent', I18N));
   }
 
   ngOnInit(): void {
@@ -77,6 +82,7 @@ export class UploadFilesComponent extends BaseComponent implements OnInit, Contr
             const file = ev.dataTransfer.items[i].getAsFile();
             console.log('... file[' + i + '].name = ' + file.name);
             this.files.push(file);
+            this.progress.push(0);
           }
         }
       } else {
@@ -84,6 +90,7 @@ export class UploadFilesComponent extends BaseComponent implements OnInit, Contr
         for (let i = 0; i < ev.dataTransfer.files.length; i++) {
           console.log('... file[' + i + '].name = ' + ev.dataTransfer.files[i].name);
           this.files.push(ev.dataTransfer.files[i]);
+          this.progress.push(0);
         }
       }
       // Pass event to removeDragData for cleanup
@@ -105,13 +112,25 @@ export class UploadFilesComponent extends BaseComponent implements OnInit, Contr
 
   delete(i: number): void {
     this.files.splice(i, 1);
+    this.progress.splice(i, 1);
+    this.emitChange(this.files);
   }
 
   onSelectFile(event: Event): void {
     const files: FileList = (event.target as HTMLInputElement).files;
     for (let i = 0; i < files.length; ++i) {
       this.files.push(files.item(i));
+      this.progress.push(0);
     }
     this.emitChange(this.files);
+  }
+  setProgress(f: File, val: number): void {
+    const i = this.files.indexOf(f);
+    this.progress[i] = val;
+  }
+  clean(file: File): void {
+    const i = this.files.indexOf(file);
+    this.files.splice(i, 1);
+    this.progress.splice(i, 1);
   }
 }

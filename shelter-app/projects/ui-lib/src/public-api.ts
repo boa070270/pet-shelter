@@ -4,9 +4,7 @@
 
 export * from './lib/link.component';
 export * from './lib/controls/carousel.component';
-export * from './lib/yes-no-dialog.component';
 export * from './lib/show-media-value.component';
-export * from './lib/show-media-dialog.component';
 export * from './lib/show-value.component';
 export * from './lib/dynamic-html/index';
 export * from './lib/end-page.component';
@@ -16,7 +14,6 @@ export * from './lib/plain-html.pipe';
 export * from './lib/masonry-list.component';
 export * from './lib/visibility-change.service';
 export * from './lib/interval-observable.service';
-export * from './lib/dialogs';
 export * from './lib/advert.component';
 export * from './lib/shared';
 export * from './lib/survey';

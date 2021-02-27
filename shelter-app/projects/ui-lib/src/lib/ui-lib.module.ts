@@ -3,8 +3,6 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {UiLibComponent} from './ui-lib.component';
-import {YesNoDialogComponent} from './yes-no-dialog.component';
-import {ShowMediaDialogComponent} from './show-media-dialog.component';
 import {ShowMediaValueComponent} from './show-media-value.component';
 import {ShowValueComponent} from './show-value.component';
 import {CarouselComponent} from './controls/carousel.component';
@@ -15,13 +13,11 @@ import {ImageListComponent} from './image-list.component';
 import {PlainHtmlPipe} from './plain-html.pipe';
 import {MasonryListComponent} from './masonry-list.component';
 import {AdvertComponent} from './advert.component';
-import {CdkTableModule} from "@angular/cdk/table";
+import {CdkTableModule} from '@angular/cdk/table';
 
 @NgModule({
   declarations: [
     UiLibComponent,
-    YesNoDialogComponent,
-    ShowMediaDialogComponent,
     ShowMediaValueComponent,
     ShowValueComponent,
     CarouselComponent,
@@ -42,8 +38,6 @@ import {CdkTableModule} from "@angular/cdk/table";
   ],
   exports: [
     UiLibComponent,
-    YesNoDialogComponent,
-    ShowMediaDialogComponent,
     ShowMediaValueComponent,
     ShowValueComponent,
     CarouselComponent,

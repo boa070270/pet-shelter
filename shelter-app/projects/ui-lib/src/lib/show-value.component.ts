@@ -1,6 +1,6 @@
 import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
-import {ShowMediaDialogComponent} from './show-media-dialog.component';
-import {MatDialog} from '@angular/material/dialog';
+import {DialogService} from './dialog-service';
+import {ShowMediaValueComponent} from './show-media-value.component';
 
 export interface ShowMediaType {
   mediaType: string;
@@ -20,9 +20,7 @@ export class ShowValueComponent implements OnInit {
   mediaURI: string;
   mediaType: string;
 
-  constructor(
-    private dialog: MatDialog
-  ) { }
+  constructor(private dialog: DialogService) { }
 
   ngOnInit(): void {
     if (this.row && this.row.mediaType && this.row.mediaType.indexOf('/') > 0){
@@ -33,7 +31,7 @@ export class ShowValueComponent implements OnInit {
   }
   play(): void {
     if (this.type === 'video' || this.type === 'image'){
-      this.dialog.open(ShowMediaDialogComponent, {
+      this.dialog.open(ShowMediaValueComponent, {
         maxWidth: '70vh',
         maxHeight: '70vh',
         data: {
