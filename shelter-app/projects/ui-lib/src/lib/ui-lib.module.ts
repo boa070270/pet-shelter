@@ -5,8 +5,6 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {UiLibComponent} from './ui-lib.component';
 import {ShowMediaValueComponent} from './show-media-value.component';
 import {ShowValueComponent} from './show-value.component';
-import {CarouselComponent} from './controls/carousel.component';
-import {LinkComponent} from './link.component';
 import {EndPageComponent} from './end-page.component';
 import {IsVisibleDirective} from './is-visible.directive';
 import {ImageListComponent} from './image-list.component';
@@ -20,8 +18,6 @@ import {CdkTableModule} from '@angular/cdk/table';
     UiLibComponent,
     ShowMediaValueComponent,
     ShowValueComponent,
-    CarouselComponent,
-    LinkComponent,
     EndPageComponent,
     IsVisibleDirective,
     ImageListComponent,
@@ -40,8 +36,6 @@ import {CdkTableModule} from '@angular/cdk/table';
     UiLibComponent,
     ShowMediaValueComponent,
     ShowValueComponent,
-    CarouselComponent,
-    LinkComponent,
     EndPageComponent,
     IsVisibleDirective,
     ImageListComponent,

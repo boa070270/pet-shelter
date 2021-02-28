@@ -10,7 +10,7 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import {SystemLang} from '../i18n';
+import {SystemLang} from '../../i18n';
 import {Subscription} from 'rxjs';
 import {VoteOption, VoteType} from './disscution-api';
 

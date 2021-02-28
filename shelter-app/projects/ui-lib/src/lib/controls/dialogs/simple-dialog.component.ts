@@ -1,10 +1,10 @@
 import {Component, Inject, OnDestroy, ViewChild} from '@angular/core';
 import {SystemLang} from '../../i18n';
-import {SwaggerObject, TitleType, ActionType, ExtendedData, I18NType, DictionaryService} from '../../shared';
-import {SwaggerFormComponent} from '../../swagger-form';
+import {ActionType, DictionaryService, ExtendedData, I18NType, SwaggerObject} from '../../shared';
+import {SwaggerFormComponent} from '../swagger-form/swagger-form.component';
 import {Subscription} from 'rxjs';
 import {AbstractComponent} from '../abstract.component';
-import {DialogRef, CdkDialogContainer, DIALOG_DATA} from '../../dialog-service';
+import {CdkDialogContainer, DIALOG_DATA, DialogRef} from '../../dialog-service';
 
 const I18N: I18NType = {
   DEF_TITLE_OK: [{lang: 'en', title: 'Ok'}, {lang: 'uk', title: 'Tak'}],
@@ -95,7 +95,7 @@ export class SimpleDialogComponent extends AbstractComponent implements OnDestro
     if (this.swagger) {
       if (this.form.formGroup.valid || this.form.formGroup.disabled) {
         console.log('SimpleDialogComponent.save', this.form.formGroup.value);
-        this.dialogRef.close(this.form.formGroup.value);
+        this.dialogRef.close(this.form.formGroup.getRawValue());
       }
     } else {
       this.dialogRef.close('ok');

@@ -11,7 +11,7 @@ export class PlainHtmlPipe implements PipeTransform {
     }
     const withoutHtml = value.replace(/<(?:.|\n)*?>/gm, ' ');
     if (length && length < withoutHtml.length) {
-      return withoutHtml.substring(0, length) + ' ...';
+      return withoutHtml.substring(0, length);
     } else {
       return withoutHtml;
     }

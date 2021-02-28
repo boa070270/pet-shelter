@@ -1,10 +1,10 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {Response, UserType} from './common/types';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {catchError, map, tap} from 'rxjs/operators';
-import {from, Observable, of} from 'rxjs';
+import {map, tap} from 'rxjs/operators';
+import {Observable, of} from 'rxjs';
 import {DialogRef, DialogService, ExtendedData, SwaggerNative, SwaggerObject, swaggerUI} from 'ui-lib';
-import {UrlTree} from "@angular/router";
+import {UrlTree} from '@angular/router';
 
 const I18N = {
   user_caption: [{lang: 'en', title: 'User name'}, {lang: 'uk', title: 'І\'мя користувача'}],
@@ -49,7 +49,7 @@ export class AuthorizationService {
     this.user = null;
     this.authEmitter.emit(this.user);
   }
-  logInBasic(userName, password): Observable<boolean> {
+  logInBasic(userName, password): Observable<UserType> {
     const value = 'Basic ' + window.btoa(userName + ':' + password);
     const options = {
       headers: new HttpHeaders({
@@ -63,15 +63,8 @@ export class AuthorizationService {
         this.user = v;
         this.user.authHeaders = [{name: 'Authorization', value}];
         this.authEmitter.emit(this.user);
-      }),
-      map(() => {
-        return !!this.user;
-      }),
-      catchError((err, caught) => {
-        console.log(err, caught);
-        // @ts-ignore
-        return from(false);
-      }));
+      })
+    );
   }
   private openDialog(): DialogRef<any> {
     const extData = ExtendedData.create({}, false, DLG, 'yes_no', 'Authorization', 'gm-login', 'info-color');
@@ -82,11 +75,20 @@ export class AuthorizationService {
     if (this.user) {
       return of(!!this.user.role.find(r => mRole.includes(r)));
     }
-    return new Observable(obs => {
+    return new Observable<boolean>(obs => {
       const dlgRef = this.openDialog();
       dlgRef.afterClosed().subscribe( d => {
         if (d) {
-          return this.logInBasic(d.login, d.password);
+            this.logInBasic(d.login, d.password).subscribe( u => {
+              if (u && u.role && u.role.find(r => mRole.includes(r)) !== undefined ) {
+                obs.next(true);
+              } else {
+                obs.next(false);
+              }
+            },
+              err => {
+                obs.error(err);
+              });
         } else {
           this.logOut();
           obs.next(false);

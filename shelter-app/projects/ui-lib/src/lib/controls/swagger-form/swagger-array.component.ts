@@ -1,9 +1,9 @@
 import {Component, forwardRef, Inject, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
-import {ArrayDataSource, I18NType, SwaggerArray, SwaggerComponent, SwaggerNative, SwaggerObject} from '../shared';
-import {TableComponent} from '../controls';
+import {ArrayDataSource, I18NType, SwaggerArray, SwaggerComponent, SwaggerNative, SwaggerObject} from '../../shared';
+import {TableComponent} from '../table/table.component';
 import {FormErrorsService} from './form-errors.service';
-import {SystemLang} from '../i18n';
+import {SystemLang} from '../../i18n';
 import {Directionality} from '@angular/cdk/bidi';
 import {BaseSwaggerComponent} from './base-swagger.component';
 

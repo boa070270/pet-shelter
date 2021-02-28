@@ -9,7 +9,7 @@ import {
   SwaggerGroupComponent,
   SwaggerNative,
   SwaggerObject
-} from '../shared';
+} from '../../shared';
 import {
   AbstractControl,
   ControlValueAccessor,
@@ -19,7 +19,7 @@ import {
   Validators
 } from '@angular/forms';
 import {BaseSwaggerComponent} from './base-swagger.component';
-import {SystemLang} from '../i18n';
+import {SystemLang} from '../../i18n';
 import {Directionality} from '@angular/cdk/bidi';
 
 export const SWAGGER_FORM_VALUE_ACCESSOR: any = {

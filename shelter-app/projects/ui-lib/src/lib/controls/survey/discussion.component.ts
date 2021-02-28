@@ -1,8 +1,8 @@
 import {Component, Inject, Input, OnDestroy, OnInit} from '@angular/core';
 import {DiscussionMediator, CommentType, VoteOption, VoteType, CommentResponse} from './disscution-api';
-import {BrowserStorageService} from '../shared';
+import {BrowserStorageService} from '../../shared';
 import {Observable, Subscription} from 'rxjs';
-import {SystemLang} from '../i18n';
+import {SystemLang} from '../../i18n';
 
 @Component({
   selector: 'lib-discussion',

@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {choiceFormat, DictionaryService, I18NType, isTitleType, TitleType} from '../shared';
+import {choiceFormat, DictionaryService, I18NType, isTitleType, TitleType} from '../../shared';
 import {ValidationErrors} from '@angular/forms';
 
 const I18N: I18NType = {

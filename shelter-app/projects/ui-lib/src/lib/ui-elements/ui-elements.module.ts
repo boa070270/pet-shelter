@@ -8,16 +8,12 @@ import {
   RadioControlComponent,
   SelectControlComponent,
   TableComponent,
-  TitleTypeControlComponent
-} from '../controls';
-import {SurveyModule} from '../survey';
-import {
+  TitleTypeControlComponent,
   GeneratorFormComponent,
   SwaggerArrayComponent,
   SwaggerFormComponent,
-  SwaggerFormModule,
   SwaggerNativeComponent
-} from '../swagger-form';
+} from '../controls';
 import { DynamicPageComponent } from './dynamic-page.component';
 import {createCustomElement} from '@angular/elements';
 
@@ -26,13 +22,9 @@ import {createCustomElement} from '@angular/elements';
   imports: [
     CommonModule,
     ControlsModule,
-    SurveyModule,
-    SwaggerFormModule
   ],
   exports: [
     ControlsModule,
-    SurveyModule,
-    SwaggerFormModule,
     DynamicPageComponent
   ]
 })

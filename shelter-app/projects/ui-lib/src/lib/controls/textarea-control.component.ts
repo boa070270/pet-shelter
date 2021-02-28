@@ -104,7 +104,7 @@ export class TextareaControlComponent extends BaseComponent implements  OnInit, 
     this.pPlaceholder = this.doIfNeedI18n(this.placeholder);
     this.iconsClass = {};
     if (this.leadingIcon) {
-      this.iconsClass['gm-' + this.leadingIcon] = true;
+      this.iconsClass[this.leadingIcon] = true;
     }
   }
   ngOnChanges(changes: SimpleChanges): void {

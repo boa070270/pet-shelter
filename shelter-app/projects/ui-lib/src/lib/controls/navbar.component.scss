@@ -3,24 +3,67 @@
   padding: 0;
   display: grid;
   grid-auto-rows: 3em;
-  grid-template-columns: 1em 3em calc(100% - 6em) 1em 1em;
+  grid-template-columns: 1em 3em calc(100% - 30em) 8em 10em 1em;
+  input {
+    width: 9em;
+    border: none;
+    font: inherit;
+    appearance: none;
+    margin: 0;
+    padding: 0;
+    border: {
+      bottom: {
+        color: #007BFF;
+        style: solid;
+        width: 1px;
+      };
+    };
+    -webkit-border-image: none;
+
+    &::placeholder {
+      color: transparent;
+      font: inherit;
+    }
+
+    &:focus {
+      outline: none;
+      border-bottom-color: #00c8f0;
+      -webkit-border-image: none;
+      &::placeholder {
+        color: gray;
+      }
+
+      & ~ .ui-input-title {
+        top: -30%;
+        color: #00c8f0;
+        font-size: x-small;
+      }
+    }
+  }
+  select {
+    background: white;
+    overflow-wrap: break-word;
+    border: {
+      color: white;
+      bottom: {
+        color: #007BFF;
+        style: solid;
+        width: 1px;
+      };
+    };
+  }
+  button {
+    background: none;
+    padding: 0;
+    margin: 0;
+  }
+  label {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
 }
 .clip-img {
   clip-path: circle(46%);
   max-height: 3em;
   max-width: 3em;
-}
-@keyframes show-search { from { width: 0; } to { width: 60px} }
-@-webkit-keyframes show-search { from { width: 0 } to { width: 60px} }
-@keyframes hide-search { from { width: 60px } to { width: 0} }
-@-webkit-keyframes hide-search { from { width: 60px } to { width: 0} }
-
-.navbar-search {
-  visibility: hidden;
-  animation: hide-search 2s;
-  :focus {
-    visibility: visible;
-    width: 60px;
-    animation: show-search 2s;
-  }
 }

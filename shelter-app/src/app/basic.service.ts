@@ -1,11 +1,11 @@
-import {Injectable, OnDestroy} from '@angular/core';
+import {Inject, Injectable, OnDestroy} from '@angular/core';
 import {HttpClient, HttpEvent, HttpHeaders, HttpResponse} from '@angular/common/http';
 import {Observable, Subscription} from 'rxjs';
 import {
   BrowserStorageService,
   CommentResponse,
-  LanguageType as UILanguageType,
-  ObtainSystemLanguage,
+  LanguageType as UILanguageType, UILogger,
+  ObtainSystemLanguage, UILoggerToken,
   VoteType
 } from 'ui-lib';
 import {map, tap} from 'rxjs/operators';
@@ -28,7 +28,7 @@ import {
   SearchResult,
   TitleType,
   UserType,
-} from './common/types';
+} from './common';
 import {AuthorizationService} from './authorization.service';
 
 const API_URL = '/api/v1';
@@ -42,7 +42,9 @@ export class BasicService implements ObtainSystemLanguage, OnDestroy {
   private authSubscription: Subscription;
   private clientId: string;
 
-  constructor(private http: HttpClient, private authService: AuthorizationService, private storage: BrowserStorageService) {
+  constructor(@Inject(UILoggerToken) private logger: UILogger,
+              private http: HttpClient, private authService: AuthorizationService,
+              private storage: BrowserStorageService) {
     this.authSubscription = authService.authEmitter.subscribe(u => {
       if (u) {
         this.authHeaders = u.authHeaders;
@@ -89,12 +91,14 @@ export class BasicService implements ObtainSystemLanguage, OnDestroy {
   }
   /**** Lang ****/
   getLangs(): Observable<LanguageType[]> {
+    this.logger.debug('getLangs');
     return this.http.get<HttpResponse<Response<LanguageType[]>>>(API_URL + '/lang', this.httpOptions()).pipe(map(resp => {
       this.setClientId(resp.headers.get('x-client-id'));
       return resp.body;
     }), map(resp => resp.data));
   }
   getSystemLanguages(): Observable<UILanguageType[]> {
+    this.logger.debug('getSystemLanguages');
     return this.http.get<HttpResponse<Response<UILanguageType[]>>>(API_URL + '/lang', this.httpOptions()).pipe(map(resp => {
       this.setClientId(resp.headers.get('x-client-id'));
       return resp.body;
@@ -118,6 +122,7 @@ export class BasicService implements ObtainSystemLanguage, OnDestroy {
     );
   }
   upsertLanguage(lang: UILanguageType): Observable<HttpResponse<IdResponse>> {
+    this.logger.debug(lang);
     return this.http.post<HttpResponse<IdResponse>>(API_URL + '/lang', lang, this.httpOptions(true)).pipe(
       tap(r => this.setClientId(r.headers.get('x-client-id')))
     );

@@ -6,7 +6,7 @@ import {
   NumberConstrictions,
   StringConstrictions, SwaggerUI,
   SwaggerSchema
-} from '../shared/swagger-object';
+} from '../../shared/swagger-object';
 import {AbstractControl, FormControl, FormGroup, Validators} from '@angular/forms';
 
 interface UI extends SwaggerUI {

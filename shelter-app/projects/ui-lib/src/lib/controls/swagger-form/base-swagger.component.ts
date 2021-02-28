@@ -1,8 +1,8 @@
-import {Component, Inject, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
-import {BaseComponent} from '../controls';
-import {BaseConstrictions, I18NType, SwaggerSchema, SwaggerUI} from '../shared';
+import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {BaseComponent} from '../base.component';
+import {BaseConstrictions, SwaggerSchema, SwaggerUI} from '../../shared';
 import {AbstractControl, ControlValueAccessor, FormGroup} from '@angular/forms';
-import {SystemLang} from '../i18n';
+import {SystemLang} from '../../i18n';
 import {Directionality} from '@angular/cdk/bidi';
 import {Subscription} from 'rxjs';
 

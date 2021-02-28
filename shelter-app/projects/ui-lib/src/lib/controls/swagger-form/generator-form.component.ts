@@ -1,6 +1,6 @@
 import {Component, ComponentRef, Input, OnInit, ViewChild} from '@angular/core';
 import {SwaggerFormService} from './swagger-form.service';
-import {SwaggerGroupComponent, SwaggerSchema} from '../shared';
+import {SwaggerGroupComponent, SwaggerSchema} from '../../shared';
 import {FormGroup} from '@angular/forms';
 import {SwaggerFormComponent} from './swagger-form.component';
 

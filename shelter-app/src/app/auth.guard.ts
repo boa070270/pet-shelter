@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import {CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router} from '@angular/router';
-import { Observable } from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {AuthorizationService} from './authorization.service';
 import {SystemMenuService} from './system-menu.service';
-import {UserTypeRoleEnum} from './common/types';
+import {UserTypeRoleEnum} from './common';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +20,7 @@ export class AuthGuard implements CanActivate {
     const menu = this.systemMenu.getMenu(url);
     const mRole = (menu && menu.role) ? menu.role.split(',') : [];
     if (mRole.find( v => v === UserTypeRoleEnum.public)) {
-      return true;
+      return of(true);
     }
     return this.authService.hasRight(mRole);
     // return this.router.parseUrl('/login');

@@ -1,4 +1,4 @@
-export * from './common.module';
+export * from './shelter-common.module';
 export * from './menu-helper';
 export * from './obseravble';
 export * from './swagger-objects';

@@ -18,6 +18,7 @@ const routes: Routes = [
   { path: 'pet/:id', component: PetComponent },
   { path: 'search', component: SearchPageComponent },
   { path: 'test-dynamic', component: TestDynamicComponent},
+  { path: 'test', component: TopMenuPageComponent},
   { path: 'admin', loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule) },
 ];
 const KnownComponents = {

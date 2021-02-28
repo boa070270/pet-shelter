@@ -1,12 +1,15 @@
-import {Component, ComponentRef, forwardRef, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ComponentsPluginService, I18NType, NativeConstrictions, SwaggerComponent, SwaggerNative} from '../shared';
+import {Component, ComponentRef, forwardRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ComponentsPluginService, NativeConstrictions, SwaggerComponent, SwaggerNative} from '../../shared';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {CdkPortalOutlet, ComponentPortal} from '@angular/cdk/portal';
-import {BaseComponent, CheckboxControlComponent, InputControlComponent, ListBuilderComponent} from '../controls';
 import {FormErrorsService} from './form-errors.service';
-import {SystemLang} from '../i18n';
+import {SystemLang} from '../../i18n';
 import {Directionality} from '@angular/cdk/bidi';
 import {BaseSwaggerComponent} from './base-swagger.component';
+import {BaseComponent} from '../base.component';
+import {InputControlComponent} from '../input-control.component';
+import {CheckboxControlComponent} from '../checkbox-control.component';
+import {ListBuilderComponent} from '../list-builder.component';
 
 @Component({
   selector: 'lib-swagger-native',

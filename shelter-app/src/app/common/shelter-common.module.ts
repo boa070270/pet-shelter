@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {PageComponent} from './page.component';
 import {PetComponent} from './pet.component';
 import {SafeHtmlPipe} from './safe-html.pipe';
-import {ControlsModule, DynamicHTMLModule, UiLibModule} from 'ui-lib';
+import {ControlsModule, DynamicHTMLModule, UiLibModule, } from 'ui-lib';
 import {CardPetComponent} from './card-pet.component';
 import {CardPageComponent} from './card-page.component';
 import {TabletPetComponent} from './tablet-pet.component';
@@ -14,7 +14,6 @@ import {SearchTypeComponent} from './search-type.component';
 import {BreadcrumbsComponent} from './breadcrumbs.component';
 import { LengthenListComponent } from './plugins/lengthen-list.component';
 import { VoteComponent } from './plugins/vote.component';
-import {SurveyModule} from 'ui-lib';
 
 @NgModule({
   declarations: [
@@ -45,8 +44,7 @@ import {SurveyModule} from 'ui-lib';
         UiLibModule,
         DynamicHTMLModule,
         RouterModule,
-        SurveyModule,
         ControlsModule
     ],
 })
-export class ShelterCommonModule { }
+export class ShelterCommonModule {}

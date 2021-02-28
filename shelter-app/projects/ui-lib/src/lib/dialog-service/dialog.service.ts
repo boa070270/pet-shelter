@@ -26,8 +26,12 @@ import {PositionStrategy} from '@angular/cdk/overlay/position/position-strategy'
   providedIn: 'root'
 })
 export class DialogService implements OnDestroy {
-  private readonly simpleDialogComponent: Type<any>;
-  private readonly snakeBarComponent: Type<any>;
+  private get simpleDialogComponent(): Type<any> {
+    return this.componentsPlugin.getPlugin('simple-dialog').component;
+  }
+  private get snakeBarComponent(): Type<any> {
+    return this.componentsPlugin.getPlugin('snake-bar').component;
+  }
   // tslint:disable-next-line:variable-name
   _afterAllClosedBase = new Subject<void>();
   // tslint:disable-next-line:variable-name
@@ -54,9 +58,6 @@ export class DialogService implements OnDestroy {
     if (!_parentDialog && location) {
       location.subscribe(() => this.closeAll());
     }
-
-    this.simpleDialogComponent = this.componentsPlugin.getPlugin('simple-dialog').component;
-    this.snakeBarComponent = this.componentsPlugin.getPlugin('snake-bar').component;
   }
 
   /* e.g.
