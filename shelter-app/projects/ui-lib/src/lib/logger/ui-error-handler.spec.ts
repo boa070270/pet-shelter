@@ -1,7 +1,7 @@
-import { UiErrorHandler } from './ui-error-handler';
+import { UIErrorHandler } from './ui-error-handler';
 
 describe('UiErrorHandler', () => {
   it('should create an instance', () => {
-    expect(new UiErrorHandler()).toBeTruthy();
+    expect(new UIErrorHandler(null)).toBeTruthy();
   });
 });

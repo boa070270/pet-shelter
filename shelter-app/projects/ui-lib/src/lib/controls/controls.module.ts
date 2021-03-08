@@ -21,7 +21,7 @@ import {AbstractComponent} from './abstract.component';
 import {ToolbarComponent} from './toolbar.component';
 import {NavbarComponent} from './navbar.component';
 import {RouterModule} from '@angular/router';
-import {MenuComponent} from './menu.component';
+import {MenuComponent} from './menu/menu.component';
 import {SpinnerComponent} from './spinner.component';
 import {SimpleDialogComponent} from './dialogs/simple-dialog.component';
 import {SnakeBarComponent} from './dialogs/snake-bar.component';
@@ -35,6 +35,9 @@ import {
   SwaggerNativeComponent
 } from './swagger-form/public-api';
 import {PortalModule} from '@angular/cdk/portal';
+import {ScrollingModule} from '@angular/cdk/scrolling';
+import {CdkMenuModule} from "../menu";
+import { MenuItemComponent } from './menu/menu-item.component';
 
 @NgModule({
   declarations: [
@@ -60,17 +63,19 @@ import {PortalModule} from '@angular/cdk/portal';
     LinkComponent,
     SimpleDialogComponent, SnakeBarComponent,
     GeneratorFormComponent, SwaggerArrayComponent, SwaggerFormComponent, SwaggerNativeComponent,
-    CommentComponent, VoteComponent, DiscussionComponent
+    CommentComponent, VoteComponent, DiscussionComponent, MenuItemComponent
   ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    CdkTableModule,
-    BidiModule,
-    RouterModule,
-    PortalModule,
-    ReactiveFormsModule
-  ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        CdkTableModule,
+        BidiModule,
+        RouterModule,
+        PortalModule,
+        ReactiveFormsModule,
+        ScrollingModule,
+        CdkMenuModule
+    ],
   exports: [
     PortalModule,
     CheckboxControlComponent,

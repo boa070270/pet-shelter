@@ -29,7 +29,7 @@ export interface CheckboxParameters {
   providers: [CHECKBOX_VALUE_ACCESSOR],
 })
 export class CheckboxControlComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
-  // tslint:disable-next-line:variable-name
+
   private _extraParams: CheckboxParameters = {};
   @Input()
   set extraParams(p: CheckboxParameters) {

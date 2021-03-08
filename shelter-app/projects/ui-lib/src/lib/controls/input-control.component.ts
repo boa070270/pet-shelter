@@ -1,4 +1,4 @@
-import {Component, forwardRef, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {Component, ElementRef, forwardRef, Input, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {SystemLang} from '../i18n';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {Directionality} from '@angular/cdk/bidi';
@@ -76,7 +76,7 @@ export class InputControlComponent extends TextareaControlComponent implements O
   get formEnctype(): string {
     return this.extraParams.formEnctype;
   }
-
+  @ViewChild('input', {static: true}) input: ElementRef<HTMLInputElement>;
   constructor(public systemLang: SystemLang, protected directionality: Directionality) {
     super(systemLang, directionality);
   }

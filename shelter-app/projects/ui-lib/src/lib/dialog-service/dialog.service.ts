@@ -32,22 +32,22 @@ export class DialogService implements OnDestroy {
   private get snakeBarComponent(): Type<any> {
     return this.componentsPlugin.getPlugin('snake-bar').component;
   }
-  // tslint:disable-next-line:variable-name
+
   _afterAllClosedBase = new Subject<void>();
-  // tslint:disable-next-line:variable-name
+
   _afterOpened: Subject<DialogRef<any>> = new Subject();
 
   afterAllClosed: Observable<void> = defer(() => this.openDialogs.length ?
     this._getAfterAllClosed() : this._getAfterAllClosed().pipe(startWith(undefined)));
-  // tslint:disable-next-line:variable-name
+
   _openDialogs: DialogRef<any>[] = [];
 
   constructor(
-    // tslint:disable-next-line:variable-name
+
     private _overlay: Overlay,
-    // tslint:disable-next-line:variable-name
+
     private _injector: Injector,
-    // tslint:disable-next-line:variable-name
+
     @Optional() @SkipSelf() private _parentDialog: DialogService,
     @Optional() location: Location,
     private componentsPlugin: ComponentsPluginService) {
@@ -178,6 +178,7 @@ export class DialogService implements OnDestroy {
     cfg.height = '100%';
     cfg.width = '80vw';
     cfg.scrollStrategies = {block: true};
+    cfg.disableClose = false;
     return this.open(compOrTemplate, cfg);
   }
 

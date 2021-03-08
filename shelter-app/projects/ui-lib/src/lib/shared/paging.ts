@@ -76,9 +76,9 @@ export const PagingSize = [10, 20, 50, 100];
  * It's used by TableComponent and CdkDataSource
  */
 export class Paging {
-  // tslint:disable-next-line:variable-name
+
   private _size = 0;
-  // tslint:disable-next-line:variable-name
+
   private _pageSize = PagingSize[0];
   protected listRange: ListRange = {start: 0, end: 0};
   private subs: Subscription;

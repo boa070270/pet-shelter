@@ -11,7 +11,7 @@ import {Subscription} from 'rxjs';
   template: ''
 })
 export class BaseSwaggerComponent extends BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
-  // tslint:disable-next-line:variable-name
+
   protected _swagger: SwaggerSchema;
   private statusSubs: Subscription;
   protected formControl: AbstractControl;

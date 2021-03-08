@@ -107,9 +107,9 @@ export function validNativeType(str: string): boolean {
   return false;
 }
 export abstract class SwaggerSchema {
-  // tslint:disable-next-line:variable-name
+
   protected _ui: SwaggerUI;
-  // tslint:disable-next-line:variable-name
+
   protected _constrain: BaseConstrictions;
   get ui(): SwaggerUI {
     return this._ui;
@@ -124,7 +124,7 @@ export abstract class SwaggerSchema {
   abstract stringify(): string;
 }
 export abstract class SwaggerNative extends SwaggerSchema {
-  // tslint:disable-next-line:variable-name
+
   protected _type: SwaggerNativeTypes;
   get type(): SwaggerNativeTypes {
     return this._type;
@@ -194,7 +194,7 @@ export abstract class SwaggerNative extends SwaggerSchema {
   abstract compare(p1: any, p2: any): number;
 }
 export class SwaggerArray extends SwaggerSchema {
-  // tslint:disable-next-line:variable-name
+
   protected _items: SwaggerNative | SwaggerObject;
   get items(): SwaggerNative | SwaggerObject {
     return this._items;

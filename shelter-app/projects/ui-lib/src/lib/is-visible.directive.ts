@@ -9,7 +9,7 @@ const DEFAULT_THROTTLE_TIME = 50;
   selector: '[libIsVisible]'
 })
 export class IsVisibleDirective implements OnDestroy {
-  @Input() throttle = 100;
+  @Input() throttle = 20;
   private subs1: Subscription;
   private subs2: Subscription;
   // @ts-ignore

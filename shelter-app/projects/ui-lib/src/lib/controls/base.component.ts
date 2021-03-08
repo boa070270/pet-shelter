@@ -23,7 +23,7 @@ export interface CommonParameters {
   providers: [{provide: 'i18NCfg', useValue: null}]
 })
 export class BaseComponent extends AbstractComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
-  // tslint:disable-next-line:variable-name
+
   private _commons = {};
   @Input()
   set common(p: CommonParameters) {

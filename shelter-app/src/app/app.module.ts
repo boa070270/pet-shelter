@@ -11,38 +11,32 @@ import {
   ObtainSystemLanguage,
   UiElementsModule,
   LoggerModule,
-  DialogServiceModule,
-  MAT_DIALOG_SCROLL_STRATEGY_PROVIDER,
-  DIALOG_REF,
-  DialogRef,
-  DIALOG_CONTAINER, CdkDialogContainer, DIALOG_CONFIG, DialogConfig
+  DialogServiceModule, UILoggerWriterToken,
 } from 'ui-lib';
 import {HttpClientModule} from '@angular/common/http';
-import { MainPageComponent } from './main-page.component';
-import { TopMenuPageComponent } from './top-menu-page.component';
-import { SubMenuPageComponent } from './sub-menu-page/sub-menu-page.component';
+import {MainPageComponent} from './main-page.component';
+import {TopMenuPageComponent} from './top-menu-page.component';
+import {SubMenuPageComponent} from './sub-menu-page/sub-menu-page.component';
 import {FormsModule} from '@angular/forms';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {AngularWysiwygEditorLibModule} from '@bilousd/angular-wysiwyg-editor-lib';
-import { SearchPageComponent } from './search-page.component';
+import {SearchPageComponent} from './search-page.component';
 import {ShelterCommonModule} from './common';
-import { MenuPageComponent } from './menu-page.component';
+import {MenuPageComponent} from './menu-page.component';
 import {BasicService} from './basic.service';
-import { TestDynamicComponent } from './test-dynamic.component';
-// import {Overlay, OverlayModule} from '@angular/cdk/overlay';
-import {PortalModule} from '@angular/cdk/portal';
-// import {CDK_CONNECTED_OVERLAY_SCROLL_STRATEGY_PROVIDER} from "@angular/cdk/overlay/overlay-directives";
+import {TestDynamicComponent} from './test-dynamic.component';
+import {LogWriterService} from "./log-writer.service";
 
 @NgModule({
-    declarations: [
-        AppComponent,
-        MainPageComponent,
-        TopMenuPageComponent,
-        SubMenuPageComponent,
-        SearchPageComponent,
-        MenuPageComponent,
-        TestDynamicComponent,
-    ],
+  declarations: [
+    AppComponent,
+    MainPageComponent,
+    TopMenuPageComponent,
+    SubMenuPageComponent,
+    SearchPageComponent,
+    MenuPageComponent,
+    TestDynamicComponent,
+  ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
@@ -59,16 +53,11 @@ import {PortalModule} from '@angular/cdk/portal';
     LoggerModule,
     DialogServiceModule,
   ],
-    providers: [
-      {provide: 'ObtainSystemLanguage', useClass: BasicService},
-      // MAT_DIALOG_SCROLL_STRATEGY_PROVIDER,
-      // {provide: DIALOG_REF, useValue: DialogRef},
-      // {provide: DIALOG_CONTAINER, useValue: CdkDialogContainer},
-      // {provide: DIALOG_CONFIG, useValue: DialogConfig},
-      // Overlay,
-      // CDK_CONNECTED_OVERLAY_SCROLL_STRATEGY_PROVIDER,
-    ],
-    bootstrap: [AppComponent]
+  providers: [
+    {provide: 'ObtainSystemLanguage', useClass: BasicService},
+    {provide: UILoggerWriterToken, useClass: LogWriterService}
+  ],
+  bootstrap: [AppComponent]
 })
 export class AppModule {
 }

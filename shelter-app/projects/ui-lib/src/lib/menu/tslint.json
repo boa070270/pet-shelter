@@ -1,0 +1,39 @@
+{
+  "extends": "../../../tslint.json",
+  "rules": {
+    "directive-selector": [
+      true,
+      "attribute",
+      "camelCase"
+    ],
+    "component-selector": [
+      true,
+      "element",
+      "kebab-case"
+    ],
+    "no-inferrable-types": [
+      true,
+      "ignore-properties"
+    ],
+    "variable-name": false,
+    "no-input-rename": [
+      false
+    ],
+    "no-output-rename": [
+      false
+    ],
+    "typedef": [
+      false
+    ],
+    "directive-class-suffix": [
+      false
+    ],
+    "no-host-metadata-property": [
+      false
+    ],
+    "object-literal-key-quotes": [
+      false
+    ],
+    "no-non-null-assertion": false
+  }
+}

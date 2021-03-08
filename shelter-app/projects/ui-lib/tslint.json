@@ -4,18 +4,26 @@
     "directive-selector": [
       true,
       "attribute",
-      "lib",
       "camelCase"
     ],
     "component-selector": [
       true,
       "element",
-      "lib",
       "kebab-case"
     ],
     "no-inferrable-types": [
       true,
       "ignore-properties"
+    ],
+    "variable-name": [
+      true,
+      "allow-leading-underscore"
+    ],
+    "no-input-rename": [
+      false
+    ],
+    "no-output-rename": [
+      false
     ]
   }
 }

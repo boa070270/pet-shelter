@@ -1,34 +1,39 @@
-import {Component, EventEmitter, OnDestroy, Output} from '@angular/core';
-import {LanguageType, MenuService, UIMenu} from '../shared';
+import {Component, ElementRef, EventEmitter, Inject, Input, OnDestroy, Output} from '@angular/core';
+import {LanguageType, MenuService, UILogger, UILoggerToken, UIMenu} from '../shared';
 import {SystemLang} from '../i18n';
 import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'lib-navbar',
-  template: `<div class="ui-navbar">
-    <button class="gm-more_vert" (click)="emitter.emit('sidebar')"></button>
-    <a [routerLink]="'/'">
-      <img src="/assets/img/logo.jpg" class="clip-img">
-    </a>
-    <div class="ui-navbar-menu">
-        <lib-menu [menu]="menu"></lib-menu>
-    </div>
-    <label>
-      <span class="gm-language"></span>
-      <select [value]="lang">
-        <option *ngFor="let l of languages" [value]="l.lang">{{l.displayName}}</option>
-      </select>
-    </label>
-    <label>
-      <span class="gm-search"></span>
-      <input #inputSearch type="text" class="navbar-search" (change)="emitter.emit('search')">
-    </label>
-    <button class="gm-menu" (click)="emitter.emit('menu')"></button>
-  </div>`,
-  styleUrls: ['./navbar.component.scss']
+  template: `
+    <div class="ui-navbar">
+      <button class="gm-more_vert" (click)="emitter.emit({who: 'sidebar'})"></button>
+      <a [routerLink]="'/'">
+        <img src="/assets/img/logo.jpg" class="clip-img">
+      </a>
+      <div class="ui-navbar-menu">
+          <lib-menu [menu]="menu"></lib-menu>
+      </div>
+      <label>
+        <span class="gm-language"></span>
+        <select [value]="lang">
+          <option *ngFor="let l of languages" [value]="l.lang">{{l.displayName}}</option>
+        </select>
+      </label>
+      <label>
+        <span class="gm-search"></span>
+        <input type="text" class="navbar-search" [(ngModel)]="value"
+               (change)="emitter.emit({who: 'search', value: value})"
+               (keyup)="emitter.emit({who: 'search', value: $event.target.value})">
+      </label>
+      <button class="gm-menu" (click)="emitter.emit({who: 'menu'})"></button>
+    </div>`,
+  styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent implements OnDestroy {
   private subs: Subscription;
+  @Input()
+  imgSrc: string;
   get menu(): UIMenu[] {
     return this.menuService.menu;
   }
@@ -41,7 +46,9 @@ export class NavbarComponent implements OnDestroy {
   @Output()
   emitter = new EventEmitter<any>();
   languages: LanguageType[];
-  constructor(private menuService: MenuService, private systemLang: SystemLang) {
+  value: string;
+  constructor(private el: ElementRef, private menuService: MenuService, private systemLang: SystemLang,
+              @Inject(UILoggerToken) private logger: UILogger) {
     this.languages = systemLang.getLanguages();
     this.subs = systemLang.onChange().subscribe(l => {
       if (typeof l === 'object') {
@@ -49,9 +56,7 @@ export class NavbarComponent implements OnDestroy {
       }
     });
   }
-
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
-
 }

@@ -27,7 +27,7 @@ export const TEXTAREA_VALUE_ACCESSOR: any = {
   providers: [TEXTAREA_VALUE_ACCESSOR]
 })
 export class TextareaControlComponent extends BaseComponent implements  OnInit, OnDestroy, OnChanges, ControlValueAccessor {
-  // tslint:disable-next-line:variable-name
+
   protected _extraParams: TextareaParameters = {};
   @Input()
   set extraParams(p: TextareaParameters) {
@@ -126,16 +126,13 @@ export class TextareaControlComponent extends BaseComponent implements  OnInit, 
     this.pPlaceholder = this.doIfNeedI18n(this.placeholder);
   }
   writeValue(obj: any): void {
-    console.log('InputControlComponent.writeValue', obj);
     this.value = obj;
   }
   setDisabledState(isDisabled: boolean): void {
     super.setDisabledState(isDisabled);
-    console.log('InputControlComponent.setDisabledState', isDisabled);
   }
   onChange($event: Event): void {
     if (typeof this.change === 'function') {
-      console.log('InputControlComponent.onChange(this.value)');
       this.change(this.value);
     }
   }
@@ -145,4 +142,10 @@ export class TextareaControlComponent extends BaseComponent implements  OnInit, 
     }
   }
 
+  onKeyUp(event: KeyboardEvent): void {
+    const target = event.target as any;
+    if (target) {
+      this.change(target.value);
+    }
+  }
 }

@@ -1,6 +1,6 @@
 <div class="ui-input">
   <label class="ui-input-icons" [ngClass]="iconsClass">
-    <input [type]="type" (blur)="onBlur()"
+    <input #input [type]="type" (blur)="onBlur()"
            [placeholder]="pPlaceholder"
            [accessKey]="accessKey"
            [dir]="dir"
@@ -16,6 +16,7 @@
            [tabIndex]="tabIndex"
            [(ngModel)]="value"
            (change)="onChange($event)"
+           (keyup)="onKeyUp($event)"
     >
     <span class="ui-input-title" [ngClass]="{'ui-input-empty': !value, 'ui-input-icon-place': !!leadingIcon}" *ngIf="!!pCaption">{{pCaption}}</span>
     <span class="ui-input-hint" *ngIf="!!pHint">{{pHint}}</span>

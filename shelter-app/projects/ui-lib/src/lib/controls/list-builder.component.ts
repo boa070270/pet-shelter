@@ -22,7 +22,7 @@ const I18N = {
   styleUrls: ['./checkbox-control.component.scss']
 })
 export class ListBuilderComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
-  // tslint:disable-next-line:variable-name
+
   private _extraParams: CheckboxParameters = {};
   availableList: string[] = [];
   resultList: string[] = [];

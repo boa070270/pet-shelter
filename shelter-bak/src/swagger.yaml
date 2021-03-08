@@ -1773,6 +1773,28 @@ paths:
                     description: Internal server error
                     schema:
                         $ref: '#/definitions/StatusType'
+    /log:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
+        x-swagger-router-controller: log-writer
+        post:
+            summary: Save log event
+            operationId: writeLog
+            tags:
+                - public
+            parameters:
+                -   in: body
+                    name: body
+                    description: body
+                    required: true
+                    schema:
+                        $ref: '#/definitions/LogEvent'
+            responses:
+                200:
+                    description: Empty
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+
 definitions:
     StatusType:
         type: object
@@ -2328,3 +2350,12 @@ definitions:
                             $ref: '#/definitions/CommentType'
             status:
                 $ref: '#/definitions/StatusType'
+    LogEvent:
+        type: object
+        properties:
+            date:
+                type: string
+            level:
+                type: string
+            message:
+                type: string

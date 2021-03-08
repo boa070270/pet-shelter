@@ -6,7 +6,7 @@ import {
   CommentResponse,
   LanguageType as UILanguageType, UILogger,
   ObtainSystemLanguage, UILoggerToken,
-  VoteType
+  VoteType, LogLevel
 } from 'ui-lib';
 import {map, tap} from 'rxjs/operators';
 import {
@@ -38,7 +38,7 @@ const API_URL = '/api/v1';
 })
 export class BasicService implements ObtainSystemLanguage, OnDestroy {
 
-  private authHeaders: Array<{name: string, value: string | string[]}>;
+  private authHeaders: Array<{ name: string, value: string | string[] }>;
   private authSubscription: Subscription;
   private clientId: string;
 

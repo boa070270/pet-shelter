@@ -6,10 +6,10 @@ import {
   OnDestroy,
   OnInit,
   TemplateRef,
-  ViewChild
+  ViewChild, ViewContainerRef
 } from '@angular/core';
 import {BasicService} from './basic.service';
-import {SystemLang} from 'ui-lib';
+import {DialogService, NavbarComponent, SystemLang} from 'ui-lib';
 import {Subscription} from 'rxjs';
 import {LanguageType, MenuTree} from './common/types';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
@@ -29,7 +29,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   private subscriptionLang: Subscription;
   arrow: string;
   @ViewChild('sidebar') sidebar: TemplateRef<any>;
-  @ViewChild('sdnBtn') sdnBtn: ElementRef;
+  @ViewChild(NavbarComponent, {read: ViewContainerRef}) navbarViewRef: ViewContainerRef;
   searchText: string;
   humMenu = false;
   languages: LanguageType[];
@@ -39,6 +39,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
               private systemMenu: SystemMenuService,
               private changeDetectorRef: ChangeDetectorRef,
               private router: Router,
+              private dialog: DialogService,
               breakpointObserver: BreakpointObserver) {
     this.menuTree = systemMenu.menuTree();
     this.languages = this.systemLang.getLanguages();
@@ -95,5 +96,30 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onSelectLang(e: Event): void {
     this.systemLang.setLocale((e.target as any).value);
+  }
+
+  onNavbar(event: any): void {
+    switch (event.who) {
+      case 'search':
+        console.log('search phrase: ' + event.value);
+        break;
+      case 'sidebar':
+        // this.dialog.sideLeft(this.sidebar, {hasBackdrop: true});
+        this.dialog.openFromTemplate(this.sidebar, {
+          disableClose: false,
+          height: '100vh',
+          position: {
+            left: '0',
+            top: '0'
+          },
+          scrollStrategies: 'block',
+          // viewContainerRef: this.navbarViewRef,
+          // backdropClass: 'part'
+        });
+        break;
+      case 'menu':
+        console.log('show menu');
+        break;
+    }
   }
 }

@@ -1,3 +1,19 @@
+@use './controls';
+
+:host {
+  margin: 0;
+  padding: 0;
+  display: block;
+  position: sticky;
+  z-index: 1000;
+  top: 0;
+  background: {
+    color: #00c8f0;
+  }
+  border: {
+    radius: 5px;
+  };
+}
 .ui-navbar {
   margin: 0;
   padding: 0;
@@ -43,6 +59,7 @@
   select {
     background: white;
     overflow-wrap: break-word;
+    outline: none;
     border: {
       color: white;
       bottom: {
@@ -56,6 +73,8 @@
     background: none;
     padding: 0;
     margin: 0;
+    border: none;
+    outline: none;
   }
   label {
     margin-top: auto;

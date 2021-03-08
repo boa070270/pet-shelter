@@ -2,8 +2,7 @@ import {Component, forwardRef, OnChanges, OnDestroy, OnInit, SimpleChanges} from
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SystemLang} from '../i18n';
 import {CheckboxControlComponent} from './checkbox-control.component';
-import {coerceArray} from '@angular/cdk/coercion';
-import {Directionality} from "@angular/cdk/bidi";
+import {Directionality} from '@angular/cdk/bidi';
 
 export const RADIO_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,

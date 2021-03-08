@@ -28,13 +28,13 @@ export class DialogRef<T, R = any> {
   disableClose: boolean | undefined;
 
   /** Result to be passed to afterClosed. */
-    // tslint:disable-next-line:variable-name
+
   private _result: R | undefined;
 
   constructor(
-    // tslint:disable-next-line:variable-name
+
     public _overlayRef: OverlayRef,
-    // tslint:disable-next-line:variable-name
+
     protected _containerInstance: CdkDialogContainer,
     readonly id: string = `dialog-${uniqueId++}`) {
 

@@ -4,7 +4,7 @@ import {filter, repeatWhen, shareReplay, takeUntil, tap} from 'rxjs/operators';
 export function whenPageVisible<T>(): (s: Observable<T>) => Observable<T> {
   const visibilitychange$ = fromEvent(document, 'visibilitychange').pipe(
     tap(n => {
-      console.log('event',n);
+      console.log('event', n);
     }),
     shareReplay({ refCount: true, bufferSize: 1 })
   );
