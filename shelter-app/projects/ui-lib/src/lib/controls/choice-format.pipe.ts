@@ -7,7 +7,7 @@ import {choiceFormat} from '../shared';
 export class ChoiceFormatPipe implements PipeTransform {
 
   transform(value: string, ...args: any[]): string {
-    return choiceFormat(value, args);
+    return choiceFormat(value, ...args);
   }
 
 }
