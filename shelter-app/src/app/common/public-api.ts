@@ -1,6 +1,5 @@
 export * from './shelter-common.module';
 export * from './menu-helper';
-export * from './obseravble';
 export * from './swagger-objects';
 export * from './types';
 export * from './breadcrumbs.component';

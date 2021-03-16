@@ -36,8 +36,8 @@ import {
 } from './swagger-form/public-api';
 import {PortalModule} from '@angular/cdk/portal';
 import {ScrollingModule} from '@angular/cdk/scrolling';
-import {CdkMenuModule} from "../menu";
-import { MenuItemComponent } from './menu/menu-item.component';
+import { UiMenuDirective } from './menu/ui-menu.directive';
+import { MenuBarComponent } from './menu/menu-bar.component';
 
 @NgModule({
   declarations: [
@@ -63,7 +63,7 @@ import { MenuItemComponent } from './menu/menu-item.component';
     LinkComponent,
     SimpleDialogComponent, SnakeBarComponent,
     GeneratorFormComponent, SwaggerArrayComponent, SwaggerFormComponent, SwaggerNativeComponent,
-    CommentComponent, VoteComponent, DiscussionComponent, MenuItemComponent
+    CommentComponent, VoteComponent, DiscussionComponent, UiMenuDirective, MenuBarComponent,
   ],
     imports: [
         CommonModule,
@@ -74,7 +74,6 @@ import { MenuItemComponent } from './menu/menu-item.component';
         PortalModule,
         ReactiveFormsModule,
         ScrollingModule,
-        CdkMenuModule
     ],
   exports: [
     PortalModule,
@@ -98,7 +97,7 @@ import { MenuItemComponent } from './menu/menu-item.component';
     LinkComponent,
     SimpleDialogComponent, SnakeBarComponent,
     GeneratorFormComponent, SwaggerArrayComponent, SwaggerFormComponent, SwaggerNativeComponent,
-    CommentComponent, VoteComponent, DiscussionComponent
+    CommentComponent, VoteComponent, DiscussionComponent, UiMenuDirective, MenuBarComponent,
   ]
 })
 export class ControlsModule {
@@ -129,10 +128,3 @@ export class ControlsModule {
     componentsPlugin.addPlugin('snake-bar', {component: SnakeBarComponent, schema: null});
   }
 }
-
-// const BASE_PROPERTIES: {
-//   hint: string | TitleType[];
-//   error: string | TitleType[];33333333333333333
-//   caption: string | TitleType[];
-//
-// }

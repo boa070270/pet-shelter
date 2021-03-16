@@ -31,7 +31,8 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   }
 
   refreshTitles(): void {
-    this.titles = this.urls.map( u => this.systemMenu.getTitle(u));
+    const titles = this.urls.map( u => this.systemMenu.menusAndTitle.titles.filter(f => f.id = u));
+    this.titles = titles.map(t => this.systemLang.getTitle(t));
   }
 
 }

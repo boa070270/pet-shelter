@@ -19,7 +19,6 @@ export * from './lib/controls';
 export * from './lib/ui-elements';
 export * from './lib/dialog-service';
 export * from './lib/logger';
-export * from './lib/menu';
 
 export * from './lib/ui-lib.service';
 export * from './lib/ui-lib.component';

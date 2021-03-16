@@ -12,11 +12,11 @@ import {Subscription} from 'rxjs';
         <img src="/assets/img/logo.jpg" class="clip-img">
       </a>
       <div class="ui-navbar-menu">
-          <lib-menu [menu]="menu"></lib-menu>
+          <lib-menu-bar [menu]="menu"></lib-menu-bar>
       </div>
       <label>
         <span class="gm-language"></span>
-        <select [value]="lang">
+        <select [(ngModel)]="lang">
           <option *ngFor="let l of languages" [value]="l.lang">{{l.displayName}}</option>
         </select>
       </label>
@@ -26,7 +26,10 @@ import {Subscription} from 'rxjs';
                (change)="emitter.emit({who: 'search', value: value})"
                (keyup)="emitter.emit({who: 'search', value: $event.target.value})">
       </label>
-      <button class="gm-menu" (click)="emitter.emit({who: 'menu'})"></button>
+      <div libUiMenu class="display-flex">
+        <button class="gm-menu" (click)="emitter.emit({who: 'menu'})" ></button>
+        <lib-menu [menu]="menu" [bottom]="true"></lib-menu>
+      </div>
     </div>`,
   styleUrls: ['./navbar.component.scss'],
 })
@@ -34,9 +37,10 @@ export class NavbarComponent implements OnDestroy {
   private subs: Subscription;
   @Input()
   imgSrc: string;
-  get menu(): UIMenu[] {
-    return this.menuService.menu;
-  }
+  // get menu(): UIMenu[] {
+  //   return this.menuService.menu;
+  // }
+  @Input() menu: UIMenu[];
   set lang(l: string) {
     this.systemLang.setLocale(l);
   }

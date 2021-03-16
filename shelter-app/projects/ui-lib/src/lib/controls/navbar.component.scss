@@ -19,11 +19,13 @@
   padding: 0;
   display: grid;
   grid-auto-rows: 3em;
-  grid-template-columns: 1em 3em calc(100% - 30em) 8em 10em 1em;
+  grid-template-columns: 2em 3em calc(100% - 28em) 7em 8em 2em;
+  grid-auto-flow: column;
+  //overflow: hidden;
   input {
-    width: 9em;
+    width: 8em;
     border: none;
-    font: inherit;
+    font-size: small;
     appearance: none;
     margin: 0;
     padding: 0;
@@ -60,6 +62,7 @@
     background: white;
     overflow-wrap: break-word;
     outline: none;
+    font-size: small;
     border: {
       color: white;
       bottom: {
@@ -68,6 +71,9 @@
         width: 1px;
       };
     };
+    option {
+      font-size: small;
+    }
   }
   button {
     background: none;
@@ -75,6 +81,7 @@
     margin: 0;
     border: none;
     outline: none;
+    font-size: 1.2em;
   }
   label {
     margin-top: auto;
@@ -85,4 +92,13 @@
   clip-path: circle(46%);
   max-height: 3em;
   max-width: 3em;
+}
+.ui-navbar-menu {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+.display-flex {
+  display: flex;
+  justify-content: center;
 }

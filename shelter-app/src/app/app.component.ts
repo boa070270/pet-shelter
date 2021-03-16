@@ -9,7 +9,7 @@ import {
   ViewChild, ViewContainerRef
 } from '@angular/core';
 import {BasicService} from './basic.service';
-import {DialogService, NavbarComponent, SystemLang} from 'ui-lib';
+import {DialogService, NavbarComponent, SystemLang, UIMenu} from 'ui-lib';
 import {Subscription} from 'rxjs';
 import {LanguageType, MenuTree} from './common/types';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
@@ -25,6 +25,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   title = 'shelter-app';
   styleSdn: string;
   menuTree: MenuTree[];
+  menu: UIMenu[];
   private subscription: Subscription;
   private subscriptionLang: Subscription;
   arrow: string;
@@ -42,6 +43,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
               private dialog: DialogService,
               breakpointObserver: BreakpointObserver) {
     this.menuTree = systemMenu.menuTree();
+    this.menu = this.menuTree2UIMenu(this.menuTree);
     this.languages = this.systemLang.getLanguages();
     this.subscriptionLang = this.systemLang.onChange().subscribe(next => this.onLangChange(next));
     breakpointObserver.observe([
@@ -86,6 +88,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   onLangChange(next: any): void {
     if (typeof next === 'string') {
       this.menuTree = this.systemMenu.menuTree();
+      this.menu = this.menuTree2UIMenu(this.menuTree);
     }
   }
 
@@ -121,5 +124,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
         console.log('show menu');
         break;
     }
+  }
+  menuTree2UIMenu(menuTree: MenuTree[]): UIMenu[] {
+    return menuTree ? menuTree.map(m => ({href: m.path, title: m.title, sub: this.menuTree2UIMenu( m.menu )})) : [];
   }
 }

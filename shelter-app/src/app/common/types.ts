@@ -50,10 +50,10 @@ export interface MenuAndTitlesType {
 }
 export interface MenuTree {
   path: string;
-  title: string;
+  title: string | TitleType[];
   component: string;
   role?: string;
-  menu?: MenuTree[] | void;
+  menu?: MenuTree[];
 }
 export interface VoteType {
   who: string;

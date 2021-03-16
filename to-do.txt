@@ -15,7 +15,8 @@
 - Task! Swagger form do not validate number, allow input string
 - Task! What do with table that reference to another table?
 - Task? SwaggerObject, maybe move required to constriction?
-
+- Task! carousel, masonry-list
+-
 
 
 DONE! Task! Is there enough one form of field in the swagger? Let's look at the field that represent <img>,

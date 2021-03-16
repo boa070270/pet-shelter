@@ -1,6 +1,6 @@
 <div cdk-scrollable class="app-container">
-  <img src="/api/v1/assets/16560">
-  <lib-navbar (emitter)="onNavbar($event)"></lib-navbar>
+  <img src="/api/v1/assets/16560" class="top-banner">
+  <lib-navbar (emitter)="onNavbar($event)" [menu]="menu"></lib-navbar>
   <div class="app-container">
     <router-outlet></router-outlet>
   </div>
