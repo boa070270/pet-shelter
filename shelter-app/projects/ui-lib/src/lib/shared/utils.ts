@@ -18,7 +18,7 @@
  * @param params - parameters
  */
 export function choiceFormat(str: string, ...params: any[]): string {
-  return str.replace(/\{\d*\}/g, (s: string) => {
+  return str.replace(/\{\d*.*\}/g, (s: string) => {
     const [num, choices] = s.substring(1, s.length - 1).split(',');
     // @ts-ignore
     const param = num * 1;

@@ -3,7 +3,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  forwardRef,
+  forwardRef, Inject,
   Input,
   OnDestroy,
   OnInit,
@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import {DialogRef, DialogService} from '../../dialog-service';
 import {
-  AbstractDataSource,
+  AbstractDataSource, ArrayDataSource,
   CdkDataSource,
   choiceFormat,
   coerceToSwaggerNative,
@@ -25,7 +25,7 @@ import {
   PagingSize,
   SwaggerNative,
   SwaggerObject,
-  TitleType
+  TitleType, UILogger, UILoggerToken
 } from '../../shared';
 import {SystemLang} from '../../i18n';
 import {BaseComponent} from '../base.component';
@@ -126,7 +126,8 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
   constructor(public systemLang: SystemLang,
               protected dialogService: DialogService,
               protected directionality: Directionality,
-              dictionary: DictionaryService) {
+              dictionary: DictionaryService,
+              @Inject(UILoggerToken) protected logger: UILogger) {
     // TODO IE doesn't support assign, how angular solves this
     super(systemLang, directionality, dictionary.getLibDictionary('TableComponent', I18N));
   }
@@ -162,6 +163,10 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
       this.hint = (this.swagger.ui || {}).description;
     }
     super.ngOnInit();
+    if (!this.dataSource) {
+      this.dataSource = new ArrayDataSource([]);
+      this.logger.warn('DataSource undefined');
+    }
     this.cdkDataSource = this.dataSource.registerDS();
     this.cdkTable.dataSource = this.cdkDataSource;
     this.paging = new Paging(this.cdkTable.viewChange, this.cdkDataSource.totalRecords);

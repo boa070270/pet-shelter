@@ -147,6 +147,10 @@ export abstract class SwaggerNative extends SwaggerSchema {
       }
     }
   }
+  // tslint:disable-next-line:variable-name
+  // protected _type: SwaggerNativeTypes;
+  // protected ctrlType: string;
+  // protected constraints: CommonConstrictions;
   static asString(controlType?: string, constraints?: StringConstrictions, ui?: SwaggerUI): SwaggerNative {
     return new SwaggerNativeString(controlType, constraints, ui);
   }

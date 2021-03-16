@@ -1,14 +1,13 @@
 import {
-    AfterViewInit, ApplicationRef,
-    ChangeDetectorRef,
-    Component, ComponentFactoryResolver,
-    ElementRef,
-    EventEmitter, HostListener, Injector,
-    Input,
-    OnChanges,
-    OnInit,
-    Output,
-    ViewChild
+  AfterViewInit,
+  ApplicationRef,
+  Component,
+  ComponentFactoryResolver,
+  ElementRef,
+  HostListener,
+  Injector,
+  Input,
+  ViewChild
 } from '@angular/core';
 import {HelpingTools} from './helping-tools';
 import {EditorPluginComponent} from './editor-plugin.component';

@@ -33,11 +33,13 @@ import {
   SwaggerArrayComponent,
   SwaggerFormComponent,
   SwaggerNativeComponent
-} from './swagger-form/public-api';
+} from './swagger-form';
 import {PortalModule} from '@angular/cdk/portal';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import { UiMenuDirective } from './menu/ui-menu.directive';
 import { MenuBarComponent } from './menu/menu-bar.component';
+import { EditableListComponent } from './editable-list.component';
+// import { SwaggerBuilderComponent } from './swagger-builder.component';
 
 @NgModule({
   declarations: [
@@ -64,6 +66,8 @@ import { MenuBarComponent } from './menu/menu-bar.component';
     SimpleDialogComponent, SnakeBarComponent,
     GeneratorFormComponent, SwaggerArrayComponent, SwaggerFormComponent, SwaggerNativeComponent,
     CommentComponent, VoteComponent, DiscussionComponent, UiMenuDirective, MenuBarComponent,
+    EditableListComponent,
+    // SwaggerBuilderComponent,
   ],
     imports: [
         CommonModule,
@@ -98,6 +102,8 @@ import { MenuBarComponent } from './menu/menu-bar.component';
     SimpleDialogComponent, SnakeBarComponent,
     GeneratorFormComponent, SwaggerArrayComponent, SwaggerFormComponent, SwaggerNativeComponent,
     CommentComponent, VoteComponent, DiscussionComponent, UiMenuDirective, MenuBarComponent,
+    EditableListComponent,
+    // SwaggerBuilderComponent,
   ]
 })
 export class ControlsModule {

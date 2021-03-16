@@ -4,7 +4,7 @@
   <label>
       <select [dir]="dir" [disabled]="disabled" [name]="name" (change)="onChange($event)" (blur)="onBlur()"
               [multiple]="multiple"
-              [required]="required"
+              [required]="required" #selectElement
       >
         <ng-container *ngFor="let op of options; index as i">
             <option><span>{{pTitles[i] || op}}</span></option>

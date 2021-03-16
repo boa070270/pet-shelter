@@ -4,9 +4,6 @@ import {CommonModule} from '@angular/common';
 import {EditorPluginComponent} from './editor-plugin.component';
 import {DynamicHTMLModule} from './dynamic-html';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {DialogsModule} from "../dialogs";
-
-
 
 @NgModule({
   declarations: [
@@ -22,7 +19,6 @@ import {DialogsModule} from "../dialogs";
         }),
         ReactiveFormsModule,
         FormsModule,
-        DialogsModule
     ],
   exports: [EditorComponent]
 })

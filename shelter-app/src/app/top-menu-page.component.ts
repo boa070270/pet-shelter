@@ -5,7 +5,7 @@ import {
   CommentResponse,
   CommentType,
   DialogService,
-  DiscussionMediator,
+  DiscussionMediator, EditableListComponent,
   ExtendedData,
   GeneratorFormComponent,
   SwaggerFormService,
@@ -191,7 +191,29 @@ export class TopMenuPageComponent implements OnInit {
           sex: SwaggerNative.asString(null, {enum: ['m', 'f']})
         })
       });
+// <<<<<<< HEAD
+// =======
+  swaggerOption = [this.swagger];
+  /******* Table *******/
+  tableDataSet = [
+    {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
+    {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He'},
+    {position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li'},
+    {position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
+    {position: 5, name: 'Boron', weight: 10.811, symbol: 'B'},
+    {position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C'},
+    {position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
+    {position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O'},
+    {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
+    {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
+  ];
+  tableColumnSet = ['position', 'name', 'weight', 'symbol'];
+  tableCaption = 'Test table';
+  tableData = new BehaviorSubject<any>(this.tableDataSet);
+  tableColumns = this.tableColumnSet;
+// >>>>>>> editable-list
   listOptions = ['first', 'second', 'third', 'fifth', 'sixth'];
+  listOptions2 = ['first', 'second', 'third', 'fifth', 'sixth'];
   lustTitles: TitleType[] = [
     {id: 'first', lang: 'en', title: 'First element'},
     {id: 'first', lang: 'uk', title: 'First element'},

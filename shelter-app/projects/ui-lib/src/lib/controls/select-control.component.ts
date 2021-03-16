@@ -1,4 +1,14 @@
-import {Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  forwardRef,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
 import {CheckboxControlComponent} from './checkbox-control.component';
 import {SystemLang} from '../i18n';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
@@ -26,6 +36,8 @@ export class SelectControlComponent extends CheckboxControlComponent implements 
     return this.extraParams.multiple || null;
   }
 
+  @ViewChild('selectElement') selectElement: ElementRef<HTMLSelectElement>;
+
   constructor(public systemLang: SystemLang, protected directionality: Directionality) {
     super(systemLang, directionality);
   }
@@ -44,6 +56,10 @@ export class SelectControlComponent extends CheckboxControlComponent implements 
     if (obj !== null && obj !== undefined) {
       super.writeValue(coerceArray(obj));
     }
+  }
+  setValue(key: any, value: any): void {
+    super.setValue(key, value);
+    this.selectElement.nativeElement.selectedIndex = this.options.indexOf(key);
   }
   registerOnChange(fn: (_: any) => {}): void {
     super.registerOnChange(fn);

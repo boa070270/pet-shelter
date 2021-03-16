@@ -11,7 +11,7 @@ import {ConsoleLogWriter} from './console-log-writer';
     CommonModule
   ],
   providers: [
-    {provide: ErrorHandler, useClass: UIErrorHandler},
+    // {provide: ErrorHandler, useClass: UIErrorHandler}, // TODO doesn't publish until production
     {provide: UILoggerToken, useClass: LoggerService},
     {provide: LoggerConfigurationToken, useValue: {level: LogLevel.Debug}},
     {provide: UILoggerWriterToken, useClass: ConsoleLogWriter}

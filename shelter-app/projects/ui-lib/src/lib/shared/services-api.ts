@@ -4,10 +4,13 @@
 import {InjectionToken} from '@angular/core';
 
 /**** Logger ****/
+// tslint:disable-next-line:variable-name
 export const UILoggerToken =
   new InjectionToken<UILogger>('LoggerService');
+// tslint:disable-next-line:variable-name
 export const UILoggerWriterToken =
   new InjectionToken<UILogger>('UILoggerWriterToken');
+// tslint:disable-next-line:variable-name
 export const LoggerConfigurationToken =
   new InjectionToken<LoggerConfiguration>('LoggerConfiguration');
 

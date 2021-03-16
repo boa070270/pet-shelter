@@ -12,6 +12,15 @@
 <h1>List builder</h1>
 <lib-list-builder caption="List builder" [options]="listOptions"></lib-list-builder>
 <br>
+
+<h1>Editable list</h1>
+<lib-editable-list #list caption="Editable list" [options]="listOptions2"></lib-editable-list>
+<br>
+
+<h1>Swagger builder</h1>
+<!--<lib-swagger-builder [options]="swaggerOption"></lib-swagger-builder>-->
+<br>
+
 <h1>Dialog</h1>
 <ng-template #tmplDialog let-textDialog>{{textDialog}}</ng-template>
 <button (click)="openDialog()">Dialog</button>
