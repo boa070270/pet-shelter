@@ -25,7 +25,7 @@ import {ShelterCommonModule} from './common';
 import {MenuPageComponent} from './menu-page.component';
 import {BasicService} from './basic.service';
 import {TestDynamicComponent} from './test-dynamic.component';
-import {LogWriterService} from "./log-writer.service";
+import {LogWriterService} from './log-writer.service';
 
 @NgModule({
   declarations: [

@@ -1,9 +1,8 @@
 import {Injectable} from '@angular/core';
-import {UILogWriter, BrowserStorageService, LogLevel} from 'ui-lib';
+import {BrowserStorageService, LogLevel, UILogWriter} from 'ui-lib';
 import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
-import {LanguageType, Response} from './common';
+import {Response} from './common';
 import {map} from 'rxjs/operators';
-import {Observable} from 'rxjs';
 
 const API_URL = '/api/v1';
 
