@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {ShowMediaDialogComponent} from './show-media-dialog.component';
+import {DialogService} from './dialog-service';
 
 @Component({
   selector: 'lib-show-media-value',
@@ -13,7 +12,7 @@ export class ShowMediaValueComponent implements OnInit {
   mediaURI: string;
   mediaType: string;
 
-  constructor(private dialog: MatDialog) { }
+  constructor(private dialog: DialogService) { }
 
   ngOnInit(): void {
     this.mediaURI = this.data.value;
@@ -21,7 +20,7 @@ export class ShowMediaValueComponent implements OnInit {
   }
 
   play(): void {
-    this.dialog.open(ShowMediaDialogComponent, {
+    this.dialog.open(ShowMediaValueComponent, {
       width: '100%',
       data: {
         mediaURI: this.mediaURI,

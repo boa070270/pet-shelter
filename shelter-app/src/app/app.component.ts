@@ -1,10 +1,18 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  TemplateRef,
+  ViewChild, ViewContainerRef
+} from '@angular/core';
 import {BasicService} from './basic.service';
-import {SystemLang} from 'ui-lib';
+import {DialogService, NavbarComponent, SystemLang, UIMenu} from 'ui-lib';
 import {Subscription} from 'rxjs';
 import {LanguageType, MenuTree} from './common/types';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
-import {MatSidenav} from '@angular/material/sidenav';
 import {Router} from '@angular/router';
 import {SystemMenuService} from './system-menu.service';
 
@@ -17,13 +25,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   title = 'shelter-app';
   styleSdn: string;
   menuTree: MenuTree[];
+  menu: UIMenu[];
   private subscription: Subscription;
   private subscriptionLang: Subscription;
   arrow: string;
-  private toggleSnav = false;
-  toolbarStyle: string;
-  @ViewChild('sideNav') snav: MatSidenav;
-  @ViewChild('sdnBtn') sdnBtn: ElementRef;
+  @ViewChild('sidebar') sidebar: TemplateRef<any>;
+  @ViewChild(NavbarComponent, {read: ViewContainerRef}) navbarViewRef: ViewContainerRef;
   searchText: string;
   humMenu = false;
   languages: LanguageType[];
@@ -33,8 +40,10 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
               private systemMenu: SystemMenuService,
               private changeDetectorRef: ChangeDetectorRef,
               private router: Router,
+              private dialog: DialogService,
               breakpointObserver: BreakpointObserver) {
     this.menuTree = systemMenu.menuTree();
+    this.menu = this.menuTree2UIMenu(this.menuTree);
     this.languages = this.systemLang.getLanguages();
     this.subscriptionLang = this.systemLang.onChange().subscribe(next => this.onLangChange(next));
     breakpointObserver.observe([
@@ -79,32 +88,44 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   onLangChange(next: any): void {
     if (typeof next === 'string') {
       this.menuTree = this.systemMenu.menuTree();
+      this.menu = this.menuTree2UIMenu(this.menuTree);
     }
-  }
-  onCloseSideNav(): void {
-    console.log('sideNavObserver complete:', this);
-    this.arrow = 'arrow_right';
-    this.styleSdn = undefined;
-    this.toggleSnav = false;
-    this.toolbarStyle = undefined;
-  }
-  sideToggle(): boolean {
-    this.toggleSnav = !this.toggleSnav;
-    this.snav.toggle(this.toggleSnav);
-    if (this.toggleSnav) {
-      this.styleSdn = `left: 200px;`;
-      this.arrow = 'arrow_left';
-      this.toolbarStyle = `margin-left: 200px; margin-right: -200px`;
-    }
-    return false;
   }
 
-  searchPagesAndPet($event: MouseEvent): void {
+  searchPagesAndPet(): void {
     console.log(`search for ${this.searchText}`);
     this.router.navigate(['/search', {query: this.searchText}]);
   }
 
   onSelectLang(e: Event): void {
     this.systemLang.setLocale((e.target as any).value);
+  }
+
+  onNavbar(event: any): void {
+    switch (event.who) {
+      case 'search':
+        console.log('search phrase: ' + event.value);
+        break;
+      case 'sidebar':
+        // this.dialog.sideLeft(this.sidebar, {hasBackdrop: true});
+        this.dialog.openFromTemplate(this.sidebar, {
+          disableClose: false,
+          height: '100vh',
+          position: {
+            left: '0',
+            top: '0'
+          },
+          scrollStrategies: 'block',
+          // viewContainerRef: this.navbarViewRef,
+          // backdropClass: 'part'
+        });
+        break;
+      case 'menu':
+        console.log('show menu');
+        break;
+    }
+  }
+  menuTree2UIMenu(menuTree: MenuTree[]): UIMenu[] {
+    return menuTree ? menuTree.map(m => ({href: m.path, title: m.title, sub: this.menuTree2UIMenu( m.menu )})) : [];
   }
 }

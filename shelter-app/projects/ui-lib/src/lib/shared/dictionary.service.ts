@@ -1,5 +1,5 @@
-import {TitleType} from './language';
 import {Injectable} from '@angular/core';
+import {I18NType} from './language';
 
 /**
  * This service provides all texts that are used by other modules
@@ -9,12 +9,26 @@ import {Injectable} from '@angular/core';
 })
 export class DictionaryService {
   constructor() { }
-  private dictionary: {[key: string]: any} = {};
+  private libDictionary: {[key: string]: I18NType} = {};
+  private appDictionary: {[key: string]: I18NType} = {};
+  private customDic: {[key: string]: I18NType} = {};
 
-  setDictionary(key: string, value: any): void {
-    this.dictionary[key] = value;
+  setLibDictionary(key: string, value: I18NType): void {
+    this.libDictionary[key] = value;
   }
-  getDictionary(key): any {
-    return this.dictionary[key];
+  getLibDictionary(key: string, def?: I18NType): I18NType {
+    return this.libDictionary[key] || def || {};
+  }
+  setAppDictionary(key: string, value: I18NType): void {
+    this.appDictionary[key] = value;
+  }
+  getAppDictionary(key, def?: I18NType): I18NType {
+    return this.appDictionary[key] || def || {};
+  }
+  setCustomDictionary(key: string, value: I18NType): void {
+    this.customDic[key] = value;
+  }
+  getCustomDictionary(key: string, def?: I18NType): I18NType {
+    return this.customDic[key] || def || {};
   }
 }

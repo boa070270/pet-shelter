@@ -1,19 +1,17 @@
 import {Component, ElementRef, Injector, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {createCustomElement} from '@angular/elements';
 import {
-  GeneratorFormComponent,
-  SwaggerArrayComponent,
-  SwaggerFormComponent,
-  SwaggerNativeComponent
-} from '../swagger-form';
-import {
   BooleanControlComponent,
   CheckboxControlComponent,
   InputControlComponent,
   RadioControlComponent,
   SelectControlComponent,
   TableComponent,
-  TitleTypeControlComponent
+  TitleTypeControlComponent,
+  GeneratorFormComponent,
+  SwaggerArrayComponent,
+  SwaggerFormComponent,
+  SwaggerNativeComponent
 } from '../controls';
 
 @Component({

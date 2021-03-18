@@ -1,15 +1,16 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
+import {Component, Inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
 import {SystemLang} from '../i18n';
 import {Subscription} from 'rxjs';
-import {distinctTitleId, isTitleType, TitleType} from '../shared';
+import {distinctTitleId, I18NType, isTitleType, TitleType} from '../shared';
 import {ControlValueAccessor} from '@angular/forms';
 import {Directionality} from '@angular/cdk/bidi';
+import {AbstractComponent} from './abstract.component';
 
 export interface CommonParameters {
   id?: string;
   name?: string;
   hint?: string | TitleType[];
-  error?: string | TitleType[];
+  error?: Array<string | TitleType>;
   caption?: string | TitleType[];
   hidden?: boolean;
   disabled?: boolean;
@@ -18,10 +19,11 @@ export interface CommonParameters {
 }
 @Component({
   selector: 'lib-base',
-  template: ''
+  template: '',
+  providers: [{provide: 'i18NCfg', useValue: null}]
 })
-export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
-  // tslint:disable-next-line:variable-name
+export class BaseComponent extends AbstractComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
+
   private _commons = {};
   @Input()
   set common(p: CommonParameters) {
@@ -50,23 +52,18 @@ export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValue
   @Input()
   set hint(p: string | TitleType[]) {
     this.common.hint = p;
-  }
-  get hint(): string | TitleType[] {
-    return this.common.hint || null;
+    this.pHint = this.doIfNeedI18n(p) as string;
   }
   @Input()
-  set error(p: string | TitleType[]) {
+  set error(p: Array<string | TitleType>) {
     this.common.error = p;
-  }
-  get error(): string | TitleType[] {
-    return this.common.error;
+    const err = this.doIfNeedI18n(p, {});
+    this.pError = err ? Object.values(err) : null;
   }
   @Input()
   set caption(p: string | TitleType[]) {
     this.common.caption = p;
-  }
-  get caption(): string | TitleType[] {
-    return this.common.caption;
+    this.pCaption = this.doIfNeedI18n(this.common.caption);
   }
   @Input()
   set hidden(p: boolean) {
@@ -92,85 +89,41 @@ export class BaseComponent implements OnInit, OnDestroy, OnChanges, ControlValue
   dir: string;
   pHint: string;
   pCaption: string;
-  pError: string;
-  private subsLang: Subscription;
+  pError: string[];
   private subsDir: Subscription;
   protected change: (_: any) => {};
   protected touch: () => {};
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
+  constructor(public systemLang: SystemLang, protected directionality: Directionality, @Inject('i18NCfg') public i18NCfg?: I18NType) {
+    super(systemLang, i18NCfg);
     this.dir = directionality.value;
     this.subsDir = directionality.change.subscribe(d => {
       this.dir = d;
-    });
-    this.subsLang = systemLang.onChange().subscribe(l => {
-      if (typeof l === 'string') {
-        this.onChangeLang();
-      }
     });
   }
 
 
   ngOnInit(): void {
-    this.pCaption = this.doIfNeedI18n(this.caption);
+    this.onChangeLang();
     if (!this.pCaption && this.common.nameAsCaption) {
       this.pCaption = this.name;
     }
-    this.pHint = this.doIfNeedI18n(this.hint) as string;
   }
   ngOnChanges(changes: SimpleChanges): void {
     console.log('BaseControlComponent.ngOnChanges', this, changes);
     if (changes.name) {
       console.log('BaseControlComponent.ngOnChanges was changed name');
     }
-    if (changes.hint) {
-      this.pHint = this.doIfNeedI18n(this.hint) as string;
-    }
-    if (changes.caption) {
-      this.pCaption = this.doIfNeedI18n(this.caption);
-    }
-    if (changes.error) {
-      this.pError = this.doIfNeedI18n(this.error);
-    }
   }
   ngOnDestroy(): void {
-      this.subsLang.unsubscribe();
       this.subsDir.unsubscribe();
   }
   onChangeLang(): void {
-    this.pHint = this.doIfNeedI18n(this.hint) as string;
-    this.pCaption = this.doIfNeedI18n(this.caption);
-    this.pError = this.doIfNeedI18n(this.error);
-  }
-
-  /**
-   * Take a lang specific title if "what" is TitleType or TitleType[]
-   * @param what: expected "string" | TitleType[]
-   * @param holder - represent object where would be stored titles as id:title
-   */
-  doIfNeedI18n(what: any, holder?: {}): any {
-    if (typeof what === 'string') {
-      if (holder) {
-        holder[what] = what;
-      } else {
-        return what || '';
-      }
-    } else if (this.needI18n(what)) {
-      if (holder) {
-        const ids = distinctTitleId(what);
-        for (const id of ids) {
-          const titles = (what as TitleType[]).filter(t => t.id = id);
-          holder[id] = this.systemLang.getTitle(titles);
-        }
-      } else {
-        return this.systemLang.getTitle(what as TitleType[]);
-      }
-    }
-    return holder || '';
-  }
-
-  needI18n(what: any): boolean {
-    return (typeof what === 'object' !== null) && (isTitleType(what) || (Array.isArray(what) && isTitleType(what[0])));
+    super.onChangeLang();
+    this.pHint = this.doIfNeedI18n(this.common.hint) as string;
+    this.pCaption = this.doIfNeedI18n(this.common.caption);
+    const err = this.doIfNeedI18n(this.common.error, {});
+    this.pError = err ? Object.values(err) : null;
   }
   protected emitChange(value: any): void {
     console.log('BaseControlComponent.emitChange', this, value);

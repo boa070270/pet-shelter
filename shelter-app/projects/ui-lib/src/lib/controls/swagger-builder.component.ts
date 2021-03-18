@@ -1,18 +1,18 @@
-import {Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild} from '@angular/core';
 import {BaseComponent} from './base.component';
 import {ControlValueAccessor} from '@angular/forms';
 import {SystemLang} from '../i18n';
 import {Directionality} from '@angular/cdk/bidi';
 import {EditableListComponent} from './editable-list.component';
-import {SwaggerCustomUI, SwaggerNative, SwaggerObject, SwaggerSchema, swaggerUI, TitleType} from '../shared';
+import {SwaggerNative, SwaggerObject, SwaggerSchema, SwaggerUI, swaggerUI, TitleType} from '../shared';
 import {CheckboxControlComponent, CheckboxParameters} from './checkbox-control.component';
 import {SelectControlComponent} from './select-control.component';
-import {SwaggerFormComponent} from '../swagger-form';
+import {SwaggerFormComponent} from './swagger-form';
 
 interface SwaggerObjectConstruct {
   orderControls: string[];
   properties: { [key: string]: SwaggerSchema };
-  ui: SwaggerCustomUI;
+  ui: SwaggerUI;
   required: string[];
 }
 
@@ -46,7 +46,7 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
         {
           childId: SwaggerNative.asString(),
           childDescription: SwaggerNative.asString(),
-          sex: SwaggerNative.asString(null, {enums: ['m', 'f']})
+          sex: SwaggerNative.asString(null, {enum: ['m', 'f']})
         })
     },
     ui: null,
@@ -124,14 +124,14 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
       switch (change) {
         case 'SwaggerNative':
           this.swaggerObject = new SwaggerObject([], {
-              type: SwaggerNative.asString(null, {enums: this.nativeTypes},
+              type: SwaggerNative.asString(null, {enum: this.nativeTypes},
                 swaggerUI([{lang: 'en', title: 'Native type'}, {lang: 'uk', title: 'Тип нативного елементу'}]))
             }
           );
           break;
         case 'SwaggerArray':
           this.swaggerObject = new SwaggerObject([], {
-              arrayType: SwaggerNative.asString(null, {enums: this.nativeTypes},
+              arrayType: SwaggerNative.asString(null, {enum: this.nativeTypes},
                 swaggerUI([{lang: 'en', title: 'Array type'}, {lang: 'uk', title: 'Тип елементів массиву'}])),
             }
           );

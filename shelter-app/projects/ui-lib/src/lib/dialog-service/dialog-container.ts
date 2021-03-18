@@ -76,19 +76,19 @@ export function throwDialogContentAlreadyAttachedError(): void {
 })
 // tslint:disable-next-line:component-class-suffix
 export class CdkDialogContainer extends BasePortalOutlet implements OnDestroy {
-  // tslint:disable-next-line:variable-name
+
   private readonly _document: Document;
 
   /** State of the dialog animation. */
-    // tslint:disable-next-line:variable-name
+
   _state: 'void' | 'enter' | 'exit' = 'enter';
 
   /** Element that was focused before the dialog was opened. Save this to restore upon close. */
-    // tslint:disable-next-line:variable-name
+
   private _elementFocusedBeforeDialogWasOpened: HTMLElement | null = null;
 
    /** The class that traps and manages focus within the dialog. */
-     // tslint:disable-next-line:variable-name
+
   private _focusTrap = this._focusTrapFactory.create(this._elementRef.nativeElement);
 
   // @HostBinding is used in the class as it is expected to be extended. Since @Component decorator
@@ -105,7 +105,7 @@ export class CdkDialogContainer extends BasePortalOutlet implements OnDestroy {
   // tslint:disable-next-line:typedef
   @HostBinding('attr.role') get _role() { return this._config.role; }
 
-  // tslint:disable-next-line:variable-name
+
   @HostBinding('attr.aria-modal') _ariaModal: boolean = true;
 
   // tslint:disable-next-line:typedef
@@ -113,40 +113,40 @@ export class CdkDialogContainer extends BasePortalOutlet implements OnDestroy {
   // tslint:disable:no-host-decorator-in-concrete no-private-getters
 
   /** The portal host inside of this container into which the dialog content will be loaded. */
-    // tslint:disable-next-line:variable-name
+
   @ViewChild(CdkPortalOutlet, {static: true}) _portalHost: CdkPortalOutlet;
 
   /** A subject emitting before the dialog enters the view. */
-    // tslint:disable-next-line:variable-name
+
   _beforeEnter: Subject<void> = new Subject();
 
   /** A subject emitting after the dialog enters the view. */
-    // tslint:disable-next-line:variable-name
+
   _afterEnter: Subject<void> = new Subject();
 
   /** A subject emitting before the dialog exits the view. */
-    // tslint:disable-next-line:variable-name
+
   _beforeExit: Subject<void> = new Subject();
 
   /** A subject emitting after the dialog exits the view. */
-    // tslint:disable-next-line:variable-name
+
   _afterExit: Subject<void> = new Subject();
 
   /** Stream of animation `done` events. */
-    // tslint:disable-next-line:variable-name
+
   _animationDone = new Subject<AnimationEvent>();
 
   constructor(
-    // tslint:disable-next-line:variable-name
+
     private _elementRef: ElementRef<HTMLElement>,
-    // tslint:disable-next-line:variable-name
+
     private _focusTrapFactory: FocusTrapFactory,
-    // tslint:disable-next-line:variable-name
+
     private _changeDetectorRef: ChangeDetectorRef,
-    // tslint:disable-next-line:variable-name
+
     @Optional() @Inject(DOCUMENT) _document: any,
     /** The dialog configuration. */
-    // tslint:disable-next-line:variable-name
+
     public _config: DialogConfig) {
     super();
 

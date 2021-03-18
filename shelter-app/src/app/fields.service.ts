@@ -1,28 +1,40 @@
 import {Injectable, OnDestroy} from '@angular/core';
-import {FieldAndTitlesType, FieldType, FieldTypeTypeEnum, FieldValueType} from './common/types';
-import {BasicService} from './basic.service';
-import {Subscription} from 'rxjs';
-import {SystemLang} from 'ui-lib';
+import {FieldAndTitlesType, FieldTypeUI, FieldValueType} from './common/types';
+import {BehaviorSubject, Subscription} from 'rxjs';
+import {CdkDataSource, SystemLang} from 'ui-lib';
+import {DataSources} from './datasources';
+import {ListRange} from '@angular/cdk/collections';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FieldsService implements OnDestroy {
-  private fields: FieldAndTitlesType[];
+  private fields: ReadonlyArray<FieldAndTitlesType>;
   private readonly subscription: Subscription;
+  private cdkDS: CdkDataSource<FieldTypeUI, FieldAndTitlesType>;
+  private subject = new BehaviorSubject<ListRange>({start: 0, end: Number.MAX_VALUE});
 
-  constructor(private service: BasicService) {
-    this.subscription = service.getFieldsDataSource().select().subscribe( v => {
-      this.fields = v;
-    });
+  constructor(private dataSources: DataSources) {
+    this.cdkDS = this.dataSources.Fields.registerDS();
+    this.cdkDS.trIn = (v) => {
+      const res: FieldAndTitlesType[] = [];
+      v.forEach(f => res.push({
+        field: {name: f.name, order: f.order, type: f.type, enumValues: f.enumValues, subtype: f.subtype},
+        titles: f.title
+      }));
+      return res;
+    };
+    this.subscription = this.cdkDS.connect({viewChange: this.subject})
+      .subscribe(d => this.fields = d);
   }
   ngOnDestroy(): void {
     console.log('destroy FieldsService');
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+    this.dataSources.Fields.unregisterDS(this.cdkDS);
   }
-  getFields(): FieldAndTitlesType[] {
+  getFields(): ReadonlyArray<FieldAndTitlesType> {
     return this.fields;
   }
   fieldValueAsString(fv: FieldValueType, systemLang: SystemLang): string {

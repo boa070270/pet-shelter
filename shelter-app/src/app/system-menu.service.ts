@@ -62,55 +62,19 @@ export class SystemMenuService implements OnDestroy {
       }
     }
   }
-  menuTree(locale?: string): MenuTree[] {
-    const result: MenuTree[] = [];
-    result.push({path: 'test', title: 'Test', component: 'TopMenuPageComponent'}); // TODO remove this
-    const menusAndTitles = this.menusAndTitle;
-    for (const m of menusAndTitles.menus) {
-      let menuTree: MenuTree  = this._findParent(result, m.path);
-      if (menuTree) {
-        menuTree.component = m.component;
-        menuTree.role = m.role;
-      } else {
-        menuTree = {
-          path: m.path,
-          component: m.component,
-          title: this.getTitle(m.path, locale, menusAndTitles),
-          role: m.role
-        };
-      }
-      if (m.parentId) {
-        let parent = this._findParent(result, m.parentId);
-        if (!parent) {
-          parent = {
-            path: m.parentId,
-            component: null,
-            title: this.getTitle(m.parentId, locale, menusAndTitles)
-          };
-          result.push(parent);
-        }
-        if (!parent.menu) {
-          parent.menu = [];
-        }
-        parent.menu.push(menuTree);
-      } else {
-        result.push(menuTree);
-      }
+  menuChildren(menuTree: MenuTree): void {
+    const children = this.menusAndTitle.menus.filter(m => m.parentId === menuTree.path)
+      .map(m => ({path: m.path, component: m.component, role: m.role, title: this.menusAndTitle.titles.filter(t => t.id === m.path)}));
+    if (children.length > 0) {
+      children.forEach(c => this.menuChildren(c));
+      menuTree.menu = children;
     }
-    return result;
   }
-  getTitle(path: string, locale?: string, menusAndTitles?: MenusAndTitlesType): string {
-    const titles = (menusAndTitles || this.menusAndTitle).titles.filter(v => v.id === path);
-    if (titles) {
-      if (locale) {
-        const title = titles.find(v => v.lang === locale);
-        if (title) {
-          return title.title;
-        }
-      }
-      return this.systemLang.getTitle(titles);
-    }
-    return path;
+  menuTree(locale?: string): MenuTree[] {
+    const result: MenuTree[] = this.menusAndTitle.menus.filter(m => !m.parentId)
+      .map(m => ({path: m.path, component: m.component, role: m.role, title: this.menusAndTitle.titles.filter(t => t.id === m.path)}));
+    result.forEach(c => this.menuChildren(c));
+    return result;
   }
   getMenu(url: string, menusAndTitles?: MenusAndTitlesType): MenuType {
     const menus = menusAndTitles || this.menusAndTitle;

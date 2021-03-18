@@ -1,1 +1,9 @@
 $ui-control-min-width: 200px;
+.pos-bottom {
+  top: 100%;
+}
+.pos-beside-left {
+  top: inherit;
+  margin-top: -1em;
+  left: 100%
+}

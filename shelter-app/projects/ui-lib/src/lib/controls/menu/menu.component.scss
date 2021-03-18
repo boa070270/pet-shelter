@@ -1,0 +1,36 @@
+@use '../controls';
+:host {
+  display: block;
+  position: fixed;
+  margin: 0;
+  padding: 0;
+  visibility: collapse;
+}
+.menu-panel{
+  list-style: none;
+  margin: 0;
+  padding-left: 2px;
+  padding-right: 2px;
+  width: 100%;
+  white-space: nowrap;
+  box-sizing: border-box;
+  border: {
+    width: 1px;
+    style: solid;
+  };
+  li {
+    border: none;
+  }
+  li:hover {
+    background-color: aquamarine;
+  }
+}
+.pos-bottom {
+  top: 100%;
+}
+.pos-beside-left {
+  top: inherit;
+  margin-top: -1em;
+  left: 100%
+}
+

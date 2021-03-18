@@ -1,6 +1,5 @@
 import {Component, Input, OnInit, TemplateRef} from '@angular/core';
 import {ComponentType} from '@angular/cdk/overlay';
-import {UIDataSource} from './ui-types';
 
 @Component({
   selector: 'lib-masonry-list',

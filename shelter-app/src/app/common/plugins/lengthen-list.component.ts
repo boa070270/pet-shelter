@@ -75,12 +75,14 @@ export class LengthenListComponent implements OnInit, OnDestroy, OnChanges, Afte
         return;
       }
       this.service.search(this.index, this.lang, this.query, this.size, this.searchResult.length * this.size).subscribe(data => {
-        if (data.data.length > 0) {
-          this.searchResult.push(data.data);
+        if (data) {
+          if (data.data.length > 0) {
+            this.searchResult.push(data.data);
+          }
+          this.lastQuery = Date.now();
+          this.totals = data.total;
+          this.canBeLoaded = true;
         }
-        this.lastQuery = Date.now();
-        this.totals = data.total;
-        this.canBeLoaded = true;
       });
     }
   }

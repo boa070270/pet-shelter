@@ -1,4 +1,4 @@
-import {Injectable, OnDestroy} from '@angular/core';
+import {Injectable, NgZone, OnDestroy} from '@angular/core';
 import {VisibilityChangeService} from './visibility-change.service';
 import {Observable, Subject, Subscription} from 'rxjs';
 
@@ -11,7 +11,7 @@ export class IntervalObservableService implements OnDestroy {
   private next = 0;
   private interval: any;
 
-  constructor(visibilityChange: VisibilityChangeService) {
+  constructor(visibilityChange: VisibilityChangeService, private readonly _ngZone: NgZone) {
     this.subscription = visibilityChange.observable().subscribe((isShow) => this.stopStartInterval(isShow));
     this.init();
   }
@@ -31,7 +31,9 @@ export class IntervalObservableService implements OnDestroy {
   }
   private init(): void {
     if (!this.interval) {
-      this.interval = setInterval( () => this.intervalSubject.next(this.next++), 1000);
+      this._ngZone.runOutsideAngular(() => {
+        this.interval = setInterval( () => this.intervalSubject.next(this.next++), 1000);
+      });
     }
   }
   private stopStartInterval(isShow: boolean): void {

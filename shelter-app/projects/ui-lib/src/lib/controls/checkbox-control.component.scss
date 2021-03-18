@@ -65,6 +65,7 @@ label {
 }
 select {
   min-width: controls.$ui-control-min-width;
+  width: 98%;
 }
 option {
   &:hover {
@@ -88,7 +89,7 @@ option:hover+.tooltip {
   grid-template-areas: "action left"
                       "action right";
   //grid-template-rows: 1fr 1fr;
-  grid-template-columns: 6em 4fr;
+  grid-template-columns: 1.7em 98%;
 }
 .list-builder-panel-left {
   grid-area: left;
@@ -106,14 +107,18 @@ option:hover+.tooltip {
   button {
     font-weight: bold;
     padding: 0;
-    width: 6em;
+    width: 1.7em;
     height: 1.7em;
     margin: 2px;
   }
 }
+.list-editable {
+  height: 100%;
+}
 .list-select {
   list-style: none;
   min-height: calc(4em + 8px);
+  width: 98%;
   height: calc(4em + 8px);
   margin: 0;
   padding: 2px;

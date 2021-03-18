@@ -1,0 +1,24 @@
+@use "../controls";
+
+:host {
+  display: block;
+  position: relative;
+  white-space: nowrap;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+.ui-menu-button-container {
+  white-space: nowrap;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  @media screen and (max-width: 1024px) {
+    display: none;
+  }
+}
+.ui-menu-button {
+  white-space: nowrap;
+  background-color: inherit;
+}

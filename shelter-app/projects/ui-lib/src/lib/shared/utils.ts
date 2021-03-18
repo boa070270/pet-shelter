@@ -17,13 +17,13 @@
  * @param str formatted string
  * @param params - parameters
  */
-export function choiceFormat(str: string, params: any[]): string {
-  return str.replace(/\{.*\}/g, (s: string) => {
+export function choiceFormat(str: string, ...params: any[]): string {
+  return str.replace(/\{\d*.*\}/g, (s: string) => {
     const [num, choices] = s.substring(1, s.length - 1).split(',');
     // @ts-ignore
     const param = num * 1;
     if (!isNaN(param) && params[param] !== undefined) {
-      const parameter = params[param];
+      const parameter = trParam(params[param]);
       if (choices) {
         const choice = choices.split('|');
         for (const ch of choice) {
@@ -50,6 +50,21 @@ export function choiceFormat(str: string, params: any[]): string {
     }
     return '';
   });
+}
+function trParam(p: any): any {
+  if (typeof p === 'object') {
+    if (p === null) {
+      return 'null';
+    }
+    if (p instanceof Error) {
+      return `${p.name}: ${p.message}.\n${p.stack}`;
+    }
+    return JSON.stringify(p);
+  }
+  if (typeof p === 'function') {
+    return `function ${p.name}`;
+  }
+  return p;
 }
 function parseRangeChoice(parameter: string, choice: string): string {
   const i = choice.search(/[\]\)]/);

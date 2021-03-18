@@ -1,6 +1,7 @@
 import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {BasicService} from './basic.service';
 import {
+  AbstractDataSource,
   CommentResponse,
   CommentType,
   DialogService,
@@ -10,7 +11,7 @@ import {
   SwaggerFormService,
   SwaggerNative,
   SwaggerObject,
-  swaggerUI,
+  swaggerUI, TableProviderService,
   TitleType,
   VoteOption,
   VoteType
@@ -187,25 +188,12 @@ export class TopMenuPageComponent implements OnInit {
         {
           childId: SwaggerNative.asString(),
           childDescription: SwaggerNative.asString(),
-          sex: SwaggerNative.asString(null, {enums: ['m', 'f']})
+          sex: SwaggerNative.asString(null, {enum: ['m', 'f']})
         })
       });
-  swaggerOption = [{
-    orderControls: ['id', 'description', 'child'],
-    properties: {
-      id: SwaggerNative.asString(),
-      description: SwaggerNative.asString(),
-      child: new SwaggerObject(
-        ['childId', 'childDescription', 'sex'],
-        {
-          childId: SwaggerNative.asString(),
-          childDescription: SwaggerNative.asString(),
-          sex: SwaggerNative.asString(null, {enums: ['m', 'f']})
-        })
-    },
-    ui: null,
-    required: ['id']
-  }];
+// <<<<<<< HEAD
+// =======
+  swaggerOption = [this.swagger];
   /******* Table *******/
   tableDataSet = [
     {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
@@ -223,6 +211,7 @@ export class TopMenuPageComponent implements OnInit {
   tableCaption = 'Test table';
   tableData = new BehaviorSubject<any>(this.tableDataSet);
   tableColumns = this.tableColumnSet;
+// >>>>>>> editable-list
   listOptions = ['first', 'second', 'third', 'fifth', 'sixth'];
   listOptions2 = ['first', 'second', 'third', 'fifth', 'sixth'];
   lustTitles: TitleType[] = [
@@ -238,10 +227,15 @@ export class TopMenuPageComponent implements OnInit {
     {id: 'first', lang: 'uk', title: 'First element'},
   ];
   listSelect: any;
+  tblSwagger: SwaggerObject;
+  tblData: AbstractDataSource<any>;
   constructor(private basicService: BasicService,
               private dynamicSwagger: SwaggerFormService,
-              private dialogService: DialogService) {
+              private dialogService: DialogService,
+              private tableProvider: TableProviderService) {
     dynamicSwagger.addSchemaIfNotExists('test', this.swagger);
+    this.tblData = tableProvider.getDataSource('test');
+    this.tblSwagger = this.tableProvider.getTableSwagger('test');
   }
 
   ngOnInit(): void {

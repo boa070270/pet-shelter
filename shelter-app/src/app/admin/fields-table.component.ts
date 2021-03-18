@@ -1,53 +1,22 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {EditTableConfiguration, makeColumnInfo} from 'ui-lib';
-import {BasicService} from '../basic.service';
-import {MatDialog} from '@angular/material/dialog';
+import {Component} from '@angular/core';
+import {AbstractDataSource} from 'ui-lib';
 // from x-payload
-import {FieldAndTitlesType} from '../common/types';
-import {FormsConfigurationService} from './forms-configuration.service';
+import {FieldTypeUI} from '../common/types';
+import {SwaggerFieldType} from '../common/swagger-objects';
+import {DataSources} from '../datasources';
 
 @Component({
   selector: 'app-fields-table',
-  templateUrl: './fields-table.component.html',
+  template: `
+    <lib-table [dataSource]="dataSource" [swagger]="swagger"></lib-table>
+  `,
   styleUrls: ['./fields-table.component.sass']
 })
-export class FieldsTableComponent implements OnInit, OnDestroy {
-  tableConfiguration: EditTableConfiguration<FieldAndTitlesType>;
+export class FieldsTableComponent {
+  dataSource: AbstractDataSource<FieldTypeUI>;
+  swagger = SwaggerFieldType;
 
-  constructor(public dialog: MatDialog, private service: BasicService, private formsConfiguration: FormsConfigurationService) {}
-
-  ngOnInit(): void {
-    this.tableConfiguration = {
-      readonly: false,
-      dataSource: this.service.getFieldsDataSource(),
-      newItem: () => this.formsConfiguration.fieldNewItem(),
-      getId: (r) => '' + r.field.name,
-      getColumnValue: (element, column) => {
-        switch (column) {
-          case 'name':
-            return element.field.name;
-          case 'type':
-            return element.field.type.toString();
-          case 'subtype':
-            return element.field.subtype;
-          case 'enumValues':
-            return element.field.enumValues;
-          case 'titles':
-            return element.titles.map(value => value.lang + ':' + value.title).join(',');
-        }
-      },
-      allColumns: [
-        makeColumnInfo('name', 'Field name', true, false),
-        makeColumnInfo('type', 'Field type', true, false),
-        makeColumnInfo('subtype', 'Subtype', true, false),
-        makeColumnInfo('enumValues', 'Enum value', false, false),
-        makeColumnInfo('titles', 'Titles', true, false),
-      ],
-      formConfiguration: this.formsConfiguration.fieldFormConfiguration()
-    };
+  constructor(datasources: DataSources) {
+    this.dataSource = datasources.Fields;
   }
-
-  ngOnDestroy(): void {
-  }
-
 }

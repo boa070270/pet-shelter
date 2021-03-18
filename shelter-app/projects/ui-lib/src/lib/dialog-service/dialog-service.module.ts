@@ -12,6 +12,7 @@ import {
   DIALOG_REF,
   MAT_DIALOG_SCROLL_STRATEGY_PROVIDER
 } from './dialog-injectors';
+import {ComponentsPluginService} from '../shared';
 @NgModule({
   declarations: [
     CdkDialogContainer,
@@ -20,19 +21,22 @@ import {
     CommonModule,
     OverlayModule,
     PortalModule,
-    A11yModule,
+    A11yModule
   ],
   exports: [
     // Re-export the PortalModule so that people extending the `CdkDialogContainer`
     // don't have to remember to import it or be faced with an unhelpful error.
-    PortalModule,
     CdkDialogContainer,
+    PortalModule,
+    OverlayModule,
   ],
   providers: [
     MAT_DIALOG_SCROLL_STRATEGY_PROVIDER,
     {provide: DIALOG_CONTAINER, useValue: CdkDialogContainer},
     {provide: DIALOG_CONFIG, useValue: DialogConfig},
+    {provide: DIALOG_REF, useValue: DialogRef}
   ],
   entryComponents: [CdkDialogContainer],
 })
-export class DialogServiceModule { }
+export class DialogServiceModule {
+}

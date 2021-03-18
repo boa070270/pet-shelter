@@ -1,4 +1,4 @@
-<lib-carousel [datasource]="datasource" [showNumberItems]="count" [itemTemplate]="tmpl" [fixCount]="fixCount"></lib-carousel>
+<lib-carousel [cdkDataSource]="cdkDataSource" [showNumberItems]="count" [itemTemplate]="tmpl" [fixCount]="fixCount"></lib-carousel>
 <ng-template #tmpl let-ctx>
   <lib-advert *ngIf="resource === 'banner'" [mediaUrl]="'/api/v1/assets/' + ctx.assetId" [refUrl]="ctx.targetUrl" [mimeType]="ctx.mimeType" [tooltip]="ctx.tooltip"></lib-advert>
   <lib-advert *ngIf="resource === 'pet'" [mediaUrl]="'/api/v1/assets/' + ctx.assetId" [refUrl]="'/pet/'+ctx.targetUrl" [mimeType]="ctx.mimeType" [tooltip]="ctx.tooltip"></lib-advert>

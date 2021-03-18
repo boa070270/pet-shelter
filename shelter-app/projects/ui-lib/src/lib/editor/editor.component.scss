@@ -1,0 +1,102 @@
+:host {
+    height: 100%;
+    max-height: 80vh;
+    width: 100%;
+    max-width: 80vw;
+}
+.editor-toolbar-parent {
+    display: grid;
+}
+.editor-toolbar {
+    display: inline-block;
+    min-height: 35px;
+}
+.editor-multiple-buttons {
+    display: inline-flex;
+}
+.editor-single-button {
+    height: 21px;
+    width: 28px;
+    margin: 6px 3px 6px 3px;
+    border-radius: 6px 6px 6px 6px;
+}
+.editor-button-right {
+    height: 21px;
+    width: 28px;
+    border-collapse: collapse;
+    border-left-width: 0;
+    border-radius: 0 6px 6px 0;
+    margin: 6px 3px 6px 0;
+}
+.editor-button-left {
+    height: 21px;
+    width: 28px;
+    border-radius: 6px 0 0 6px;
+    margin: 6px 0 6px 3px;
+}
+.editor-button-middle {
+    height: 21px;
+    width: 28px;
+    border-radius: 0;
+    border-left-width: 0;
+    margin: 6px 0 6px 0;
+}
+.editor-editable {
+    border: 1px solid black;
+    padding: 3px;
+    min-width: 400px;
+    min-height: 300px;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+.editor-button-active {
+    background-color: dimgray;
+}
+.editor-image-controls-input {
+    width: 20px;
+    margin: 6px 0 6px 6px;
+}
+.editor-table-input {
+    width: 50px;
+    margin: 6px 0 6px 6px;
+}
+.editor-help {
+    display: flex;
+    align-content: center;
+    background: rgba(80, 80, 80, 0.3);
+    z-index: 1080;
+    position: center;
+    width: 100vw;
+    height: 100vh;
+}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    overflow: auto;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    z-index: 1;
+}
+.dropdown-content button {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    border: 0;
+    width: 100%;
+    white-space: nowrap;
+}
+
+.dropdown-content button:hover {background-color: #ddd;}
+.show {display: block;}
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+.dropbtn {
+
+}
+.editor-icon-img {
+    width: 14px;
+}

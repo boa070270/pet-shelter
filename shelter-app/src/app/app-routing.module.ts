@@ -1,25 +1,24 @@
 import {NgModule} from '@angular/core';
 import {Route, Router, RouterModule, Routes} from '@angular/router';
 import {SystemLang} from 'ui-lib';
-import {MenuTree} from './common/types';
+import {MenuTree} from './common';
 import {SubMenuPageComponent} from './sub-menu-page/sub-menu-page.component';
 import {TopMenuPageComponent} from './top-menu-page.component';
 import {MainPageComponent} from './main-page.component';
-import {PageComponent} from './common/page.component';
-import {PetComponent} from './common/pet.component';
+import {PageComponent} from './common';
+import {PetComponent} from './common';
 import {SearchPageComponent} from './search-page.component';
 import {MenuPageComponent} from './menu-page.component';
 import {SystemMenuService} from './system-menu.service';
-import {LoginPageComponent} from './login-page.component';
 import {TestDynamicComponent} from './test-dynamic.component';
 
 const routes: Routes = [
   { path: '', component: MainPageComponent },
-  { path: 'login', component: LoginPageComponent},
   { path: 'page/:id', component: PageComponent },
   { path: 'pet/:id', component: PetComponent },
   { path: 'search', component: SearchPageComponent },
   { path: 'test-dynamic', component: TestDynamicComponent},
+  { path: 'test', component: TopMenuPageComponent},
   { path: 'admin', loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule) },
 ];
 const KnownComponents = {

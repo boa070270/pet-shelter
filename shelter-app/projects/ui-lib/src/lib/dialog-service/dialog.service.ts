@@ -1,8 +1,8 @@
 import {
   ComponentRef,
-  Inject,
   Injectable,
-  Injector, OnDestroy,
+  Injector,
+  OnDestroy,
   Optional,
   SkipSelf,
   StaticProvider,
@@ -14,7 +14,7 @@ import {ComponentType, Overlay, OverlayConfig, OverlayRef, ScrollStrategy} from 
 import {DialogRef} from './dialog-ref';
 import {defer, Observable, of as observableOf, Subject} from 'rxjs';
 import {startWith} from 'rxjs/operators';
-import {DIALOG_CONFIG, DIALOG_CONTAINER, DIALOG_DATA, DIALOG_REF, DIALOG_SCROLL_STRATEGY} from './dialog-injectors';
+import {DIALOG_CONTAINER, DIALOG_DATA, DIALOG_REF} from './dialog-injectors';
 import {Location} from '@angular/common';
 import {DialogConfig} from './dialog-config';
 import {CdkDialogContainer} from './dialog-container';
@@ -26,24 +26,28 @@ import {PositionStrategy} from '@angular/cdk/overlay/position/position-strategy'
   providedIn: 'root'
 })
 export class DialogService implements OnDestroy {
-  private readonly simpleDialogComponent: Type<any>;
-  private readonly snakeBarComponent: Type<any>;
-  // tslint:disable-next-line:variable-name
+  private get simpleDialogComponent(): Type<any> {
+    return this.componentsPlugin.getPlugin('simple-dialog').component;
+  }
+  private get snakeBarComponent(): Type<any> {
+    return this.componentsPlugin.getPlugin('snake-bar').component;
+  }
+
   _afterAllClosedBase = new Subject<void>();
-  // tslint:disable-next-line:variable-name
+
   _afterOpened: Subject<DialogRef<any>> = new Subject();
 
   afterAllClosed: Observable<void> = defer(() => this.openDialogs.length ?
     this._getAfterAllClosed() : this._getAfterAllClosed().pipe(startWith(undefined)));
-  // tslint:disable-next-line:variable-name
+
   _openDialogs: DialogRef<any>[] = [];
 
   constructor(
-    // tslint:disable-next-line:variable-name
+
     private _overlay: Overlay,
-    // tslint:disable-next-line:variable-name
+
     private _injector: Injector,
-    // tslint:disable-next-line:variable-name
+
     @Optional() @SkipSelf() private _parentDialog: DialogService,
     @Optional() location: Location,
     private componentsPlugin: ComponentsPluginService) {
@@ -54,9 +58,6 @@ export class DialogService implements OnDestroy {
     if (!_parentDialog && location) {
       location.subscribe(() => this.closeAll());
     }
-
-    this.simpleDialogComponent = this.componentsPlugin.getPlugin('simple-dialog').component;
-    this.snakeBarComponent = this.componentsPlugin.getPlugin('snake-bar').component;
   }
 
   /* e.g.
@@ -86,60 +87,65 @@ export class DialogService implements OnDestroy {
     return this.openFromComponent(this.simpleDialogComponent,
       {data: extData, disableClose: modal || false, scrollStrategies: {block: true}});
   }
+
   infoExtDialog(extData: ExtendedData, modal?: boolean): DialogRef<any> {
     extData.iconColor = 'info-color';
     extData.icon = 'gm-info_outline';
     return this.openExtDialog(extData, modal);
   }
+
   warnExtDialog(extData: ExtendedData, modal?: boolean): DialogRef<any> {
     extData.iconColor = 'warn-color';
     extData.icon = 'gm-warning';
     return this.openExtDialog(extData, modal);
   }
+
   errorExtDialog(extData: ExtendedData, modal?: boolean): DialogRef<any> {
     extData.iconColor = 'error-color';
     extData.icon = 'gm-error';
     return this.openExtDialog(extData, modal);
   }
+
   infoMsgDialog(msg: string, modal?: boolean, action?: ActionType): DialogRef<any> {
     const extData = ExtendedData.create(msg, true, null, action);
     return this.infoExtDialog(extData, modal);
   }
+
   warnMsgDialog(msg: string, modal?: boolean, action?: ActionType): DialogRef<any> {
     const extData = ExtendedData.create(msg, true, null, action);
     return this.warnExtDialog(extData, modal);
   }
+
   errorMsgDialog(msg: string, modal?: boolean, action?: ActionType): DialogRef<any> {
     const extData = ExtendedData.create(msg, true, null, action);
     return this.errorExtDialog(extData, modal);
   }
+
   openSnakeBar(extData: ExtendedData): void {
-    const dlg = this.snakeFromComponent(this.snakeBarComponent, {data: extData, disableClose: false});
+    const dlg = this.snake(this.snakeBarComponent, {data: extData, disableClose: false});
     setTimeout(() => dlg.close(), 5000);
   }
+
   snakeInfo(msg: string): void {
     const extData = ExtendedData.create(msg, true, null, 'ok', '', 'gm-info_outline', 'info-color');
     this.openSnakeBar(extData);
   }
+
   snakeWarn(msg: string): void {
     const extData = ExtendedData.create(msg, true, null, 'ok', '', 'gm-warning', 'warn-color');
     this.openSnakeBar(extData);
   }
+
   snakeError(msg: string): void {
     const extData = ExtendedData.create(msg, true, null, 'ok', '', 'gm-error', 'error-color');
     this.openSnakeBar(extData);
   }
-  snakeFromComponent<T>(component: ComponentType<T>, config?: DialogConfig): DialogRef<any> {
+
+  snake<T>(compOrTemplate: ComponentType<T> | TemplateRef<T>, config?: DialogConfig): DialogRef<any> {
     const cfg = config || {};
     cfg.position = {bottom: '0'};
     cfg.hasBackdrop = false;
-    return this.openFromComponent(component, cfg);
-  }
-  snakeFromTemplate<T>(template: TemplateRef<T>, config?: DialogConfig): DialogRef<any> {
-    const cfg = config || {};
-    cfg.position = {bottom: '0'};
-    cfg.hasBackdrop = false;
-    return this.openFromTemplate(template, cfg);
+    return this.open(compOrTemplate, cfg);
   }
   /** Stream that emits when all dialogs are closed. */
   _getAfterAllClosed(): Observable<void> {
@@ -158,12 +164,30 @@ export class DialogService implements OnDestroy {
 
   /** Gets an open dialog by id. */
   getById(id: string): DialogRef<any> | undefined {
-    return this._openDialogs.find(ref  => ref.id === id);
+    return this._openDialogs.find(ref => ref.id === id);
   }
 
   /** Closes all open dialogs. */
   closeAll(): void {
     this.openDialogs.forEach(ref => ref.close());
+  }
+
+  sideLeft<T>(compOrTemplate: ComponentType<T> | TemplateRef<T>, config?: DialogConfig): DialogRef<any> {
+    const cfg = config || {};
+    cfg.position = {bottom: '0', left: '0', top: '0'};
+    cfg.height = '100%';
+    cfg.width = '80vw';
+    cfg.scrollStrategies = {block: true};
+    cfg.disableClose = false;
+    return this.open(compOrTemplate, cfg);
+  }
+
+  open<T>(compOrTemplate: ComponentType<T> | TemplateRef<T>, config?: DialogConfig): DialogRef<any> {
+    if (compOrTemplate instanceof TemplateRef) {
+      return this.openFromTemplate(compOrTemplate, config);
+    } else {
+      return this.openFromComponent(compOrTemplate, config);
+    }
   }
 
   /** Opens a dialog from a component. */

@@ -1,3 +1,14 @@
-@import "./styles/regular";
-@import "./styles/common";
-@import "./styles/colors";
+@use "./styles/regular";
+@use "./styles/common";
+@use "./styles/colors";
+body {
+  display: block;
+  margin: {
+    top: 0;
+    bottom: 0;
+    left: auto;
+    right: auto;
+  };
+  padding: 0;
+  height: 100%;
+}

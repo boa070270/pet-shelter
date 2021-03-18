@@ -23,6 +23,10 @@ export interface IdResponse {
     status: StatusType;
 }
 
+export interface MenuTypeUI extends MenuType {
+  title: TitleType[];
+}
+
 export interface MenuType {
     path: string;
     component: string;
@@ -46,10 +50,10 @@ export interface MenuAndTitlesType {
 }
 export interface MenuTree {
   path: string;
-  title: string;
+  title: string | TitleType[];
   component: string;
   role?: string;
-  menu?: MenuTree[] | void;
+  menu?: MenuTree[];
 }
 export interface VoteType {
   who: string;
@@ -218,6 +222,9 @@ export interface FieldsAndTitlesType {
 export interface FieldAndTitlesType {
   field: FieldType;
   titles: TitleType[];
+}
+export interface FieldTypeUI extends FieldType {
+  title: TitleType[];
 }
 export function convertFieldsToFieldArray(fields: FieldsAndTitlesType): FieldAndTitlesType[] {
   const result: FieldAndTitlesType[] = [];

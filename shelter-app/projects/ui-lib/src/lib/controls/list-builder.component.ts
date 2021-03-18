@@ -1,26 +1,35 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild} from '@angular/core';
 import {SelectControlComponent} from './select-control.component';
-import {ControlValueAccessor} from '@angular/forms';
+import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SystemLang} from '../i18n';
 import {coerceArray} from '@angular/cdk/coercion';
 import {ListSelectComponent} from './list-select.component';
 import {BaseComponent} from './base.component';
-import {TitleType} from '../shared';
+import {DictionaryService, TitleType} from '../shared';
 import {CheckboxParameters} from './checkbox-control.component';
-import {Directionality} from "@angular/cdk/bidi";
+import {Directionality} from '@angular/cdk/bidi';
 
-const DEF_REMOVE_TITLES: TitleType[] = [{lang: 'en', title: 'Remove'}, {lang: 'uk', title: 'Видалити'}];
-const DEF_ADD_TITLES: TitleType[] = [{lang: 'en', title: 'Add'}, {lang: 'uk', title: 'Добавити'}];
-const DEF_UP_TITLES: TitleType[] = [{lang: 'en', title: 'Up'}, {lang: 'uk', title: 'Вгору'}];
-const DEF_DOWN_TITLES: TitleType[] = [{lang: 'en', title: 'Down'}, {lang: 'uk', title: 'Вниз'}];
+export const LIST_BUILDER_VALUE_ACCESSOR: any = {
+  provide: NG_VALUE_ACCESSOR,
+  useExisting: forwardRef(() => ListBuilderComponent),
+  multi: true
+};
+
+const I18N = {
+  REMOVE_TITLES: [{lang: 'en', title: 'Remove'}, {lang: 'uk', title: 'Видалити'}],
+  ADD_TITLES: [{lang: 'en', title: 'Add'}, {lang: 'uk', title: 'Добавити'}],
+  UP_TITLES: [{lang: 'en', title: 'Up'}, {lang: 'uk', title: 'Вгору'}],
+  DOWN_TITLES: [{lang: 'en', title: 'Down'}, {lang: 'uk', title: 'Вниз'}]
+};
 
 @Component({
   selector: 'lib-list-builder',
   templateUrl: './list-builder.component.html',
-  styleUrls: ['./checkbox-control.component.scss']
+  styleUrls: ['./checkbox-control.component.scss'],
+  providers: [LIST_BUILDER_VALUE_ACCESSOR]
 })
 export class ListBuilderComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
-  // tslint:disable-next-line:variable-name
+
   private _extraParams: CheckboxParameters = {};
   availableList: string[] = [];
   resultList: string[] = [];
@@ -66,8 +75,9 @@ export class ListBuilderComponent extends BaseComponent implements OnInit, OnCha
   @ViewChild(SelectControlComponent, {static: true}) available: SelectControlComponent;
   @ViewChild(ListSelectComponent, {static: true}) result: ListSelectComponent;
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
-    super(systemLang, directionality);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality,
+              dictionary: DictionaryService) {
+    super(systemLang, directionality, dictionary.getLibDictionary('ListBuilderComponent', I18N));
   }
 
   ngOnInit(): void {
@@ -82,10 +92,10 @@ export class ListBuilderComponent extends BaseComponent implements OnInit, OnCha
     this.buttonTitles();
   }
   buttonTitles(): void {
-    this.titleAdd = this.systemLang.getTitle(DEF_ADD_TITLES);
-    this.titleRemove = this.systemLang.getTitle(DEF_REMOVE_TITLES);
-    this.titleDown = this.systemLang.getTitle(DEF_DOWN_TITLES);
-    this.titleUp = this.systemLang.getTitle(DEF_UP_TITLES);
+    this.titleAdd = this.i18n.ADD_TITLES;
+    this.titleRemove = this.i18n.REMOVE_TITLES;
+    this.titleDown = this.i18n.DOWN_TITLES;
+    this.titleUp = this.i18n.UP_TITLES;
   }
   render(): void {
     this.availableList = this.options.filter( v => !this.resultList.includes(v)).sort();
