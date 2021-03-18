@@ -41,6 +41,10 @@ export interface NativeConstrictions extends BaseConstrictions {
   format?: 'date' | 'date-time' | 'password' | 'byte' | 'binary' | 'email' | 'uuid' | 'uri' | 'hostname' | 'ipv4'
     | 'ipv6' | 'color' | 'datetime-local' | 'month' | 'number' | 'search' | 'tel' | 'text' | 'time' | 'week';
 }
+export const SWAGGER_TEXT_FORMAT = ['date', 'date-time', 'password', 'byte', 'binary', 'email', 'uuid', 'uri', 'hostname',
+  'ipv4', 'ipv6', 'color', 'datetime-local', 'month', 'number', 'search', 'tel', 'text', 'time', 'week'];
+export const SWAGGER_NATIVE_TYPES = ['string', 'number', 'integer', 'boolean', 'file'];
+
 export interface NumberConstrictions extends NativeConstrictions {
   minimum?: number;
   maximum?: number;

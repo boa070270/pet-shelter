@@ -1,24 +1,33 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild} from '@angular/core';
-import {ExtendedData, SwaggerNative, SwaggerObject, swaggerUI, TitleType} from '../shared';
-import {ControlValueAccessor} from '@angular/forms';
+import {Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild} from '@angular/core';
+import {DictionaryService, ExtendedData, SwaggerNative, SwaggerObject, swaggerUI, TitleType} from '../shared';
+import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {BaseComponent} from './base.component';
 import {SystemLang} from '../i18n';
 import {Directionality} from '@angular/cdk/bidi';
 import {CheckboxParameters} from './checkbox-control.component';
 import {ListSelectComponent} from './list-select.component';
 import {coerceArray} from '@angular/cdk/coercion';
-import {DialogRef, DialogService} from '../dialog-service';
+import {DialogService} from '../dialog-service';
 
-const DEF_REMOVE_TITLES: TitleType[] = [{lang: 'en', title: 'Remove'}, {lang: 'uk', title: 'Видалити'}];
-const DEF_ADD_TITLES: TitleType[] = [{lang: 'en', title: 'Add'}, {lang: 'uk', title: 'Додати'}];
-const DEF_EDIT_TITLES: TitleType[] = [{lang: 'en', title: 'Edit'}, {lang: 'uk', title: 'Змінити'}];
-const DEF_UP_TITLES: TitleType[] = [{lang: 'en', title: 'Up'}, {lang: 'uk', title: 'Вгору'}];
-const DEF_DOWN_TITLES: TitleType[] = [{lang: 'en', title: 'Down'}, {lang: 'uk', title: 'Вниз'}];
+const I18N = {
+  DEF_REMOVE_TITLES: [{lang: 'en', title: 'Remove'}, {lang: 'uk', title: 'Видалити'}],
+  DEF_ADD_TITLES: [{lang: 'en', title: 'Add'}, {lang: 'uk', title: 'Додати'}],
+  DEF_EDIT_TITLES: [{lang: 'en', title: 'Edit'}, {lang: 'uk', title: 'Змінити'}],
+  DEF_UP_TITLES: [{lang: 'en', title: 'Up'}, {lang: 'uk', title: 'Вгору'}],
+  DEF_DOWN_TITLES: [{lang: 'en', title: 'Down'}, {lang: 'uk', title: 'Вниз'}]
+};
+
+export const EDITABLE_LIST_VALUE_ACCESSOR: any = {
+  provide: NG_VALUE_ACCESSOR,
+  useExisting: forwardRef(() => EditableListComponent),
+  multi: true
+};
 
 @Component({
   selector: 'lib-editable-list',
   templateUrl: './editable-list.component.html',
-  styleUrls: ['./checkbox-control.component.scss']
+  styleUrls: ['./checkbox-control.component.scss'],
+  providers: [EDITABLE_LIST_VALUE_ACCESSOR]
 })
 export class EditableListComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
@@ -69,8 +78,8 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
   @ViewChild(ListSelectComponent, {static: true}) result: ListSelectComponent;
 
   constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              private dialogService: DialogService) {
-    super(systemLang, directionality);
+              private dialogService: DialogService, dictionary: DictionaryService) {
+    super(systemLang, directionality, dictionary.getLibDictionary('EditableListComponent', I18N));
   }
 
   ngOnInit(): void {
@@ -90,11 +99,11 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
     this.buttonTitles();
   }
   buttonTitles(): void {
-    this.titleAdd = this.systemLang.getTitle(DEF_ADD_TITLES);
-    this.titleEdit = this.systemLang.getTitle(DEF_EDIT_TITLES);
-    this.titleRemove = this.systemLang.getTitle(DEF_REMOVE_TITLES);
-    this.titleDown = this.systemLang.getTitle(DEF_DOWN_TITLES);
-    this.titleUp = this.systemLang.getTitle(DEF_UP_TITLES);
+    this.titleAdd = this.i18n.DEF_ADD_TITLES;
+    this.titleEdit = this.i18n.DEF_EDIT_TITLES;
+    this.titleRemove = this.i18n.DEF_REMOVE_TITLES;
+    this.titleDown = this.i18n.DEF_DOWN_TITLES;
+    this.titleUp = this.i18n.DEF_UP_TITLES;
   }
   render(): void { // changed
     // this.list = this.options;

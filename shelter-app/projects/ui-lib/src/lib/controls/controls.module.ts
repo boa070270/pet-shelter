@@ -39,7 +39,7 @@ import {ScrollingModule} from '@angular/cdk/scrolling';
 import { UiMenuDirective } from './menu/ui-menu.directive';
 import { MenuBarComponent } from './menu/menu-bar.component';
 import { EditableListComponent } from './editable-list.component';
-// import { SwaggerBuilderComponent } from './swagger-builder.component';
+import { SwaggerBuilderComponent } from './swagger-builder.component';
 
 @NgModule({
   declarations: [
@@ -67,7 +67,7 @@ import { EditableListComponent } from './editable-list.component';
     GeneratorFormComponent, SwaggerArrayComponent, SwaggerFormComponent, SwaggerNativeComponent,
     CommentComponent, VoteComponent, DiscussionComponent, UiMenuDirective, MenuBarComponent,
     EditableListComponent,
-    // SwaggerBuilderComponent,
+    SwaggerBuilderComponent,
   ],
     imports: [
         CommonModule,
@@ -103,7 +103,7 @@ import { EditableListComponent } from './editable-list.component';
     GeneratorFormComponent, SwaggerArrayComponent, SwaggerFormComponent, SwaggerNativeComponent,
     CommentComponent, VoteComponent, DiscussionComponent, UiMenuDirective, MenuBarComponent,
     EditableListComponent,
-    // SwaggerBuilderComponent,
+    SwaggerBuilderComponent,
   ]
 })
 export class ControlsModule {

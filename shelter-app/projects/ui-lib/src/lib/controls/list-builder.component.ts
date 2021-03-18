@@ -1,6 +1,6 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild} from '@angular/core';
 import {SelectControlComponent} from './select-control.component';
-import {ControlValueAccessor} from '@angular/forms';
+import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SystemLang} from '../i18n';
 import {coerceArray} from '@angular/cdk/coercion';
 import {ListSelectComponent} from './list-select.component';
@@ -8,6 +8,12 @@ import {BaseComponent} from './base.component';
 import {DictionaryService, TitleType} from '../shared';
 import {CheckboxParameters} from './checkbox-control.component';
 import {Directionality} from '@angular/cdk/bidi';
+
+export const LIST_BUILDER_VALUE_ACCESSOR: any = {
+  provide: NG_VALUE_ACCESSOR,
+  useExisting: forwardRef(() => ListBuilderComponent),
+  multi: true
+};
 
 const I18N = {
   REMOVE_TITLES: [{lang: 'en', title: 'Remove'}, {lang: 'uk', title: 'Видалити'}],
@@ -19,7 +25,8 @@ const I18N = {
 @Component({
   selector: 'lib-list-builder',
   templateUrl: './list-builder.component.html',
-  styleUrls: ['./checkbox-control.component.scss']
+  styleUrls: ['./checkbox-control.component.scss'],
+  providers: [LIST_BUILDER_VALUE_ACCESSOR]
 })
 export class ListBuilderComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
@@ -85,10 +92,10 @@ export class ListBuilderComponent extends BaseComponent implements OnInit, OnCha
     this.buttonTitles();
   }
   buttonTitles(): void {
-    this.titleAdd = this.systemLang.getTitle(this.i18n.ADD_TITLES);
-    this.titleRemove = this.systemLang.getTitle(this.i18n.REMOVE_TITLES);
-    this.titleDown = this.systemLang.getTitle(this.i18n.DOWN_TITLES);
-    this.titleUp = this.systemLang.getTitle(this.i18n.UP_TITLES);
+    this.titleAdd = this.i18n.ADD_TITLES;
+    this.titleRemove = this.i18n.REMOVE_TITLES;
+    this.titleDown = this.i18n.DOWN_TITLES;
+    this.titleUp = this.i18n.UP_TITLES;
   }
   render(): void {
     this.availableList = this.options.filter( v => !this.resultList.includes(v)).sort();
