@@ -45,7 +45,9 @@ HTML Editor                                             Data
 
 When user complete to make this page and try to save its html and data editor need to check if all mandatory fields of plugin is filled
 and says to user if he something omits.
-To the back we store html and data as different objects, to pull them to one function like saveCustomPage(html, data);
+To the back we store html and data as different objects, to push them to one function like saveCustomPage(html, data);
+To show custom page we read these html and data from back, then push data to pageDataService and display this html page.
+All plugins will ask the pageDataService and obtain their data to properly present itself.
 ---
 
 - IFilter:
