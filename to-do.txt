@@ -1,11 +1,59 @@
+1. Task! We have a lot of controls, we can define form through swagger object that can be used to collect data.
+But what do we do with the presentation? For presentation we "have": table, custom pages.
+For the table we provide datasource (we need to make configuration to it), for  custom pages we have editor that allow us to "make" page.
+What is the "make page". We allow user to design page by fill it with html text and our tags.
+Our tags (we call them plugins) have parameters, when we fill these parameters the page will show this component properly.
+If this enough? For a static page, yes.
+For a dynamic page it isn't enough. For the dynamic page we have only one component - table.
+The dynamic page is a model that knows how to present/expose data. So when we for example want display some data through carousel,
+we need to make a model how this data will be present in carousel.
+What data can be provided to dynamic page? 1. It is DataSource, we provide it to table. If this is enough? Maybe,
+IMHO there isn't a lot of difference between DataSource with one data and the data with out datasource.
+Let's look at table component. We provide it datasource and swagger-object that describe element of this datasource.
+The table know how to present this data, know how to modify them.
+But what about carousel? This is more complicated component, there doesn't enough provide dataSource and swagger-object.
+Carousel - is a model that knows how to display other components (how many, how change them and when), to display this data
+we need to provide component that will present this data in carousel.
+
+Let's divide presentation components on categories:
+- components that know how present data:
+  simple data:
+    input, select, radio, checkbox - can we use them on custom page? If yes - we need to provide them name of field and value (we do not have implementation for such design)
+  swagger form:
+    is provided with swagger-object and data
+  table
+    is provided with swagger-object and DataSource
+  survey
+    vote, discussion, comment - all them need refactoring
+  carousel, all lists - all them need refactoring
+
+- components that needs other components to present data
+  all components need deep refactoring
+
+What is the process to make custom page:
+1. User open editor, he has access to html editor and set of plugins. He can drag-and-drop plugin over html editor.
+He can set parameters of plugin.
+HTML Editor                                             Data
+<p>Hello world</>                                       {
+<p><carousel name="car1"></carousel></p>                  car1:{datasource:'name', component:'name', swagger:'name'|{swagger object}},
+<p><ui-img name="img1"></ui-img></</p>                    img1:{id="000001"},
+<p>You can edit this table</p>
+<ui-table name="tbl1"></ui-table>                         tbl1:{datasource:'name', swagger:'name'|{swagger object}},
+<ui-vote name="vote1"></ui-vote>                          vote1:{all that need to this component to properly work},
+<ui-comment name="comment1"></ui-comment>                 comment1: {all that need to this component to properly work}
+                                                        }
+
+When user complete to make this page and try to save its html and data editor need to check if all mandatory fields of plugin is filled
+and says to user if he something omits.
+To the back we store html and data as different objects, to pull them to one function like saveCustomPage(html, data);
+---
+
 - IFilter:
   bring all parameters to this type
   make filter-dialog-component
   show this dialog on showDialogFilter instead simple one input
 
-- Task! Swagger! What do I need to do with forms that need dynamically change its content?
-
-- Task! Table! I want extend status bar to show number of all rows and number of filtered rows
+- Task! Table! I want extend the table status bar to show number of all rows and number of filtered rows
 
 - Task! Exclude material
   - Task! Change AuthDialog (it uses material)
@@ -18,20 +66,15 @@
 - Task! carousel, masonry-list
 -
 
-
-DONE! Task! Is there enough one form of field in the swagger? Let's look at the field that represent <img>,
+Task! Is there enough one form of field in the swagger? Let's look at the field that represent <img>,
 to the edit mode we need input to fill the src, but when we in the view mode maybe we need this picture..
-What is SwaggerObject, what a role it completes?
-  - it describes data that we need collect through SwaggerForm
-  - it describes how we present some data?
-  e.g. Dynamic page:
-  <our-tag-1 swagger="swagger-id"/> we need swagger here because we need fill the form that describes what data will be displayed.
-  So through SwaggerObject and SwaggerForm we allow user to dynamically fill the page.
-  But what is the table? Table also is a presentation component, it also needs swagger to describe what and how it would present.
 
+
+DONE!
+Task! Swagger! What do I need to do with forms that need dynamically change its content?
   Decision: The Form can be dynamical. To describe its behavior I provide these rules:
   behavior: {
-    [field: string]: Rule[] //field can be this form or children form, for children use format field.field
+    [field: string]: Rule[] //field from this form
   }
   Rule: {c: Condition, hide?:[fields,], show?:[fields,], disable?:[fields,], enable?:[fields,]}
   Condition: [,]<value | >value | !value | =value
