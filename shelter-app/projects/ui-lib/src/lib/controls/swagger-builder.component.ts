@@ -34,11 +34,15 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
   selected: string;
   selectedType: string;
   arrayType: string;
-  nestedOptions: SwaggerObjectConstruct[];
-  swaggerObject: SwaggerObject;
-  swagger: SwaggerObjectConstruct = {
-    orderControls: ['id', 'description', 'child'],
-    properties: {
+  nestedOptions: SwaggerObject[];
+  swaggerObject: SwaggerObject = new SwaggerObject(['type'], {
+      type: SwaggerNative.asString(null, {enum: this.nativeTypes},
+        swaggerUI([{lang: 'en', title: 'Native type'}, {lang: 'uk', title: 'Тип нативного елементу'}]))
+    }
+  );
+  swagger: SwaggerObject = new SwaggerObject(
+    ['id', 'description', 'child'],
+    {
       id: SwaggerNative.asString(),
       description: SwaggerNative.asString(),
       child: new SwaggerObject(
@@ -48,10 +52,7 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
           childDescription: SwaggerNative.asString(),
           sex: SwaggerNative.asString(null, {enum: ['m', 'f']})
         })
-    },
-    ui: null,
-    required: ['id']
-  };
+    }, null, ['id']);
 
   @Input()
   set extraParams(p: CheckboxParameters) {
@@ -64,10 +65,10 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
     return this._extraParams;
   }
   @Input()
-  set options(p: SwaggerObjectConstruct[]) {
+  set options(p: SwaggerObject[]) {
     this.extraParams.options = p;
   }
-  get options(): SwaggerObjectConstruct[] {
+  get options(): SwaggerObject[] {
     if (!this.extraParams.options) {
       this.extraParams.options = [{orderControls: null, properties: null, ui: null, required: null}];
     }
@@ -123,20 +124,21 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
       this.selectedType = change;
       switch (change) {
         case 'SwaggerNative':
-          this.swaggerObject = new SwaggerObject([], {
+          this.swaggerObject = new SwaggerObject(['type'], {
               type: SwaggerNative.asString(null, {enum: this.nativeTypes},
                 swaggerUI([{lang: 'en', title: 'Native type'}, {lang: 'uk', title: 'Тип нативного елементу'}]))
             }
           );
           break;
         case 'SwaggerArray':
-          this.swaggerObject = new SwaggerObject([], {
+          this.swaggerObject = new SwaggerObject(['arrayType'], {
               arrayType: SwaggerNative.asString(null, {enum: this.nativeTypes},
                 swaggerUI([{lang: 'en', title: 'Array type'}, {lang: 'uk', title: 'Тип елементів массиву'}])),
             }
           );
           break;
         case 'SwaggerObject':
+          this.nestedOptions = [this.swagger];
           this.swaggerObject = null;
           break;
       }
@@ -146,12 +148,6 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
       console.log('SwaggerBuilderComponent.swaggerForm.registerOnChange', change);
       return {};
     });
-    // Native:               Select type (string, number...) (for now)
-    // obj.type, obj.controlType, obj.constrictions, obj.ui
-    // Array:                Select type (native/object) - inside swagger builder for selected
-    // obj.itemsType, obj.constrictions, obj.ui
-    // Object:                       Swagger Builder Component
-    // obj.orderControls, obj.ui, obj.required, obj.properties
   }
 
   onChangeLang(): void {

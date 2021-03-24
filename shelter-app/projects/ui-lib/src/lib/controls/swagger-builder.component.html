@@ -4,7 +4,7 @@
     <div class="list-builder-panel-left">
       <lib-editable-list [options]="list" [tooltips]="tooltips" [titles]="titles"></lib-editable-list>
     </div>
-    <div class="list-builder-panel-right" >
+    <div class="list-builder-panel-right" [hidden]="!selected">
       <lib-select-control [options]="availableTypes" [titles]="titles" [tooltips]="tooltips" [multiple]="false"></lib-select-control>
       <lib-checkbox-control [(ngModel)]="checkbox"
                             [options]="['required']"
@@ -12,28 +12,33 @@
                             [tooltips]="['Обов\'язково']"
                             hint="Is property required"
       ></lib-checkbox-control>
-      <lib-swagger-form *ngIf="swaggerObject" [swagger]="swaggerObject"></lib-swagger-form>
-      <ng-container [ngSwitch]="selectedType">
-        <ng-container *ngSwitchCase="'SwaggerNative'">
-          <lib-select-control [options]="nativeTypes" [titles]="titles" [tooltips]="tooltips" [multiple]="false"></lib-select-control>
-        </ng-container>
+      <ng-template [ngIf]="swaggerObject">
+        <lib-swagger-form [swagger]="swaggerObject"></lib-swagger-form>
+      </ng-template>
+      <ng-template [ngIf]="!swaggerObject">
+        <lib-swagger-builder [options]="nestedOptions"></lib-swagger-builder>
+      </ng-template>
+<!--      <ng-container [ngSwitch]="selectedType">-->
+<!--        <ng-container *ngSwitchCase="'SwaggerNative'">-->
+<!--          <lib-select-control [options]="nativeTypes" [titles]="titles" [tooltips]="tooltips" [multiple]="false"></lib-select-control>-->
+<!--        </ng-container>-->
 
-        <ng-container *ngSwitchCase="'SwaggerArray'">
-          <lib-select-control [options]="['SwaggerNative', 'SwaggerObject']" [titles]="titles" [tooltips]="tooltips" [multiple]="false"></lib-select-control>
-          <ng-container [ngSwitch]="arrayType">
-            <ng-container *ngSwitchCase="'SwaggerNative'">
-              <lib-select-control [options]="nativeTypes" [titles]="titles" [tooltips]="tooltips" [multiple]="false"></lib-select-control>
-            </ng-container>
-            <ng-container *ngSwitchCase="'SwaggerObject'">
-              <lib-swagger-builder [options]="nestedOptions"></lib-swagger-builder>
-            </ng-container>
-          </ng-container>
-        </ng-container>
+<!--        <ng-container *ngSwitchCase="'SwaggerArray'">-->
+<!--          <lib-select-control [options]="['SwaggerNative', 'SwaggerObject']" [titles]="titles" [tooltips]="tooltips" [multiple]="false"></lib-select-control>-->
+<!--          <ng-container [ngSwitch]="arrayType">-->
+<!--            <ng-container *ngSwitchCase="'SwaggerNative'">-->
+<!--              <lib-select-control [options]="nativeTypes" [titles]="titles" [tooltips]="tooltips" [multiple]="false"></lib-select-control>-->
+<!--            </ng-container>-->
+<!--            <ng-container *ngSwitchCase="'SwaggerObject'">-->
+<!--              <lib-swagger-builder [options]="nestedOptions"></lib-swagger-builder>-->
+<!--            </ng-container>-->
+<!--          </ng-container>-->
+<!--        </ng-container>-->
 
-        <ng-container *ngSwitchCase="'SwaggerObject'">
-          <lib-swagger-builder [options]="nestedOptions"></lib-swagger-builder>
-        </ng-container>
-      </ng-container>
+<!--        <ng-container *ngSwitchCase="'SwaggerObject'">-->
+<!--          <lib-swagger-builder [options]="nestedOptions"></lib-swagger-builder>-->
+<!--        </ng-container>-->
+<!--      </ng-container>-->
     </div>
   </div>
 <!--  <div class="list-builder-panel">-->
