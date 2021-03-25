@@ -1,19 +1,19 @@
 @use './controls';
 
-:host {
-  margin: 0;
-  padding: 0;
-  display: block;
-  position: sticky;
-  z-index: 1000;
-  top: 0;
-  background: {
-    color: #00c8f0;
-  }
-  border: {
-    radius: 5px;
-  };
-}
+//:host {
+//  margin: 0;
+//  padding: 0;
+//  display: block;
+//  position: sticky;
+//  z-index: 1000;
+//  top: 0;
+//  background: {
+//    color: #00c8f0;
+//  }
+//  border: {
+//    radius: 5px;
+//  };
+//}
 .ui-navbar {
   margin: 0;
   padding: 0;
@@ -21,6 +21,9 @@
   grid-auto-rows: 3em;
   grid-template-columns: 2em 3em calc(100% - 28em) 7em 8em 2em;
   grid-auto-flow: column;
+  width: 100vw;
+  background-color: #00c8f0;
+  border-radius: 5px;
   //overflow: hidden;
   input {
     width: 8em;

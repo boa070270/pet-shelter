@@ -14,7 +14,7 @@ import {
 } from 'ui-lib';
 // from x-payload
 import {BannerType, FileType, PageType, PetType} from '../common/types';
-import {SwaggerBannerType, SwaggerFileType, SwaggerPageType, SwaggerPetType} from '../common/swagger-objects';
+import {AddSwaggerBannerType, SwaggerFileType, SwaggerPageType, SwaggerPetType} from '../common/swagger-objects';
 import {DataSources} from '../datasources';
 import {BasicService} from '../basic.service';
 import {HttpEventType, HttpResponse} from '@angular/common/http';
@@ -108,7 +108,7 @@ export class FilesTableComponent extends AbstractComponent implements OnDestroy 
   }
 
   private hdlMakeBanner(rows: any[]): void {
-    const extData = ExtendedData.create({ref: rows[0].id}, false, SwaggerBannerType, 'save_cancel', this.i18n.addBanner);
+    const extData = ExtendedData.create({ref: {refId: rows[0].id}}, false, AddSwaggerBannerType, 'save_cancel', this.i18n.addBanner);
     const dlgRef = this.dialogService.openExtDialog(extData, true);
     dlgRef.afterClosed().subscribe(data => {
       if (data) {

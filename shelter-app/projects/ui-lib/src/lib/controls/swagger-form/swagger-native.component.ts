@@ -1,5 +1,11 @@
 import {Component, ComponentRef, forwardRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ComponentsPluginService, NativeConstrictions, SwaggerComponent, SwaggerNative} from '../../shared';
+import {
+  coerceNativeValue,
+  ComponentsPluginService,
+  NativeConstrictions,
+  SwaggerComponent,
+  SwaggerNative
+} from '../../shared';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {CdkPortalOutlet, ComponentPortal} from '@angular/cdk/portal';
 import {FormErrorsService} from './form-errors.service';
@@ -43,7 +49,8 @@ export class SwaggerNativeComponent extends BaseSwaggerComponent implements OnIn
   }
   registerOnChange(fn: any): void {
     if (this.componentRef) {
-      this.componentRef.instance.registerOnChange(fn);
+      const coerce = coerceNativeValue((this.swagger as SwaggerNative).type);
+      this.componentRef.instance.registerOnChange((v) => fn(coerce(v)));
     }
   }
   registerOnTouched(fn: any): void {

@@ -29,3 +29,13 @@ export interface LoggerConfiguration {
 export interface UILogWriter {
   write(date: Date, level: LogLevel, message: string): void;
 }
+/**
+ * Component data service
+ * The aim of this service is a providing data to a component
+ */
+// tslint:disable-next-line:variable-name
+export const ComponentDataToken =
+  new InjectionToken<ComponentData>('ComponentDataToken');
+export interface ComponentData {
+  get(key: string): any;
+}

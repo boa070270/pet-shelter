@@ -137,7 +137,7 @@ const I18N_FIELD = {
   enumValues_description: [{lang: 'en', title: 'Input an enum definition as words separated by a comma'}, {lang: 'uk', title: 'Визначте перелік'}],
   enumValues_tooltip: [{lang: 'en', title: 'Input enum'}, {lang: 'uk', title: 'Введіть значеня'}],
   enumValues_placeholder: [{lang: 'en', title: 'one,two'}, {lang: 'uk', title: 'one,two'}],
-}
+};
 export const SwaggerFieldType = new SwaggerObject(
   [ 'name', 'type', 'subtype', 'order', 'enumValues'],
   {
@@ -396,12 +396,27 @@ export const SwaggerCarouselResponse = new SwaggerObject(
   },
   swaggerUI(),
   null);
+export const AddSwaggerBannerType = new SwaggerObject(
+  [ 'score', 'lang', 'ref', ],
+  {
+    score: SwaggerNative.asInteger(
+      undefined,
+      { default: null, },
+      swaggerUI(null, [ { lang: 'en', title: 'can be use as position/order', }, ])),
+    lang: SwaggerNative.asString(
+      undefined,
+      {},
+      swaggerUI(null, [ { lang: 'en', title: 'locales are sequenced in line by comma', }, ])),
+    ref: SwaggerReferenceType,
+  },
+  swaggerUI(),
+  [ 'score', ]);
 export const SwaggerBannerType = new SwaggerObject(
   [ 'id', 'score', 'lang', 'ref', ],
   {
     id: SwaggerNative.asString(
       undefined,
-      {},
+      {immutable: true},
       swaggerUI()),
     score: SwaggerNative.asInteger(
       undefined,
@@ -411,8 +426,7 @@ export const SwaggerBannerType = new SwaggerObject(
       undefined,
       {},
       swaggerUI(null, [ { lang: 'en', title: 'locales are sequenced in line by comma', }, ])),
-    ref: undefined,
-
+    ref: SwaggerReferenceType,
   },
   swaggerUI(),
   [ 'score', ]);

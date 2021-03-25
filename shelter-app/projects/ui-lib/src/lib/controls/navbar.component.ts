@@ -6,6 +6,7 @@ import {Subscription} from 'rxjs';
 @Component({
   selector: 'lib-navbar',
   template: `
+    <lib-app-bar barPosition="Up" [asSticky]="true">
     <div class="ui-navbar">
       <button class="gm-more_vert" (click)="emitter.emit({who: 'sidebar'})"></button>
       <a [routerLink]="'/'">
@@ -30,7 +31,8 @@ import {Subscription} from 'rxjs';
         <button class="gm-menu" (click)="emitter.emit({who: 'menu'})" ></button>
         <lib-menu [menu]="menu" [bottom]="true"></lib-menu>
       </div>
-    </div>`,
+    </div>
+    </lib-app-bar>`,
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent implements OnDestroy {

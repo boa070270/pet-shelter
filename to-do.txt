@@ -34,7 +34,7 @@ What is the process to make custom page:
 1. User open editor, he has access to html editor and set of plugins. He can drag-and-drop plugin over html editor.
 He can set parameters of plugin.
 HTML Editor                                             Data
-<p>Hello world</>                                       {
+<p>Hello world</p>                                       {
 <p><carousel name="car1"></carousel></p>                  car1:{datasource:'name', component:'name', swagger:'name'|{swagger object}},
 <p><ui-img name="img1"></ui-img></</p>                    img1:{id="000001"},
 <p>You can edit this table</p>

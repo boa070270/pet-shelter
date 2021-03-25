@@ -1,5 +1,7 @@
 <a routerLink="/test-dynamic">Test Dynamic Page</a>
-
+<div class="fixed-test">
+  <span>Scroll:{{posY | json}}</span>
+</div>
 <h1>Test Table</h1>
 <lib-table [swagger]="tblSwagger" [dataSource]="tblData"></lib-table>
 <br>
@@ -1724,3 +1726,11 @@
   <li class="gm-zoom_out">gm-zoom_out</li>
   <li class="gm-zoom_out_map">gm-zoom_out_map</li>
 </ul>
+<!--
+<lib-app-bar [barPosition]="'Up'" style="width: 100%; background-color: blueviolet">
+  AppBar Top
+</lib-app-bar>
+<lib-app-bar [barPosition]="'Down'" style="width: 100%; background-color: blueviolet">
+  AppBar Bottom
+</lib-app-bar>
+-->

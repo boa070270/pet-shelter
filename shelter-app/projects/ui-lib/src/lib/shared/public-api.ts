@@ -11,3 +11,5 @@ export * from './utils';
 export * from './paging';
 export * from './menu.service';
 export * from './services-api';
+export * from './scroll-event.service';
+export * from './interval-observable.service';
