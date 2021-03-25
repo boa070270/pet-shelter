@@ -11,7 +11,7 @@ export class SlideContainerDirective {
     this.showSlide();
   }
   private showSlide(): void {
-    this.style = `left: 0px; transform: translateX(-${this.order}%)`;
+    this.style = `left: 0px; transform: translateX(-${this.order * 100}%)`;
   }
   addSlide(): number {
     return this.slides++;
@@ -23,7 +23,7 @@ export class SlideContainerDirective {
     this.showSlide();
   }
   prev(): void {
-    if (++this.order > this.slides) {
+    if (--this.order <= 0) {
       this.order = 0;
     }
     this.showSlide();

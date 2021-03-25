@@ -2,7 +2,7 @@ import {
   Component,
   EventEmitter,
   Inject,
-  Input, NgZone,
+  Input,
   OnDestroy,
   OnInit,
   Optional,
@@ -15,18 +15,18 @@ import {SystemLang} from '../../i18n';
 import {SlideContainerDirective} from './slide-container.directive';
 import {ListRange} from '@angular/cdk/collections';
 import {Subscription} from 'rxjs';
-import {dashCaseToCamelCase} from "@angular/compiler/src/util";
 
 
 @Component({
   selector: 'lib-carousel',
   template: `<div class="slide-container" libSlideContainer>
-    <div libSlideElement *ngFor="let item of data">
-      <ng-template [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="item"></ng-template>
+    <div libSlideElement *ngFor="let item of data" class="slide-element">
+      <ng-template [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{$implicit:item}"></ng-template>
     </div>
-    <button class="gm-chevron_left btn btn-left" (click)="slideContainer.prev()"></button>
-    <button class="gm-chevron_right btn btn-right" (click)="slideContainer.next()"></button>
-  </div>`,
+  </div>
+  <button class="gm-chevron_left btn btn-left" (click)="slideContainer.prev()"></button>
+  <button class="gm-chevron_right btn btn-right" (click)="slideContainer.next()"></button>
+  `,
   styleUrls: ['./carousel.component.scss']
 })
 export class CarouselComponent<T, U> extends AbstractComponent implements OnInit, OnDestroy {
@@ -58,7 +58,7 @@ export class CarouselComponent<T, U> extends AbstractComponent implements OnInit
   }
 
   private updateData(): void {
-    if (this.data.length === 10) {
+    if (this.data && this.data.length === 10) {
       this.start += 10;
     } else {
       this.start = 0;
