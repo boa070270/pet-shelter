@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Inject,
@@ -36,20 +37,27 @@ export class CarouselComponent<T, U> extends AbstractComponent implements OnInit
   private readonly collectionViewer;
   data: T[] | ReadonlyArray<T> = null;
   start = 0;
+  private cycle = 0;
   private dataSubs: Subscription;
+  private interval: Subscription;
   constructor(public systemLang: SystemLang, private intervalObserver: IntervalObservableService,
+              protected changeDetector: ChangeDetectorRef,
               @Optional() @Inject('i18NCfg') public i18NCfg?: I18NType) {
     super(systemLang, i18NCfg);
     this.collectionViewer = {viewChange: new EventEmitter<ListRange>()};
-    this.intervalObserver.scheduler( () => this.updateData(), 10);
+    this.interval = this.intervalObserver.scheduler( () => this.updateData(), 10);
   }
   ngOnInit(): void {
     const data = this.cdkDataSource.connect(this.collectionViewer);
-    this.dataSubs = data.subscribe(d => this.data = d);
+    this.dataSubs = data.subscribe(d => {
+      this.data = d;
+      this.changeDetector.detectChanges();
+    });
     this.collectionViewer.viewChange.emit({start: this.start, end: this.start + 10});
   }
   ngOnDestroy(): void {
     super.ngOnDestroy();
+    this.interval.unsubscribe();
     if (this.dataSubs !== null) {
       this.cdkDataSource.disconnect(this.collectionViewer);
       this.dataSubs.unsubscribe();
@@ -58,6 +66,12 @@ export class CarouselComponent<T, U> extends AbstractComponent implements OnInit
   }
 
   private updateData(): void {
+    if (this.cycle++ < 40) {
+      this.slideContainer.next();
+      this.changeDetector.detectChanges();
+      return;
+    }
+    this.cycle = 0;
     if (this.data && this.data.length === 10) {
       this.start += 10;
     } else {
