@@ -14,6 +14,7 @@ import {EditorPluginComponent} from './editor-plugin.component';
 import {ButtonTools} from './button-tools';
 import {InsertTools} from './insert-tools';
 import {Align, BorderStyle, BorderWidth} from './types';
+import {SlideContainerDirective} from '../controls';
 
 @Component({
     selector: 'lib-wysiwyg-editor',
@@ -31,12 +32,13 @@ export class EditorComponent implements AfterViewInit {
     regexBR = /<br>/g;
     replaceBR = '<br>\n';
 
-    @ViewChild('editor') editorElement: ElementRef<HTMLDivElement>;
+    @ViewChild('editor', {static: true}) editorElement: ElementRef<HTMLDivElement>;
     @Input() startingHTMLvalue = '';
     @ViewChild('c1') color1: ElementRef<HTMLInputElement>;
     @ViewChild('c2') color2: ElementRef<HTMLInputElement>;
     @ViewChild('c3') color3: ElementRef<HTMLInputElement>;
     @ViewChild('c4') color4: ElementRef<HTMLInputElement>;
+    @ViewChild(SlideContainerDirective, {static: true}) slide: SlideContainerDirective;
     // @Output() output: EventEmitter<any> = new EventEmitter<any>();
 
     boldPressed: boolean;
@@ -60,7 +62,12 @@ export class EditorComponent implements AfterViewInit {
 
     @ViewChild('helpDIV') helpDIV: ElementRef<HTMLDivElement>;
     helpPressed = false;
-
+    get source(): string {
+      return this.editorElement.nativeElement.innerHTML;
+    }
+    set source(s) {
+      this.editorElement.nativeElement.innerHTML = s;
+    }
     constructor(private resolver: ComponentFactoryResolver,
                 private injector: Injector,
                 private app: ApplicationRef) {}
@@ -68,7 +75,7 @@ export class EditorComponent implements AfterViewInit {
     ngAfterViewInit(): void {
         this.selection = document.getSelection();
         if (this.startingHTMLvalue) {
-            this.editorElement.nativeElement.innerHTML = this.startingHTMLvalue;
+            this.source = this.startingHTMLvalue;
             // @ts-ignore
             for (const el of this.editorElement.nativeElement.getElementsByTagName('editor-plugin')) {
                 const factory = this.resolver.resolveComponentFactory(EditorPluginComponent);

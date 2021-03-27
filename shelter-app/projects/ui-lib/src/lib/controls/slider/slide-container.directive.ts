@@ -30,4 +30,10 @@ export class SlideContainerDirective {
     }
     this.showSlide();
   }
+  to(slide: number): void {
+    if (slide >= 0 && slide < this.slides) {
+      this.order = slide;
+    }
+    this.showSlide();
+  }
 }

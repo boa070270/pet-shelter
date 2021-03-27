@@ -4,22 +4,24 @@ import {CommonModule} from '@angular/common';
 import {EditorPluginComponent} from './editor-plugin.component';
 import {DynamicHTMLModule} from './dynamic-html';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {ControlsModule} from '../controls';
 
 @NgModule({
   declarations: [
       EditorComponent,
       EditorPluginComponent
   ],
-    imports: [
-        CommonModule,
-        DynamicHTMLModule.forRoot({
-            components: [
-                {component: EditorPluginComponent, selector: 'editor-plugin'}
-            ]
-        }),
-        ReactiveFormsModule,
-        FormsModule,
-    ],
+  imports: [
+    CommonModule,
+    DynamicHTMLModule.forRoot({
+      components: [
+        {component: EditorPluginComponent, selector: 'editor-plugin'}
+      ]
+    }),
+    ReactiveFormsModule,
+    FormsModule,
+    ControlsModule,
+  ],
   exports: [EditorComponent]
 })
 export class AngularWysiwygEditorLibModule { }
