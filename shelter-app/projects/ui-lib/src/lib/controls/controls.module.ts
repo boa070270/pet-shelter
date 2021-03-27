@@ -44,6 +44,7 @@ import { AppBarComponent } from './app-bar.component';
 import { SlideContainerDirective } from './slider/slide-container.directive';
 import { SlideContainerComponent } from './slider/slide-container.component';
 import { SlideElementDirective } from './slider/slide-element.directive';
+import { CardComponent } from './card.component';
 
 @NgModule({
   declarations: [
@@ -76,6 +77,7 @@ import { SlideElementDirective } from './slider/slide-element.directive';
     SlideContainerDirective,
     SlideContainerComponent,
     SlideElementDirective,
+    CardComponent,
   ],
     imports: [
         CommonModule,
@@ -116,6 +118,7 @@ import { SlideElementDirective } from './slider/slide-element.directive';
     SlideContainerDirective,
     SlideContainerComponent,
     SlideElementDirective,
+    CardComponent,
   ]
 })
 export class ControlsModule {
@@ -144,5 +147,6 @@ export class ControlsModule {
     componentsPlugin.addPlugin('lib-upload-files', {component: UploadFilesComponent, schema: null});
     componentsPlugin.addPlugin('simple-dialog', {component: SimpleDialogComponent, schema: null});
     componentsPlugin.addPlugin('snake-bar', {component: SnakeBarComponent, schema: null});
+    componentsPlugin.addPlugin('app-bar', {component: AppBarComponent, schema: null});
   }
 }

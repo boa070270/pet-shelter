@@ -11,9 +11,9 @@ import {
 } from '@angular/core';
 import {Form, NgForm} from '@angular/forms';
 import {BehaviorSubject, Observable} from 'rxjs';
-import {TableSchema} from '../controls/table/table-schema';
-import {ExtendedData, swaggerUI} from "../shared";
-import {DialogService} from "../dialog-service";
+// import {TableSchema} from '../controls/table/table-schema';
+import {ExtendedData, swaggerUI} from '../shared';
+import {DialogService} from '../dialog-service';
 
 @Component({
     // tslint:disable-next-line:component-selector
@@ -26,7 +26,7 @@ export class EditorPluginComponent {
     availableTags = ['lib-table-generator'];
 
     // TODO get from some service or something
-    componentParams: TableSchema;
+    // componentParams: TableSchema;
 
     // TODO get from server into input and save on change
     tableDataSet = [
@@ -161,20 +161,20 @@ export class EditorPluginComponent {
       extData.action = 'save_cancel';
       extData.caption = this.selected;
       // extData.icon = 'gm-warning';
-      extData.swagger = {
-        orderControls: [],
-        properties: {
-          observableData: {
-
-          },
-          columns: {
-
-          },
-          caption: {
-
-          }
-        }
-      };
+      // extData.swagger = {
+      //   orderControls: [],
+      //   properties: {
+      //     observableData: {
+      //
+      //     },
+      //     columns: {
+      //
+      //     },
+      //     caption: {
+      //
+      //     }
+      //   }
+      // };
 
 
         // [caption] = "tableSchema.caption"

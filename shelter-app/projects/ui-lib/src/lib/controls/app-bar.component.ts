@@ -10,8 +10,8 @@ import {Subscription} from 'rxjs';
   styleUrls: ['./app-bar.component.scss']
 })
 export class AppBarComponent extends AbstractComponent implements OnInit, OnDestroy {
-  @Input() barPosition: 'Up' | 'Down';
-  @Input() asSticky: boolean;
+  @Input('position') barPosition: 'Up' | 'Down';
+  @Input('sticky') asSticky: boolean;
   private readonly scrollSubs: Subscription;
   style: any = {display: 'block', margin: 0, padding: 0, height: '3em', 'z-index': 1000, position: 'relative'};
   private direction: string;
@@ -42,6 +42,7 @@ export class AppBarComponent extends AbstractComponent implements OnInit, OnDest
       this.style.position = this.position;
     } else {
       this.style.bottom = `-${this.slide}px`;
+      this.style.position = 'fixed';
     }
   }
   ngOnDestroy(): void {

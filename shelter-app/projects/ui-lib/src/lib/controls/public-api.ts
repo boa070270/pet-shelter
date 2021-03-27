@@ -30,3 +30,4 @@ export * from './swagger-form/public-api';
 export * from './survey/public-api';
 export * from './link.component';
 export * from './app-bar.component';
+export * from './card.component';
