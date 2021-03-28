@@ -6,7 +6,7 @@ import {Subscription} from 'rxjs';
   selector: '[libSlideContainer]'
 })
 export class SlideContainerDirective {
-  slides = 0;
+  private slides = 0;
   private order = 0;
   @HostBinding() style: string;
   constructor(private intervalObserver: IntervalObservableService) {
@@ -35,5 +35,8 @@ export class SlideContainerDirective {
       this.order = slide;
     }
     this.showSlide();
+  }
+  get slide(): number {
+    return this.order;
   }
 }

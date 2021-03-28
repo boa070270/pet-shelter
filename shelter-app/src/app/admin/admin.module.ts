@@ -14,6 +14,7 @@ import {UserTableComponent} from './user-table.component';
 import {ControlsModule, UiLibModule, DialogServiceModule, AngularWysiwygEditorLibModule} from 'ui-lib';
 import {ShelterCommonModule} from '../common';
 import {FormsModule} from '@angular/forms';
+import { TestSyncComponent } from './test-sync.component';
 
 
 @NgModule({
@@ -27,6 +28,7 @@ import {FormsModule} from '@angular/forms';
     BannersTableComponent,
     PageTableComponent,
     UserTableComponent,
+    TestSyncComponent,
   ],
   imports: [
     CommonModule,

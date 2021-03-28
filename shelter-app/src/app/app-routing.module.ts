@@ -11,7 +11,8 @@ import {SearchPageComponent} from './search-page.component';
 import {MenuPageComponent} from './menu-page.component';
 import {SystemMenuService} from './system-menu.service';
 import {TestDynamicComponent} from './test-dynamic.component';
-import {TestEditorComponent} from "./test-editor.component";
+import {TestEditorComponent} from './test-editor.component';
+import {TestSyncComponent} from './admin/test-sync.component';
 
 const routes: Routes = [
   { path: '', component: MainPageComponent },
@@ -20,6 +21,7 @@ const routes: Routes = [
   { path: 'search', component: SearchPageComponent },
   { path: 'test-dynamic', component: TestDynamicComponent},
   { path: 'test-editor', component: TestEditorComponent},
+  { path: 'test-sync', component: TestSyncComponent},
   { path: 'test', component: TopMenuPageComponent},
   { path: 'admin', loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule) },
 ];
