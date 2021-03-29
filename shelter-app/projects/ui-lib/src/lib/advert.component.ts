@@ -14,6 +14,7 @@ export class AdvertComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+    console.log('AdvertComponent', this.mimeType, this.mediaUrl, this.refUrl, this.tooltip);
   }
 
 }

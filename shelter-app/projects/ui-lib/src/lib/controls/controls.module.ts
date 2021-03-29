@@ -26,7 +26,7 @@ import {SpinnerComponent} from './spinner.component';
 import {SimpleDialogComponent} from './dialogs/simple-dialog.component';
 import {SnakeBarComponent} from './dialogs/snake-bar.component';
 import {CommentComponent, VoteComponent, DiscussionComponent} from './survey';
-import {CarouselComponent} from './carousel.component';
+import {CarouselComponent} from './slider/carousel.component';
 import {LinkComponent} from './link.component';
 import {
   GeneratorFormComponent,
@@ -40,6 +40,11 @@ import { UiMenuDirective } from './menu/ui-menu.directive';
 import { MenuBarComponent } from './menu/menu-bar.component';
 import { EditableListComponent } from './editable-list.component';
 import { SwaggerBuilderComponent } from './swagger-builder.component';
+import { AppBarComponent } from './app-bar.component';
+import { SlideContainerDirective } from './slider/slide-container.directive';
+import { SlideContainerComponent } from './slider/slide-container.component';
+import { SlideElementDirective } from './slider/slide-element.directive';
+import { CardComponent } from './card.component';
 
 @NgModule({
   declarations: [
@@ -68,6 +73,11 @@ import { SwaggerBuilderComponent } from './swagger-builder.component';
     CommentComponent, VoteComponent, DiscussionComponent, UiMenuDirective, MenuBarComponent,
     EditableListComponent,
     SwaggerBuilderComponent,
+    AppBarComponent,
+    SlideContainerDirective,
+    SlideContainerComponent,
+    SlideElementDirective,
+    CardComponent,
   ],
     imports: [
         CommonModule,
@@ -104,6 +114,11 @@ import { SwaggerBuilderComponent } from './swagger-builder.component';
     CommentComponent, VoteComponent, DiscussionComponent, UiMenuDirective, MenuBarComponent,
     EditableListComponent,
     SwaggerBuilderComponent,
+    AppBarComponent,
+    SlideContainerDirective,
+    SlideContainerComponent,
+    SlideElementDirective,
+    CardComponent,
   ]
 })
 export class ControlsModule {
@@ -132,5 +147,6 @@ export class ControlsModule {
     componentsPlugin.addPlugin('lib-upload-files', {component: UploadFilesComponent, schema: null});
     componentsPlugin.addPlugin('simple-dialog', {component: SimpleDialogComponent, schema: null});
     componentsPlugin.addPlugin('snake-bar', {component: SnakeBarComponent, schema: null});
+    componentsPlugin.addPlugin('app-bar', {component: AppBarComponent, schema: null});
   }
 }

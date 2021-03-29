@@ -12,6 +12,7 @@ import {
   UiElementsModule,
   LoggerModule,
   DialogServiceModule, UILoggerWriterToken,
+  AngularWysiwygEditorLibModule
 } from 'ui-lib';
 import {HttpClientModule} from '@angular/common/http';
 import {MainPageComponent} from './main-page.component';
@@ -19,13 +20,13 @@ import {TopMenuPageComponent} from './top-menu-page.component';
 import {SubMenuPageComponent} from './sub-menu-page/sub-menu-page.component';
 import {FormsModule} from '@angular/forms';
 import {ScrollingModule} from '@angular/cdk/scrolling';
-import {AngularWysiwygEditorLibModule} from '@bilousd/angular-wysiwyg-editor-lib';
 import {SearchPageComponent} from './search-page.component';
 import {ShelterCommonModule} from './common';
 import {MenuPageComponent} from './menu-page.component';
 import {BasicService} from './basic.service';
 import {TestDynamicComponent} from './test-dynamic.component';
 import {LogWriterService} from './log-writer.service';
+import { TestEditorComponent } from './test-editor.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +37,7 @@ import {LogWriterService} from './log-writer.service';
     SearchPageComponent,
     MenuPageComponent,
     TestDynamicComponent,
+    TestEditorComponent,
   ],
   imports: [
     BrowserModule,

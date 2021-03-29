@@ -6,7 +6,6 @@ import {Router} from '@angular/router';
   template: `<div (click)="onCLick()" class="link-container">
     <img src="{{icoUri}}" class="ico-class" *ngIf="icoUri">
     <i [ngClass]="classes" *ngIf="faIcon"></i>
-    <mat-icon class="fnt-class" *ngIf="matIcon">{{matIcon}}</mat-icon>
     <div class="content">
       <ng-content></ng-content>
     </div>
@@ -21,14 +20,13 @@ import {Router} from '@angular/router';
 })
 export class LinkComponent implements OnInit {
   @Input() href: string;
-  @Input() matIcon: string;
   @Input() faIcon: string;
   icoUri: string;
 
   constructor(private router: Router) { }
 
   ngOnInit(): void {
-    if (!this.matIcon && !this.faIcon) {
+    if (!this.faIcon) {
       if (this.href.startsWith('tel:')) {
         this.faIcon = 'phone';
       } else if (this.href.startsWith('mailto:')) {

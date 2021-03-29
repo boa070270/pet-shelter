@@ -1,11 +1,16 @@
 :host {
-    height: 100%;
-    max-height: 80vh;
-    width: 100%;
-    max-width: 80vw;
+  display: block;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  padding: 5px;
+  box-sizing: border-box;
 }
 .editor-toolbar-parent {
-    display: grid;
+  display: block;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 .editor-toolbar {
     display: inline-block;
@@ -41,14 +46,34 @@
     border-left-width: 0;
     margin: 6px 0 6px 0;
 }
+.work-space {
+  display: block;
+  position: relative;
+  min-width: 400px;
+  min-height: 300px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.work-table {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
 .editor-editable {
-    border: 1px solid black;
-    padding: 3px;
-    min-width: 400px;
-    min-height: 300px;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
+  display: block;
+  position: relative;
+  border: 1px solid black;
+  padding: 3px;
+  min-width: 400px;
+  min-height: 300px;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
 }
 .editor-button-active {
     background-color: dimgray;

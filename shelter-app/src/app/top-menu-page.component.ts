@@ -1,4 +1,4 @@
-import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {BasicService} from './basic.service';
 import {
   AbstractDataSource,
@@ -14,7 +14,8 @@ import {
   swaggerUI, TableProviderService,
   TitleType,
   VoteOption,
-  VoteType
+  VoteType,
+  ScrollEventService
 } from 'ui-lib';
 import {BehaviorSubject, EMPTY, from as fromObject, Observable} from 'rxjs';
 import {NgForm} from '@angular/forms';
@@ -229,13 +230,20 @@ export class TopMenuPageComponent implements OnInit {
   listSelect: any;
   tblSwagger: SwaggerObject;
   tblData: AbstractDataSource<any>;
+  posY: any;
   constructor(private basicService: BasicService,
               private dynamicSwagger: SwaggerFormService,
               private dialogService: DialogService,
-              private tableProvider: TableProviderService) {
+              private tableProvider: TableProviderService,
+              private scrollEvent: ScrollEventService,
+              protected changeDetector: ChangeDetectorRef) {
     dynamicSwagger.addSchemaIfNotExists('test', this.swagger);
     this.tblData = tableProvider.getDataSource('test');
     this.tblSwagger = this.tableProvider.getTableSwagger('test');
+    this.scrollEvent.eventEmitter.subscribe(se => {
+      this.posY = se;
+      this.changeDetector.detectChanges();
+    });
   }
 
   ngOnInit(): void {

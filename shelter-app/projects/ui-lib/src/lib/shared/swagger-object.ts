@@ -113,6 +113,22 @@ export function validNativeType(str: string): boolean {
   }
   return false;
 }
+export function coerceNativeValue(type: SwaggerNativeTypes): (v: any) => any {
+    switch (type) {
+      case 'string':
+        return (v) => v;
+      case 'number':
+        return (v) => v * 1;
+      case 'integer':
+        return (v) => v * 1;
+      case 'boolean':
+        return (v) => !!v;
+      case 'file':
+        return (v) => v;
+      default:
+        return (v) => null;
+    }
+}
 export abstract class SwaggerSchema {
 
   protected _ui: SwaggerUI;

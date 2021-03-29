@@ -1,0 +1,7 @@
+<div>
+  <div #editor style="width: 90%; height: 30%; border: 1px solid; padding: 5px; margin: 8px;"
+       [contentEditable]="true" (click)="onClick($event)" (keydown)="onKeyPress($event)"></div>
+</div>
+<div>
+  <textarea style="width: 90%; height: 30%; padding: 5px; margin: 8px;" [(ngModel)]="source"></textarea>
+</div>

@@ -12,7 +12,7 @@ import {
   GeneratorFormComponent,
   SwaggerArrayComponent,
   SwaggerFormComponent,
-  SwaggerNativeComponent
+  SwaggerNativeComponent, AppBarComponent
 } from '../controls';
 import { DynamicPageComponent } from './dynamic-page.component';
 import {createCustomElement} from '@angular/elements';
@@ -25,7 +25,7 @@ import {createCustomElement} from '@angular/elements';
   ],
   exports: [
     ControlsModule,
-    DynamicPageComponent
+    DynamicPageComponent,
   ]
 })
 export class UiElementsModule {
@@ -56,6 +56,7 @@ export class UiElementsModule {
     customElements.define('lib-generator-form-element', generatorFormComponent);
     customElements.define('lib-swagger-array-element', swaggerArrayComponent);
     customElements.define('lib-swagger-native-element', swaggerNativeComponent);
-
+    const appBar = createCustomElement(AppBarComponent, {injector});
+    customElements.define('app-bar', appBar);
   }
 }

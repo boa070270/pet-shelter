@@ -15,10 +15,10 @@ class BannerDb {
         let result;
         switch (resource) {
         case 'banner' :
-            result = await pgPool.query('SELECT \'banner\' as resource, b.id_asset as "assetId", b.target_url as "targetUrl", b.tooltip, s.mimetype as "mimeType" FROM banner b, storage_lob s WHERE b.id_asset = s.id and (b.lang = coalesce($1,b.lang) or b.lang is null) ORDER BY b.score OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY', [lang, offset, count]);
+            result = await pgPool.query('SELECT \'banner\' as resource, b.id_asset as "assetId", b.target_url as "targetUrl", b.tooltip, s.mimetype as "mimeType" FROM banner b, storage_lob s WHERE b.id_asset = s.id and (b.lang = coalesce($1,b.lang) or b.lang is null or b.lang = \'\') ORDER BY b.score OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY', [lang, offset, count]);
             break;
         case 'page':
-            result = await pgPool.query('SELECT \'page\' as resource, a.id_asset as "assetId", a.id_page as "targetUrl", a.tooltip, s.mimetype as "mimeType" FROM page_attachment a, storage_lob s, pages p WHERE a.id_asset = s.id and (p.lang = coalesce($1,p.lang) or p.lang is null) and p.id = a.id_page ORDER BY p.score, p.created desc OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY', [lang, offset, count]);
+            result = await pgPool.query('SELECT \'page\' as resource, a.id_asset as "assetId", a.id_page as "targetUrl", a.tooltip, s.mimetype as "mimeType" FROM page_attachment a, storage_lob s, pages p WHERE a.id_asset = s.id and (p.lang = coalesce($1,p.lang) or p.lang is null or p.lang = \'\') and p.id = a.id_page ORDER BY p.score, p.created desc OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY', [lang, offset, count]);
             break;
         case 'pet':
             result = await pgPool.query('SELECT \'pet\' as resource, p.id_asset as "assetId", p.id_pet as "targetUrl", p.tooltip, s.mimetype as "mimeType" FROM pet_asset p, storage_lob s WHERE p.id_asset = s.id OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY', [offset, count]);
