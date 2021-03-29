@@ -163,8 +163,9 @@ export class TestDynamicComponent implements OnInit {
           }, null, ['fieldName', 'fieldType'], null,
           {
             fieldType: [
-              // {c: '!SwaggerNative,SwaggerObject,SwaggerArray',
-              // hide: ['itemType', 'nativeType', 'objectLink']}, // required and default, so no use?
+              {c: '!SwaggerNative,SwaggerObject,SwaggerArray',
+                hide: ['itemType', 'nativeType', 'objectLink', 'nativeConstrictions', 'objectConstrictions',
+                  'arrayConstrictions', 'stringConstrictions', 'numberConstrictions']},
               {c: '=SwaggerNative',
                 hide: ['itemType', 'objectLink', 'objectConstrictions', 'arrayConstrictions'],
                 show: ['nativeType', 'nativeConstrictions']},
@@ -176,8 +177,8 @@ export class TestDynamicComponent implements OnInit {
                 show: ['itemType', 'arrayConstrictions']}
               ],
             itemType: [
-              {c: '=SwaggerNative', hide: ['objectLink'], show: ['nativeType']},
-              {c: '=SwaggerObject', hide: ['nativeType'], show: ['objectLink']}
+              {c: '=SwaggerNative', hide: ['objectLink'], show: ['nativeType', 'nativeConstrictions']},
+              {c: '=SwaggerObject', hide: ['nativeType'], show: ['objectLink', 'objectConstrictions']}
               ],
             nativeType: [
               {c: '=string', show: ['stringConstrictions']},
@@ -228,7 +229,7 @@ export class TestDynamicComponent implements OnInit {
   }
 
   moveUp(rows: any[]): void {
-    console.log('TestDynamicComponent.moveUp');
+    console.log('TestDynamicComponent.moveUp', rows);
     if (rows[0].order < 1) {
       return;
     }
@@ -237,7 +238,7 @@ export class TestDynamicComponent implements OnInit {
     this.data = {fields: this.data.fields.slice()};
   }
   moveDown(rows: any[]): void {
-    console.log('TestDynamicComponent.moveDown');
+    console.log('TestDynamicComponent.moveDown', rows);
     if (rows[0].order > this.data.fields.length - 1) {
       return;
     }
