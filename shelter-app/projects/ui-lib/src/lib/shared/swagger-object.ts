@@ -62,6 +62,9 @@ export interface ArrayConstrictions extends BaseConstrictions {
   minItems?: number;
   maxItems?: number;
   uniqueItems?: boolean;
+  customTableActions?: Array<{icon: string, tooltip: string | TitleType[], command: string, action: (v) => void}>;
+  trIn?: (v: any[]) => any[];
+  trOut?: (v: any[]) => any[];
 }
 export interface ObjectConstrictions extends BaseConstrictions {
   /**

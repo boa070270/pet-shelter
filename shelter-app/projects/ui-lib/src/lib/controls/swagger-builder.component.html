@@ -12,10 +12,10 @@
                             [tooltips]="['Обов\'язково']"
                             hint="Is property required"
       ></lib-checkbox-control>
-      <ng-template [ngIf]="swaggerObject">
-        <lib-swagger-form [swagger]="swaggerObject"></lib-swagger-form>
+      <ng-template [ngIf]="formObject">
+        <lib-swagger-form [swagger]="formObject"></lib-swagger-form>
       </ng-template>
-      <ng-template [ngIf]="!swaggerObject">
+      <ng-template [ngIf]="!formObject">
         <lib-swagger-builder [options]="nestedOptions"></lib-swagger-builder>
       </ng-template>
 <!--      <ng-container [ngSwitch]="selectedType">-->

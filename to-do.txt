@@ -1,3 +1,9 @@
+- Bug! Table component tableSettings not displaying all available columns to display in table, only ones that is in orderControl
+- Bug! Table component doesn't save edits
+- Bug! Table component addRow doesn't show 'default' constriction
+- Bug! Table component -> addRow -> without default, 'select' element shows something chosen, but doesn't save it
+- Proposal: Form should not save values of inputs that are hidden with object Behaviour
+- Task! List plugin for native swagger array
 - IFilter:
   bring all parameters to this type
   make filter-dialog-component
