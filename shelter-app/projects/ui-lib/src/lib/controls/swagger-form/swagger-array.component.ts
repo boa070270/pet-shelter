@@ -1,6 +1,15 @@
-import {Component, forwardRef, Inject, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, forwardRef, Inject, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
-import {ArrayDataSource, I18NType, SwaggerArray, SwaggerComponent, SwaggerNative, SwaggerObject} from '../../shared';
+import {
+  ArrayConstrictions,
+  ArrayDataSource,
+  BaseConstrictions,
+  I18NType,
+  SwaggerArray,
+  SwaggerComponent,
+  SwaggerNative,
+  SwaggerObject
+} from '../../shared';
 import {TableComponent} from '../table/table.component';
 import {FormErrorsService} from './form-errors.service';
 import {SystemLang} from '../../i18n';
@@ -10,7 +19,8 @@ import {BaseSwaggerComponent} from './base-swagger.component';
 @Component({
   selector: 'lib-swagger-array',
   template: `
-    <lib-table [swagger]="items" [dataSource]="dataSource" [disabled]="disabled"></lib-table>`,
+    <lib-table [swagger]="items" [dataSource]="dataSource" [disabled]="disabled" [customActions]="constrictions.customTableActions"
+               (tableEvent)="tableAction($event)" [trIn]="constrictions.trIn" [trOut]="constrictions.trOut"></lib-table>`,
   styleUrls: ['./swagger-array.component.scss'],
   providers: [{
     provide: NG_VALUE_ACCESSOR,
@@ -23,9 +33,12 @@ export class SwaggerArrayComponent extends BaseSwaggerComponent implements OnIni
   dataSource = ArrayDataSource.EmptyDS();
   @Input()
   nameControl: string;
-  @ViewChild(TableComponent, {static: true}) table: TableComponent;
+  @ViewChild(TableComponent, {static: true}) table: TableComponent<any, any>;
   get items(): SwaggerNative | SwaggerObject {
     return (this.swagger as SwaggerArray).items;
+  }
+  get constrictions(): ArrayConstrictions {
+    return (this.swagger as SwaggerArray).constrictions;
   }
   constructor(public systemLang: SystemLang, protected directionality: Directionality,
               protected formErrors: FormErrorsService) {
@@ -51,4 +64,10 @@ export class SwaggerArrayComponent extends BaseSwaggerComponent implements OnIni
     super.setDisabledState(isDisabled);
   }
 
+  tableAction(event: {cmd: string; rows: any[]}): void {
+    const a = this.constrictions.customTableActions.find(value => value.command === event.cmd);
+    if (a) {
+      a.action(event.rows);
+    }
+  }
 }

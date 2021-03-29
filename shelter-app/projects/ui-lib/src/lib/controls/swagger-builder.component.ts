@@ -4,17 +4,10 @@ import {ControlValueAccessor} from '@angular/forms';
 import {SystemLang} from '../i18n';
 import {Directionality} from '@angular/cdk/bidi';
 import {EditableListComponent} from './editable-list.component';
-import {SwaggerNative, SwaggerObject, SwaggerSchema, SwaggerUI, swaggerUI, TitleType} from '../shared';
+import {SwaggerNative, SwaggerObject, SwaggerArray, swaggerUI, TitleType} from '../shared';
 import {CheckboxControlComponent, CheckboxParameters} from './checkbox-control.component';
 import {SelectControlComponent} from './select-control.component';
 import {SwaggerFormComponent} from './swagger-form';
-
-interface SwaggerObjectConstruct {
-  orderControls: string[];
-  properties: { [key: string]: SwaggerSchema };
-  ui: SwaggerUI;
-  required: string[];
-}
 
 @Component({
   selector: 'lib-swagger-builder',
@@ -27,18 +20,18 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
   private _extraParams: CheckboxParameters = {};
 
   availableTypes = ['SwaggerNative', 'SwaggerArray', 'SwaggerObject'];
-  nativeTypes = ['string', 'number', 'integer', 'boolean'];
   checkbox;
 
   list: string[];
   selected: string;
   selectedType: string;
   arrayType: string;
-  nestedOptions: SwaggerObjectConstruct[];
-  swaggerObject: SwaggerObject;
-  swagger: SwaggerObjectConstruct = {
-    orderControls: ['id', 'description', 'child'],
-    properties: {
+  nestedOptions: SwaggerObject[];
+  formObject: SwaggerObject = this.setFormObject('native');
+
+  swagger: SwaggerObject = new SwaggerObject(
+    ['id', 'description', 'child'],
+    {
       id: SwaggerNative.asString(),
       description: SwaggerNative.asString(),
       child: new SwaggerObject(
@@ -48,10 +41,11 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
           childDescription: SwaggerNative.asString(),
           sex: SwaggerNative.asString(null, {enum: ['m', 'f']})
         })
-    },
-    ui: null,
-    required: ['id']
-  };
+    }, null, ['id']);
+
+  get props(): object {
+    return this.swagger.properties;
+  }
 
   @Input()
   set extraParams(p: CheckboxParameters) {
@@ -64,10 +58,10 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
     return this._extraParams;
   }
   @Input()
-  set options(p: SwaggerObjectConstruct[]) {
+  set options(p: SwaggerObject[]) {
     this.extraParams.options = p;
   }
-  get options(): SwaggerObjectConstruct[] {
+  get options(): SwaggerObject[] {
     if (!this.extraParams.options) {
       this.extraParams.options = [{orderControls: null, properties: null, ui: null, required: null}];
     }
@@ -91,7 +85,7 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
   @ViewChild(EditableListComponent, {static: true}) result: EditableListComponent;
   @ViewChild(SelectControlComponent, {static: true}) selectControl: SelectControlComponent;
   @ViewChild(CheckboxControlComponent, {static: true}) isRequired: CheckboxControlComponent;
-  @ViewChild(SwaggerFormComponent, {static: true}) swaggerForm: SwaggerFormComponent;
+  @ViewChild(SwaggerFormComponent) swaggerForm: SwaggerFormComponent;
 
   constructor(public systemLang: SystemLang, protected directionality: Directionality) {
     super(systemLang, directionality);
@@ -107,51 +101,64 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
 
     this.result.registerOnChange(change => {
       if (change instanceof Array) {
-        console.log('SwaggerBuilderComponent.EditableList.registerOnChange = Array');
+        // TODO save new list items or delete old if changed
+        console.log('SwaggerBuilderComponent.EditableList.registerOnChange = Array: ', change);
         return {};
       }
+      if (this.selected) {
+        switch (this.selectControl.getArrayValues()[0]) {
+          case 'SwaggerNative':
+            this.props[this.selected] = SwaggerNative.parse(this.swaggerForm.formGroup.value);
+            break;
+          case 'SwaggerArray':
+            this.props[this.selected] = SwaggerArray.parse(this.swaggerForm.formGroup.value);
+            break;
+          case 'SwaggerObject':
+          // TODO
+        }
+        console.log('SwaggerBuilderComponent.EditableList.registerOnChange.swagger', this.swagger);
+      }
+
       this.selected = change;
-      // if is in options swagger - get value and put here
-      // this.selectControl.clearAll();
-      // this.selectControl.setValue('SwaggerObject', true);
-      // this.isRequired.setValue('required', true);
+      // TODO change selectControl to value corresponding to 'selected'
+      if (this.props[this.selected] instanceof SwaggerNative) {
+        this.selectControl.setValue('SwaggerNative', true);
+        // this.swaggerForm.writeValue()
+        // TODO change select inside form to ...
+        console.log('SwaggerBuilderComponent.EditableList.registerOnChange.type',
+          (this.props[this.selected] as SwaggerNative).type);
+        this.swaggerForm.writeValue({type: (this.props[this.selected] as SwaggerNative).type});
+      }
+
+      // if (this.swaggerForm) {
+      //   this.swaggerForm.registerOnChange(formChange => {
+      //     console.log('SwaggerBuilderComponent.swaggerForm.registerOnChange', formChange);
+      //     console.log(this.swaggerForm.getFormControl('type'));
+      //     return {};
+      //   });
+      // }
       return {};
     });
     // selectedType.registerOnChange - change inputs
     this.selectControl.registerOnChange(change => {
       console.log('SwaggerBuilderComponent.select.onChange', change);
+      // TODO if change !== old type : do something (just to be sure)
       this.selectedType = change;
       switch (change) {
         case 'SwaggerNative':
-          this.swaggerObject = new SwaggerObject([], {
-              type: SwaggerNative.asString(null, {enum: this.nativeTypes},
-                swaggerUI([{lang: 'en', title: 'Native type'}, {lang: 'uk', title: 'Тип нативного елементу'}]))
-            }
-          );
+          this.formObject = this.setFormObject('native');
           break;
         case 'SwaggerArray':
-          this.swaggerObject = new SwaggerObject([], {
-              arrayType: SwaggerNative.asString(null, {enum: this.nativeTypes},
-                swaggerUI([{lang: 'en', title: 'Array type'}, {lang: 'uk', title: 'Тип елементів массиву'}])),
-            }
-          );
+          this.formObject = this.setFormObject('array');
           break;
         case 'SwaggerObject':
-          this.swaggerObject = null;
+          // TODO nested options
+          this.nestedOptions = [this.swagger];
+          this.formObject = this.setFormObject('null');
           break;
       }
       return {};
     });
-    this.swaggerForm.registerOnChange(change => {
-      console.log('SwaggerBuilderComponent.swaggerForm.registerOnChange', change);
-      return {};
-    });
-    // Native:               Select type (string, number...) (for now)
-    // obj.type, obj.controlType, obj.constrictions, obj.ui
-    // Array:                Select type (native/object) - inside swagger builder for selected
-    // obj.itemsType, obj.constrictions, obj.ui
-    // Object:                       Swagger Builder Component
-    // obj.orderControls, obj.ui, obj.required, obj.properties
   }
 
   onChangeLang(): void {
@@ -169,6 +176,25 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
 
   ngOnDestroy(): void {
     super.ngOnDestroy();
+  }
+
+  setFormObject(type): SwaggerObject {
+    const nativeTypes = ['string', 'number', 'integer', 'boolean'];
+    switch (type) {
+      case 'native':
+        return new SwaggerObject(['type'], {
+            type: SwaggerNative.asString(null, {enum: nativeTypes},
+              swaggerUI([{lang: 'en', title: 'Array type'}, {lang: 'uk', title: 'Тип елементів массиву'}])),
+          }
+        );
+      case 'array':
+        return new SwaggerObject(['type'], {
+          type: SwaggerNative.asString(null, {enum: nativeTypes},
+            swaggerUI([{lang: 'en', title: 'Native type'}, {lang: 'uk', title: 'Тип нативного елементу'}]))
+        });
+      case 'null':
+        return null;
+    }
   }
 
 }

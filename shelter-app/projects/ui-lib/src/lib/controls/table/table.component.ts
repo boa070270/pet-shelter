@@ -33,7 +33,7 @@ import {CdkTable} from '@angular/cdk/table';
 import {zip} from 'rxjs';
 import {Directionality} from '@angular/cdk/bidi';
 import {ComponentType} from '@angular/cdk/overlay';
-import {NG_VALUE_ACCESSOR} from '@angular/forms';
+import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 
 // i18n
 const I18N: I18NType = {
@@ -75,7 +75,7 @@ const DIALOG_SEARCH = new SwaggerObject(['search'], { search: SwaggerNative.asSt
     {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => TableComponent), multi: true}
   ]
 })
-export class TableComponent extends BaseComponent implements OnInit, OnDestroy, AfterViewInit {
+export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDestroy, AfterViewInit, ControlValueAccessor {
   readonly PagingSize = PagingSize;
   get pageSize(): number {
     return this.paging.pageSize;
@@ -89,7 +89,7 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
   @Input()
   displayedNames: I18NType = {};
   @Input()
-  dataSource: AbstractDataSource<any>;
+  dataSource: AbstractDataSource<T>;
   @Input()
   editForm: ComponentType<any> | TemplateRef<any>;
   @Input()
@@ -122,6 +122,10 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
   private paging: Paging;
   private dialogRef: DialogRef<any> = null;
   private dialogTimer: any = null;
+  @Input()
+  trIn: (v: U[]) => T[];
+  @Input()
+  trOut: (v: T[]) => U[];
 
   constructor(public systemLang: SystemLang,
               protected dialogService: DialogService,
@@ -168,6 +172,12 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
       this.logger.warn('DataSource undefined');
     }
     this.cdkDataSource = this.dataSource.registerDS();
+    if (this.trIn) {
+      this.cdkDataSource.trIn = this.trIn;
+    }
+    if (this.trOut) {
+      this.cdkDataSource.trOut = this.trOut;
+    }
     this.cdkTable.dataSource = this.cdkDataSource;
     this.paging = new Paging(this.cdkTable.viewChange, this.cdkDataSource.totalRecords);
   }
@@ -189,7 +199,7 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
   }
 
   tableSettings(): void {
-    const extDate = ExtendedData.create({columns: this.displayedColumns}, false,
+    const extDate = ExtendedData.create({columns: this.displayedColumns}, false, // TODO not all columns
       new SwaggerObject(['columns'],
         { columns: SwaggerNative.asString('list-builder', {enum: this.swagger.orderControls})}), // TODO!!!
       'save_cancel', '');
@@ -268,6 +278,7 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
         if (row) {
           this.cdkDataSource.updateRow(row).subscribe( () => {
             this.dialogService.snakeInfo(this.i18n.updated);
+            this.emitChange(row);
           });
         }
       });
@@ -296,6 +307,7 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
         if (row) {
           this.cdkDataSource.insertRow(row).subscribe( () => {
             this.dialogService.snakeInfo(this.i18n.added);
+            this.emitChange(row);
           });
         }
       });
@@ -314,6 +326,7 @@ export class TableComponent extends BaseComponent implements OnInit, OnDestroy, 
            zip(...observers)
              .subscribe( n => {
              this.dialogService.snakeInfo(choiceFormat(this.i18n.deleted, n.length));
+             this.emitChange(n);
            });
          }
       });

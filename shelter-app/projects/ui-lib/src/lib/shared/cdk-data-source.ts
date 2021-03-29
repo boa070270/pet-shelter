@@ -384,7 +384,9 @@ export class CdkDataSource<U, T> extends DataSource<T> {
   selectedRows = [];
   subject = new Subject<T[]>();
   private subscription: Subscription;
+  // Transform data from AbstractDataSource to CdkDataSource
   trIn: (v: U[]) => T[] = (v) => v as unknown as T[];
+  // Transform data from CdkDataSource to AbstractDataSource
   trOut: (v: T[]) => U[] = (v) => v as unknown as U[];
   get totalRecords(): BehaviorSubject<number> {
     return this.main.total;
