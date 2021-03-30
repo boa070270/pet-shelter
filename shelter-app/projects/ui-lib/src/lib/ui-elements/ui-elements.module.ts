@@ -12,7 +12,7 @@ import {
   GeneratorFormComponent,
   SwaggerArrayComponent,
   SwaggerFormComponent,
-  SwaggerNativeComponent, AppBarComponent
+  SwaggerNativeComponent, AppBarComponent, LinkComponent
 } from '../controls';
 import { DynamicPageComponent } from './dynamic-page.component';
 import {createCustomElement} from '@angular/elements';
@@ -58,5 +58,9 @@ export class UiElementsModule {
     customElements.define('lib-swagger-native-element', swaggerNativeComponent);
     const appBar = createCustomElement(AppBarComponent, {injector});
     customElements.define('app-bar', appBar);
+    const link = createCustomElement(LinkComponent, {injector});
+    customElements.define('lib-link', link);
+    const inputTitle = createCustomElement(TitleTypeControlComponent, {injector});
+    customElements.define('lib-input-title', inputTitle);
   }
 }

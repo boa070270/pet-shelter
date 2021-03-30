@@ -1,6 +1,4 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import * as keys from '@angular/cdk/keycodes';
-import {hasModifierKey} from '@angular/cdk/keycodes';
 
 // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
 const KNOWN_KEYS = ['Enter', 'Tab',
@@ -15,8 +13,104 @@ const NAVIGATION_KEYS = [
   'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'End', 'Home', 'PageDown', 'PageUp',
 ];
 const TEXT_NODE = 3;
-const ELEMENT_NODE = 1;
+// const ELEMENT_NODE = 1;
 const DESIGNER_ATTR_NAME = '_design';
+interface Cursor {
+  parent: Element;
+  indexOfChildren: number;
+  start: number;
+  finish: number;
+  updateElement?: Element; // If absent, than parent contain an marked element that need to be updated
+}
+function isDescendant(parent: Node, child: Node): boolean {
+  if (parent && child) {
+    while (child !== parent && child !== null) {
+      child = child.parentNode;
+    }
+    return child === parent;
+  }
+  return false;
+}
+function indexOfChildren(node: Node): number {
+  let i = 0;
+  while (node.previousSibling !== null) {
+    node = node.previousSibling;
+    ++i;
+  }
+  return i;
+}
+function thePrevNode(node: Node): Node {
+  if (node.lastChild) {
+    return thePrevNode(node.lastChild);
+  }
+  return node;
+}
+function theNextNode(node: Node): Node {
+  if (node.firstChild) {
+    return theNextNode(node.firstChild);
+  }
+  return node;
+}
+function stepToNextNode(from: Node, directionTop: boolean): Node {
+  if (directionTop){
+    if (from.previousSibling !== null) {
+      return from.previousSibling;
+    } else {
+      if (from.parentNode.previousSibling) {
+        return thePrevNode(from.parentNode.previousSibling);
+      } else {
+        return from.parentNode.parentNode;////???????????????????????
+      }
+    }
+  } else {
+    if (from.nextSibling !== null) {
+      return from.nextSibling;
+    } else {
+      if (from.parentNode.nextSibling) {
+        return from.parentNode.firstChild;
+      } else {
+        return from.parentNode;
+      }
+    }
+  }
+}
+/**
+ * How it works.
+ * We use custom elements, so when I place a custom element on the designer panel,
+ * this element is transformed into a collection of different elements which compose it.
+ * After this, I cannot use the inner HTML of the designer.
+ * My solution: I use two panels one for designer, second "source" to store untransformed HTML.
+ * The customer works in designer panel, but all actions from keyboard and mouse modify source panel and then
+ * the result is copied to the designer panel.
+ * I try copy only modified parts.
+ * As anchor, ALL ELEMENTS that I place into design panel I mark with attribute DESIGNER_ATTR_NAME with unique number ID
+ * On every action, I need to:
+ * - define position that will be modified
+ * - find this part of text in the source panel
+ * - modify this part
+ * - update the design panel with this part
+ * Cases:
+ * 1. Selection is collapsed and focusNode is TEXT_NODE:
+ *   1. take parent element and check DESIGNER_ATTR_NAME, if the attribute is absent, this text node belongs to a custom
+ *   element, do nothing. This can be incorrect, but this our custom elements and we can take a rules:
+ *     1. Custom elements render content with tags.
+ *     2. All other text variables that are rendering by custom element are given to it through property configuration.
+ *     3. the source always marked all elements with _design attribute. see checkAndMarkElements()
+ *   2. parent element has attribute:
+ *    find text that belong to this parent element, modify it and update inner html of
+ *   this parent element
+ * 2. Selection is collapsed and focusNode is not TEXT_NODE:
+ *    I know only one reason for this, there is empty source.
+ * 3. Selection isn't collapsed and focusNode is TEXT_NODE and anchorNode is the same TEXT_NODE:
+ *    It's like 1. But in this case I need to replace selected text with one input character,
+ *    then update inner Html of parent.
+ * 4. Selection isn't collapsed and focusNode is TEXT_NODE and anchorNode is another TEXT_NODE and both focusNode and
+ * anchorNode have the same parent element:
+ * 5. Selection isn't collapsed and focusNode is TEXT_NODE and anchorNode is another TEXT_NODE and both focusNode and
+ * anchorNode have the different parent elements:
+ * 6. Selection isn't collapsed and focusNode or anchorNode do not belong to designer panel:
+ *   skip this action.
+ */
 @Component({
   selector: 'app-test-sync',
   templateUrl: './test-sync.component.html',
@@ -26,16 +120,136 @@ export class TestSyncComponent implements OnInit {
   position = 0;
   designAttr = 0;
   source = '';
+  designIndex = 0;
   editor: HTMLDivElement;
+  cursors: Cursor[];
   @ViewChild('editor', {static: true}) editorRef: ElementRef<HTMLDivElement>;
   constructor() { }
 
   ngOnInit(): void {
     this.editor = this.editorRef.nativeElement;
   }
+  syncOnTouch(): Cursor[] {
+    /* A user can normally only select one range at a time, so the rangeCount will usually be 1.
+     Scripting can be used to make the selection contain more than one range. We do not use script here!
+     */
+    if (window.getSelection().rangeCount > 1) {
+      console.log('There is  modified range by script');
+      return null;
+    }
+    let range = window.getSelection().getRangeAt(0);
+    // withdraw custom elements nodes and change selection
+    let startContainer = range.startContainer;
+    let endContainer = range.endContainer;
+    while (startContainer.parentElement.getAttribute(DESIGNER_ATTR_NAME) === null && startContainer !== endContainer) {
+      startContainer = stepToNextNode(startContainer, false);
+    }
+    while (endContainer.parentElement.getAttribute(DESIGNER_ATTR_NAME) === null && startContainer !== endContainer) {
+      endContainer = stepToNextNode(endContainer, true);
+    }
+    if (startContainer !== range.startContainer || endContainer !== range.endContainer) {
+      window.getSelection().setBaseAndExtent(startContainer,
+        startContainer !== range.startContainer ? 0 : range.startOffset,
+        endContainer,
+        endContainer !== range.endContainer ? endContainer.textContent.length : range.endOffset);
+      range = window.getSelection().getRangeAt(0);
+    }
 
+    const {isCollapsed, anchorNode, focusNode} = window.getSelection();
+    if (!isDescendant(this.editor, focusNode) || !isDescendant(this.editor, anchorNode)) { // Case 6 simplified
+      return null;
+    }
+    if (isCollapsed && anchorNode.parentElement.getAttribute(DESIGNER_ATTR_NAME) === null) { // case 1.1
+      return null;
+    }
+    if (focusNode.parentElement === anchorNode.parentElement) {
+      const parent = focusNode.parentElement;
+      if (focusNode === anchorNode) { // Case 1. Case 3. The nodes are same TEXT_NODE
+        if (focusNode.nodeType === TEXT_NODE) {
+          return [{
+            parent,
+            indexOfChildren: indexOfChildren(focusNode),
+            start: range.startOffset,
+            finish: range.endOffset
+          }];
+        } else {
+          console.log('Not text node', isCollapsed);
+          return [{parent: this.editor, indexOfChildren: 0, start: 0, finish: 0}];
+        }
+      } else { // Case 4. The nodes are different but have the same parent
+        return [{
+          parent,
+          indexOfChildren: indexOfChildren(anchorNode),
+          start: range.startOffset,
+          finish: undefined
+        }, {
+          parent,
+          indexOfChildren: indexOfChildren(focusNode),
+          start: 0,
+          finish: range.endOffset
+        }];
+      }
+    } else { // Case 5. The nodes have different parents
+        let commonParent = range.commonAncestorContainer as Element;
+        // step up until define parent from design
+        while (commonParent.getAttribute(DESIGNER_ATTR_NAME) !== null
+          || commonParent !== this.editor) {
+          commonParent = commonParent.parentElement;
+        }
+        return [{
+          parent: range.startContainer.parentElement,
+          indexOfChildren: indexOfChildren(range.startContainer),
+          start: (startContainer === range.startContainer.parentElement) ? range.startOffset : 0,
+          finish: undefined,
+          updateElement: commonParent
+        }, {
+          parent: range.endContainer.parentElement,
+          indexOfChildren: indexOfChildren(range.startContainer),
+          start: 0,
+          finish: (endContainer === range.endContainer.parentElement) ? range.endOffset : undefined,
+          updateElement: commonParent
+        }];
+    }
+  }
+  syncSource(cursor: Cursor[]): {fromParent: number, toParent: number, start: number, end: number} {
+    if (cursor.length === 1) {
+      if (cursor[0].parent === this.editor) {
+        return {fromParent: 0, toParent: this.source.length, start: cursor[0].start, end: cursor[0].finish};
+      }
+      const attr = cursor[0].parent.getAttribute(DESIGNER_ATTR_NAME);
+      const regexp = new RegExp(`/<([a-zA-Z][^<>]*\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>/g`);
+      const startElement = this.source.search(regexp);
+      const fromParent = this.source.indexOf('>', startElement);
+      const toParent = this.source.indexOf('<', fromParent);
+      return {fromParent, toParent, start: fromParent + cursor[0].start, end: fromParent + cursor[0].finish};
+    } else {
+      const result = {fromParent: 0, toParent: 0, start: 0, end: 0};
+      let attr = cursor[0].parent.getAttribute(DESIGNER_ATTR_NAME);
+      let regexp = new RegExp(`/<([a-zA-Z][^<>]*\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>/g`);
+      let startElement = this.source.search(regexp);
+      if (cursor[0].parent === cursor[1].parent) {
+        result.fromParent = this.source.indexOf('>', startElement);
+        result.start = result.fromParent + cursor[0].start;
+      }
+      attr = cursor[1].parent.getAttribute(DESIGNER_ATTR_NAME);
+      regexp = new RegExp(`/<([a-zA-Z][^<>]*\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>/g`);
+      startElement = this.source.search(regexp);
+      const fromParent = this.source.indexOf('>', startElement);
+      result.end = fromParent + cursor[1].finish;
+      result.toParent = this.source.indexOf('<', fromParent);
+      return result;
+    }
+  }
   onClick(event: MouseEvent): void {
-    this.syncOnTouch();
+    console.log(event);
+    this.cursors = this.syncOnTouch();
+    if (this.checkAndMarkElements()) {
+      this.editor.innerHTML = this.source;
+    }
+    console.log('syncOnTouch:', this.cursors);
+    if (this.cursors) {
+      console.log('syncOnTouch:', this.syncSource(this.cursors));
+    }
   }
 
   onKeyPress(event: KeyboardEvent): void {
@@ -48,42 +262,48 @@ export class TestSyncComponent implements OnInit {
       console.log('onKeyPress input not editable symbol', event.key);
       return;
     }
-    const cursor = this.  syncOnTouch();
-    if (WHITESPACE_KEYS.includes(event.key)) {
-      this.whitespace(cursor, event.key);
-    } else if (EDITING_KEYS.includes(event.key)) {
-      this.editingKey(cursor, event.key);
-    } else if (NAVIGATION_KEYS.includes(event.key)) {
-      this.navigation(cursor, event.key);
-    } else {
-      this.simpleChar(cursor, event.key);
+    const cursor = this.syncOnTouch();
+    if (cursor) {
+      if (WHITESPACE_KEYS.includes(event.key)) {
+        this.whitespace(cursor, event.key);
+      } else if (EDITING_KEYS.includes(event.key)) {
+        this.editingKey(cursor, event.key);
+      } else if (NAVIGATION_KEYS.includes(event.key)) {
+        this.cursors = cursor;
+      } else {
+        this.simpleChar(cursor, event.key);
+      }
     }
     event.preventDefault();
   }
-  syncOnTouch(): number {
-    const {isCollapsed, anchorNode, anchorOffset, focusNode, focusOffset, rangeCount} = window.getSelection();
-    console.log('syncOnTouch', isCollapsed, anchorOffset, focusOffset, rangeCount);
-    if (focusNode) {
-      let element = focusNode as HTMLElement;
-      if (focusNode.nodeType === TEXT_NODE) {
-        element = focusNode.parentElement;
-      }
-      const v = element.getAttribute(DESIGNER_ATTR_NAME);
-      let from = 0;
-      if (v) {
-        from = this.source.indexOf(DESIGNER_ATTR_NAME + `="${v}"`);
-        from = this.source.indexOf('>', from);
-      }
-      return from + focusOffset;
-    } else {
-      return 0;
-    }
-  }
 
-  private whitespace(cursor: number, key: string): void {
+  /**
+   * The position can be on text node that are rendered bu custom element. In this case we try to define the node that
+   * belong to our source.
+   * @param start - from this node we start search
+   * @param directionTop - define searching direction true - to top, false to bottom
+   */
+  findMarkedNode(start: Node, directionTop: boolean): Node {
+    while (start && (start.parentElement.getAttribute(DESIGNER_ATTR_NAME) === null || start !== this.editor)) {
+      start = stepToNextNode(start, directionTop);
+    }
+    return start;
+  }
+  findMarkedChild(start: Element, directionTop: boolean): Element {
+    if (!start) {
+      return null;
+    }
+    let child = directionTop ? start.firstElementChild : start.lastElementChild;
+    while (child && child.previousElementSibling && child.previousElementSibling.getAttribute(DESIGNER_ATTR_NAME) !== null) {
+      child = child.previousElementSibling;
+    }
+    return (child && child.getAttribute(DESIGNER_ATTR_NAME) !== null) ? child : this.findMarkedChild(child, directionTop);
+  }
+  private whitespace(cursor: Cursor[], key: string): void {
     switch (key) {
       case 'Enter':
-        this.source = this.source.substring(0, cursor) + '<br>' + this.source.substring(cursor);
+        const range = this.syncSource(cursor);
+        this.source = this.source.substring(0, range.start) + '<br>' + this.source.substring(range.end);
         break;
       case 'Tab':
         break;
@@ -91,13 +311,13 @@ export class TestSyncComponent implements OnInit {
     this.editor.innerHTML = this.source;
   }
 
-  private editingKey(cursor: number, key: string): void {
+  private editingKey(cursor: Cursor[], key: string): void {
     switch (key) {
       case 'Backspace':
-        this.source = this.source.substring(0, cursor - 1) + this.source.substring(cursor);
+        this.source = this.source.substring(0, cursor[0].finish - 1) + this.source.substring(cursor[0].finish);
         break;
       case 'Delete':
-        this.source = this.source.substring(0, cursor) + this.source.substring(cursor + 1);
+        this.source = this.source.substring(0, cursor[0].finish) + this.source.substring(cursor[0].finish + 1);
         break;
       case 'Insert':
         break;
@@ -105,14 +325,25 @@ export class TestSyncComponent implements OnInit {
     this.editor.innerHTML = this.source;
   }
 
-  private navigation(cursor: number, key: string): void {
-
-  }
-
-  private simpleChar(cursor: number, key: string): void {
-    this.source = this.source.substring(0, cursor) + key + this.source.substring(cursor);
+  private simpleChar(cursor: Cursor[], key: string): void {
+    this.source = this.source.substring(0, cursor[0].finish) + key + this.source.substring(cursor[0].finish);
     this.editor.innerHTML = this.source;
     const sel = window.getSelection();
     window.getSelection().setPosition(sel.focusNode, sel.focusOffset + 1);
+  }
+  checkAndMarkElements(): boolean {
+    let result = false;
+    const upd = this.source.replace(/<([a-zA-Z][^<]*)>/g, (s: string, ...args: any[]) => {
+      const tagBody = args[0] as string;
+      if (tagBody.indexOf(DESIGNER_ATTR_NAME) === -1) {
+        result = true;
+        return `<${tagBody} ${DESIGNER_ATTR_NAME}="${this.designIndex++}">`;
+      }
+      return s;
+    });
+    if (result) {
+      this.source = upd;
+    }
+    return result;
   }
 }
