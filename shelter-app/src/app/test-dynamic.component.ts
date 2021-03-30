@@ -1,14 +1,17 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, OnInit, ViewChild} from '@angular/core';
 import {
+  AbstractDataSource,
   ArrayDataSource,
-  PeriodicElement,
+  DialogService,
+  SwaggerArray,
   SwaggerFormService,
   SwaggerNative,
   SwaggerObject,
-  TableProviderService
+  swaggerUI,
+  TableProviderService,
+  TitleType
 } from 'ui-lib';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {DataSource} from '@angular/cdk/collections';
+import {BasicService} from './basic.service';
 
 @Component({
   selector: 'app-test-dynamic',
@@ -26,6 +29,8 @@ import {DataSource} from '@angular/cdk/collections';
         <option value="e">CdkTable</option>
       </select>
       <button (click)="onClick()">Render</button>
+      <h1>Array form test</h1>
+      <lib-swagger-form [swagger]="formSwagger" [(ngModel)]="data"></lib-swagger-form>
     </div>
   `,
   styleUrls: ['./test-dynamic.component.sass']
@@ -53,16 +58,165 @@ export class TestDynamicComponent implements OnInit {
           sex: SwaggerNative.asString( null, {enum: ['m', 'f']})
         })
       });
+  i18n = {
+    act_up: [{lang: 'en', title: 'Move one position up'}, {lang: 'uk', title: 'Підняти на одну позицію'}],
+    act_down: [{lang: 'en', title: 'Move one position down'}, {lang: 'uk', title: 'Опустити на одну позицію'}]
+  };
+  actions: Array<{icon: string, tooltip: string | TitleType[], command: string, action: (v) => void}> = [
+    {icon: 'gm-keyboard_arrow_up', command: 'move-up', tooltip: this.i18n.act_up, action: (v) => { this.moveUp(v); }},
+    {icon: 'gm-keyboard_arrow_down', command: 'move-down', tooltip: this.i18n.act_down, action: (v) => { this.moveDown(v); }}
+  ];
+  formSwagger: SwaggerObject = new SwaggerObject(
+    ['fields'],
+    {
+      fields: new SwaggerArray(
+        new SwaggerObject(
+          ['fieldName', 'fieldType', 'itemType', 'nativeType', 'objectLink', 'required',
+            'constriction', 'nativeConstrictions', 'numberConstrictions', 'stringConstrictions',
+            'arrayConstrictions', 'objectConstrictions', 'ui'],
+          {
+            order: SwaggerNative.asInteger(null, {default: 0},
+              swaggerUI(null, [{lang: 'en', title: ''}, {lang: 'uk', title: 'Обов\'язкове поле'}])),
+            fieldName: SwaggerNative.asString(),
+            fieldType: SwaggerNative.asString(null,
+              {enum: ['SwaggerNative', 'SwaggerArray', 'SwaggerObject'], default: 'SwaggerNative'}),
+            constriction: new SwaggerObject(
+              ['control', 'validators', 'asyncValidator'],
+              {
+                control: SwaggerNative.asString(),
+                validators: SwaggerNative.asString(), // ??? write as string and parse to function later?
+                asyncValidator: SwaggerNative.asString(), // ???
+              }
+            ),
+            nativeConstrictions: new SwaggerObject(
+              ['readOnly', 'immutable', 'writeOnly', 'nullable', 'enum',
+                'enumDescriptions', 'enumTooltips', 'enumMulti', 'default', 'format'],
+              {
+                readOnly: SwaggerNative.asBoolean(),
+                immutable: SwaggerNative.asBoolean(),
+                writeOnly: SwaggerNative.asBoolean(),
+                nullable: SwaggerNative.asBoolean(),
+                enum: SwaggerNative.asString(), // ??? array as string separated by ','?
+                enumDescriptions: SwaggerNative.asString(), // ???
+                enumTooltips: SwaggerNative.asString(),
+                enumMulti: SwaggerNative.asBoolean(),
+                default: SwaggerNative.asString(),
+                format: SwaggerNative.asString(null,
+                  {enum: ['date', 'date-time', 'password', 'byte', 'binary', 'email', 'uuid', 'uri', 'hostname',
+                      'ipv4', 'ipv6', 'color', 'datetime-local', 'month', 'number', 'search', 'tel', 'text', 'time', 'week']}),
+              }
+            ),
+            numberConstrictions: new SwaggerObject(
+              ['minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum', 'multipleOf'],
+              {
+                minimum: SwaggerNative.asNumber(),
+                maximum: SwaggerNative.asNumber(),
+                exclusiveMinimum: SwaggerNative.asNumber(),
+                exclusiveMaximum: SwaggerNative.asNumber(),
+                multipleOf: SwaggerNative.asNumber()
+              }
+            ),
+            stringConstrictions: new SwaggerObject(
+              ['minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum', 'multipleOf'],
+              {
+                minimum: SwaggerNative.asNumber(),
+                maximum: SwaggerNative.asNumber(),
+                exclusiveMinimum: SwaggerNative.asNumber(),
+                exclusiveMaximum: SwaggerNative.asNumber(),
+                multipleOf: SwaggerNative.asNumber()
+              }
+            ),
+            arrayConstrictions: new SwaggerObject(
+              ['minItems', 'maxItems', 'uniqueItems', 'customTableActions', 'trIn', 'trOut'],
+              {
+                minLength: SwaggerNative.asNumber(),
+                maxLength: SwaggerNative.asNumber(),
+                pattern: SwaggerNative.asString()
+              }
+            ),
+            objectConstrictions: new SwaggerObject(
+              ['orderCtrl', 'toFrm', 'fromFrm'],
+              {
+                orderCtrl: SwaggerNative.asString(), // ???
+                toFrm: SwaggerNative.asString(), // ???
+                fromFrm: SwaggerNative.asString() // ???
+              }
+            ),
+            itemType: SwaggerNative.asString(null, {enum: ['SwaggerNative', 'SwaggerObject']}),
+            nativeType: SwaggerNative.asString(null,
+              {enum: ['string', 'number', 'integer', 'boolean'], default: 'string'}),
+            objectLink: SwaggerNative.asString(),
+            ui: new SwaggerObject(
+              ['description', 'caption', 'toolTip', 'placeHolder', 'leadingIcon', 'trailingIcon', 'nameAsCaption'],
+              {
+                description: SwaggerNative.asString(), // ??? try to parse as TitleType and leave as string if fails?
+                caption: SwaggerNative.asString(), // ???
+                toolTip: SwaggerNative.asString(), // ???
+                placeHolder: SwaggerNative.asString(), // ???
+                leadingIcon: SwaggerNative.asString(),
+                trailingIcon: SwaggerNative.asString(),
+                nameAsCaption: SwaggerNative.asBoolean(),
+              }
+            ),
+            required: SwaggerNative.asBoolean(null, null,
+              swaggerUI([{lang: 'en', title: 'Required'}, {lang: 'uk', title: 'Обов\'язкове поле'}])),
+          }, null, ['fieldName', 'fieldType'], null,
+          {
+            fieldType: [
+              {c: '!SwaggerNative,SwaggerObject,SwaggerArray',
+                hide: ['itemType', 'nativeType', 'objectLink', 'nativeConstrictions', 'objectConstrictions',
+                  'arrayConstrictions', 'stringConstrictions', 'numberConstrictions']},
+              {c: '=SwaggerNative',
+                hide: ['itemType', 'objectLink', 'objectConstrictions', 'arrayConstrictions'],
+                show: ['nativeType', 'nativeConstrictions']},
+              {c: '=SwaggerObject',
+                hide: ['itemType', 'nativeType', 'nativeConstrictions', 'arrayConstrictions', 'stringConstrictions', 'numberConstrictions'],
+                show: ['objectLink', 'objectConstrictions']},
+              {c: '=SwaggerArray',
+                hide: ['nativeConstrictions', 'objectConstrictions', 'stringConstrictions', 'numberConstrictions'],
+                show: ['itemType', 'arrayConstrictions']}
+              ],
+            itemType: [
+              {c: '=SwaggerNative', hide: ['objectLink'], show: ['nativeType', 'nativeConstrictions']},
+              {c: '=SwaggerObject', hide: ['nativeType'], show: ['objectLink', 'objectConstrictions']}
+              ],
+            nativeType: [
+              {c: '=string', show: ['stringConstrictions']},
+              {c: '=number,integer', show: ['numberConstrictions']}
+            ]
+          }
+        ), {customTableActions: this.actions, trIn: v => {
+            return v.map((k, i) => {
+            k.order = i;
+            return k;
+          });
+        }}
+      )
+    }
+  );
+
+
+  data;
+  change: EventEmitter<any>;
+  dataSource: AbstractDataSource<any>;
   @ViewChild('insertHere', {static: true}) insertHere: ElementRef<HTMLDivElement>;
   innerHtml: any;
 
-  constructor(private swaggerFormService: SwaggerFormService, private tableProviderService: TableProviderService) {
+  constructor(private swaggerFormService: SwaggerFormService, private tableProviderService: TableProviderService,
+              protected  basicService: BasicService,
+              protected  dialogService: DialogService) {
     swaggerFormService.addSchemaIfNotExists('test', this.swagger);
     tableProviderService.setTableSwagger('test', TableSwagger);
     tableProviderService.setDataSource('test', new ArrayDataSource(tableDataSet));
   }
 
   ngOnInit(): void {
+    // this.dataSource = ArrayDataSource.EmptyDS();
+    // this.data = {fields: this.dataSource};
+    this.data = {fields: [
+        {order: 0, fieldName: 'asd', fieldType: 'SwaggerNative', nativeType: 'integer'},
+        {order: 1, fieldName: 'zxc', fieldType: 'SwaggerNative', nativeType: 'string'}
+      ]};
   }
 
   onClick(): void {
@@ -73,6 +227,29 @@ export class TestDynamicComponent implements OnInit {
   onChange(): void {
     this.textHtml = this.knownTexts[this.knownText];
   }
+
+  moveUp(rows: any[]): void {
+    console.log('TestDynamicComponent.moveUp', rows);
+    if (rows[0].order < 1) {
+      return;
+    }
+    const item = this.data.fields.splice(rows[0].order - 1, 1);
+    this.data.fields.splice(rows[rows.length - 1].order, 0, item[0]);
+    this.data = {fields: this.data.fields.slice()};
+  }
+  moveDown(rows: any[]): void {
+    console.log('TestDynamicComponent.moveDown', rows);
+    if (rows[0].order > this.data.fields.length - 1) {
+      return;
+    }
+    const item = this.data.fields.splice(rows[rows.length - 1].order + 1, 1);
+    this.data.fields.splice(rows[0].order, 0, item[0]);
+    this.data = {fields: this.data.fields.slice()};
+  }
+
+  // change(event: any): void {
+  //   console.log('change', this.data, event);
+  // }
 }
 
 /******* Table *******/

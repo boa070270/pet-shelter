@@ -41,9 +41,9 @@ export class FilesTableComponent extends AbstractComponent implements OnDestroy 
   files: File[];
   @ViewChild(UploadFilesComponent) uploadComponent: UploadFilesComponent;
   actions: Array<{icon: string, tooltip: string | TitleType[], command: string}> = [
-    {icon: 'gm-pets', command: 'add-pet', tooltip: this.i18n.act_pet},
-    {icon: 'gm-image', command: 'add-banner', tooltip: this.i18n.act_banner},
-    {icon: 'gm-image', command: 'add-banner', tooltip: this.i18n.act_page}
+    {icon: 'gm-pets', command: 'add-pet', tooltip: i18N.act_pet}, // was this.i18N.act_pet
+    {icon: 'gm-image', command: 'add-banner', tooltip: i18N.act_banner}, // was this.i18N.act_banner
+    {icon: 'gm-image', command: 'add-banner', tooltip: i18N.act_page} // was this.i18N.act_page
     ];
   readonly i18NSource: any;
   readonly dlgComment = new SwaggerObject(['comment'], {
@@ -122,7 +122,7 @@ export class FilesTableComponent extends AbstractComponent implements OnDestroy 
   }
   private hdlMakePage(rows: any[]): void {
     // tslint:disable-next-line:max-line-length
-    const extData = ExtendedData.create({ref: rows.map(r => ({refId: r.id}))}, false, SwaggerPageType, 'save_cancel', this.i18n.addBanner);
+    const extData = ExtendedData.create({ref: rows.map(r => ({refId: r.id}))}, false, SwaggerPageType, 'save_cancel', 'temp'); // was i18N.addBanner
     const dlgRef = this.dialogService.openExtDialog(extData, true);
     dlgRef.afterClosed().subscribe(data => {
       if (data) {
@@ -133,7 +133,7 @@ export class FilesTableComponent extends AbstractComponent implements OnDestroy 
   }
   private hdlMakePet(rows: any[]): void {
     // tslint:disable-next-line:max-line-length
-    const extData = ExtendedData.create({ref: rows.map(r => ({refId: r.id}))}, false, SwaggerPetType, 'save_cancel', this.i18n.addBanner);
+    const extData = ExtendedData.create({ref: rows.map(r => ({refId: r.id}))}, false, SwaggerPetType, 'save_cancel', 'temp'); // was i18N.addBanner
     const dlgRef = this.dialogService.openExtDialog(extData, true);
     dlgRef.afterClosed().subscribe(data => {
       if (data) {

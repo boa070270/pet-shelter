@@ -147,7 +147,12 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
 
   onEdit(): void {
     this.openDialog((v) => {
-      this.list.push(v.name);
+      for (let i = 0; i < this.list.length; i++) {
+        this.list[i] = this.list[i] === this.selected ? v.name : this.list[i];
+      }
+      // this.list.forEach(s => {
+      //   this.list[s] = (s === this.selected) ? this.selected : v.name;
+      // });
     }, this.selected);
   }
 
