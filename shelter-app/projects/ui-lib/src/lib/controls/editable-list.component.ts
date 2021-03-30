@@ -33,6 +33,7 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
 
   // tslint:disable-next-line:variable-name
   private _extraParams: CheckboxParameters = {};
+  _swagger: SwaggerNative;
   list: string[] = [];
   selected: string;
   titleRemove: string;
@@ -40,6 +41,17 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
   titleEdit: string;
   titleUp: string;
   titleDown: string;
+  @Input()
+  set swagger(s: SwaggerNative) {
+    this._swagger = s;
+  }
+  get swagger(): SwaggerNative {
+    if (this._swagger) {
+      return this._swagger;
+    }
+    return SwaggerNative.asString('input', null,
+      swaggerUI([{lang: 'en', title: 'Value'}, {lang: 'uk', title: 'Значення елементу'}]));
+  }
   @Input()
   set extraParams(p: CheckboxParameters) {
     this._extraParams = p || {};
@@ -105,9 +117,6 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
     this.titleDown = this.i18n.DEF_DOWN_TITLES;
     this.titleUp = this.i18n.DEF_UP_TITLES;
   }
-  render(): void { // changed
-    // this.list = this.options;
-  }
   ngOnChanges(changes: SimpleChanges): void {
     if (!this.list) {
       this.list = [];
@@ -118,11 +127,11 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
   ngOnDestroy(): void {
     super.ngOnDestroy();
   }
-  writeValue(obj: any): void {
-    if (obj !== null && obj !== undefined) {
-      this.list = coerceArray(obj) || [];
+  writeValue(v: any): void {
+    if (Array.isArray(v)) {
+      console.log('EditableListComponent.writeValue', v);
+      this.list = v;
     }
-    this.render();
   }
   registerOnChange(fn: (_: any) => {}): void {
     super.registerOnChange(fn);
@@ -150,9 +159,6 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
       for (let i = 0; i < this.list.length; i++) {
         this.list[i] = this.list[i] === this.selected ? v.name : this.list[i];
       }
-      // this.list.forEach(s => {
-      //   this.list[s] = (s === this.selected) ? this.selected : v.name;
-      // });
     }, this.selected);
   }
 
@@ -164,7 +170,7 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
     extData.swagger = new SwaggerObject(
       ['name'],
       {
-        name: SwaggerNative.asString('input', null, swaggerUI([{lang: 'en', title: 'Key name'}, {lang: 'uk', title: 'Назва ключа'}])),
+        name: this.swagger,
       },
       null,
       ['name']);
@@ -176,7 +182,6 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
       if (v) {
         f(v);
       }
-      this.render();
       this.emitChange(this.list);
     });
   }
@@ -184,7 +189,6 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
   onRemove(): void {
     this.list = this.list.filter(v => !this.result.values[v]);
     this.result.clearAll();
-    this.render();
     this.emitChange(this.list);
   }
 

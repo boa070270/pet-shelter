@@ -79,7 +79,7 @@ export class TestDynamicComponent implements OnInit {
               swaggerUI(null, [{lang: 'en', title: ''}, {lang: 'uk', title: 'Обов\'язкове поле'}])),
             fieldName: SwaggerNative.asString(),
             fieldType: SwaggerNative.asString(null,
-              {enum: ['SwaggerNative', 'SwaggerArray', 'SwaggerObject'], default: 'SwaggerNative'}),
+              {enum: ['SwaggerNative', 'SwaggerArray', 'SwaggerObject']}),
             constriction: new SwaggerObject(
               ['control', 'validators', 'asyncValidator'],
               {
@@ -96,9 +96,9 @@ export class TestDynamicComponent implements OnInit {
                 immutable: SwaggerNative.asBoolean(),
                 writeOnly: SwaggerNative.asBoolean(),
                 nullable: SwaggerNative.asBoolean(),
-                enum: SwaggerNative.asString(), // ??? array as string separated by ','?
+                enum: new SwaggerArray(SwaggerNative.asString()), // ??? make enumType input to check if number or string?
                 enumDescriptions: SwaggerNative.asString(), // ???
-                enumTooltips: SwaggerNative.asString(),
+                enumTooltips: new SwaggerArray(SwaggerNative.asString()), // ??? write TitleType[] as string and parse later?
                 enumMulti: SwaggerNative.asBoolean(),
                 default: SwaggerNative.asString(),
                 format: SwaggerNative.asString(null,

@@ -3,7 +3,7 @@ import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {
   ArrayConstrictions,
   ArrayDataSource,
-  BaseConstrictions,
+  BaseConstrictions, coerceToSwaggerArray, coerceToSwaggerNative, coerceToSwaggerObject,
   I18NType,
   SwaggerArray,
   SwaggerComponent,
@@ -15,12 +15,17 @@ import {FormErrorsService} from './form-errors.service';
 import {SystemLang} from '../../i18n';
 import {Directionality} from '@angular/cdk/bidi';
 import {BaseSwaggerComponent} from './base-swagger.component';
+import {EditableListComponent} from "../editable-list.component";
 
 @Component({
   selector: 'lib-swagger-array',
   template: `
-    <lib-table [swagger]="items" [dataSource]="dataSource" [disabled]="disabled" [customActions]="constrictions.customTableActions"
-               (tableEvent)="tableAction($event)" [trIn]="constrictions.trIn" [trOut]="constrictions.trOut"></lib-table>`,
+    <ng-container [ngSwitch]="controlType">
+      <lib-table [swagger]="items" [dataSource]="dataSource" [disabled]="disabled" [customActions]="constrictions.customTableActions"
+                 (tableEvent)="tableAction($event)" [trIn]="constrictions.trIn" [trOut]="constrictions.trOut"
+                 *ngSwitchCase="'object'"></lib-table>
+      <lib-editable-list [swagger]="items" *ngSwitchCase="'native'"></lib-editable-list>
+    </ng-container>`,
   styleUrls: ['./swagger-array.component.scss'],
   providers: [{
     provide: NG_VALUE_ACCESSOR,
@@ -34,11 +39,28 @@ export class SwaggerArrayComponent extends BaseSwaggerComponent implements OnIni
   @Input()
   nameControl: string;
   @ViewChild(TableComponent, {static: true}) table: TableComponent<any, any>;
+  @ViewChild(EditableListComponent, {static: true}) editableList: EditableListComponent;
+  get component(): TableComponent<any, any> | EditableListComponent {
+    if (this.editableList) {
+      return this.editableList;
+    } else if (this.table) {
+      return this.table;
+    }
+  }
   get items(): SwaggerNative | SwaggerObject {
     return (this.swagger as SwaggerArray).items;
   }
   get constrictions(): ArrayConstrictions {
     return (this.swagger as SwaggerArray).constrictions;
+  }
+  get controlType(): string {
+    if (this.items) {
+      if (this.items instanceof SwaggerNative) {
+        return 'native';
+      } else if (this.items instanceof SwaggerObject) {
+        return 'object';
+      }
+    }
   }
   constructor(public systemLang: SystemLang, protected directionality: Directionality,
               protected formErrors: FormErrorsService) {
@@ -52,13 +74,19 @@ export class SwaggerArrayComponent extends BaseSwaggerComponent implements OnIni
     super.ngOnDestroy();
   }
   registerOnChange(fn: any): void {
-    this.table.registerOnChange(fn);
+    if (this.component) {
+      this.component.registerOnChange(fn);
+    }
   }
   registerOnTouched(fn: any): void {
-    this.table.registerOnTouched(fn);
+    if (this.component) {
+      this.component.registerOnTouched(fn);
+    }
   }
   writeValue(obj: any): void {
-    this.table.writeValue(obj);
+    if (this.component) {
+      this.component.writeValue(obj);
+    }
   }
   setDisabledState(isDisabled: boolean): void {
     super.setDisabledState(isDisabled);
