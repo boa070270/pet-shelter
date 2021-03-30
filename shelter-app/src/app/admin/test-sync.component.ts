@@ -13,7 +13,7 @@ const NAVIGATION_KEYS = [
   'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'End', 'Home', 'PageDown', 'PageUp',
 ];
 const TEXT_NODE = 3;
-// const ELEMENT_NODE = 1;
+const ELEMENT_NODE = 1;
 const DESIGNER_ATTR_NAME = '_design';
 interface Cursor {
   parent: Element;
@@ -39,41 +39,76 @@ function indexOfChildren(node: Node): number {
   }
   return i;
 }
-function thePrevNode(node: Node): Node {
-  if (node.lastChild) {
-    return thePrevNode(node.lastChild);
-  }
-  return node;
-}
-function theNextNode(node: Node): Node {
+function firstGrandChild(node: Node): Node {
   if (node.firstChild) {
-    return theNextNode(node.firstChild);
+    return firstGrandChild(node.firstChild);
   }
   return node;
 }
-function stepToNextNode(from: Node, directionTop: boolean): Node {
-  if (directionTop){
-    if (from.previousSibling !== null) {
-      return from.previousSibling;
-    } else {
-      if (from.parentNode.previousSibling) {
-        return thePrevNode(from.parentNode.previousSibling);
-      } else {
-        return from.parentNode.parentNode;////???????????????????????
-      }
+function lastGrandChild(node: Node): Node {
+  if (node.lastChild) {
+    return lastGrandChild(node.lastChild);
+  }
+  return node;
+}
+function findNodeUp(from: Node, criteria: (n: Node) => boolean): Node {
+  if (criteria(from)) {
+    return from;
+  }
+  while (from.previousSibling) {
+    from = from.previousSibling;
+    if (from.nodeType === ELEMENT_NODE) {
+      from = lastGrandChild(from);
     }
-  } else {
-    if (from.nextSibling !== null) {
-      return from.nextSibling;
-    } else {
-      if (from.parentNode.nextSibling) {
-        return from.parentNode.firstChild;
-      } else {
-        return from.parentNode;
-      }
+    if (criteria(from)) {
+      return from;
     }
   }
+  // there is nothing on sibling level, so level up
+  do {
+    from = from.parentNode;
+    if (criteria(from)) {
+      return from;
+    }
+  } while (from.previousSibling === null);
+  // we on the node that has previousSibling, lets check these children from the nearest
+  from = from.previousSibling;
+  if (from.nodeType === ELEMENT_NODE) {
+    return findNodeUp(lastGrandChild(from), criteria);
+  } else {
+    return findNodeUp(from, criteria);
+  }
+
 }
+function findNodeDown(from: Node, criteria: (n: Node) => boolean): Node {
+  if (criteria(from)) {
+    return from;
+  }
+  while (from.nextSibling) {
+    from = from.nextSibling;
+    if (from.nodeType === ELEMENT_NODE) {
+      from = firstGrandChild(from);
+    }
+    if (criteria(from)) {
+      return from;
+    }
+  }
+  // there is nothing on sibling level, so level up
+  do {
+    from = from.parentNode;
+    if (criteria(from)) {
+      return from;
+    }
+  } while (from.nextSibling === null);
+  // we on the node that has nextSibling, lets check these children from the nearest
+  from = from.nextSibling;
+  if (from.nodeType === ELEMENT_NODE) {
+    return findNodeDown(firstGrandChild(from), criteria);
+  } else {
+    return findNodeDown(from, criteria);
+  }
+}
+
 /**
  * How it works.
  * We use custom elements, so when I place a custom element on the designer panel,
@@ -139,13 +174,18 @@ export class TestSyncComponent implements OnInit {
     }
     let range = window.getSelection().getRangeAt(0);
     // withdraw custom elements nodes and change selection
-    let startContainer = range.startContainer;
-    let endContainer = range.endContainer;
-    while (startContainer.parentElement.getAttribute(DESIGNER_ATTR_NAME) === null && startContainer !== endContainer) {
-      startContainer = stepToNextNode(startContainer, false);
-    }
-    while (endContainer.parentElement.getAttribute(DESIGNER_ATTR_NAME) === null && startContainer !== endContainer) {
-      endContainer = stepToNextNode(endContainer, true);
+    const startContainer = findNodeDown(range.startContainer,
+      (n) => (n.nodeType === TEXT_NODE && (n.parentElement.getAttribute(DESIGNER_ATTR_NAME) !== null || n.parentElement === this.editor))
+        || n === range.endContainer);
+    const endContainer = findNodeUp(range.endContainer,
+      (n) => (n.nodeType === TEXT_NODE && (n.parentElement.getAttribute(DESIGNER_ATTR_NAME) !== null || n.parentElement === this.editor))
+        || n === startContainer);
+    if (startContainer === endContainer
+      && startContainer.parentElement.getAttribute(DESIGNER_ATTR_NAME) !== null
+      && startContainer.parentElement !== this.editor) {
+      // this text absent in our designer
+      // TODO we can show snake menu here to explain this case to user
+      return null;
     }
     if (startContainer !== range.startContainer || endContainer !== range.endContainer) {
       window.getSelection().setBaseAndExtent(startContainer,
@@ -275,29 +315,6 @@ export class TestSyncComponent implements OnInit {
       }
     }
     event.preventDefault();
-  }
-
-  /**
-   * The position can be on text node that are rendered bu custom element. In this case we try to define the node that
-   * belong to our source.
-   * @param start - from this node we start search
-   * @param directionTop - define searching direction true - to top, false to bottom
-   */
-  findMarkedNode(start: Node, directionTop: boolean): Node {
-    while (start && (start.parentElement.getAttribute(DESIGNER_ATTR_NAME) === null || start !== this.editor)) {
-      start = stepToNextNode(start, directionTop);
-    }
-    return start;
-  }
-  findMarkedChild(start: Element, directionTop: boolean): Element {
-    if (!start) {
-      return null;
-    }
-    let child = directionTop ? start.firstElementChild : start.lastElementChild;
-    while (child && child.previousElementSibling && child.previousElementSibling.getAttribute(DESIGNER_ATTR_NAME) !== null) {
-      child = child.previousElementSibling;
-    }
-    return (child && child.getAttribute(DESIGNER_ATTR_NAME) !== null) ? child : this.findMarkedChild(child, directionTop);
   }
   private whitespace(cursor: Cursor[], key: string): void {
     switch (key) {
