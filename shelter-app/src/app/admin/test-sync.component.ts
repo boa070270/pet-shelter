@@ -264,19 +264,42 @@ export class TestSyncComponent implements OnInit {
       return {fromParent, toParent, start: fromParent + cursor[0].start, end: fromParent + cursor[0].finish};
     } else {
       const result = {fromParent: 0, toParent: 0, start: 0, end: 0};
-      let attr = cursor[0].parent.getAttribute(DESIGNER_ATTR_NAME);
-      let regexp = new RegExp(`/<([a-zA-Z][^<>]*\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>/g`);
-      let startElement = this.source.search(regexp);
-      if (cursor[0].parent === cursor[1].parent) {
-        result.fromParent = this.source.indexOf('>', startElement);
-        result.start = result.fromParent + cursor[0].start;
+      if ( ((cursor[0].updateElement || cursor[0].parent) === this.editor)
+        || ((cursor[1].updateElement || cursor[1].parent) === this.editor) ) {
+        result.fromParent = 0;
+        result.toParent = this.source.length;
+        //////////////////////////////////////TODO
+      } else if (cursor[0].parent === cursor[1].parent) {
+        const attr = cursor[0].parent.getAttribute(DESIGNER_ATTR_NAME);
+        const regexp = new RegExp(`/<([a-zA-Z][^<>]*\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>/g`);
+        let pos = this.source.search(regexp);
+        result.fromParent = this.source.indexOf('>', pos);
+        pos = result.fromParent;
+        for (let i = 0; i < cursor[0].indexOfChildren; ++i) {
+          pos = this.source.indexOf('>', pos);
+        }
+        result.start = pos + cursor[0].start;
+        pos = result.fromParent;
+        for (let i = 0; i < cursor[1].indexOfChildren; ++i) {
+          pos = this.source.indexOf('>', pos);
+        }
+        result.end = pos + cursor[1].finish;
+        result.toParent = this.source.indexOf('<', result.end);
+      } else {//////////////////////////////////TODO
+        let attr = (cursor[0].updateElement || cursor[0].parent).getAttribute(DESIGNER_ATTR_NAME);
+        let regexp = new RegExp(`/<([a-zA-Z][^<>]*\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>/g`);
+        let startElement = this.source.search(regexp);
+        if (cursor[0].parent === cursor[1].parent) {
+          result.fromParent = this.source.indexOf('>', startElement);
+          result.start = result.fromParent + cursor[0].start;
+        }
+        attr = (cursor[1].updateElement || cursor[1].parent).getAttribute(DESIGNER_ATTR_NAME);
+        regexp = new RegExp(`/<([a-zA-Z][^<>]*\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>/g`);
+        startElement = this.source.search(regexp);
+        const fromParent = this.source.indexOf('>', startElement);
+        result.end = fromParent + cursor[1].finish;
+        result.toParent = this.source.indexOf('<', fromParent);
       }
-      attr = cursor[1].parent.getAttribute(DESIGNER_ATTR_NAME);
-      regexp = new RegExp(`/<([a-zA-Z][^<>]*\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>/g`);
-      startElement = this.source.search(regexp);
-      const fromParent = this.source.indexOf('>', startElement);
-      result.end = fromParent + cursor[1].finish;
-      result.toParent = this.source.indexOf('<', fromParent);
       return result;
     }
   }
