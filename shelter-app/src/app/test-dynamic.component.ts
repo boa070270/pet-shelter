@@ -75,8 +75,7 @@ export class TestDynamicComponent implements OnInit {
             'constriction', 'nativeConstrictions', 'numberConstrictions', 'stringConstrictions',
             'arrayConstrictions', 'objectConstrictions', 'ui'],
           {
-            order: SwaggerNative.asInteger(null, {default: 0},
-              swaggerUI(null, [{lang: 'en', title: ''}, {lang: 'uk', title: 'Обов\'язкове поле'}])),
+            order: SwaggerNative.asInteger(null, {default: 0}),
             fieldName: SwaggerNative.asString(),
             fieldType: SwaggerNative.asString(null,
               {enum: ['SwaggerNative', 'SwaggerArray', 'SwaggerObject']}),
@@ -84,7 +83,7 @@ export class TestDynamicComponent implements OnInit {
               ['control', 'validators', 'asyncValidator'],
               {
                 control: SwaggerNative.asString(),
-                validators: SwaggerNative.asString(), // ??? write as string and parse to function later?
+                validators: SwaggerNative.asString(), // TODO use angular Validators
                 asyncValidator: SwaggerNative.asString(), // ???
               }
             ),
@@ -96,9 +95,9 @@ export class TestDynamicComponent implements OnInit {
                 immutable: SwaggerNative.asBoolean(),
                 writeOnly: SwaggerNative.asBoolean(),
                 nullable: SwaggerNative.asBoolean(),
-                enum: new SwaggerArray(SwaggerNative.asString()), // ??? make enumType input to check if number or string?
+                // enum: new SwaggerArray(SwaggerNative.asString()),
                 enumDescriptions: SwaggerNative.asString(), // ???
-                enumTooltips: new SwaggerArray(SwaggerNative.asString()), // ??? write TitleType[] as string and parse later?
+                // enumTooltips: new SwaggerArray(SwaggerNative.asString()), // ??? write TitleType[] as string and parse later?
                 enumMulti: SwaggerNative.asBoolean(),
                 default: SwaggerNative.asString(),
                 format: SwaggerNative.asString(null,
@@ -117,21 +116,22 @@ export class TestDynamicComponent implements OnInit {
               }
             ),
             stringConstrictions: new SwaggerObject(
-              ['minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum', 'multipleOf'],
+              ['minLength', 'maxLength', 'pattern'],
               {
-                minimum: SwaggerNative.asNumber(),
-                maximum: SwaggerNative.asNumber(),
-                exclusiveMinimum: SwaggerNative.asNumber(),
-                exclusiveMaximum: SwaggerNative.asNumber(),
-                multipleOf: SwaggerNative.asNumber()
+                minLength: SwaggerNative.asNumber(),
+                maxLength: SwaggerNative.asNumber(),
+                pattern: SwaggerNative.asString()
               }
             ),
             arrayConstrictions: new SwaggerObject(
               ['minItems', 'maxItems', 'uniqueItems', 'customTableActions', 'trIn', 'trOut'],
               {
-                minLength: SwaggerNative.asNumber(),
-                maxLength: SwaggerNative.asNumber(),
-                pattern: SwaggerNative.asString()
+                minItems: SwaggerNative.asNumber(),
+                maxItems: SwaggerNative.asNumber(),
+                uniqueItems: SwaggerNative.asBoolean(),
+                customTableActions: SwaggerNative.asString(), // TODO
+                trIn: SwaggerNative.asString(),
+                trOut: SwaggerNative.asString()
               }
             ),
             objectConstrictions: new SwaggerObject(
@@ -144,12 +144,12 @@ export class TestDynamicComponent implements OnInit {
             ),
             itemType: SwaggerNative.asString(null, {enum: ['SwaggerNative', 'SwaggerObject']}),
             nativeType: SwaggerNative.asString(null,
-              {enum: ['string', 'number', 'integer', 'boolean'], default: 'string'}),
+              {enum: ['string', 'number', 'integer', 'boolean']}),
             objectLink: SwaggerNative.asString(),
             ui: new SwaggerObject(
               ['description', 'caption', 'toolTip', 'placeHolder', 'leadingIcon', 'trailingIcon', 'nameAsCaption'],
               {
-                description: SwaggerNative.asString(), // ??? try to parse as TitleType and leave as string if fails?
+                description: SwaggerNative.asString(),
                 caption: SwaggerNative.asString(), // ???
                 toolTip: SwaggerNative.asString(), // ???
                 placeHolder: SwaggerNative.asString(), // ???
@@ -211,8 +211,6 @@ export class TestDynamicComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // this.dataSource = ArrayDataSource.EmptyDS();
-    // this.data = {fields: this.dataSource};
     this.data = {fields: [
         {order: 0, fieldName: 'asd', fieldType: 'SwaggerNative', nativeType: 'integer'},
         {order: 1, fieldName: 'zxc', fieldType: 'SwaggerNative', nativeType: 'string'}

@@ -148,5 +148,6 @@ export class ControlsModule {
     componentsPlugin.addPlugin('simple-dialog', {component: SimpleDialogComponent, schema: null});
     componentsPlugin.addPlugin('snake-bar', {component: SnakeBarComponent, schema: null});
     componentsPlugin.addPlugin('app-bar', {component: AppBarComponent, schema: null});
+    componentsPlugin.addPlugin('editable-list', {component: EditableListComponent, schema: null});
   }
 }

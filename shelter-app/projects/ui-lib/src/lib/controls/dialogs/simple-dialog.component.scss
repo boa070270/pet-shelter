@@ -71,3 +71,7 @@
     display: inline-block;
   }
 }
+.dialog-container {
+  overflow: auto;
+  max-height: 80vh;
+}

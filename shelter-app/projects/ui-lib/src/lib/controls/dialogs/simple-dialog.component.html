@@ -1,4 +1,4 @@
-<div class="{{dialogBorderClass}}">
+<div class="{{dialogBorderClass}} dialog-container">
   <div class="dialog-caption" *ngIf="caption"><span [ngClass]="iconClasses"></span><span>{{ caption }}</span></div>
   <lib-swagger-form [swagger]="swagger" *ngIf="swagger" [(ngModel)]="data" [readOnly]="disabled"></lib-swagger-form>
   <span class="dialog-message" *ngIf="!swagger">{{data}}</span>

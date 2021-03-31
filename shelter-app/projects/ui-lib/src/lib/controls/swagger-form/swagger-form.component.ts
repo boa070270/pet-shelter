@@ -1,4 +1,4 @@
-import {AfterContentInit, Component, forwardRef, Input, OnDestroy, OnInit} from '@angular/core';
+import {AfterContentInit, ChangeDetectorRef, Component, forwardRef, Input, OnDestroy, OnInit} from '@angular/core';
 import {
   coerceToSwaggerArray,
   coerceToSwaggerNative,
@@ -35,12 +35,12 @@ export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
       <ng-container *ngFor="let fld of properties">
         <ng-container [ngSwitch]="fld.controlType">
           <lib-swagger-native [propertyId]="fld.propertyId" [swagger]="swaggerProperties[fld.propertyId]" [required]="fld.required"
-                              [pFormGroup]="formGroup" *ngSwitchCase="'native'" [formControl]="getFormControl(fld.propertyId)" [ngStyle]="fld.style"></lib-swagger-native>
+                              [pFormGroup]="formGroup" *ngSwitchCase="'native'" [formControl]="fld.control" [ngStyle]="fld.style"></lib-swagger-native>
           <lib-swagger-form [propertyId]="fld.propertyId" [swagger]="swaggerProperties[fld.propertyId]" [required]="fld.required"
                             [(ngModel)]="fld.propertyId" [nameControl]="fld.propertyId"
                             [pFormGroup]="formGroup" *ngSwitchCase="'object'"></lib-swagger-form>
           <lib-swagger-array [propertyId]="fld.propertyId" [swagger]="swaggerProperties[fld.propertyId]" [required]="fld.required"
-                             [pFormGroup]="formGroup" *ngSwitchCase="'array'" [formControl]="getFormControl(fld.propertyId)"></lib-swagger-array>
+                             [pFormGroup]="formGroup" *ngSwitchCase="'array'" [formControl]="fld.control"></lib-swagger-array>
         </ng-container>
       </ng-container>
     </div>`,
@@ -59,11 +59,8 @@ export class SwaggerFormComponent extends BaseSwaggerComponent implements OnInit
   get behavior(): { [field: string]: Rule[]; } {
     return (this._swagger as SwaggerObject).behavior;
   }
-  getFormControl(name: string): FormControl {
-    return this.formGroup.get(name) as FormControl;
-  }
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
+  constructor(public systemLang: SystemLang, protected directionality: Directionality, protected changeDetector: ChangeDetectorRef) {
     super(systemLang, directionality);
   }
 
@@ -203,6 +200,7 @@ export class SwaggerFormComponent extends BaseSwaggerComponent implements OnInit
           }
         }
       }
+      this.changeDetector.detectChanges();
     });
   }
   private applyRule(r: Rule): void {
