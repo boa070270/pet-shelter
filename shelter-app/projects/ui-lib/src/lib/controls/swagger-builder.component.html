@@ -1,4 +1,5 @@
 <label>
   <span class="ui-input-title" *ngIf="pCaption">{{pCaption}}</span>
 </label>
+<lib-swagger-form [swagger]="formSwagger" [(ngModel)]="data"></lib-swagger-form>
 <span class="hint">{{pHint}}</span>

@@ -16,8 +16,9 @@ import {
   ArrayConstrictions,
   ObjectConstrictions,
   SwaggerUI,
-  coerceToSwaggerNative, coerceToSwaggerObject, coerceToSwaggerArray, SwaggerNativeTypes
+  coerceToSwaggerNative, coerceToSwaggerObject, coerceToSwaggerArray, SwaggerNativeTypes, SwaggerSchema
 } from '../shared';
+import {ObjectLinkService} from './object-link.service';
 
 @Component({
   selector: 'lib-swagger-builder',
@@ -28,30 +29,158 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
 
   @Input()
   swagger: SwaggerObject;
-  // = new SwaggerObject(
-  //   ['id', 'description', 'child'],
-  //   {
-  //     id: SwaggerNative.asString(),
-  //     description: SwaggerNative.asString(),
-  //     child: new SwaggerObject(
-  //       ['childId', 'childDescription', 'sex'],
-  //       {
-  //         childId: SwaggerNative.asString(),
-  //         childDescription: SwaggerNative.asString(),
-  //         sex: SwaggerNative.asString(null, {enum: ['m', 'f']})
-  //       })
-  //   }, null, ['id']);
+
+  i18n = {
+    act_up: [{lang: 'en', title: 'Move one position up'}, {lang: 'uk', title: 'Підняти на одну позицію'}],
+    act_down: [{lang: 'en', title: 'Move one position down'}, {lang: 'uk', title: 'Опустити на одну позицію'}]
+  };
+  actions: Array<{icon: string, tooltip: string | TitleType[], command: string, action: (v) => void}> = [
+    {icon: 'gm-keyboard_arrow_up', command: 'move-up', tooltip: this.i18n.act_up, action: (v) => { this.moveUp(v); }},
+    {icon: 'gm-keyboard_arrow_down', command: 'move-down', tooltip: this.i18n.act_down, action: (v) => { this.moveDown(v); }}
+  ];
+  formSwagger: SwaggerObject = new SwaggerObject(
+    ['fields'],
+    {
+      fields: new SwaggerArray(
+        new SwaggerObject(
+          ['fieldName', 'fieldType', 'itemType', 'nativeType', 'objectLink', 'required',
+            'constriction', 'nativeConstrictions', 'numberConstrictions', 'stringConstrictions',
+            'arrayConstrictions', 'objectConstrictions', 'ui'],
+          {
+            order: SwaggerNative.asInteger(null, {default: 0}),
+            fieldName: SwaggerNative.asString(),
+            fieldType: SwaggerNative.asString(null,
+              {enum: ['SwaggerNative', 'SwaggerArray', 'SwaggerObject']}),
+            constriction: new SwaggerObject(
+              ['control', 'validators', 'asyncValidator'],
+              {
+                control: SwaggerNative.asString(),
+                validators: SwaggerNative.asString(), // TODO use angular Validators
+                asyncValidator: SwaggerNative.asString(), // ???
+              }
+            ),
+            nativeConstrictions: new SwaggerObject(
+              ['readOnly', 'immutable', 'writeOnly', 'nullable', 'enum',
+                'enumDescriptions', 'enumTooltips', 'enumMulti', 'default', 'format'],
+              {
+                readOnly: SwaggerNative.asBoolean(),
+                immutable: SwaggerNative.asBoolean(),
+                writeOnly: SwaggerNative.asBoolean(),
+                nullable: SwaggerNative.asBoolean(),
+                enum: new SwaggerArray(SwaggerNative.asString()),
+                enumDescriptions: SwaggerNative.asString(), // ???
+                enumTooltips: new SwaggerArray(SwaggerNative.asString()), // ??? write TitleType[] as string and parse later?
+                enumMulti: SwaggerNative.asBoolean(),
+                default: SwaggerNative.asString(),
+                format: SwaggerNative.asString(null,
+                  {enum: ['date', 'date-time', 'password', 'byte', 'binary', 'email', 'uuid', 'uri', 'hostname',
+                      'ipv4', 'ipv6', 'color', 'datetime-local', 'month', 'number', 'search', 'tel', 'text', 'time', 'week']}),
+              }
+            ),
+            numberConstrictions: new SwaggerObject(
+              ['minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum', 'multipleOf'],
+              {
+                minimum: SwaggerNative.asNumber(),
+                maximum: SwaggerNative.asNumber(),
+                exclusiveMinimum: SwaggerNative.asNumber(),
+                exclusiveMaximum: SwaggerNative.asNumber(),
+                multipleOf: SwaggerNative.asNumber()
+              }
+            ),
+            stringConstrictions: new SwaggerObject(
+              ['minLength', 'maxLength', 'pattern'],
+              {
+                minLength: SwaggerNative.asNumber(),
+                maxLength: SwaggerNative.asNumber(),
+                pattern: SwaggerNative.asString()
+              }
+            ),
+            arrayConstrictions: new SwaggerObject(
+              ['minItems', 'maxItems', 'uniqueItems', 'customTableActions', 'trIn', 'trOut'],
+              {
+                minItems: SwaggerNative.asNumber(),
+                maxItems: SwaggerNative.asNumber(),
+                uniqueItems: SwaggerNative.asBoolean(),
+                customTableActions: SwaggerNative.asString(), // TODO
+                trIn: SwaggerNative.asString(),
+                trOut: SwaggerNative.asString()
+              }
+            ),
+            // TODO object constrictions is not needed, because obj params should be set while making object
+            objectConstrictions: new SwaggerObject(
+              ['orderCtrl', 'toFrm', 'fromFrm'],
+              {
+                orderCtrl: SwaggerNative.asString(), // ???
+                toFrm: SwaggerNative.asString(), // ???
+                fromFrm: SwaggerNative.asString() // ???
+              }
+            ),
+            itemType: SwaggerNative.asString(null, {enum: ['SwaggerNative', 'SwaggerObject']}),
+            nativeType: SwaggerNative.asString(null,
+              {enum: ['string', 'number', 'integer', 'boolean']}),
+            objectLink: SwaggerNative.asString(),
+            // TODO cannot set ui for swagger native if setting ui for swagger array
+            ui: new SwaggerObject(
+              ['description', 'caption', 'toolTip', 'placeHolder', 'leadingIcon', 'trailingIcon', 'nameAsCaption'],
+              {
+                description: SwaggerNative.asString(),
+                caption: SwaggerNative.asString(), // ???
+                toolTip: SwaggerNative.asString(), // ???
+                placeHolder: SwaggerNative.asString(), // ???
+                leadingIcon: SwaggerNative.asString(),
+                trailingIcon: SwaggerNative.asString(),
+                nameAsCaption: SwaggerNative.asBoolean(),
+              }
+            ),
+            required: SwaggerNative.asBoolean(null, null,
+              swaggerUI([{lang: 'en', title: 'Required'}, {lang: 'uk', title: 'Обов\'язкове поле'}])),
+          }, null, ['fieldName', 'fieldType'], null,
+          {
+            fieldType: [
+              {c: '!SwaggerNative,SwaggerObject,SwaggerArray',
+                hide: ['itemType', 'nativeType', 'objectLink', 'nativeConstrictions', 'objectConstrictions',
+                  'arrayConstrictions', 'stringConstrictions', 'numberConstrictions']},
+              {c: '=SwaggerNative',
+                hide: ['itemType', 'objectLink', 'objectConstrictions', 'arrayConstrictions'],
+                show: ['nativeType', 'nativeConstrictions']},
+              {c: '=SwaggerObject',
+                hide: ['itemType', 'nativeType', 'nativeConstrictions', 'arrayConstrictions', 'stringConstrictions', 'numberConstrictions'],
+                show: ['objectLink', 'objectConstrictions']},
+              {c: '=SwaggerArray',
+                hide: ['nativeConstrictions', 'objectConstrictions', 'stringConstrictions', 'numberConstrictions'],
+                show: ['itemType', 'arrayConstrictions']}
+            ],
+            itemType: [
+              {c: '=SwaggerNative', hide: ['objectLink'], show: ['nativeType', 'nativeConstrictions']},
+              {c: '=SwaggerObject', hide: ['nativeType'], show: ['objectLink', 'objectConstrictions']}
+            ],
+            nativeType: [
+              {c: '=string', show: ['stringConstrictions']},
+              {c: '=number,integer', show: ['numberConstrictions']}
+            ]
+          }
+        ), {customTableActions: this.actions, trIn: v => {
+            return v.map((k, i) => {
+              k.order = i;
+              return k;
+            });
+          }}
+      )
+    }
+  );
+  data;
 
   get props(): object {
     return this.swagger.properties;
   }
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
+  constructor(public systemLang: SystemLang, protected directionality: Directionality, private objectLink: ObjectLinkService) {
     super(systemLang, directionality);
   }
 
   ngOnInit(): void {
     super.ngOnInit();
+    this.data = {fields: this.objectLink.toFrm(this.swagger)};
   }
 
   onChangeLang(): void {
@@ -66,62 +195,22 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
     super.ngOnDestroy();
   }
 
-  toFrm(obj: SwaggerObject): PropertyForm[] {
-    const props: PropertyForm[] = [];
-    for (const property of obj.orderControls) {
-      const prop = obj.properties[property];
-      const p: PropertyForm = {
-        order: obj.orderControls.indexOf(property),
-        fieldName: property,
-        fieldType: undefined
-      };
-      if (coerceToSwaggerNative(prop)) {
-        p.fieldType = 'SwaggerNative';
-        p.nativeType = (prop as SwaggerNative).type;
-      } else if (coerceToSwaggerObject(prop)) {
-        p.fieldType = 'SwaggerObject';
-        p.objectLink = this.getLink(prop as SwaggerObject);
-      } else if (coerceToSwaggerArray(prop)) {
-        p.fieldType = 'SwaggerArray';
-        const item = (prop as SwaggerArray).items;
-        if (coerceToSwaggerNative(item)) {
-          p.itemType = 'SwaggerNative';
-          p.nativeType = (item as SwaggerNative).type;
-        } else if (coerceToSwaggerObject(item)) {
-          p.itemType = 'SwaggerObject';
-          p.objectLink = this.getLink(item as SwaggerObject);
-        }
-      }
-
-      props.push();
+  moveUp(rows: any[]): void {
+    console.log('TestDynamicComponent.moveUp', rows);
+    if (rows[0].order < 1) {
+      return;
     }
-    // {order: 0, fieldName: 'asd', fieldType: 'SwaggerNative', nativeType: 'integer'},
-    return props;
+    const item = this.data.fields.splice(rows[0].order - 1, 1);
+    this.data.fields.splice(rows[rows.length - 1].order, 0, item[0]);
+    this.data = {fields: this.data.fields.slice()};
   }
-
-  fromFrm(): SwaggerObject {
-    return new SwaggerObject([], {});
+  moveDown(rows: any[]): void {
+    console.log('TestDynamicComponent.moveDown', rows);
+    if (rows[0].order > this.data.fields.length - 1) {
+      return;
+    }
+    const item = this.data.fields.splice(rows[rows.length - 1].order + 1, 1);
+    this.data.fields.splice(rows[0].order, 0, item[0]);
+    this.data = {fields: this.data.fields.slice()};
   }
-
-  // TODO swaggerLink service to map objects
-  getLink(obj: SwaggerObject): string {
-    return 'TODO link';
-  }
-}
-
-interface PropertyForm {
-  order: number;
-  fieldName: string;
-  fieldType: 'SwaggerNative' | 'SwaggerArray' | 'SwaggerObject';
-  itemType?: 'SwaggerNative' | 'SwaggerObject';
-  nativeType?: SwaggerNativeTypes;
-  objectLink?: string;
-  required?: boolean;
-  constriction?: BaseConstrictions;
-  nativeConstrictions?: NativeConstrictions;
-  numberConstrictions?: NumberConstrictions;
-  stringConstrictions?: StringConstrictions;
-  arrayConstrictions?: ArrayConstrictions;
-  objectConstrictions?: ObjectConstrictions;
-  ui?: SwaggerUI;
 }
