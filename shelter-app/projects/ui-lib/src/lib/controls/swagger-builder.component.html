@@ -1,5 +1,12 @@
 <label>
   <span class="ui-input-title" *ngIf="pCaption">{{pCaption}}</span>
 </label>
+<button (click)="save()">Save</button>
+<label>
+  <select #select>
+    <option [value]="l" *ngFor="let l of objectLink.array">{{l}}</option>
+  </select>
+</label>
+<button (click)="load(select.value)">Load</button>
 <lib-swagger-form [swagger]="formSwagger" [(ngModel)]="data"></lib-swagger-form>
 <span class="hint">{{pHint}}</span>

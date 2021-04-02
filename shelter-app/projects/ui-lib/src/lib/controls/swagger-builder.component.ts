@@ -9,16 +9,9 @@ import {
   SwaggerArray,
   swaggerUI,
   TitleType,
-  BaseConstrictions,
-  NumberConstrictions,
-  NativeConstrictions,
-  StringConstrictions,
-  ArrayConstrictions,
-  ObjectConstrictions,
-  SwaggerUI,
-  coerceToSwaggerNative, coerceToSwaggerObject, coerceToSwaggerArray, SwaggerNativeTypes, SwaggerSchema
 } from '../shared';
 import {ObjectLinkService} from './object-link.service';
+import {SwaggerFormComponent} from './swagger-form';
 
 @Component({
   selector: 'lib-swagger-builder',
@@ -39,13 +32,43 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
     {icon: 'gm-keyboard_arrow_down', command: 'move-down', tooltip: this.i18n.act_down, action: (v) => { this.moveDown(v); }}
   ];
   formSwagger: SwaggerObject = new SwaggerObject(
-    ['fields'],
+    ['link', 'constriction', 'objectConstrictions', 'ui', 'fields'],
     {
+      link: SwaggerNative.asString(),
+      constriction: new SwaggerObject(
+        ['control', 'validators', 'asyncValidator'],
+        {
+          control: SwaggerNative.asString(),
+          validators: SwaggerNative.asString(), // TODO use angular Validators
+          asyncValidator: SwaggerNative.asString(), // ???
+        }
+      ),
+      objectConstrictions: new SwaggerObject(
+        ['orderCtrl', 'toFrm', 'fromFrm'],
+        {
+          orderCtrl: SwaggerNative.asString(), // ???
+          toFrm: SwaggerNative.asString(), // ???
+          fromFrm: SwaggerNative.asString() // ???
+        }
+      ),
+      ui: new SwaggerObject(
+        ['description', 'caption', 'toolTip', 'placeHolder', 'leadingIcon', 'trailingIcon', 'nameAsCaption'],
+        {
+          description: SwaggerNative.asString(),
+          caption: SwaggerNative.asString(), // ???
+          toolTip: SwaggerNative.asString(), // ???
+          placeHolder: SwaggerNative.asString(), // ???
+          leadingIcon: SwaggerNative.asString(),
+          trailingIcon: SwaggerNative.asString(),
+          nameAsCaption: SwaggerNative.asBoolean(),
+        }
+      ),
+      // TODO rules
       fields: new SwaggerArray(
         new SwaggerObject(
           ['fieldName', 'fieldType', 'itemType', 'nativeType', 'objectLink', 'required',
             'constriction', 'nativeConstrictions', 'numberConstrictions', 'stringConstrictions',
-            'arrayConstrictions', 'objectConstrictions', 'ui'],
+            'arrayConstrictions', 'ui'],
           {
             order: SwaggerNative.asInteger(null, {default: 0}),
             fieldName: SwaggerNative.asString(),
@@ -106,19 +129,10 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
                 trOut: SwaggerNative.asString()
               }
             ),
-            // TODO object constrictions is not needed, because obj params should be set while making object
-            objectConstrictions: new SwaggerObject(
-              ['orderCtrl', 'toFrm', 'fromFrm'],
-              {
-                orderCtrl: SwaggerNative.asString(), // ???
-                toFrm: SwaggerNative.asString(), // ???
-                fromFrm: SwaggerNative.asString() // ???
-              }
-            ),
             itemType: SwaggerNative.asString(null, {enum: ['SwaggerNative', 'SwaggerObject']}),
             nativeType: SwaggerNative.asString(null,
               {enum: ['string', 'number', 'integer', 'boolean']}),
-            objectLink: SwaggerNative.asString(),
+            objectLink: SwaggerNative.asString('select', {enum: this.objectLink.array}),
             // TODO cannot set ui for swagger native if setting ui for swagger array
             ui: new SwaggerObject(
               ['description', 'caption', 'toolTip', 'placeHolder', 'leadingIcon', 'trailingIcon', 'nameAsCaption'],
@@ -138,21 +152,24 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
           {
             fieldType: [
               {c: '!SwaggerNative,SwaggerObject,SwaggerArray',
-                hide: ['itemType', 'nativeType', 'objectLink', 'nativeConstrictions', 'objectConstrictions',
+                hide: ['itemType', 'nativeType', 'objectLink', 'nativeConstrictions',
                   'arrayConstrictions', 'stringConstrictions', 'numberConstrictions']},
               {c: '=SwaggerNative',
-                hide: ['itemType', 'objectLink', 'objectConstrictions', 'arrayConstrictions'],
+                hide: ['itemType', 'objectLink', 'arrayConstrictions'],
                 show: ['nativeType', 'nativeConstrictions']},
               {c: '=SwaggerObject',
-                hide: ['itemType', 'nativeType', 'nativeConstrictions', 'arrayConstrictions', 'stringConstrictions', 'numberConstrictions'],
-                show: ['objectLink', 'objectConstrictions']},
+                hide: ['itemType', 'nativeType', 'nativeConstrictions',
+                  'arrayConstrictions', 'stringConstrictions', 'numberConstrictions'],
+                show: ['objectLink']
+              },
               {c: '=SwaggerArray',
-                hide: ['nativeConstrictions', 'objectConstrictions', 'stringConstrictions', 'numberConstrictions'],
+                hide: ['nativeConstrictions', 'stringConstrictions', 'numberConstrictions'],
                 show: ['itemType', 'arrayConstrictions']}
             ],
             itemType: [
               {c: '=SwaggerNative', hide: ['objectLink'], show: ['nativeType', 'nativeConstrictions']},
-              {c: '=SwaggerObject', hide: ['nativeType'], show: ['objectLink', 'objectConstrictions']}
+              {c: '=SwaggerObject', hide: ['nativeType', 'nativeConstrictions', 'stringConstrictions',
+                  'numberConstrictions'], show: ['objectLink']}
             ],
             nativeType: [
               {c: '=string', show: ['stringConstrictions']},
@@ -169,18 +186,19 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
     }
   );
   data;
+  @ViewChild(SwaggerFormComponent) formComponent: SwaggerFormComponent;
 
   get props(): object {
     return this.swagger.properties;
   }
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality, private objectLink: ObjectLinkService) {
+  constructor(public systemLang: SystemLang, protected directionality: Directionality, public objectLink: ObjectLinkService) {
     super(systemLang, directionality);
   }
 
   ngOnInit(): void {
     super.ngOnInit();
-    this.data = {fields: this.objectLink.toFrm(this.swagger)};
+    this.data = {link: '', fields: this.objectLink.toFrm(this.swagger)};
   }
 
   onChangeLang(): void {
@@ -212,5 +230,26 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
     const item = this.data.fields.splice(rows[rows.length - 1].order + 1, 1);
     this.data.fields.splice(rows[0].order, 0, item[0]);
     this.data = {fields: this.data.fields.slice()};
+  }
+
+  save(): void {
+    const v = this.formComponent.formGroup.value;
+    console.log('SwaggerBuilderComponent.save', v);
+    this.objectLink.addLink(this.objectLink.fromFrm(v), v.link);
+    console.log(this.objectLink.list);
+  }
+  load(link: string): void {
+    const obj = this.objectLink.getObject(link);
+    if (obj) {
+      this.data = {
+        link,
+        constriction: obj.constrictions,
+        objectConstrictions: (obj as SwaggerObject).constrictions,
+        ui: obj.ui,
+        fields: this.objectLink.toFrm(obj)
+      };
+    } else {
+      console.log('Broken link: couldn\'t find an object by this link');
+    }
   }
 }

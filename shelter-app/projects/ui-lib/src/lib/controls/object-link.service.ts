@@ -22,6 +22,9 @@ import {
 export class ObjectLinkService {
 
   list = new Map<string, SwaggerObject>();
+  get array(): string[] {
+    return [...this.list.keys()];
+  }
 
   constructor() { }
 
@@ -63,10 +66,16 @@ export class ObjectLinkService {
     return props;
   }
 
-  fromFrm(props: PropertyForm[]): SwaggerObject {
+  fromFrm(data: {constriction, objectConstrictions, ui, fields: PropertyForm[]}): SwaggerObject {
     const orderCtrl = [];
+    const required = [];
+    const props = data.fields;
     const properties: { [key: string]: SwaggerSchema } = {};
     for (const p of props) {
+      orderCtrl.push(p.fieldName);
+      if (p.required) {
+        required.push(p.fieldName);
+      }
       switch (p.fieldType) {
         case 'SwaggerArray':
           if (p.itemType === 'SwaggerNative') {
@@ -85,7 +94,7 @@ export class ObjectLinkService {
           break;
       }
     }
-    return new SwaggerObject(orderCtrl, properties);
+    return new SwaggerObject(orderCtrl, properties, data.ui, required, data.constriction);
   }
   setNativeProp(p, wrap?): SwaggerNative | SwaggerArray {
     let c;
@@ -114,6 +123,9 @@ export class ObjectLinkService {
     }
   }
 
+  addLink(obj: SwaggerObject, link): void {
+    this.list.set(link, obj);
+  }
   // TODO swaggerLink service to map objects
   getLink(obj: SwaggerObject): string {
     let link;
@@ -123,10 +135,14 @@ export class ObjectLinkService {
       }
     });
     console.log('ObjectListService.getLink', link);
+    if (!link) {
+      link = obj.orderControls.toString();
+      this.list.set(link, obj);
+    }
     return link;
   }
   getObject(link: string): SwaggerObject {
-    return new SwaggerObject([], {});
+    return this.list.get(link);
   }
 }
 
