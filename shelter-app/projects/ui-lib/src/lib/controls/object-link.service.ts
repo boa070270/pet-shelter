@@ -22,11 +22,29 @@ import {
 export class ObjectLinkService {
 
   list = new Map<string, SwaggerObject>();
+  private _array = [];
   get array(): string[] {
-    return [...this.list.keys()];
+    for (const k of this.list.keys()) {
+      if (!this._array.includes(k)) {
+        this._array.push(k);
+      }
+    }
+    return this._array;
+  }
+  set array(arr) {
+    this._array.length = 0;
+    this._array.push(arr);
   }
 
   constructor() { }
+
+  updateArray(arr: string[]): void {
+    for (const s of arr) {
+      if (!this._array.includes(s)) {
+        this._array.push(s);
+      }
+    }
+  }
 
   toFrm(obj: SwaggerObject): PropertyForm[] {
     const props: PropertyForm[] = [];

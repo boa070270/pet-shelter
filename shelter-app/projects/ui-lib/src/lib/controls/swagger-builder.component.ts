@@ -34,6 +34,7 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
   formSwagger: SwaggerObject = new SwaggerObject(
     ['link', 'constriction', 'objectConstrictions', 'ui', 'fields'],
     {
+      // TODO check links for duplicates with pattern constraint?
       link: SwaggerNative.asString(),
       constriction: new SwaggerObject(
         ['control', 'validators', 'asyncValidator'],
@@ -235,6 +236,8 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
   save(): void {
     const v = this.formComponent.formGroup.value;
     console.log('SwaggerBuilderComponent.save', v);
+    // TODO fix formGroup.value being only one property instead of array
+    v.fields = this.data.fields;
     this.objectLink.addLink(this.objectLink.fromFrm(v), v.link);
     console.log(this.objectLink.list);
   }
