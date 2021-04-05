@@ -1,4 +1,4 @@
-import {Component, forwardRef, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
+import {ChangeDetectorRef, Component, forwardRef, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
 import {CheckboxControlComponent} from './checkbox-control.component';
 import {SystemLang} from '../i18n';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
@@ -18,8 +18,9 @@ export const BOOLEAN_INPUT_ACCESSOR: any = {
 })
 export class BooleanControlComponent extends CheckboxControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
-    super(systemLang, directionality);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality,
+              protected changeDetect: ChangeDetectorRef) {
+    super(systemLang, directionality, changeDetect);
   }
 
   ngOnInit(): void {

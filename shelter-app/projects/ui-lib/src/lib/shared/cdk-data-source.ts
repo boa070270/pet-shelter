@@ -187,9 +187,10 @@ export abstract class AbstractDataSource<T> {
       })
     );
   }
-  updateRow<U>(ds: CdkDataSource<T, U>, row: U): Observable<DataExpectedResult<U>> {
+  updateRow<U>(ds: CdkDataSource<T, U>, row: U, oldRow: U): Observable<DataExpectedResult<U>> {
     const r = ds.trOut([row]);
-    const i = this.data.indexOf(r[0]);
+    const rOld = ds.trOut([oldRow]);
+    const i = this.data.indexOf(rOld[0]);
     this.data[i] = r[0];
     return this.update(r[0]).pipe(
       tap(() => this.updateConsumers(ds)),
@@ -420,8 +421,8 @@ export class CdkDataSource<U, T> extends DataSource<T> {
   refresh(): void {
     this.main.obtainPage(this, true);
   }
-  updateRow(row: T): Observable<DataExpectedResult<T>> {
-    return this.main.updateRow(this, row).pipe(
+  updateRow(row: T, oldRow: T): Observable<DataExpectedResult<T>> {
+    return this.main.updateRow(this, row, oldRow).pipe(
       tap(() => this.main.obtainPage(this))
     );
   }

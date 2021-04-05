@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   ElementRef,
   forwardRef,
@@ -38,8 +39,9 @@ export class SelectControlComponent extends CheckboxControlComponent implements 
 
   @ViewChild('selectElement') selectElement: ElementRef<HTMLSelectElement>;
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
-    super(systemLang, directionality);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality,
+              protected changeDetect: ChangeDetectorRef) {
+    super(systemLang, directionality, changeDetect);
   }
 
   ngOnInit(): void {
