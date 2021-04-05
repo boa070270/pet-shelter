@@ -12,33 +12,11 @@ const EDITING_KEYS = [
 const NAVIGATION_KEYS = [
   'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'End', 'Home', 'PageDown', 'PageUp',
 ];
-const TEXT_NODE = 3;
 const ELEMENT_NODE = 1;
+const TEXT_NODE = 3;
+const CDATA_SECTION_NODE = 4;
+const COMMENT_NODE = 8;
 const DESIGNER_ATTR_NAME = '_design';
-interface Cursor {
-  parent: HTMLElement;
-  indexOfChildren: number;
-  start: number;
-  finish: number;
-  updateElement?: HTMLElement; // If absent, than parent contain an marked element that need to be updated
-}
-function isDescendant(parent: Node, child: Node): boolean {
-  if (parent && child) {
-    while (child !== parent && child !== null) {
-      child = child.parentNode;
-    }
-    return child === parent;
-  }
-  return false;
-}
-function indexOfChildren(node: Node): number {
-  let i = 0;
-  while (node.previousSibling !== null) {
-    node = node.previousSibling;
-    ++i;
-  }
-  return i;
-}
 function firstGrandChild(node: Node): Node {
   if (node && node.firstChild) {
     return firstGrandChild(node.firstChild);
@@ -116,12 +94,12 @@ function findSourceMark(attr: string, source: string): RegExpExecArray {
   const regexp = new RegExp(`<([a-zA-Z][^<>]*\\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>`, 'gs');
   return regexp.exec(source);
 }
-function findEndOfTag(tag: string, source: string, p: number = 0): number {
-  const regexp = new RegExp(`</${tag}\s*>`, 'ig');
-  return source.substring(p).search(regexp);
+function startSourceMark(attr: string, source: string): number {
+  return findSourceMark(attr, source).index;
 }
-function isEmptyElement(n: Node): boolean {
-  return n.nodeType === ELEMENT_NODE && n.firstChild === null;
+function endSourceMark(attr: string, source: string): number {
+  const res = findSourceMark(attr, source);
+  return res.index + res[0].length;
 }
 // Cases
 const THE_SAME_NODE = 0;
@@ -225,110 +203,20 @@ export class TestSyncComponent implements OnInit {
       || (n.nodeType === TEXT_NODE && (n.parentElement === this.editor || n.parentElement.getAttribute(DESIGNER_ATTR_NAME) !== null))
       || (n.nodeType === ELEMENT_NODE && (n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) !== null));
   }
-  syncSource(cursor: Cursor[]): {fromParent: number, toParent: number, start: number, end: number} {
-    if (cursor.length === 1) {
-      if (cursor[0].parent === this.editor) {
-        return {fromParent: 0, toParent: this.source.length, start: cursor[0].start, end: cursor[0].finish};
-      }
-      const attr = cursor[0].parent.getAttribute(DESIGNER_ATTR_NAME);
-      const regexp = new RegExp(`<([a-zA-Z][^<>]*\\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>`, 'g');
-      const res = regexp.exec(this.source);
-      const fromParent = res.index + res[0].length;
-      const toParent = this.source.indexOf('<', fromParent);
-      return {fromParent, toParent, start: fromParent + cursor[0].start, end: fromParent + cursor[0].finish};
-    } else {
-      const result = {fromParent: 0, toParent: 0, start: 0, end: 0};
-      if ( ((cursor[0].updateElement || cursor[0].parent) === this.editor)
-        || ((cursor[1].updateElement || cursor[1].parent) === this.editor) ) {
-        result.fromParent = 0;
-        result.toParent = this.source.length;
-        let attr = cursor[0].parent.getAttribute(DESIGNER_ATTR_NAME);
-        let pos = result.fromParent;
-        if (attr !== null) {
-          const regexp = new RegExp(`<([a-zA-Z][^<>]*\\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>`, 'gs');
-          const res = regexp.exec(this.source);
-          pos = res.index + res[0].length;
-        }
-        for (let i = 0; i < cursor[0].indexOfChildren; ++i) {
-          pos = this.source.indexOf('>', pos);
-        }
-        result.start = pos + cursor[0].start;
-        pos = result.fromParent;
-        attr = cursor[1].parent.getAttribute(DESIGNER_ATTR_NAME);
-        if (attr !== null) {
-          const regexp = new RegExp(`<([a-zA-Z][^<>]*\\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>`, 'gs');
-          const res = regexp.exec(this.source);
-          pos = res.index + res[0].length;
-        }
-        for (let i = 0; i < cursor[1].indexOfChildren; ++i) {
-          pos = this.source.indexOf('>', pos);
-        }
-        result.end = pos + cursor[1].finish;
-      } else if (cursor[0].parent === cursor[1].parent) {
-        const attr = cursor[0].parent.getAttribute(DESIGNER_ATTR_NAME);
-        const regexp = new RegExp(`<([a-zA-Z][^<>]*\\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>`, 'gs');
-        const res = regexp.exec(this.source);
-        let pos = res.index + res[0].length;
-        result.fromParent = pos;
-        for (let i = 0; i < cursor[0].indexOfChildren; ++i) {
-          pos = this.source.indexOf('>', pos);
-        }
-        result.start = pos + cursor[0].start;
-        pos = result.fromParent;
-        for (let i = 0; i < cursor[1].indexOfChildren; ++i) {
-          pos = this.source.indexOf('>', pos);
-        }
-        result.end = pos + cursor[1].finish;
-        result.toParent = this.source.indexOf('<', result.end);
-      } else {
-        let attr = cursor[0].parent.getAttribute(DESIGNER_ATTR_NAME);
-        let regexp = new RegExp(`<([a-zA-Z][^<>]*\\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>`, 'gs');
-        let res = regexp.exec(this.source);
-        let pos = res.index + res[0].length;
-        result.fromParent = this.source.indexOf('>', pos);
-        pos = result.fromParent;
-        for (let i = 0; i < cursor[0].indexOfChildren; ++i) {
-          pos = this.source.indexOf('>', pos);
-        }
-        result.start = pos + cursor[0].start;
-        attr = cursor[1].parent.getAttribute(DESIGNER_ATTR_NAME);
-        regexp = new RegExp(`<([a-zA-Z][^<>]*\\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>`, 'gs');
-        res = regexp.exec(this.source);
-        pos = res.index + res[0].length;
-        for (let i = 0; i < cursor[1].indexOfChildren; ++i) {
-          pos = this.source.indexOf('>', pos);
-        }
-        result.end = pos + cursor[1].finish;
-        // for toParent need to find next sibling that has DESIGNER_ATTR_NAME
-        let parent = cursor[0].updateElement || cursor[0].parent;
-        parent = findNodeDown(parent.nextSibling,
-          ( n) => (n && n.nodeType === ELEMENT_NODE) && ((n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME)) !== null) as HTMLElement;
-        if (parent === null) {
-          result.end = this.source.length;
-        } else {
-          attr = parent.getAttribute(DESIGNER_ATTR_NAME);
-          regexp = new RegExp(`<([a-zA-Z][^<>]*\\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>`, 'gs');
-          res = regexp.exec(this.source);
-          result.end = res.index + res[0].length;
-        }
-      }
-      return result;
-    }
-  }
   onClick(event: MouseEvent): void {
     console.log(event);
     if (this.checkAndMarkElements()) {
       this.editor.innerHTML = this.source;
     }
     this.syncOnTouch();
-    console.log('syncOnTouch:', this.lastRange);
-    console.log('syncOnTouch:', this.getModifiedPart((t, i) => t));
+    console.log('onClick:', this.lastRange);
+    console.log('onClick:', this.getModifiedPart((t, i) => t));
     if (this.lastRange) {
       const start = this.syncPosition(this.lastRange.startContainer, this.lastRange.startOffset);
       const end = this.syncPosition(this.lastRange.endContainer, this.lastRange.endOffset);
-      console.log('syncOnTouch start:', start);
-      console.log('syncOnTouch end:', end);
-      console.log('syncOnTouch substr:', this.source.substring(start, end));
+      console.log('onClick start:', start);
+      console.log('onClick end:', end);
+      console.log('onClick substr:', this.source.substring(start, end));
     }
   }
   getModifiedPart(f: (t: string, i: number) => string, keyEvent?: KeyboardEvent): {parent: HTMLElement, text: string, start, end} {
@@ -348,8 +236,7 @@ export class TestSyncComponent implements OnInit {
             }
             attr = (parent as HTMLElement).getAttribute(DESIGNER_ATTR_NAME);
           }
-          const res = findSourceMark(attr, this.source);
-          const start = res.index + res[0].length;
+          const start = endSourceMark(attr, this.source);
           const end = this.endOfElement((parent as HTMLElement).tagName, start);
           return {parent: parent as HTMLElement, text: this.source.substring(start, end), start, end};
         } else {
@@ -357,41 +244,72 @@ export class TestSyncComponent implements OnInit {
           if (parent === this.editor) {
             return {parent: this.editor, text: this.source.substring(0), start: 0, end: this.source.length};
           }
-          const res = findSourceMark((parent as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
-          const start = res.index + res[0].length;
+          const start = endSourceMark((parent as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
           const end = this.endOfElement((parent as HTMLElement).tagName, start);
           return {parent: parent as HTMLElement, text: this.source.substring(start, end), start, end};
         }
       }
     }
   }
+  /**
+   * Range: container, offset.
+   * container type can be ELEMENT_NODE and TEXT_NODE, COMMENT_NODE, CDATA_NODE
+   * if ELEMENT_NODE the offset is number of child node.
+   *   If the node with this number is present it point on the begin of the node.
+   *   If there is no node with this number, it point on the end of the node
+   * If TEXT_NODE, COMMENT_NODE, CDATA_NODE the offset is the number of characters from the start
+   * @param n Node
+   * @param offset number
+   */
   syncPosition(n: Node, offset: number): number {
-    // let prevMark = n;
-    let parent = n;
-    let child = offset;
-    let shift = 0;
-    if (n.nodeType === TEXT_NODE) {
-      parent = n.parentNode;
-      shift = offset;
-      for (child = 0; child < parent.childNodes.length; ++child) {
-        if (parent.childNodes[child] === n) {
-          break;
+    if (n.nodeType === ELEMENT_NODE) {
+      if (n.childNodes[offset].nodeType === ELEMENT_NODE) {
+        return startSourceMark((n.childNodes[offset] as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
+      }
+      if (offset === 0) {
+        if (n === this.editor) {
+          return 0;
+        } else {
+          return endSourceMark((n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
         }
       }
+      let start = 0;
+      if (n !== this.editor) {
+        start = endSourceMark((n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
+      }
+      for (let i = 0; n.childNodes[i] && i < offset; ++i) {
+        const ch = n.childNodes[i];
+        if (ch.nodeType === ELEMENT_NODE) {
+          start = endSourceMark((n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
+        } else if (ch.nodeType === COMMENT_NODE) {
+          start = this.source.indexOf('-->', start) + 3;
+        } else if (ch.nodeType === CDATA_SECTION_NODE) {
+          start = this.source.indexOf(']]>', start) + 3;
+        }
+      }
+      return start;
+    } else {
+      // we expect only TEXT_NODE here
+      let start = 0;
+      const parent = n.parentNode;
+      for (; parent.childNodes[start] !== n; ++start){}
+      start = this.syncPosition(parent, start);
+      return start + offset + this.unicodes(start, offset);
     }
-    // for (;child >= 0; --child) {
-    //   if (parent.nodeType === ELEMENT_NODE) {
-    //
-    //   }
-    // }
-    const prevMark = findNodeUp(n, (s) =>
-      s === this.editor || (s.nodeType === ELEMENT_NODE && (s as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) !== null));
-    let start = 0;
-    if (prevMark !== this.editor) {
-      const res = findSourceMark((prevMark as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
-      start = res.index + res[0].length;
-    }
-    return start + offset;
+  }
+  unicodes(start: number, end: number): number {
+    let str = this.source.substr(start);
+    let count = 0;
+    do {
+      const res = /&#(\d{2,4}|x[0-9a-zA-Z]{2,4});/.exec(str);
+      if (res === null || res.index > end) {
+        break;
+      }
+      count += (res[1].length + 2);
+      end -= (res[1].length + 3);
+      str = str.substr(res.index + res[1].length + 3);
+    } while (true);
+    return count;
   }
   endOfElement(tag: string, pos: number): number {
     const regexp = new RegExp(`<\/${tag}>`, 'gi');
@@ -430,6 +348,10 @@ export class TestSyncComponent implements OnInit {
   }
   onKeyUp($event: KeyboardEvent): void {
     this.syncOnTouch();
+    if (this.lastRange) {
+      const start = this.syncPosition(this.lastRange.startContainer, this.lastRange.startOffset);
+      console.log('onKeyUp', this.source.substr(start, 5));
+    }
     console.log(this.lastRange);
   }
   onKeyPress(event: KeyboardEvent): void {
@@ -509,11 +431,12 @@ export class TestSyncComponent implements OnInit {
   }
   checkAndMarkElements(): boolean {
     let result = false;
-    const upd = this.source.replace(/<([a-zA-Z][^<]*)>/g, (s: string, ...args: any[]) => {
+    const upd = this.source.replace(/<([a-zA-Z][^</]*)(\/?)>/g, (s: string, ...args: any[]) => {
       const tagBody = args[0] as string;
+      const closed = args[1] ? '/' : '';
       if (tagBody.indexOf(DESIGNER_ATTR_NAME) === -1) {
         result = true;
-        return `<${tagBody} ${DESIGNER_ATTR_NAME}="${this.designIndex++}">`;
+        return `<${tagBody} ${DESIGNER_ATTR_NAME}="${this.designIndex++}"${closed}>`;
       }
       return s;
     });

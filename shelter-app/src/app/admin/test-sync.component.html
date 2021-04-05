@@ -1,5 +1,5 @@
 <div>
-  <div #editor style="width: 90%; height: 50%; border: 1px solid; padding: 5px; margin: 8px;"
+  <div #editor style="width: 90%; height: 50%; border: 1px solid; padding: 5px; margin: 8px; overflow: auto;"
        [contentEditable]="true" (click)="onClick($event)" (keydown)="onKeyPress($event)" (keyup)="onKeyUp($event)"></div>
 </div>
 <div>
