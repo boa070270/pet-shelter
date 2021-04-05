@@ -1,4 +1,4 @@
-import {Component, forwardRef, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
+import {ChangeDetectorRef, Component, forwardRef, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
 import {SelectControlComponent} from './select-control.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SystemLang} from '../i18n';
@@ -18,8 +18,9 @@ export const LIST_SELECT_VALUE_ACCESSOR: any = {
 })
 export class ListSelectComponent extends SelectControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
-    super(systemLang, directionality);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality,
+              protected changeDetect: ChangeDetectorRef) {
+    super(systemLang, directionality, changeDetect);
     this.multiple = true;
   }
   ngOnInit(): void {

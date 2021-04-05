@@ -1,4 +1,13 @@
-import {Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  forwardRef,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges
+} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SystemLang} from '../i18n';
 import {BaseComponent} from './base.component';
@@ -97,7 +106,8 @@ export class CheckboxControlComponent extends BaseComponent implements OnInit, O
   pTitles: {[id: string]: string};
   tips: {[id: string]: string};
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
+  constructor(public systemLang: SystemLang, protected directionality: Directionality,
+              protected changeDetect: ChangeDetectorRef) {
     super(systemLang, directionality);
   }
 
@@ -137,6 +147,7 @@ export class CheckboxControlComponent extends BaseComponent implements OnInit, O
         this.setValue(obj, true);
       }
     }
+    this.changeDetect.detectChanges();
   }
   onChange($event: Event): void {
     const target: HTMLInputElement = $event.target as HTMLInputElement;
@@ -161,12 +172,10 @@ export class CheckboxControlComponent extends BaseComponent implements OnInit, O
     this.values[key] = !this.values[key];
   }
   setObject(obj: any): void {
-    Object.keys(obj).forEach(k => this.values[k] = this.options.includes(k));
-    this.values = Object.assign({}, this.values);
+    Object.keys(obj).forEach(k => this.setValue(k, true));
   }
   setArray(opt: Array<string>): void {
-    opt.forEach(o => this.values[o] = this.options.includes(o));
-    this.values = Object.assign({}, this.values);
+    opt.forEach(o => this.setValue(o, true));
   }
   getArrayValues(): any[] {
     return this.options.filter(o => this.values[o] !== null && this.values[o] !== undefined);

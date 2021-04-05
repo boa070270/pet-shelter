@@ -158,7 +158,7 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
           this.displayedNames[key] = (native.ui || {}).caption || key;
         }
       }
-      for (const n of this.swagger.orderControls) {
+      for (const n of Object.keys(this.swagger.properties)) {
         if (this.allColumns.includes(n)) {
           this.displayedColumns.push(n);
         }
@@ -199,9 +199,9 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
   }
 
   tableSettings(): void {
-    const extDate = ExtendedData.create({columns: this.displayedColumns}, false, // TODO not all columns
+    const extDate = ExtendedData.create({columns: this.displayedColumns}, false,
       new SwaggerObject(['columns'],
-        { columns: SwaggerNative.asString('list-builder', {enum: this.swagger.orderControls})}), // TODO!!!
+        { columns: SwaggerNative.asString('list-builder', {enum: Object.keys(this.swagger.properties)})}), // TODO!!!
       'save_cancel', '');
     const dialogRef = this.dialogService.infoExtDialog(extDate, true);
     dialogRef.afterClosed().subscribe(v => {
@@ -276,7 +276,7 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
     if (dialogRef) {
       dialogRef.afterClosed().subscribe( row => {
         if (row) {
-          this.cdkDataSource.updateRow(row).subscribe( () => {
+          this.cdkDataSource.updateRow(row, this.currentRow).subscribe( () => {
             this.dialogService.snakeInfo(this.i18n.updated);
             this.emitChange(row);
           });
