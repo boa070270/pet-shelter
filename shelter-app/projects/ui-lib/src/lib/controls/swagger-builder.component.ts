@@ -147,6 +147,26 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
                 nameAsCaption: SwaggerNative.asBoolean(),
               }
             ),
+            constrictionAdd: new SwaggerObject(
+              ['control', 'validators', 'asyncValidator'],
+              {
+                control: SwaggerNative.asString(),
+                validators: SwaggerNative.asString(), // TODO use angular Validators
+                asyncValidator: SwaggerNative.asString(), // ???
+              }, swaggerUI([{lang: 'en', title: 'Native constrictions'}])
+            ),
+            uiNative: new SwaggerObject(
+              ['description', 'caption', 'toolTip', 'placeHolder', 'leadingIcon', 'trailingIcon', 'nameAsCaption'],
+              {
+                description: SwaggerNative.asString(),
+                caption: SwaggerNative.asString(), // ???
+                toolTip: SwaggerNative.asString(), // ???
+                placeHolder: SwaggerNative.asString(), // ???
+                leadingIcon: SwaggerNative.asString(),
+                trailingIcon: SwaggerNative.asString(),
+                nameAsCaption: SwaggerNative.asBoolean(),
+              }, swaggerUI([{lang: 'en', title: 'Native ui'}, {lang: 'uk', title: 'Нативний інтерфейс'}])
+            ),
             required: SwaggerNative.asBoolean(null, null,
               swaggerUI([{lang: 'en', title: 'Required'}, {lang: 'uk', title: 'Обов\'язкове поле'}])),
           }, null, ['fieldName', 'fieldType'], null,
@@ -154,12 +174,13 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
             fieldType: [
               {c: '!SwaggerNative,SwaggerObject,SwaggerArray',
                 hide: ['itemType', 'nativeType', 'objectLink', 'nativeConstrictions',
-                  'arrayConstrictions', 'stringConstrictions', 'numberConstrictions']},
+                  'arrayConstrictions', 'stringConstrictions', 'numberConstrictions',
+                  'constrictionAdd', 'uiNative']},
               {c: '=SwaggerNative',
-                hide: ['itemType', 'objectLink', 'arrayConstrictions'],
+                hide: ['itemType', 'objectLink', 'arrayConstrictions', 'constrictionAdd', 'uiNative'],
                 show: ['nativeType', 'nativeConstrictions']},
               {c: '=SwaggerObject',
-                hide: ['itemType', 'nativeType', 'nativeConstrictions',
+                hide: ['itemType', 'nativeType', 'nativeConstrictions', 'constrictionAdd', 'uiNative',
                   'arrayConstrictions', 'stringConstrictions', 'numberConstrictions'],
                 show: ['objectLink']
               },
@@ -168,9 +189,10 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
                 show: ['itemType', 'arrayConstrictions']}
             ],
             itemType: [
-              {c: '=SwaggerNative', hide: ['objectLink'], show: ['nativeType', 'nativeConstrictions']},
+              {c: '=SwaggerNative', hide: ['objectLink'],
+                show: ['nativeType', 'nativeConstrictions', 'constrictionAdd', 'uiNative']},
               {c: '=SwaggerObject', hide: ['nativeType', 'nativeConstrictions', 'stringConstrictions',
-                  'numberConstrictions'], show: ['objectLink']}
+                  'numberConstrictions', 'constrictionAdd', 'uiNative'], show: ['objectLink']}
             ],
             nativeType: [
               {c: '=string', show: ['stringConstrictions']},
@@ -239,7 +261,8 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
     // TODO fix formGroup.value being only one property instead of array
     v.fields = this.data.fields;
     this.objectLink.addLink(this.objectLink.fromFrm(v), v.link);
-    console.log(this.objectLink.list);
+    // temporary solution
+    this.load(v.link);
   }
   load(link: string): void {
     const obj = this.objectLink.getObject(link);

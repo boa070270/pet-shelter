@@ -117,10 +117,10 @@ export class ObjectLinkService {
   setNativeProp(p, wrap?): SwaggerNative | SwaggerArray {
     let c;
     if (wrap) {
-      c = [null, {...p.nativeConstrictions, ...p.numberConstrictions, ...p.stringConstrictions}, null];
+      c = [null, {...p.constrictionAdd, ...p.nativeConstrictions, ...p.numberConstrictions, ...p.stringConstrictions}, p.uiNative];
       wrap = [{...p.constriction, ...p.arrayConstrictions}, p.ui];
     } else {
-      c = {...p.constriction, ...p.nativeConstrictions, ...p.numberConstrictions, ...p.stringConstrictions};
+      c = [null, {...p.constriction, ...p.nativeConstrictions, ...p.numberConstrictions, ...p.stringConstrictions}, p.ui];
     }
     switch (p.nativeType) {
       case 'boolean':
