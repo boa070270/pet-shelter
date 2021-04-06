@@ -1,6 +1,6 @@
 This text is without parent. I don't know if I allow this case.
-<lib-link href="https://www.google.com">This is simple link. I Do not know how it work</lib-link>
-<lib-link href="https://www.google.com"><span>This is another simple link that can be edited by editor</span></lib-link>
+<lib-link href="https://www.google.com"><!-- comment -->This is simple link. I Do not know how it work</lib-link>
+<lib-link href="https://www.google.com"><span><!-- comment -->This is another simple<!-- comment &dollar;&#36;\0024U+0024 -->link &#36;&#x024;U+0024that can be edited by editor</span></lib-link>
 <h1>Hello <b>World</b>!!!</h1>
 <br>
 Input Titles:
