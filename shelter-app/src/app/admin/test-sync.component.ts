@@ -17,6 +17,10 @@ const TEXT_NODE = 3;
 const CDATA_SECTION_NODE = 4;
 const COMMENT_NODE = 8;
 const DESIGNER_ATTR_NAME = '_design';
+const EMPTY_ELEMENTS = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+function isEmptyElement(tag: string): boolean {
+  return EMPTY_ELEMENTS.includes(tag.toLowerCase());
+}
 function firstGrandChild(node: Node): Node {
   if (node && node.firstChild) {
     return firstGrandChild(node.firstChild);
@@ -101,6 +105,10 @@ function endSourceMark(attr: string, source: string): number {
   const res = findSourceMark(attr, source);
   return res.index + res[0].length;
 }
+function orderOfChild(parent: Node, child: Node): number {
+  let n = 0; for (; parent.childNodes[n] !== child; ++n){}
+  return n;
+}
 // Cases
 const THE_SAME_NODE = 0;
 const THE_SAME_PARENT = 1;
@@ -149,65 +157,72 @@ const DIFFERENT_PARENTS = 2;
 })
 export class TestSyncComponent implements OnInit {
   position = 0;
-  designAttr = 0;
   source = '';
-  designIndex = 0;
+  designIndex = 1;
   editor: HTMLDivElement;
   lastRange: Range;
+  rollback: Array<{parent: string, before: string, after: string}> = [];
   @ViewChild('editor', {static: true}) editorRef: ElementRef<HTMLDivElement>;
   constructor() { }
 
   ngOnInit(): void {
     this.editor = this.editorRef.nativeElement;
   }
+
   syncOnTouch(keyEvent?: KeyboardEvent): void {
-    /* A user can normally only select one range at a time, so the rangeCount will usually be 1.
-     Scripting can be used to make the selection contain more than one range. We do not use script here!
-     */
     if (window.getSelection().rangeCount > 1) {
-      console.log('There is  modified range by script');
+      /* A user can normally only select one range at a time, so the rangeCount will usually be 1.
+       Scripting can be used to make the selection contain more than one range. We do not use script here!
+       */
       this.lastRange = null;
       return;
     }
     const range = window.getSelection().getRangeAt(0);
-    console.log('syncOnTouch', range);
-    // withdraw custom elements nodes and change selection
-    const startContainer = findNodeDown(range.startContainer,
-      (n) => n && (n === range.endContainer || n.parentElement === this.editor
-        || (n.nodeType === ELEMENT_NODE && (n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) !== null)
-        || (n.nodeType === TEXT_NODE && (n.parentElement === this.editor || n.parentElement.getAttribute(DESIGNER_ATTR_NAME) !== null))
-      ));
-    const endContainer = findNodeUp(range.endContainer,
-      (n) => n && ( n === startContainer || n.parentElement === this.editor
-        || (n.nodeType === ELEMENT_NODE && (n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) !== null)
-        || (n.nodeType === TEXT_NODE && (n.parentElement === this.editor || n.parentElement.getAttribute(DESIGNER_ATTR_NAME) !== null ))
-      ));
-    if (!this.belongDesigner(startContainer) || !this.belongDesigner(endContainer)) {
-      // this text absent in our designer. If we want to place text inside plugin, need text cover by tag
-      // TODO We can try define a plugin here and then light it, or position cursor correctly before ar after this plugin!
-      // TODO we can show snake menu here to explain this case to user
-      // window.getSelection().collapse(range.commonAncestorContainer);
-      this.lastRange = null;
-      return;
-    }
-    if (startContainer !== range.startContainer || endContainer !== range.endContainer) {
-      window.getSelection().setBaseAndExtent(startContainer,
-        startContainer !== range.startContainer ? 0 : range.startOffset,
-        endContainer,
-        endContainer !== range.endContainer ? endContainer.textContent.length : range.endOffset);
+    if (range.collapsed) {
+      if (!this.belongDesigner(range.commonAncestorContainer)) {
+        this.lastRange = null;
+        return;
+      }
+    } else {
+      // withdraw custom elements nodes and change selection
+      const startContainer = findNodeDown(range.startContainer,
+        (n) => n && (n === range.endContainer || n.parentElement === this.editor
+          || (n.nodeType === ELEMENT_NODE && (n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) !== null)
+          || (n.nodeType === TEXT_NODE && (n.parentElement === this.editor || n.parentElement.getAttribute(DESIGNER_ATTR_NAME) !== null))
+        ));
+      const endContainer = findNodeUp(range.endContainer,
+        (n) => n && (n === startContainer || n.parentElement === this.editor
+          || (n.nodeType === ELEMENT_NODE && (n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) !== null)
+          || (n.nodeType === TEXT_NODE && (n.parentElement === this.editor || n.parentElement.getAttribute(DESIGNER_ATTR_NAME) !== null))
+        ));
+      if (!this.belongDesigner(startContainer) || !this.belongDesigner(endContainer)) {
+        // this text absent in our designer. If we want to place text inside plugin, need text cover by tag
+        // TODO We can try define a plugin here and then light it, or position cursor correctly before ar after this plugin!
+        // TODO we can show snake menu here to explain this case to user
+        // window.getSelection().collapse(range.commonAncestorContainer);
+        this.lastRange = null;
+        return;
+      }
+      if (startContainer !== range.startContainer || endContainer !== range.endContainer) {
+        window.getSelection().setBaseAndExtent(startContainer,
+          startContainer !== range.startContainer ? 0 : range.startOffset,
+          endContainer,
+          endContainer !== range.endContainer ? endContainer.textContent.length : range.endOffset);
+      }
     }
     this.lastRange = window.getSelection().getRangeAt(0);
   }
   belongDesigner(n: Node): boolean {
     return n && (n === this.editor
-      || (n.nodeType === TEXT_NODE && (n.parentElement === this.editor || n.parentElement.getAttribute(DESIGNER_ATTR_NAME) !== null))
+      || (n.nodeType === TEXT_NODE && (n.parentElement.getAttribute(DESIGNER_ATTR_NAME) !== null))
       || (n.nodeType === ELEMENT_NODE && (n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) !== null));
   }
   onClick(event: MouseEvent): void {
     console.log(event);
-    if (this.checkAndMarkElements()) {
-      this.editor.innerHTML = this.source;
-    }
+    // if (this.checkAndMarkElements()) {
+    this.checkAndMarkElements();
+    this.editor.innerHTML = this.source;
+    // }
     this.syncOnTouch();
     console.log('onClick:', this.lastRange);
     console.log('onClick:', this.getModifiedPart((t, i) => t));
@@ -221,9 +236,10 @@ export class TestSyncComponent implements OnInit {
   }
   getModifiedPart(f: (t: string, i: number) => string, keyEvent?: KeyboardEvent): {parent: HTMLElement, text: string, start, end} {
     // TODO is the end in the result really required?
+    const allSource = {parent: this.editor, text: this.source.substring(0), start: 0, end: this.source.length};
     if (this.lastRange) {
       if (this.lastRange.commonAncestorContainer === this.editor) {
-        return {parent: this.editor, text: this.source.substring(0), start: 0, end: this.source.length};
+        return allSource;
       } else {
         let parent = this.lastRange.commonAncestorContainer;
         if (parent.nodeType === ELEMENT_NODE) {
@@ -232,7 +248,7 @@ export class TestSyncComponent implements OnInit {
             parent = findNodeUp(parent, (n) =>
               n && n.nodeType === ELEMENT_NODE && ((n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) !== null || n === this.editor));
             if (parent === this.editor) {
-              return {parent: this.editor, text: this.source.substring(0), start: 0, end: this.source.length};
+              return allSource;
             }
             attr = (parent as HTMLElement).getAttribute(DESIGNER_ATTR_NAME);
           }
@@ -242,7 +258,7 @@ export class TestSyncComponent implements OnInit {
         } else {
           parent = parent.parentElement;
           if (parent === this.editor) {
-            return {parent: this.editor, text: this.source.substring(0), start: 0, end: this.source.length};
+            return allSource;
           }
           const start = endSourceMark((parent as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
           const end = this.endOfElement((parent as HTMLElement).tagName, start);
@@ -256,23 +272,14 @@ export class TestSyncComponent implements OnInit {
    * container type can be ELEMENT_NODE and TEXT_NODE, COMMENT_NODE, CDATA_NODE
    * if ELEMENT_NODE the offset is number of child node.
    *   If the node with this number is present it point on the begin of the node.
-   *   If there is no node with this number, it point on the end of the node
+   *   If there is no node with this number, it point on the end of the last child node
    * If TEXT_NODE, COMMENT_NODE, CDATA_NODE the offset is the number of characters from the start
+   *   the offset can point to the end of text, in this case offset equals to length
    * @param n Node
    * @param offset number
    */
   syncPosition(n: Node, offset: number): number {
     if (n.nodeType === ELEMENT_NODE) {
-      if (n.childNodes[offset].nodeType === ELEMENT_NODE) {
-        return startSourceMark((n.childNodes[offset] as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
-      }
-      if (offset === 0) {
-        if (n === this.editor) {
-          return 0;
-        } else {
-          return endSourceMark((n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
-        }
-      }
       let start = 0;
       if (n !== this.editor) {
         start = endSourceMark((n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
@@ -280,7 +287,7 @@ export class TestSyncComponent implements OnInit {
       for (let i = 0; n.childNodes[i] && i < offset; ++i) {
         const ch = n.childNodes[i];
         if (ch.nodeType === ELEMENT_NODE) {
-          start = endSourceMark((n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
+          start = endSourceMark((ch as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
         } else if (ch.nodeType === COMMENT_NODE) {
           start = this.source.indexOf('-->', start) + 3;
         } else if (ch.nodeType === CDATA_SECTION_NODE) {
@@ -290,10 +297,8 @@ export class TestSyncComponent implements OnInit {
       return start;
     } else {
       // we expect only TEXT_NODE here
-      let start = 0;
-      const parent = n.parentNode;
-      for (; parent.childNodes[start] !== n; ++start){}
-      start = this.syncPosition(parent, start);
+      let start = orderOfChild(n.parentNode, n);
+      start = this.syncPosition(n.parentNode, start);
       return start + offset + this.unicodes(start, offset);
     }
   }
@@ -306,7 +311,7 @@ export class TestSyncComponent implements OnInit {
         break;
       }
       count += (res[1].length + 2);
-      end -= (res[1].length + 3);
+      end -= (res.index + 1);
       str = str.substr(res.index + res[1].length + 3);
     } while (true);
     return count;
@@ -378,37 +383,91 @@ export class TestSyncComponent implements OnInit {
     }
     event.preventDefault();
   }
-  private whitespace(key: string): void {
-    const w = this.whatIsCase();
-    if (w >= 0) {
-      const part = this.getModifiedPart((t, i) => t);
-      const start = this.syncPosition(this.lastRange.startContainer, this.lastRange.startOffset);
-      const end = this.syncPosition(this.lastRange.endContainer, this.lastRange.endOffset);
-      console.log(part.text, start, end);
-      switch (key) {
-        case 'Enter':
-            switch (w) {
-            case THE_SAME_NODE:
-              const index = this.designIndex++;
-              const tag = `<br ${DESIGNER_ATTR_NAME}="${index}">`;
-              this.source = this.source.substring(0, start) + tag + this.source.substring(end);
-              part.text = part.text.substring(0, start - part.start) + tag + part.text.substring(end - part.start);
-              const startType = this.lastRange.startContainer.nodeType;
-              part.parent.innerHTML = part.text;
-              let i = 1;
-              for ( let sibling = part.parent.firstChild;
-                    !(sibling.nodeType === ELEMENT_NODE && (sibling as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) === '' + index);
-                    sibling = sibling.nextSibling, i++){}
-              window.getSelection().collapse(part.parent, i);
-              break;
-            }
-            break;
-          case 'Tab':
-            break;
+  private rangeShot(): {collapsed: boolean, startOrderChild: number, startIsText: boolean, startIsEmpty: boolean,
+    startDesignId: string, startOffset: number, endIsText: boolean, endIsEmpty: boolean, endDesignId: string, endOffset: number} {
+    const st = this.lastRange.startContainer;
+    const end = this.lastRange.endContainer;
+    return {
+      collapsed: this.lastRange.collapsed,
+      startIsText: st.nodeType === TEXT_NODE
+        || (st.nodeType === ELEMENT_NODE && !isEmptyElement((st as HTMLElement).tagName)
+          && st.childNodes[this.lastRange.startOffset] === undefined),
+      startOrderChild: st.nodeType === TEXT_NODE ? orderOfChild(st.parentNode, st) : this.lastRange.startOffset,
+      startIsEmpty: (st.nodeType === ELEMENT_NODE
+        && st.childNodes[this.lastRange.startOffset] === undefined),
+      startDesignId: st.nodeType === ELEMENT_NODE ? (st as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) : null,
+      startOffset: this.lastRange.startOffset,
+      endIsText: end.nodeType === TEXT_NODE,
+      endIsEmpty: (end.nodeType === ELEMENT_NODE
+        && end.childNodes[this.lastRange.endOffset] === undefined),
+      endDesignId: end.nodeType === ELEMENT_NODE ? (end as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) : null,
+      endOffset: this.lastRange.endOffset
+    };
+  }
+  private insert(ch: string, designIndex: number = null): void {
+    const shot = this.rangeShot();
+    const part = this.getModifiedPart((t, i) => t);
+    const start = this.syncPosition(this.lastRange.startContainer, this.lastRange.startOffset);
+    const end = shot.collapsed ? start : this.syncPosition(this.lastRange.endContainer, this.lastRange.endOffset);
+    this.source = this.source.substring(0, start) + ch + this.source.substring(end);
+    const before = part.text;
+    part.text = part.text.substring(0, start - part.start) + ch + part.text.substring(end - part.start);
+    this.rollback.push({
+      parent: part.parent === this.editor ? null : (part.parent as HTMLElement).getAttribute(DESIGNER_ATTR_NAME),
+      before,
+      after: part.text
+    });
+    part.parent.innerHTML = part.text;
+    // after this I don't have a valid this.lastRange
+    if (designIndex >= 0 && designIndex !== null) {
+      const to = part.parent.querySelector(`[${DESIGNER_ATTR_NAME}="${designIndex}"]`);
+      if (isEmptyElement(to.tagName)) {
+        const n = orderOfChild(to.parentNode, to);
+        window.getSelection().collapse(to.parentNode, n + 1);
+      } else {
+        window.getSelection().collapse(to, 0);
+      }
+    } else {
+      if (shot.startIsText) {
+        let parent = this.editor;
+        if (shot.startDesignId && shot.startDesignId !== '0') {
+          parent = part.parent.querySelector(`[${DESIGNER_ATTR_NAME}="${shot.startDesignId}"]`);
+        }
+        window.getSelection().collapse(parent.childNodes[shot.startOrderChild], shot.startOffset + ch.length);
+      } else {
+        let parent = this.editor;
+        if (shot.startDesignId) {
+          parent = part.parent.querySelector(`[${DESIGNER_ATTR_NAME}="${shot.startDesignId}"]`);
+        }
+        if (parent.childNodes[shot.startOffset].hasChildNodes()) {
+          if (parent.childNodes[shot.startOffset].nodeType === TEXT_NODE) {
+            window.getSelection().collapse(parent.childNodes[shot.startOffset], ch.length);
+          } else {
+            window.getSelection().collapse(parent.childNodes[shot.startOffset], 0);
+          }
+        }
       }
     }
   }
-
+  private delete(after = true): void {
+    const shot = this.rangeShot();
+    const part = this.getModifiedPart((t, i) => t);
+    const start = this.syncPosition(this.lastRange.startContainer, this.lastRange.startOffset);
+    const end = shot.collapsed ? start : this.syncPosition(this.lastRange.endContainer, this.lastRange.endOffset);
+    if (shot.collapsed) {
+      // delete only text. If in current text
+    }
+  }
+  private whitespace(key: string): void {
+    switch (key) {
+      case 'Enter':
+        const index = this.designIndex++;
+        this.insert(`<br ${DESIGNER_ATTR_NAME}="${index}">`, index);
+        break;
+      case 'Tab':
+        break;
+    }
+  }
   private editingKey(key: string): void {
     switch (key) {
       case 'Backspace':
@@ -424,14 +483,11 @@ export class TestSyncComponent implements OnInit {
   }
 
   private simpleChar(key: string): void {
-    // this.source = this.source.substring(0, cursor[0].finish) + key + this.source.substring(cursor[0].finish);
-    this.editor.innerHTML = this.source;
-    const sel = window.getSelection();
-    window.getSelection().setPosition(sel.focusNode, sel.focusOffset + 1);
+    this.insert(key);
   }
   checkAndMarkElements(): boolean {
     let result = false;
-    const upd = this.source.replace(/<([a-zA-Z][^</]*)(\/?)>/g, (s: string, ...args: any[]) => {
+    const upd = this.source.replace(/<([a-zA-Z][^>]*)(\/?)>/g, (s: string, ...args: any[]) => {
       const tagBody = args[0] as string;
       const closed = args[1] ? '/' : '';
       if (tagBody.indexOf(DESIGNER_ATTR_NAME) === -1) {

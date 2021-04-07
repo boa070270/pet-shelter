@@ -15,7 +15,7 @@ import {ControlsModule, UiLibModule, DialogServiceModule, AngularWysiwygEditorLi
 import {ShelterCommonModule} from '../common';
 import {FormsModule} from '@angular/forms';
 import { TestSyncComponent } from './test-sync.component';
-
+import {DragDropModule} from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [
@@ -40,7 +40,8 @@ import { TestSyncComponent } from './test-sync.component';
     FormsModule,
     ControlsModule,
     FormsModule,
-    DialogServiceModule
+    DialogServiceModule,
+    DragDropModule
   ]
 })
 export class AdminModule { }
