@@ -33,8 +33,9 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
 
   // tslint:disable-next-line:variable-name
   private _extraParams: CheckboxParameters = {};
-  _swagger: SwaggerNative;
-  list: string[] = [];
+  // TODO swaggerObject
+  private _swagger: SwaggerNative | SwaggerObject;
+  list: any[] = [];
   selected: string;
   titleRemove: string;
   titleAdd: string;
@@ -42,10 +43,10 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
   titleUp: string;
   titleDown: string;
   @Input()
-  set swagger(s: SwaggerNative) {
+  set swagger(s: SwaggerNative | SwaggerObject) {
     this._swagger = s;
   }
-  get swagger(): SwaggerNative {
+  get swagger(): SwaggerNative | SwaggerObject {
     if (this._swagger) {
       return this._swagger;
     }
@@ -85,6 +86,19 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
   }
   get tooltips(): string[] | TitleType[] {
     return this.extraParams.tooltips || null;
+  }
+  get listSelect(): string[] {
+    if (this.isNative()) {
+      return this.list;
+    }
+    const a: string[] = [];
+    this.list.forEach(o => {
+      a.push(JSON.stringify(o).replace(/["{}]/g, ''));
+    });
+    return a;
+  }
+  get index(): number {
+    return this.listSelect.indexOf(this.selected);
   }
 
   @ViewChild(ListSelectComponent, {static: true}) result: ListSelectComponent;
@@ -145,19 +159,32 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
   }
 
   hasEmpty(): boolean {
-    return !!this.list.includes('');
+    return !!this.listSelect.includes('');
+  }
+
+  isNative(): boolean {
+    return this.swagger instanceof SwaggerNative;
   }
 
   onAdd(): void {
     this.openDialog((v) => {
-      this.list.push(v.name);
+      if (this.isNative()) {
+        this.list.push(v.name);
+      } else {
+        console.log('EditableListComponent.onAdd', v);
+        this.list.push(v);
+      }
     });
   }
 
   onEdit(): void {
     this.openDialog((v) => {
-      for (let i = 0; i < this.list.length; i++) {
-        this.list[i] = this.list[i] === this.selected ? v.name : this.list[i];
+      if (this.isNative()) {
+        for (let i = 0; i < this.list.length; i++) {
+          this.list[i] = this.list[i] === this.selected ? v.name : this.list[i];
+        }
+      } else {
+        this.list[this.index] = v;
       }
     }, this.selected);
   }
@@ -165,17 +192,22 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
   openDialog(f, data?): void {
     const extData = new ExtendedData();
     extData.action = 'save_cancel';
-    extData.caption = 'Please provide key name!';
-    extData.icon = 'gm-warning';
-    extData.swagger = new SwaggerObject(
-      ['name'],
-      {
-        name: this.swagger,
-      },
-      null,
-      ['name']);
-    if (data) {
-      extData.data = {name: data};
+    if (this.isNative()) {
+      extData.swagger = new SwaggerObject(
+        ['name'],
+        {
+          name: this.swagger,
+        },
+        null,
+        ['name']);
+      if (data) {
+        extData.data = {name: data};
+      }
+    } else {
+      extData.swagger = this.swagger as SwaggerObject;
+      if (data) {
+        extData.data = this.list[this.index];
+      }
     }
     const dialogRef = this.dialogService.warnExtDialog(extData, true);
     dialogRef.afterClosed().subscribe(v => {
@@ -187,7 +219,13 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
   }
 
   onRemove(): void {
-    this.list = this.list.filter(v => !this.result.values[v]);
+    if (this.isNative()) {
+      this.list = this.list.filter(v => !this.result.values[v]);
+    } else {
+      this.list = this.list.filter(v => {
+        return !this.result.values[JSON.stringify(v).replace(/["{}]/g, '')];
+      });
+    }
     this.result.clearAll();
     this.emitChange(this.list);
   }

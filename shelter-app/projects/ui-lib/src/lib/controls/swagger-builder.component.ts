@@ -93,7 +93,29 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
                 nullable: SwaggerNative.asBoolean(),
                 enum: new SwaggerArray(SwaggerNative.asString()),
                 enumDescriptions: SwaggerNative.asString(), // ???
-                enumTooltips: new SwaggerArray(SwaggerNative.asString()), // ??? write TitleType[] as string and parse later?
+                enumTooltips: new SwaggerObject(
+                  ['enumTooltipsType', 'stringArray', 'titleTypeArray'],
+                  {
+                    enumTooltipsType: SwaggerNative.asString('select',
+                      {enum: ['string', 'TitleType']}),
+                    stringArray: new SwaggerArray(SwaggerNative.asString()),
+                    titleTypeArray: new SwaggerArray(new SwaggerObject(
+                      ['id', 'lang', 'title'],
+                      {
+                        id: SwaggerNative.asString(),
+                        lang: SwaggerNative.asString(),
+                        title: SwaggerNative.asString()
+                      },
+                      null, ['lang', 'title']
+                    ), {control: 'editable-list'})
+                  }, null, null, null,
+                  { enumTooltipsType: [
+                      {c: '!string,TitleType', hide: ['stringArray', 'titleTypeArray']},
+                      {c: '=string', hide: ['titleTypeArray'], show: ['stringArray']},
+                      {c: '=TitleType', hide: ['stringArray'], show: ['titleTypeArray']}
+                    ]
+                  }
+                ),
                 enumMulti: SwaggerNative.asBoolean(),
                 default: SwaggerNative.asString(),
                 format: SwaggerNative.asString(null,
@@ -134,7 +156,6 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
             nativeType: SwaggerNative.asString(null,
               {enum: ['string', 'number', 'integer', 'boolean']}),
             objectLink: SwaggerNative.asString('select', {enum: this.objectLink.array}),
-            // TODO cannot set ui for swagger native if setting ui for swagger array
             ui: new SwaggerObject(
               ['description', 'caption', 'toolTip', 'placeHolder', 'leadingIcon', 'trailingIcon', 'nameAsCaption'],
               {
