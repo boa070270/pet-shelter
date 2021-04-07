@@ -37,10 +37,10 @@ export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
           <lib-swagger-native [propertyId]="fld.propertyId" [swagger]="swaggerProperties[fld.propertyId]" [required]="fld.required"
                               [pFormGroup]="formGroup" *ngSwitchCase="'native'" [formControl]="fld.control" [ngStyle]="fld.style"></lib-swagger-native>
           <lib-swagger-form [propertyId]="fld.propertyId" [swagger]="swaggerProperties[fld.propertyId]" [required]="fld.required"
-                            [(ngModel)]="fld.propertyId" [nameControl]="fld.propertyId"
+                            [(ngModel)]="fld.propertyId" [nameControl]="fld.propertyId" [ngStyle]="fld.style"
                             [pFormGroup]="formGroup" *ngSwitchCase="'object'"></lib-swagger-form>
           <lib-swagger-array [propertyId]="fld.propertyId" [swagger]="swaggerProperties[fld.propertyId]" [required]="fld.required"
-                             [pFormGroup]="formGroup" *ngSwitchCase="'array'" [formControl]="fld.control"></lib-swagger-array>
+                             [pFormGroup]="formGroup" *ngSwitchCase="'array'" [formControl]="fld.control" [ngStyle]="fld.style"></lib-swagger-array>
         </ng-container>
       </ng-container>
     </div>`,
