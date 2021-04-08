@@ -62,6 +62,7 @@ export class ObjectLinkService {
         p.fieldType = 'SwaggerNative';
         p.nativeType = (prop as SwaggerNative).type;
         p.nativeConstrictions = (prop as SwaggerNative).constrictions;
+        this.toFrmEnumDescriptions(p);
       } else if (coerceToSwaggerObject(prop)) {
         p.fieldType = 'SwaggerObject';
         p.objectLink = this.getLink(prop as SwaggerObject);
@@ -74,6 +75,7 @@ export class ObjectLinkService {
           p.itemType = 'SwaggerNative';
           p.nativeType = (item as SwaggerNative).type;
           p.nativeConstrictions = (prop as SwaggerNative).constrictions;
+          this.toFrmEnumDescriptions(p);
         } else if (coerceToSwaggerObject(item)) {
           p.itemType = 'SwaggerObject';
           p.objectLink = this.getLink(item as SwaggerObject);
