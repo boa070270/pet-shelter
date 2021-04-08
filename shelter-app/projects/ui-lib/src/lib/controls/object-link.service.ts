@@ -13,7 +13,7 @@ import {
   SwaggerNative,
   SwaggerNativeTypes,
   SwaggerObject,
-  SwaggerSchema, SwaggerUI
+  SwaggerSchema, SwaggerUI, TitleType
 } from '../shared';
 
 @Injectable({
@@ -83,6 +83,16 @@ export class ObjectLinkService {
     }
     return props;
   }
+  toFrmEnumDescriptions(p): void {
+    if (p.nativeConstrictions && p.nativeConstrictions.enumDescriptions) {
+      const arr = [];
+      const d = p.nativeConstrictions.enumDescriptions;
+      Object.keys(d).forEach(key => {
+        arr.push({key, value: d[key]});
+      });
+      p.nativeConstrictions.enumDescriptions = arr;
+    }
+  }
 
   fromFrm(data: {constriction, objectConstrictions, ui, fields: PropertyForm[]}): SwaggerObject {
     const orderCtrl = [];
@@ -94,6 +104,7 @@ export class ObjectLinkService {
       if (p.required) {
         required.push(p.fieldName);
       }
+      this.fromFrmEnumDescriptions(p);
       switch (p.fieldType) {
         case 'SwaggerArray':
           if (p.itemType === 'SwaggerNative') {
@@ -113,6 +124,16 @@ export class ObjectLinkService {
       }
     }
     return new SwaggerObject(orderCtrl, properties, data.ui, required, data.constriction);
+  }
+  fromFrmEnumDescriptions(p): void {
+    if (p.nativeConstrictions && p.nativeConstrictions.enumDescriptions &&
+        p.nativeConstrictions.enumDescriptions.enumDescriptionsType === 'key-value') {
+      const obj = {};
+      p.nativeConstrictions.enumDescriptions.keyDescriptions.forEach((key, value) => {
+        obj[key] = value;
+      });
+      p.nativeConstrictions.enumDescriptions = obj;
+    }
   }
   setNativeProp(p, wrap?): SwaggerNative | SwaggerArray {
     let c;
