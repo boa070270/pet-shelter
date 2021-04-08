@@ -1,6 +1,13 @@
-<div>
-  <div #editor style="width: 90%; height: 50%; border: 1px solid; padding: 5px; margin: 8px; overflow: auto;"
-       [contentEditable]="true" (click)="onClick($event)" (keydown)="onKeyPress($event)" (keyup)="onKeyUp($event)"></div>
+<div cdkDropList>
+  <div #editor style="width: 90%; height: 50%; border: 1px solid; padding: 5px; margin: 8px; overflow: auto;" _design="0"
+       [contentEditable]="true" (click)="onClick($event)" (keydown)="onKeyPress($event)" (keyup)="onKeyUp($event)"
+
+  ></div>
+  <div style="position: absolute; top: 0; right: 0; width: 5%; height: 50%; border-style: solid; margin: 5px;">
+    <div style="position: relative; width: 100%; height: 100%; margin: 10px;">
+      <div style="width: 15px; height: 15px; background-color: #0a50a1;" cdkDrag></div>
+    </div>
+  </div>
 </div>
 <div>
   <textarea style="width: 90%; height: 30%; padding: 5px; margin: 8px;" [(ngModel)]="source"></textarea>
