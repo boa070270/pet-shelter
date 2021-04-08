@@ -47,7 +47,7 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
       objectConstrictions: new SwaggerObject(
         ['orderCtrl', 'toFrm', 'fromFrm'],
         {
-          orderCtrl: SwaggerNative.asString(), // ???
+          orderCtrl: new SwaggerArray(SwaggerNative.asString()),
           toFrm: SwaggerNative.asString(), // ???
           fromFrm: SwaggerNative.asString() // ???
         }
@@ -55,10 +55,10 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
       ui: new SwaggerObject(
         ['description', 'caption', 'toolTip', 'placeHolder', 'leadingIcon', 'trailingIcon', 'nameAsCaption'],
         {
-          description: SwaggerNative.asString(),
-          caption: SwaggerNative.asString(), // ???
-          toolTip: SwaggerNative.asString(), // ???
-          placeHolder: SwaggerNative.asString(), // ???
+          description: this.stringOrArrayTitle('description'),
+          caption: this.stringOrArrayTitle('caption'),
+          toolTip: this.stringOrArrayTitle('toolTip'),
+          placeHolder: this.stringOrArrayTitle('placeHolder'),
           leadingIcon: SwaggerNative.asString(),
           trailingIcon: SwaggerNative.asString(),
           nameAsCaption: SwaggerNative.asBoolean(),
@@ -92,7 +92,35 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
                 writeOnly: SwaggerNative.asBoolean(),
                 nullable: SwaggerNative.asBoolean(),
                 enum: new SwaggerArray(SwaggerNative.asString()),
-                enumDescriptions: SwaggerNative.asString(), // ???
+                enumDescriptions: new SwaggerObject(
+                  ['enumDescriptionsType', 'keyDescriptions', 'titleTypeDescriptions'],
+                  {
+                    enumDescriptionsType: SwaggerNative.asString('select',
+                      {enum: ['key-value', 'TitleType']}),
+                    keyDescriptions: new SwaggerArray(new SwaggerObject(
+                      ['key', 'value'],
+                      {
+                        key: SwaggerNative.asString(),
+                        value: SwaggerNative.asString()
+                      }
+                    )),
+                    titleTypeDescriptions: new SwaggerArray(new SwaggerObject(
+                      ['id', 'lang', 'title'],
+                      {
+                        id: SwaggerNative.asString(),
+                        lang: SwaggerNative.asString(),
+                        title: SwaggerNative.asString()
+                      },
+                      null, ['lang', 'title']
+                    ), {control: 'editable-list'})
+                  }, null, null, null,
+                  { enumDescriptionsType: [
+                      {c: '!key-value,TitleType', hide: ['key-value', 'titleTypeArray']},
+                      {c: '=key-value', hide: ['titleTypeArray'], show: ['key-value']},
+                      {c: '=TitleType', hide: ['key-value'], show: ['titleTypeArray']}
+                    ]
+                  }
+                ),
                 enumTooltips: new SwaggerObject(
                   ['enumTooltipsType', 'stringArray', 'titleTypeArray'],
                   {
@@ -159,10 +187,10 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
             ui: new SwaggerObject(
               ['description', 'caption', 'toolTip', 'placeHolder', 'leadingIcon', 'trailingIcon', 'nameAsCaption'],
               {
-                description: SwaggerNative.asString(),
-                caption: SwaggerNative.asString(), // ???
-                toolTip: SwaggerNative.asString(), // ???
-                placeHolder: SwaggerNative.asString(), // ???
+                description: this.stringOrArrayTitle('description'),
+                caption: this.stringOrArrayTitle('caption'),
+                toolTip: this.stringOrArrayTitle('toolTip'),
+                placeHolder: this.stringOrArrayTitle('placeHolder'),
                 leadingIcon: SwaggerNative.asString(),
                 trailingIcon: SwaggerNative.asString(),
                 nameAsCaption: SwaggerNative.asBoolean(),
@@ -179,10 +207,10 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
             uiNative: new SwaggerObject(
               ['description', 'caption', 'toolTip', 'placeHolder', 'leadingIcon', 'trailingIcon', 'nameAsCaption'],
               {
-                description: SwaggerNative.asString(),
-                caption: SwaggerNative.asString(), // ???
-                toolTip: SwaggerNative.asString(), // ???
-                placeHolder: SwaggerNative.asString(), // ???
+                description: this.stringOrArrayTitle('description'),
+                caption: this.stringOrArrayTitle('caption'),
+                toolTip: this.stringOrArrayTitle('toolTip'),
+                placeHolder: this.stringOrArrayTitle('placeHolder'),
                 leadingIcon: SwaggerNative.asString(),
                 trailingIcon: SwaggerNative.asString(),
                 nameAsCaption: SwaggerNative.asBoolean(),
@@ -298,5 +326,30 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
     } else {
       console.log('Broken link: couldn\'t find an object by this link');
     }
+  }
+
+  stringOrArrayTitle(property: string): SwaggerObject {
+    const str = property + 'string';
+    const tt = property + 'titleType';
+    const properties: {[key: string]: any} = {};
+    properties[property] = SwaggerNative.asString('select', {enum: ['string', 'TitleType']});
+    properties[str] = SwaggerNative.asString();
+    properties[tt] = new SwaggerArray(new SwaggerObject(
+      ['id', 'lang', 'title'],
+      {
+        id: SwaggerNative.asString(),
+        lang: SwaggerNative.asString(),
+        title: SwaggerNative.asString()
+      },
+      null, ['lang', 'title']
+    ), {control: 'editable-list'});
+
+    const rules = {};
+    rules[property] = [
+        {c: '!string,TitleType', hide: [str, tt]},
+        {c: '=string', hide: [tt], show: [str]},
+        {c: '=TitleType', hide: [str], show: [tt]}
+      ];
+    return new SwaggerObject([property, str, tt], properties, null, null, null, rules);
   }
 }
