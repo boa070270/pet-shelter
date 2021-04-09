@@ -98,6 +98,8 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
   newForm: ComponentType<any> | TemplateRef<any>;
   @Input()
   customActions: Array<{icon: string, tooltip: string | TitleType[], command: string}> = [];
+  @Input()
+  defaultDisplay: string[];
   @Output()
   tableEvent: EventEmitter<{cmd: string, rows: any[]}> = new EventEmitter<{cmd: string; rows: any[]}>();
   private cdkDataSource: CdkDataSource<any, any>;
@@ -158,9 +160,13 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
           this.displayedNames[key] = (native.ui || {}).caption || key;
         }
       }
-      for (const n of Object.keys(this.swagger.properties)) {
-        if (this.allColumns.includes(n)) {
-          this.displayedColumns.push(n);
+      if (this.defaultDisplay) {
+        this.displayedColumns = this.defaultDisplay;
+      } else {
+        for (const n of Object.keys(this.swagger.properties)) {
+          if (this.allColumns.includes(n)) {
+            this.displayedColumns.push(n);
+          }
         }
       }
       this.caption = (this.swagger.ui || {}).caption;

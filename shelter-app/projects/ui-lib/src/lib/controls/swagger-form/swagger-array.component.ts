@@ -117,6 +117,7 @@ export class SwaggerArrayComponent extends BaseSwaggerComponent implements OnIni
           inst.dataSource = this.dataSource;
           inst.disabled = this.disabled;
           inst.customActions = this.constrictions.customTableActions;
+          inst.defaultDisplay = this.constrictions.displayColumns;
           inst.tableEvent.subscribe(e => {
             this.tableAction(e);
           });
