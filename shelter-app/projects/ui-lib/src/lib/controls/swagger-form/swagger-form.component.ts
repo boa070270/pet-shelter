@@ -3,8 +3,8 @@ import {
   coerceToSwaggerArray,
   coerceToSwaggerNative,
   coerceToSwaggerObject,
-  NativeConstrictions,
-  Rule,
+  NativeConstrictions, NumberConstrictions,
+  Rule, StringConstrictions,
   SwaggerArray,
   SwaggerGroupComponent,
   SwaggerNative,
@@ -15,7 +15,7 @@ import {
   ControlValueAccessor,
   FormControl,
   FormGroup,
-  NG_VALUE_ACCESSOR,
+  NG_VALUE_ACCESSOR, ValidatorFn,
   Validators
 } from '@angular/forms';
 import {BaseSwaggerComponent} from './base-swagger.component';
@@ -125,10 +125,12 @@ export class SwaggerFormComponent extends BaseSwaggerComponent implements OnInit
   }
   makeFormControl(swagger: SwaggerNative, required): FormControl {
     const constrictions = swagger.constrictions || {} as NativeConstrictions;
-    const validators = this.swagger.constrictions.validators || [];
+    // was: const validators = this.swagger.constrictions.validators || [];
+    const validators = swagger.constrictions.validators || [];
     if (required && !validators.includes(Validators.required)) {
       validators.push(Validators.required);
     }
+    CustomValidators.applyConstraints(validators, swagger.constrictions);
     return new FormControl(constrictions.default, validators, this.swagger.constrictions.asyncValidator);
   }
 
@@ -236,5 +238,57 @@ export class SwaggerFormComponent extends BaseSwaggerComponent implements OnInit
         }
       }
     }
+  }
+}
+abstract class CustomValidators {
+  static applyConstraints(v: ValidatorFn[], c): void {
+    if (!c) {
+      return;
+    }
+    if (c.minimum) {
+      v.push(Validators.min(c.minimum));
+    }
+    if (c.maximum) {
+      v.push(Validators.max(c.maximum));
+    }
+    if (c.exclusiveMinimum) {
+      v.push(CustomValidators.exclusiveMin(c.exclusiveMinimum));
+    }
+    if (c.exclusiveMaximum) {
+      v.push(CustomValidators.exclusiveMax(c.exclusiveMaximum));
+    }
+    if (c.multipleOf) {
+      v.push(CustomValidators.multipleOf(c.multipleOf));
+    }
+    if (c.minLength) {
+      v.push(Validators.minLength(c.minLength));
+    }
+    if (c.maxLength) {
+      v.push(Validators.maxLength(c.maxLength));
+    }
+    if (c.pattern) {
+      v.push(Validators.pattern(c.pattern));
+    }
+  }
+  static exclusiveMin(min: number): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } => {
+      if (control.value <= min) {
+        return { exclusiveMin: true };
+      }
+    };
+  }
+  static exclusiveMax(max: number): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } => {
+      if (control.value >= max) {
+        return { exclusiveMax: true };
+      }
+    };
+  }
+  static multipleOf(mul: number): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } => {
+      if (!(control.value % mul)) {
+        return { multipleOf: true };
+      }
+    };
   }
 }

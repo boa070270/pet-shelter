@@ -12,6 +12,7 @@ import {
   TitleType
 } from 'ui-lib';
 import {BasicService} from './basic.service';
+import {Validators} from "@angular/forms";
 
 @Component({
   selector: 'app-test-dynamic',
@@ -30,8 +31,8 @@ import {BasicService} from './basic.service';
       </select>
       <button (click)="onClick()">Render</button>
       <h1>Swagger builder test</h1>
-      <lib-swagger-builder [swagger]="swagger"></lib-swagger-builder>
-<!--      <lib-swagger-form [swagger]="formSwagger" [(ngModel)]="data"></lib-swagger-form>-->
+<!--      <lib-swagger-builder [swagger]="swagger"></lib-swagger-builder>-->
+      <lib-swagger-form [swagger]="formSwagger"></lib-swagger-form>
     </div>
   `,
   styleUrls: ['./test-dynamic.component.sass']
@@ -59,6 +60,15 @@ export class TestDynamicComponent implements OnInit {
           sex: SwaggerNative.asString( null, {enum: ['m', 'f']})
         })
       });
+  formSwagger: SwaggerObject = new SwaggerObject(
+    ['id', 'constraintMinMax', 'formatNumber', 'description'],
+    {
+      id: SwaggerNative.asNumber(),
+      constraintMinMax: SwaggerNative.asNumber(null, {minimum: 1, maximum: 5}),
+      formatNumber: SwaggerNative.asNumber(null, {format: 'number',
+        validators: [Validators.min(1), Validators.max(5)]}),
+      description: SwaggerNative.asString()
+    });
 
   change: EventEmitter<any>;
   dataSource: AbstractDataSource<any>;
