@@ -105,10 +105,185 @@ function endSourceMark(attr: string, source: string): number {
   const res = findSourceMark(attr, source);
   return res.index + res[0].length;
 }
-function orderOfChild(parent: Node, child: Node): number {
-  let n = 0; for (; parent.childNodes[n] !== child; ++n){}
+function endOfElement(tag: string, source: string, pos: number): RegExpExecArray {
+  const regexp = new RegExp(`<\/${tag}\\s*>`, 'gi');
+  regexp.lastIndex = pos;
+  const chk = new RegExp(`<${tag}(\\s[^>]*|\\s?)>`, 'gi');
+  chk.lastIndex = pos;
+  let res;
+  do {
+    res = regexp.exec(source);
+    if (res === null) {
+      break;
+    }
+    const p = chk.exec(source);
+    if (p === null || p.index > res.index) {
+      break;
+    }
+  } while (true);
+  return res;
+}
+function endOfElementIn(tag: string, source: string, pos: number): number {
+  const res = endOfElement(tag, source, pos);
+  if (res === null) {
+    console.error(`Absent end of tag ${tag}, position: ${pos}`);
+    return source.length;
+  }
+  return res.index;
+}
+function endOfElementOut(tag: string, source: string, pos: number): number {
+  const res = endOfElement(tag, source, pos);
+  if (res === null) {
+    console.error(`Absent end of tag ${tag}, position: ${pos}`);
+    return source.length;
+  }
+  return res.index + res[0].length;
+}
+function orderOfChild(parent: Node, child: Node, toStart = true): number {
+  let n = 0;
+  if (toStart) {
+    for (; parent.childNodes[n] !== child; ++n){}
+  } else {
+    for (; parent.childNodes[parent.childNodes.length - n] !== child; ++n){}
+  }
   return n;
 }
+function findDesignElement(editor: Element, attr: string): Element {
+  if (attr && attr !== '0') {
+    return editor.querySelector(`[${DESIGNER_ATTR_NAME}="${attr}"]`);
+  }
+  return editor;
+}
+function rangeSourceMarkIn(editor: Element, attr: string, source: string): {start: number, end: number} {
+  if (attr === '0') {
+    return {start: 0, end: source.length};
+  }
+  const res = findSourceMark(attr, source);
+  if (res) {
+    const start = res.index + res[0].length;
+    const e = findDesignElement(editor, attr);
+    if (e) {
+      if (isEmptyElement(e.tagName)) {
+        return {start, end: start + res[0].length};
+      }
+      const end = endOfElementIn(e.tagName, source, start);
+      return {start, end};
+    } else {
+      console.error('Absent element with designId=' + attr);
+    }
+  }
+  console.error('Unknown design ID:' + attr);
+  return {start: 0, end: source.length};
+}
+function rangeSourceMarkOut(editor: Element, attr, source): {start: number, end: number} {
+  if (attr === '0') {
+    return {start: 0, end: source.length};
+  }
+  const res = findSourceMark(attr, source);
+  if (res) {
+    const start = res.index;
+    const e = findDesignElement(editor, attr);
+    if (e) {
+      if (isEmptyElement(e.tagName)) {
+        return {start, end: start + res[0].length};
+      }
+      return {start, end: endOfElementOut(e.tagName, source, start + res[0].length)};
+    } else {
+      console.error('Absent element with designId=' + attr);
+    }
+  }
+  console.error('Unknown design ID:' + attr);
+  return {start: 0, end: source.length};
+}
+function shiftContainer(container: Node, next: boolean, editor: Element): {container: Node, offset: number} {
+  let offset;
+  if (!container || container === editor) {
+    container = editor;
+    offset = editor.childNodes.length;
+  } else if (container.nodeType === TEXT_NODE) {
+    offset = next ? 0 : container.textContent.length;
+  } else {
+    offset = orderOfChild(container.parentElement, container);
+    container = container.parentElement;
+  }
+  return {container, offset};
+}
+function nextPosition(container: Node, offset: number, editor: Element): {container: Node, offset: number} {
+  if (container.nodeType === TEXT_NODE && offset < container.textContent.length) {
+    offset++;
+    return {container, offset};
+  } else {
+    // this designer doesn't support elements that are removed from normal document flow, and display none
+    container = findNodeDown(container, (n) => n
+      && ((n.nodeType === ELEMENT_NODE && ((n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) !== null))
+        || (n.nodeType === TEXT_NODE && n.parentElement.getAttribute(DESIGNER_ATTR_NAME) !== null)));
+    return shiftContainer(container, true, editor);
+  }
+}
+function prevPosition(container: Node, offset: number, editor: Element): {container: Node, offset: number} {
+  if (container.nodeType === TEXT_NODE && offset !== 0) {
+    offset --;
+    return {container, offset};
+  } else {
+    container = findNodeUp(container, (n) => n
+      && ((n.nodeType === ELEMENT_NODE && ((n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) !== null))
+        || (n.nodeType === TEXT_NODE && n.parentElement.getAttribute(DESIGNER_ATTR_NAME) !== null)));
+    return shiftContainer(container, false, editor);
+  }
+}
+function unicodes(start: number, end: number, source): number {
+  const regexp = /&#(\d{2,4}|x[0-9a-zA-Z]{2,4});/;
+  regexp.lastIndex = start;
+  let count = 0;
+  do {
+    const res = regexp.exec(source);
+    if (res === null || res.index > end) {
+      break;
+    }
+    count += (res[1].length + 2);
+    end -= (res.index + 1);
+  } while (true);
+  return count;
+}
+/**
+ * Range: container, offset.
+ * container type can be ELEMENT_NODE and TEXT_NODE, COMMENT_NODE, CDATA_NODE
+ * if ELEMENT_NODE the offset is number of child node.
+ *   If the node with this number is present it point on the begin of the node.
+ *   If there is no node with this number, it point on the end of the last child node
+ * If TEXT_NODE, COMMENT_NODE, CDATA_NODE the offset is the number of characters from the start
+ *   the offset can point to the end of text, in this case offset equals to length
+ * @param n Node
+ * @param offset number
+ */
+function syncPosition(n: Node, offset: number, editor: Element, source: string): number {
+  if (n.nodeType === ELEMENT_NODE) {
+    let start = 0;
+    if (n !== editor) {
+      start = endSourceMark((n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), source);
+    }
+    for (let i = 0; n.childNodes[i] && i < offset; ++i) {
+      const ch = n.childNodes[i];
+      if (ch.nodeType === TEXT_NODE) {
+        // nothing
+      } else if (ch.nodeType === ELEMENT_NODE) {
+        const range = rangeSourceMarkOut(editor, (ch as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), source);
+        start = range.end;
+      } else if (ch.nodeType === COMMENT_NODE) {
+        start = source.indexOf('-->', start) + 3;
+      } else if (ch.nodeType === CDATA_SECTION_NODE) {
+        start = source.indexOf(']]>', start) + 3;
+      }
+    }
+    return start;
+  } else {
+    // I expect only TEXT_NODE here
+    let start = orderOfChild(n.parentNode, n);
+    start = syncPosition(n.parentNode, start, editor, source);
+    return start + offset + unicodes(start, offset, source);
+  }
+}
+
 // Cases
 const THE_SAME_NODE = 0;
 const THE_SAME_PARENT = 1;
@@ -161,6 +336,8 @@ export class TestSyncComponent implements OnInit {
   designIndex = 1;
   editor: HTMLDivElement;
   lastRange: Range;
+  // tslint:disable-next-line:variable-name
+  _sourceModified = false;
   rollback: Array<{parent: string, before: string, after: string}> = [];
   @ViewChild('editor', {static: true}) editorRef: ElementRef<HTMLDivElement>;
   constructor() { }
@@ -186,15 +363,9 @@ export class TestSyncComponent implements OnInit {
     } else {
       // withdraw custom elements nodes and change selection
       const startContainer = findNodeDown(range.startContainer,
-        (n) => n && (n === range.endContainer || n.parentElement === this.editor
-          || (n.nodeType === ELEMENT_NODE && (n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) !== null)
-          || (n.nodeType === TEXT_NODE && (n.parentElement === this.editor || n.parentElement.getAttribute(DESIGNER_ATTR_NAME) !== null))
-        ));
+        (n) => this.belongDesigner(n) || n === range.endContainer);
       const endContainer = findNodeUp(range.endContainer,
-        (n) => n && (n === startContainer || n.parentElement === this.editor
-          || (n.nodeType === ELEMENT_NODE && (n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) !== null)
-          || (n.nodeType === TEXT_NODE && (n.parentElement === this.editor || n.parentElement.getAttribute(DESIGNER_ATTR_NAME) !== null))
-        ));
+        (n) => this.belongDesigner(n) || n === startContainer);
       if (!this.belongDesigner(startContainer) || !this.belongDesigner(endContainer)) {
         // this text absent in our designer. If we want to place text inside plugin, need text cover by tag
         // TODO We can try define a plugin here and then light it, or position cursor correctly before ar after this plugin!
@@ -211,6 +382,16 @@ export class TestSyncComponent implements OnInit {
       }
     }
     this.lastRange = window.getSelection().getRangeAt(0);
+    this.tmlCheckEmpty(this.lastRange.commonAncestorContainer);
+    this.tmlCheckEmpty(this.lastRange.startContainer);
+    this.tmlCheckEmpty(this.lastRange.endContainer);
+  }
+  tmlCheckEmpty(n: Node): void {
+    if (n.nodeType === ELEMENT_NODE) {
+      if ( isEmptyElement((n as HTMLElement).tagName)) {
+        throw new Error('There is empty element');
+      }
+    }
   }
   belongDesigner(n: Node): boolean {
     return n && (n === this.editor
@@ -219,22 +400,23 @@ export class TestSyncComponent implements OnInit {
   }
   onClick(event: MouseEvent): void {
     console.log(event);
-    // if (this.checkAndMarkElements()) {
-    this.checkAndMarkElements();
-    this.editor.innerHTML = this.source;
-    // }
+    if (this._sourceModified || this.checkAndMarkElements()) {
+      this.editor.innerHTML = this.source;
+      this._sourceModified = false;
+    }
     this.syncOnTouch();
+    this.preCollapse();
     console.log('onClick:', this.lastRange);
-    console.log('onClick:', this.getModifiedPart((t, i) => t));
+    console.log('onClick:', this.getModifiedPart());
     if (this.lastRange) {
-      const start = this.syncPosition(this.lastRange.startContainer, this.lastRange.startOffset);
-      const end = this.syncPosition(this.lastRange.endContainer, this.lastRange.endOffset);
+      const start = syncPosition(this.lastRange.startContainer, this.lastRange.startOffset, this.editor, this.source);
+      const end = syncPosition(this.lastRange.endContainer, this.lastRange.endOffset, this.editor, this.source);
       console.log('onClick start:', start);
       console.log('onClick end:', end);
       console.log('onClick substr:', this.source.substring(start, end));
     }
   }
-  getModifiedPart(f: (t: string, i: number) => string, keyEvent?: KeyboardEvent): {parent: HTMLElement, text: string, start, end} {
+  getModifiedPart(): {parent: HTMLElement, text: string, start: number, end: number} {
     // TODO is the end in the result really required?
     const allSource = {parent: this.editor, text: this.source.substring(0), start: 0, end: this.source.length};
     if (this.lastRange) {
@@ -253,120 +435,37 @@ export class TestSyncComponent implements OnInit {
             attr = (parent as HTMLElement).getAttribute(DESIGNER_ATTR_NAME);
           }
           const start = endSourceMark(attr, this.source);
-          const end = this.endOfElement((parent as HTMLElement).tagName, start);
+          const end = endOfElementIn((parent as HTMLElement).tagName, this.source, start);
           return {parent: parent as HTMLElement, text: this.source.substring(start, end), start, end};
         } else {
           parent = parent.parentElement;
+          if (isEmptyElement((parent as HTMLElement).tagName)) {
+            console.error('Empty element as parent!!!', (parent as HTMLElement).tagName);
+            parent = parent.parentElement;
+          }
           if (parent === this.editor) {
             return allSource;
           }
           const start = endSourceMark((parent as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
-          const end = this.endOfElement((parent as HTMLElement).tagName, start);
+          const end = endOfElementIn((parent as HTMLElement).tagName, this.source, start);
           return {parent: parent as HTMLElement, text: this.source.substring(start, end), start, end};
         }
       }
     }
   }
-  /**
-   * Range: container, offset.
-   * container type can be ELEMENT_NODE and TEXT_NODE, COMMENT_NODE, CDATA_NODE
-   * if ELEMENT_NODE the offset is number of child node.
-   *   If the node with this number is present it point on the begin of the node.
-   *   If there is no node with this number, it point on the end of the last child node
-   * If TEXT_NODE, COMMENT_NODE, CDATA_NODE the offset is the number of characters from the start
-   *   the offset can point to the end of text, in this case offset equals to length
-   * @param n Node
-   * @param offset number
-   */
-  syncPosition(n: Node, offset: number): number {
-    if (n.nodeType === ELEMENT_NODE) {
-      let start = 0;
-      if (n !== this.editor) {
-        start = endSourceMark((n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
-      }
-      for (let i = 0; n.childNodes[i] && i < offset; ++i) {
-        const ch = n.childNodes[i];
-        if (ch.nodeType === ELEMENT_NODE) {
-          start = endSourceMark((ch as HTMLElement).getAttribute(DESIGNER_ATTR_NAME), this.source);
-        } else if (ch.nodeType === COMMENT_NODE) {
-          start = this.source.indexOf('-->', start) + 3;
-        } else if (ch.nodeType === CDATA_SECTION_NODE) {
-          start = this.source.indexOf(']]>', start) + 3;
-        }
-      }
-      return start;
-    } else {
-      // we expect only TEXT_NODE here
-      let start = orderOfChild(n.parentNode, n);
-      start = this.syncPosition(n.parentNode, start);
-      return start + offset + this.unicodes(start, offset);
-    }
-  }
-  unicodes(start: number, end: number): number {
-    let str = this.source.substr(start);
-    let count = 0;
-    do {
-      const res = /&#(\d{2,4}|x[0-9a-zA-Z]{2,4});/.exec(str);
-      if (res === null || res.index > end) {
-        break;
-      }
-      count += (res[1].length + 2);
-      end -= (res.index + 1);
-      str = str.substr(res.index + res[1].length + 3);
-    } while (true);
-    return count;
-  }
-  endOfElement(tag: string, pos: number): number {
-    const regexp = new RegExp(`<\/${tag}>`, 'gi');
-    const chk = new RegExp(`<${tag}(\\s[^>]*|\\s?)>`, 'gi');
-    let res = pos;
-    do {
-      const str = this.source.substring(pos);
-      pos = str.search(regexp);
-      if (pos === -1) {
-        break;
-      }
-      res += pos;
-      const p = str.search(chk);
-      if (p !== -1 && p < pos) {
-        pos = p;
-      } else {
-        break;
-      }
-    } while (true);
-    if (pos >= 0) {
-      return res;
-    }
-  }
-
-  whatIsCase(): number {
-    if (this.lastRange) {
-      if (this.lastRange.startContainer === this.lastRange.endContainer) {
-        return THE_SAME_NODE;
-      }
-      if (this.lastRange.startContainer.parentNode === this.lastRange.endContainer.parentNode) {
-        return THE_SAME_PARENT;
-      }
-      return DIFFERENT_PARENTS;
-    }
-    return -1;
-  }
-  onKeyUp($event: KeyboardEvent): void {
+  onKeyUp($event: KeyboardEvent): void { // Do I really need this method?
     this.syncOnTouch();
     if (this.lastRange) {
-      const start = this.syncPosition(this.lastRange.startContainer, this.lastRange.startOffset);
-      console.log('onKeyUp', this.source.substr(start, 5));
+      const start = syncPosition(this.lastRange.startContainer, this.lastRange.startOffset, this.editor, this.source);
     }
-    console.log(this.lastRange);
   }
-  onKeyPress(event: KeyboardEvent): void {
-    console.log(event);
+  onKeyDown(event: KeyboardEvent): void {
+    console.log('onKeyDown', {key: event.key, altKey: event.altKey, ctrlKey: event.ctrlKey, metaKey: event.metaKey});
     if (event.altKey || event.ctrlKey || event.metaKey) {
-      console.log('onKeyPress', true);
       return;
     }
     if (event.key.length > 1 && !KNOWN_KEYS.includes(event.key)) {
-      console.log('onKeyPress input not editable symbol', event.key);
+      console.error('onKeyPress input not editable symbol', event.key);
       return;
     }
     if (NAVIGATION_KEYS.includes(event.key)) {
@@ -383,86 +482,261 @@ export class TestSyncComponent implements OnInit {
     }
     event.preventDefault();
   }
-  private rangeShot(): {collapsed: boolean, startOrderChild: number, startIsText: boolean, startIsEmpty: boolean,
-    startDesignId: string, startOffset: number, endIsText: boolean, endIsEmpty: boolean, endDesignId: string, endOffset: number} {
-    const st = this.lastRange.startContainer;
-    const end = this.lastRange.endContainer;
-    return {
-      collapsed: this.lastRange.collapsed,
-      startIsText: st.nodeType === TEXT_NODE
-        || (st.nodeType === ELEMENT_NODE && !isEmptyElement((st as HTMLElement).tagName)
-          && st.childNodes[this.lastRange.startOffset] === undefined),
-      startOrderChild: st.nodeType === TEXT_NODE ? orderOfChild(st.parentNode, st) : this.lastRange.startOffset,
-      startIsEmpty: (st.nodeType === ELEMENT_NODE
-        && st.childNodes[this.lastRange.startOffset] === undefined),
-      startDesignId: st.nodeType === ELEMENT_NODE ? (st as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) : null,
-      startOffset: this.lastRange.startOffset,
-      endIsText: end.nodeType === TEXT_NODE,
-      endIsEmpty: (end.nodeType === ELEMENT_NODE
-        && end.childNodes[this.lastRange.endOffset] === undefined),
-      endDesignId: end.nodeType === ELEMENT_NODE ? (end as HTMLElement).getAttribute(DESIGNER_ATTR_NAME) : null,
-      endOffset: this.lastRange.endOffset
-    };
+  /**
+   * if range isn't collapsed:
+   * <div>Text_1<label>Text_2<input><span>Text_3_</span></label>Text_4_</div>
+   * case select: [t_1], result: {open:[], close:[]}
+   * case select: [t_1, Text_2], result: {open: [label], close:[]}
+   * case select: [t_1, Text_3], result: {open: [label, span], close:[]}
+   * case select: [t_1, Text_4], result: {open:[], close:[]}
+   * case select: [t_2, Text_3], result: {open: [span], close:[]}
+   * case select: [t_2, Text_4], result: {open: [], close:[label]}
+   * case select: [t_3, Text_4], result: {open: [], close:[span]}
+   */
+  private sortOut(): {open: Array<{tag: string, attr: Array<{name: string, value: string}>}>, close: Array<string>} {
+    const result = {open: [], close: []};
+    if (this.lastRange && this.lastRange.startContainer !== this.lastRange.endContainer) {
+      const tmp = [];
+      const p = this.lastRange.commonAncestorContainer;
+      let st = (this.lastRange.startContainer.nodeType === TEXT_NODE) ?
+        this.lastRange.startContainer.parentElement : this.lastRange.startContainer as HTMLElement;
+      while (st !== p) {
+        const designId = st.getAttribute(DESIGNER_ATTR_NAME);
+        if (designId) {
+          tmp.push({tag: st.tagName, designId, attr: st.getAttributeNames().map(a => ({name: a, value: st.getAttribute(a)}))});
+        }
+        st = st.parentElement;
+      }
+      st = (this.lastRange.endContainer.nodeType === TEXT_NODE) ?
+        this.lastRange.endContainer.parentElement : this.lastRange.endContainer as HTMLElement;
+      while (st !== p) {
+        const designId = st.getAttribute(DESIGNER_ATTR_NAME);
+        if (designId) {
+          const i = tmp.findIndex(v => v.designId === designId);
+          if (i >= 0) {
+            const o = tmp.splice(i, 1);
+            result.open.push({tag: o[0].tag, attr: o[0].attr});
+          }
+        }
+      }
+      for (const o of tmp) {
+        result.close.push(o.tag);
+      }
+    }
+    return result;
   }
-  private insert(ch: string, designIndex: number = null): void {
-    const shot = this.rangeShot();
-    const part = this.getModifiedPart((t, i) => t);
-    const start = this.syncPosition(this.lastRange.startContainer, this.lastRange.startOffset);
-    const end = shot.collapsed ? start : this.syncPosition(this.lastRange.endContainer, this.lastRange.endOffset);
-    this.source = this.source.substring(0, start) + ch + this.source.substring(end);
+  private txtSortOut(): string {
+    let src = '';
+    const sourOut = this.sortOut();
+    for (const e of sourOut.open) {
+      let attr = '';
+      for (const a of e.attr) {
+        attr += ` ${a.name}="${a.value || a.name}"`;
+      }
+      src += `<${e.tag}${attr}>`;
+    }
+    for (const e of sourOut.close) {
+      src += `</${e}>`;
+    }
+    return src;
+  }
+  private update(start: number, end: number, str: string): void {
+    const part = this.getModifiedPart();
+    this.source = this.source.substring(0, start) + str + this.source.substring(end);
     const before = part.text;
-    part.text = part.text.substring(0, start - part.start) + ch + part.text.substring(end - part.start);
+    part.text = part.text.substring(0, start - part.start) + str + part.text.substring(end - part.start);
     this.rollback.push({
       parent: part.parent === this.editor ? null : (part.parent as HTMLElement).getAttribute(DESIGNER_ATTR_NAME),
       before,
       after: part.text
     });
+    this.lastRange = null;
     part.parent.innerHTML = part.text;
-    // after this I don't have a valid this.lastRange
-    if (designIndex >= 0 && designIndex !== null) {
-      const to = part.parent.querySelector(`[${DESIGNER_ATTR_NAME}="${designIndex}"]`);
-      if (isEmptyElement(to.tagName)) {
-        const n = orderOfChild(to.parentNode, to);
-        window.getSelection().collapse(to.parentNode, n + 1);
-      } else {
-        window.getSelection().collapse(to, 0);
-      }
+  }
+
+  /**
+   * When wrap - I need index of new element and were I want point: before or after (it I can define from selection before)
+   * When insert:
+   *  - if was collapsed and one char was inserted:
+   *    - node can be empty before so I need this node and offset to find new text node
+   *    - else else I need this node and offset to increment offset
+   *  - if was collapsed and one element was inserted:
+   *    - I need designId of this element
+   *  - if I don't know what was inserted so I collapse to the start
+   *  - if isn't collapsed
+   *    - I need focus of selected and it position:
+   *      - if focus is from start source: I need to know this position from updated parent to find it after modifying
+   *      - if focus is to end source: I need know this position by obtain designId of a node that is parent to focus and
+   *      position from the node. So I can find this node and define new position (this node would created by sortOut)
+   */
+  // tslint:disable-next-line:max-line-length
+  preCollapse(lastRange?: Range): {collapsed: boolean, toEnd: boolean, nodeType: number, tagName: string, designId: string, order: number, offset: number} {
+    if (!lastRange) {
+      lastRange = this.lastRange;
+    }
+    const selection = window.getSelection();
+    // tslint:disable-next-line:no-bitwise
+    const toEnd = !(selection.anchorNode.compareDocumentPosition(selection.focusNode) & 2);
+    const collapseTo = toEnd ? {node: lastRange.endContainer, offset: lastRange.endOffset}
+      : {node: lastRange.startContainer, offset: lastRange.startOffset};
+    let designId = '0';
+    let tagName = 'DIV';
+    let order = 0;
+    let offset = 0;
+    if (collapseTo.node.nodeType === ELEMENT_NODE) {
+      designId = (collapseTo.node as HTMLElement).getAttribute(DESIGNER_ATTR_NAME);
+      tagName = (collapseTo.node as HTMLElement).tagName;
+      order = toEnd ? collapseTo.node.childNodes.length - collapseTo.offset : collapseTo.offset;
     } else {
-      if (shot.startIsText) {
-        let parent = this.editor;
-        if (shot.startDesignId && shot.startDesignId !== '0') {
-          parent = part.parent.querySelector(`[${DESIGNER_ATTR_NAME}="${shot.startDesignId}"]`);
-        }
-        window.getSelection().collapse(parent.childNodes[shot.startOrderChild], shot.startOffset + ch.length);
+      designId = collapseTo.node.parentElement.getAttribute(DESIGNER_ATTR_NAME);
+      tagName = collapseTo.node.parentElement.tagName;
+      order = orderOfChild(collapseTo.node.parentElement, collapseTo.node, !toEnd);
+      offset = toEnd ? collapseTo.node.textContent.length - collapseTo.offset : collapseTo.offset;
+    }
+    // tslint:disable-next-line:max-line-length
+    return {collapsed: selection.isCollapsed, toEnd, nodeType: collapseTo.node.nodeType, tagName, designId, order, offset};
+  }
+
+  /**
+   * set window selection to new position
+   * @param op type of modifying
+   * @param pre is result of preCollapse
+   * @param length define shift
+   */
+  collapseTo(op: 'ins' | 'del' | 'wrap',
+             // tslint:disable-next-line:max-line-length
+             pre: {collapsed: boolean, toEnd: boolean, nodeType: number, tagName: string, designId: string, order: number, offset: number},
+             length: number): void {
+    let node = findDesignElement(this.editor, pre.designId) as Node;
+    if (pre.nodeType === TEXT_NODE) {
+      if (pre.toEnd) {
+        node = node.childNodes[pre.order] as Node;
       } else {
-        let parent = this.editor;
-        if (shot.startDesignId) {
-          parent = part.parent.querySelector(`[${DESIGNER_ATTR_NAME}="${shot.startDesignId}"]`);
-        }
-        if (parent.childNodes[shot.startOffset].hasChildNodes()) {
-          if (parent.childNodes[shot.startOffset].nodeType === TEXT_NODE) {
-            window.getSelection().collapse(parent.childNodes[shot.startOffset], ch.length);
-          } else {
-            window.getSelection().collapse(parent.childNodes[shot.startOffset], 0);
-          }
-        }
+        node = node.childNodes[node.childNodes.length - pre.order];
       }
     }
+    const range = document.createRange();
+    range.setEnd(this.editor, 0);
+    switch (op) {
+      case 'del':
+      case 'wrap':
+        if (pre.toEnd) {
+          range.setStartAfter(node);
+        } else {
+          range.setStartBefore(node);
+        }
+        break;
+      case 'ins':
+        if (length < 0) { // we insert something unknown
+          range.setStart(this.editor, 0);
+        } else if (pre.nodeType === TEXT_NODE) {
+          range.setStart(node, pre.offset);
+        } else {
+          range.setStartAfter(node);
+        }
+        break;
+    }
+    if (pre.toEnd) {
+      window.getSelection().collapse(range.startContainer, range.startOffset);
+    } else {
+      window.getSelection().collapse(range.endContainer, range.endOffset);
+    }
+  }
+  private insert(ch: string): void {
+    const start = syncPosition(this.lastRange.startContainer, this.lastRange.startOffset, this.editor, this.source);
+    const end = syncPosition(this.lastRange.endContainer, this.lastRange.endOffset, this.editor, this.source);
+    const pre = this.preCollapse();
+    const str = this.txtSortOut() + ch;
+    const addNode = pre.nodeType === ELEMENT_NODE ? 1 : 0;
+    this.update(start, end, str);
+    let node = findDesignElement(this.editor, pre.designId) as Node;
+    let offset = 0;
+    if (pre.toEnd) {
+      node = node.childNodes[node.childNodes.length - (pre.order + addNode)];
+      offset = node.textContent.length - pre.offset;
+    } else {
+      node = node.childNodes[pre.order];
+      offset = pre.offset + ch.length;
+    }
+    window.getSelection().collapse(node, offset);
+    this.lastRange = window.getSelection().getRangeAt(0);
+  }
+  private insertTag(tag: string): void {
+    const start = syncPosition(this.lastRange.startContainer, this.lastRange.startOffset, this.editor, this.source);
+    const end = syncPosition(this.lastRange.endContainer, this.lastRange.endOffset, this.editor, this.source);
+    const pre = this.preCollapse();
+    const id = '' + this.designIndex++;
+    const isEmpty = isEmptyElement(tag);
+    const str = this.txtSortOut()
+      + (isEmpty ? `<${tag} ${DESIGNER_ATTR_NAME}="${id}">` : `<${tag} ${DESIGNER_ATTR_NAME}="${id}"></${tag}>`) ;
+    this.update(start, end, str);
+    const node = findDesignElement(this.editor, id) as Node;
+    if (isEmpty) {
+      const order = orderOfChild(node.parentNode, node) + 1;
+      if (node.parentNode.childNodes[order] && node.parentNode.childNodes[order].nodeType === TEXT_NODE) {
+        window.getSelection().collapse(node.parentNode.childNodes[order], 0);
+      } else {
+        window.getSelection().collapse(node.parentNode, order);
+      }
+    } else {
+      window.getSelection().collapse(node, 0);
+    }
+    this.lastRange = window.getSelection().getRangeAt(0);
   }
   private delete(after = true): void {
-    const shot = this.rangeShot();
-    const part = this.getModifiedPart((t, i) => t);
-    const start = this.syncPosition(this.lastRange.startContainer, this.lastRange.startOffset);
-    const end = shot.collapsed ? start : this.syncPosition(this.lastRange.endContainer, this.lastRange.endOffset);
-    if (shot.collapsed) {
-      // delete only text. If in current text
+    if (!this.lastRange.collapsed) {
+      const start = syncPosition(this.lastRange.startContainer, this.lastRange.startOffset, this.editor, this.source);
+      const end = syncPosition(this.lastRange.endContainer, this.lastRange.endOffset, this.editor, this.source);
+      const pre = this.preCollapse();
+      const str = this.txtSortOut();
+      this.update(start, end, str);
+      this.collapseTo('ins', pre, str.length);
+    } else {
+      const st = this.lastRange.startContainer;
+      const prev = prevPosition(st, this.lastRange.startOffset, this.editor);
+      const next = nextPosition(st, this.lastRange.startOffset, this.editor);
+      const range = document.createRange();
+      if (prev.container !== st && next.container !== st) {
+        range.setStart(prev.container, prev.offset);
+        range.setEnd(next.container, next.offset);
+        const pre = this.preCollapse(range);
+        const start = syncPosition(range.startContainer, range.startOffset, this.editor, this.source);
+        const end = syncPosition(range.endContainer, range.endOffset, this.editor, this.source);
+        this.update(start, end, '');
+        this.collapseTo('del', pre, 0);
+      } else {
+        let to = prev;
+        if (after) {
+          to = next;
+        }
+        if (to.container === st) {
+          if (after) {
+            range.setStart(this.lastRange.startContainer, this.lastRange.startOffset);
+            range.setEnd(to.container, to.offset);
+          } else {
+            range.setStart(to.container, to.offset);
+            range.setEnd(this.lastRange.startContainer, this.lastRange.startOffset);
+          }
+          const pre = this.preCollapse(range);
+          const start = syncPosition(range.startContainer, range.startOffset, this.editor, this.source);
+          const end = syncPosition(range.endContainer, range.endOffset, this.editor, this.source);
+          this.update(start, end, '');
+          this.collapseTo('del', pre, 0);
+        } else {
+          range.setStart(to.container, to.offset);
+          range.setEnd(to.container, to.offset);
+          window.getSelection().removeAllRanges();
+          window.getSelection().addRange(range);
+          this.lastRange = range;
+          this.delete(after);
+        }
+      }
     }
   }
   private whitespace(key: string): void {
     switch (key) {
       case 'Enter':
-        const index = this.designIndex++;
-        this.insert(`<br ${DESIGNER_ATTR_NAME}="${index}">`, index);
+        this.insertTag('br');
         break;
       case 'Tab':
         break;
@@ -471,10 +745,10 @@ export class TestSyncComponent implements OnInit {
   private editingKey(key: string): void {
     switch (key) {
       case 'Backspace':
-        // this.source = this.source.substring(0, cursor[0].finish - 1) + this.source.substring(cursor[0].finish);
+        this.delete(false);
         break;
       case 'Delete':
-        // this.source = this.source.substring(0, cursor[0].finish) + this.source.substring(cursor[0].finish + 1);
+        this.delete();
         break;
       case 'Insert':
         break;
@@ -502,4 +776,21 @@ export class TestSyncComponent implements OnInit {
     return result;
   }
 
+  sourceModified(): void {
+    this._sourceModified = true;
+  }
+
+  sourceKeyDown(event: KeyboardEvent): void {
+    if (event.altKey || event.ctrlKey || event.metaKey) {
+      return;
+    }
+    if (event.key.length > 1 && !KNOWN_KEYS.includes(event.key)) {
+      console.error('onKeyPress input not editable symbol', event.key);
+      return;
+    }
+    if (NAVIGATION_KEYS.includes(event.key)) {
+      return;
+    }
+    this._sourceModified = true;
+  }
 }
