@@ -49,7 +49,7 @@ export class TestDynamicComponent implements OnInit {
   swagger: SwaggerObject = new SwaggerObject(
     ['id', 'description', 'child'],
   {
-      id: SwaggerNative.asString(),
+      id: SwaggerNative.asNumber(),
       description: SwaggerNative.asString(),
       child: new SwaggerObject(
         ['childId', 'childDescription', 'sex'],

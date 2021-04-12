@@ -110,7 +110,7 @@ export class BaseComponent extends AbstractComponent implements OnInit, OnDestro
     }
   }
   ngOnChanges(changes: SimpleChanges): void {
-    console.log('BaseControlComponent.ngOnChanges', this, changes);
+    // console.log('BaseControlComponent.ngOnChanges', this, changes);
     if (changes.name) {
       console.log('BaseControlComponent.ngOnChanges was changed name');
     }
