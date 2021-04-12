@@ -382,6 +382,16 @@ export class TestSyncComponent implements OnInit {
       }
     }
     this.lastRange = window.getSelection().getRangeAt(0);
+    this.tmlCheckEmpty(this.lastRange.commonAncestorContainer);
+    this.tmlCheckEmpty(this.lastRange.startContainer);
+    this.tmlCheckEmpty(this.lastRange.endContainer);
+  }
+  tmlCheckEmpty(n: Node): void {
+    if (n.nodeType === ELEMENT_NODE) {
+      if ( isEmptyElement((n as HTMLElement).tagName)) {
+        throw new Error('There is empty element');
+      }
+    }
   }
   belongDesigner(n: Node): boolean {
     return n && (n === this.editor
@@ -637,11 +647,12 @@ export class TestSyncComponent implements OnInit {
     const end = syncPosition(this.lastRange.endContainer, this.lastRange.endOffset, this.editor, this.source);
     const pre = this.preCollapse();
     const str = this.txtSortOut() + ch;
+    const addNode = pre.nodeType === ELEMENT_NODE ? 1 : 0;
     this.update(start, end, str);
     let node = findDesignElement(this.editor, pre.designId) as Node;
     let offset = 0;
     if (pre.toEnd) {
-      node = node.childNodes[Math.min(node.childNodes.length - pre.order, node.childNodes.length - 1)];
+      node = node.childNodes[node.childNodes.length - (pre.order + addNode)];
       offset = node.textContent.length - pre.offset;
     } else {
       node = node.childNodes[pre.order];
@@ -661,7 +672,12 @@ export class TestSyncComponent implements OnInit {
     this.update(start, end, str);
     const node = findDesignElement(this.editor, id) as Node;
     if (isEmpty) {
-      window.getSelection().collapse(node.parentNode, orderOfChild(node.parentNode, node) + 1);
+      const order = orderOfChild(node.parentNode, node) + 1;
+      if (node.parentNode.childNodes[order] && node.parentNode.childNodes[order].nodeType === TEXT_NODE) {
+        window.getSelection().collapse(node.parentNode.childNodes[order], 0);
+      } else {
+        window.getSelection().collapse(node.parentNode, order);
+      }
     } else {
       window.getSelection().collapse(node, 0);
     }
