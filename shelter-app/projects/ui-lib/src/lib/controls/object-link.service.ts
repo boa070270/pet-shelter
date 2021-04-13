@@ -61,20 +61,18 @@ export class ObjectLinkService {
       if (coerceToSwaggerNative(prop)) {
         p.fieldType = 'SwaggerNative';
         p.nativeType = (prop as SwaggerNative).type;
-        p.nativeConstrictions = (prop as SwaggerNative).constrictions;
         this.toFrmEnumDescriptions(p);
       } else if (coerceToSwaggerObject(prop)) {
         p.fieldType = 'SwaggerObject';
         p.objectLink = this.getLink(prop as SwaggerObject);
-        // p.objectConstrictions = (prop as SwaggerObject).constrictions; ???
       } else if (coerceToSwaggerArray(prop)) {
         p.fieldType = 'SwaggerArray';
-        p.arrayConstrictions = (prop as SwaggerArray).constrictions;
         const item = (prop as SwaggerArray).items;
+        p.constriction = {...item.constrictions, ...prop.constrictions};
         if (coerceToSwaggerNative(item)) {
           p.itemType = 'SwaggerNative';
           p.nativeType = (item as SwaggerNative).type;
-          p.nativeConstrictions = (prop as SwaggerNative).constrictions;
+          p.constrictionNative = item.constrictions;
           this.toFrmEnumDescriptions(p);
         } else if (coerceToSwaggerObject(item)) {
           p.itemType = 'SwaggerObject';
@@ -86,17 +84,16 @@ export class ObjectLinkService {
     return props;
   }
   toFrmEnumDescriptions(p): void {
-    if (p.nativeConstrictions && p.nativeConstrictions.enumDescriptions) {
+    if (p.constriction.enumDescriptions) {
       const arr = [];
-      const d = p.nativeConstrictions.enumDescriptions;
-      Object.keys(d).forEach(key => {
-        arr.push({key, value: d[key]});
+      Object.keys(p.constriction.enumDescriptions).forEach(key => {
+        arr.push({key, value: p.constriction.enumDescriptions[key]});
       });
-      p.nativeConstrictions.enumDescriptions = arr;
+      p.constriction.enumDescriptions = arr;
     }
   }
 
-  fromFrm(data: {constriction, objectConstrictions, ui, fields: PropertyForm[]}): SwaggerObject {
+  fromFrm(data: {constriction, ui, fields: PropertyForm[]}): SwaggerObject {
     const orderCtrl = [];
     const required = [];
     const props = data.fields;
@@ -113,8 +110,7 @@ export class ObjectLinkService {
             properties[p.fieldName] = this.setNativeProp(p, true);
           } else if (p.itemType === 'SwaggerObject') {
             properties[p.fieldName] = new SwaggerArray(this.getObject(p.objectLink),
-              {...p.nativeConstrictions, ...p.arrayConstrictions}, p.ui
-            );
+              p.constriction, p.ui);
           }
           break;
         case 'SwaggerNative':
@@ -128,22 +124,22 @@ export class ObjectLinkService {
     return new SwaggerObject(orderCtrl, properties, data.ui, required, data.constriction);
   }
   fromFrmEnumDescriptions(p): void {
-    if (p.nativeConstrictions && p.nativeConstrictions.enumDescriptions &&
-        p.nativeConstrictions.enumDescriptions.enumDescriptionsType === 'key-value') {
+    if (p.constriction && p.constriction.enumDescriptions &&
+        p.constriction.enumDescriptions.enumDescriptionsType === 'key-value') {
       const obj = {};
-      p.nativeConstrictions.enumDescriptions.keyDescriptions.forEach((key, value) => {
+      p.constriction.enumDescriptions.keyDescriptions.forEach((key, value) => {
         obj[key] = value;
       });
-      p.nativeConstrictions.enumDescriptions = obj;
+      p.constriction.enumDescriptions = obj;
     }
   }
   setNativeProp(p, wrap?): SwaggerNative | SwaggerArray {
     let c;
     if (wrap) {
-      c = [null, {...p.constrictionAdd, ...p.nativeConstrictions, ...p.numberConstrictions, ...p.stringConstrictions}, p.uiNative];
-      wrap = [{...p.constriction, ...p.arrayConstrictions}, p.ui];
+      c = [null, {...p.constriction, ...p.constrictionNative}, p.uiNative];
+      wrap = [p.constriction, p.ui];
     } else {
-      c = [null, {...p.constriction, ...p.nativeConstrictions, ...p.numberConstrictions, ...p.stringConstrictions}, p.ui];
+      c = [null, p.constriction, p.ui];
     }
     switch (p.nativeType) {
       case 'boolean':
@@ -164,7 +160,7 @@ export class ObjectLinkService {
     }
   }
 
-  addLink(obj: SwaggerObject, link): void {
+  addLink(link: string, obj: SwaggerObject): void {
     this.list.set(link, obj);
   }
   // TODO swaggerLink service to map objects
@@ -196,10 +192,7 @@ interface PropertyForm {
   objectLink?: string;
   required?: boolean;
   constriction?: BaseConstrictions;
-  nativeConstrictions?: NativeConstrictions;
-  numberConstrictions?: NumberConstrictions;
-  stringConstrictions?: StringConstrictions;
-  arrayConstrictions?: ArrayConstrictions;
-  objectConstrictions?: ObjectConstrictions;
+  constrictionNative?: BaseConstrictions;
   ui?: SwaggerUI;
+  uiNative?: SwaggerUI;
 }

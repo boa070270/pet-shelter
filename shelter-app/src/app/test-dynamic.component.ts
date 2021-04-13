@@ -31,8 +31,8 @@ import {Validators} from "@angular/forms";
       </select>
       <button (click)="onClick()">Render</button>
       <h1>Swagger builder test</h1>
-<!--      <lib-swagger-builder [swagger]="swagger"></lib-swagger-builder>-->
-      <lib-swagger-form [swagger]="formSwagger"></lib-swagger-form>
+      <lib-swagger-builder [swagger]="swag"></lib-swagger-builder>
+<!--      <lib-swagger-form [swagger]="formSwagger"></lib-swagger-form>-->
     </div>
   `,
   styleUrls: ['./test-dynamic.component.sass']
@@ -47,6 +47,11 @@ export class TestDynamicComponent implements OnInit {
     e: '<test-table-element></test-table-element>'
   };
   knownText: any;
+  swag: SwaggerObject = new SwaggerObject(
+    ['id'],
+    {
+      id: SwaggerNative.asNumber()
+    });
   swagger: SwaggerObject = new SwaggerObject(
     ['id', 'description', 'child'],
   {
@@ -61,13 +66,29 @@ export class TestDynamicComponent implements OnInit {
         })
       });
   formSwagger: SwaggerObject = new SwaggerObject(
-    ['id', 'constraintMinMax', 'formatNumber', 'description'],
+    ['id', 'constraintMinMax', 'formatNumber', 'description', 'description1', 'description2', 'description3', 'description4',
+      'description5', 'description6', 'description7', 'description8', 'description9', 'description90', 'description91', 'description92',
+      'description93', 'description94'],
     {
       id: SwaggerNative.asNumber(),
       constraintMinMax: SwaggerNative.asNumber(null, {minimum: 1, maximum: 5}),
       formatNumber: SwaggerNative.asNumber(null, {format: 'number',
         validators: [Validators.min(1), Validators.max(5)]}),
-      description: SwaggerNative.asString()
+      description: SwaggerNative.asString(),
+      description1: SwaggerNative.asString(),
+      description2: SwaggerNative.asString(),
+      description3: SwaggerNative.asString(),
+      description4: SwaggerNative.asString(),
+      description5: SwaggerNative.asString(),
+      description6: SwaggerNative.asString(),
+      description7: SwaggerNative.asString(),
+      description8: SwaggerNative.asString(),
+      description9: SwaggerNative.asString(),
+      description90: SwaggerNative.asString(),
+      description91: SwaggerNative.asString(),
+      description92: SwaggerNative.asString(),
+      description93: SwaggerNative.asString(),
+      description94: SwaggerNative.asString(),
     });
 
   change: EventEmitter<any>;

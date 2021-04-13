@@ -74,6 +74,7 @@ export class SwaggerFormComponent extends BaseSwaggerComponent implements OnInit
       this.formGroup.disable();
     }
     if (this.swagger && this.behavior) {
+      this.applyRules(this.formGroup.value);
       this.formGroup.valueChanges.subscribe(d => this.applyRules(d));
     }
   }
@@ -144,7 +145,12 @@ export class SwaggerFormComponent extends BaseSwaggerComponent implements OnInit
   private applyRules(d: any): void {
     Object.keys(this.behavior).forEach( r => {
       const rules = this.behavior[r];
-      const value = '' + d[r];
+      let value: string;
+      if (r.charAt(0) === '$') {
+        value = '' + this.pFormGroup.value[r];
+      } else {
+        value = '' + d[r];
+      }
       for (const rule of rules) {
         if (rule.c) {
           let cond: string;

@@ -71,6 +71,7 @@ Task! Is there enough one form of field in the swagger? Let's look at the field 
 to the edit mode we need input to fill the src, but when we in the view mode maybe we need this picture..
 
 
+DONE! - Task! Behaviour! Using parent fields in rules  [ $fieldType: { c: '=string' ... } ]
 DONE! Task! Swagger form do not validate number, allow input string
 DONE!
 Task! Swagger! What do I need to do with forms that need dynamically change its content?
