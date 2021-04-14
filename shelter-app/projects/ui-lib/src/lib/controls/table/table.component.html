@@ -33,6 +33,7 @@
         <button (click)="incPage(1)"  [title]="i18n.next"> > </button>
         <button (click)="page = maxPage"  [title]="i18n.last"> >> </button>
       </span>
+    <span><span *ngIf="filteredCount < rowCount"> {{i18n.filteredCount | choiceFormat:filteredCount}}</span> {{i18n.rowsCount | choiceFormat:rowCount}}</span>
   </div>
   <span class="hint">{{pHint}}</span>
 </div>

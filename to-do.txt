@@ -55,8 +55,6 @@ All plugins will ask the pageDataService and obtain their data to properly prese
   make filter-dialog-component
   show this dialog on showDialogFilter instead simple one input
 
-- Task! Table! I want extend the table status bar to show number of all rows and number of filtered rows
-
 - Task! Exclude material
   - Task! Change AuthDialog (it uses material)
   - Task! Change AppPage
@@ -71,7 +69,8 @@ Task! Is there enough one form of field in the swagger? Let's look at the field 
 to the edit mode we need input to fill the src, but when we in the view mode maybe we need this picture..
 
 
-DONE! - Task! Behaviour! Using parent fields in rules  [ $fieldType: { c: '=string' ... } ]
+DONE! Task! Table! I want extend the table status bar to show number of all rows and number of filtered rows
+DONE! Task! Behaviour! Using parent fields in rules  [ $fieldType: { c: '=string' ... } ]
 DONE! Task! Swagger form do not validate number, allow input string
 DONE!
 Task! Swagger! What do I need to do with forms that need dynamically change its content?

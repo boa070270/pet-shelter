@@ -30,7 +30,7 @@ import {
 import {SystemLang} from '../../i18n';
 import {BaseComponent} from '../base.component';
 import {CdkTable} from '@angular/cdk/table';
-import {zip} from 'rxjs';
+import {Subscription, zip} from 'rxjs';
 import {Directionality} from '@angular/cdk/bidi';
 import {ComponentType} from '@angular/cdk/overlay';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
@@ -63,6 +63,14 @@ const I18N: I18NType = {
     selected: [
       {lang: 'en', title: 'Selected: {0,0# rows|1# row|[2..) rows}'},
       {lang: 'uk', title: 'Вибрано: {0,0# рядків|1# рядок|[2..4] рядка|[5..) рядків}'},
+    ],
+    rowsCount: [
+      {lang: 'en', title: 'Total: {0,0# rows|1# row|[2..) rows}'},
+      {lang: 'uk', title: 'Всього: {0,0# рядків|1# рядок|[2..4] рядка|[5..) рядків}'},
+    ],
+    filteredCount: [
+      {lang: 'en', title: 'Filtered: {0,0# rows|1# row|[2..) rows} of'},
+      {lang: 'uk', title: 'Відфільтровано: {0,0# рядків|1# рядок|[2..4] рядка|[5..) рядків} з'},
     ]
 };
 const DIALOG_SEARCH = new SwaggerObject(['search'], { search: SwaggerNative.asString()});
@@ -113,6 +121,9 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
   get selectedRows(): any[] {
     return (this.cdkDataSource || {}).selectedRows || [];
   }
+  rowCount = 0;
+  filteredCount = 0;
+  private subscriptions: Subscription[] = [];
   orderIcons = {};
   get order(): IOrder[] {
     return (this.cdkDataSource || {}).orderParams || [];
@@ -186,6 +197,8 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
     }
     this.cdkTable.dataSource = this.cdkDataSource;
     this.paging = new Paging(this.cdkTable.viewChange, this.cdkDataSource.totalRecords);
+    this.subscriptions.push(this.cdkDataSource.totalRecords.subscribe((n) => this.rowCount = n));
+    this.subscriptions.push(this.cdkDataSource.filteredRecords.subscribe((n) => this.filteredCount = n));
   }
   ngAfterViewInit(): void {
     this.paging.setPage(0);
@@ -195,12 +208,14 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
     super.ngOnDestroy();
     this.dataSource.unregisterDS(this.cdkDataSource);
     this.dataSource = null;
+    this.subscriptions.forEach(v => v.unsubscribe());
     this.closeDialog();
     this.paging.destroy();
   }
   writeValue(obj: any): void {
     if (this.dataSource && Array.isArray(obj)) {
       this.dataSource.setData(obj);
+      this.paging.setPage(0);
     }
   }
 

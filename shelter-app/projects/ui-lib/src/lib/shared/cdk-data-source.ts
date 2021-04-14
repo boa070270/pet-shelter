@@ -93,6 +93,7 @@ export abstract class AbstractDataSource<T> {
   protected lastModified: Date;
   protected equalData: (o1: any, o2: any) => boolean;
   total = new BehaviorSubject(0);
+  filtered = new BehaviorSubject(0);
 
   protected constructor(protected equalsOrder: (o1: any, o2: any) => boolean = simpleEquals,
                         protected equalsFilter: (f1: any, f2: any) => boolean = simpleEquals,
@@ -160,6 +161,7 @@ export abstract class AbstractDataSource<T> {
       }
     }
     const d = this.data.filter(filter).sort(compare).slice(lstRange.start, lstRange.end);
+    this.filtered.next(this.data.filter(filter).length);
     ds.subject.next(ds.trIn(d));
   }
 
@@ -232,6 +234,7 @@ export class ArrayDataSource<T> extends AbstractDataSource<T> {
   }
   setData(data: any[]): void {
     this.data = data;
+    this.total.next(data.length);
     this.updateConsumers(null);
   }
   delete(row: T): Observable<DataExpectedResult<T>> {
@@ -391,6 +394,9 @@ export class CdkDataSource<U, T> extends DataSource<T> {
   trOut: (v: T[]) => U[] = (v) => v as unknown as U[];
   get totalRecords(): BehaviorSubject<number> {
     return this.main.total;
+  }
+  get filteredRecords(): BehaviorSubject<number> {
+    return this.main.filtered;
   }
   constructor(private main: AbstractDataSource<U>) {
     super();
