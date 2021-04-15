@@ -64,13 +64,21 @@ const I18N: I18NType = {
       {lang: 'en', title: 'Selected: {0,0# rows|1# row|[2..) rows}'},
       {lang: 'uk', title: 'Вибрано: {0,0# рядків|1# рядок|[2..4] рядка|[5..) рядків}'},
     ],
-    rowsCount: [
-      {lang: 'en', title: 'Total: {0,0# rows|1# row|[2..) rows}'},
-      {lang: 'uk', title: 'Всього: {0,0# рядків|1# рядок|[2..4] рядка|[5..) рядків}'},
+    totalRows: [
+      {lang: 'en', title: 'Total:'},
+      {lang: 'uk', title: 'Всього:'},
     ],
-    filteredCount: [
-      {lang: 'en', title: 'Filtered: {0,0# rows|1# row|[2..) rows} of'},
-      {lang: 'uk', title: 'Відфільтровано: {0,0# рядків|1# рядок|[2..4] рядка|[5..) рядків} з'},
+    filtered: [
+      {lang: 'en', title: 'Filtered:'},
+      {lang: 'uk', title: 'Відфільтровано:'},
+    ],
+    filteredOf: [
+      {lang: 'en', title: 'of'},
+      {lang: 'uk', title: 'з'},
+    ],
+    countRows: [
+      {lang: 'en', title: '{0,0# rows|1# row|[2..) rows}'},
+      {lang: 'uk', title: '{0,0# рядків|1# рядок|[2..4] рядка|[5..) рядків}'},
     ]
 };
 const DIALOG_SEARCH = new SwaggerObject(['search'], { search: SwaggerNative.asString()});
@@ -108,6 +116,8 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
   customActions: Array<{icon: string, tooltip: string | TitleType[], command: string}> = [];
   @Input()
   defaultDisplay: string[];
+  @Input()
+  readonly: boolean;
   @Output()
   tableEvent: EventEmitter<{cmd: string, rows: any[]}> = new EventEmitter<{cmd: string; rows: any[]}>();
   private cdkDataSource: CdkDataSource<any, any>;
@@ -288,6 +298,9 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
 
   editRow(): void {
     this.closeDialog();
+    if (this.readonly) {
+      return;
+    }
     let dialogRef;
     if (this.editForm) {
       dialogRef = this.dialogService.open(this.editForm, {data: this.currentRow});
@@ -317,6 +330,9 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
 
   addRow(): void {
     this.closeDialog();
+    if (this.readonly) {
+      return;
+    }
     let dialogRef;
     if (this.editForm) {
       dialogRef = this.dialogService.open(this.editForm, {data: this.currentRow});
@@ -336,6 +352,9 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
   }
   deleteRows(): void {
     this.closeDialog();
+    if (this.readonly) {
+      return;
+    }
     if (this.selectedRows.length > 0) {
       this.dialogService.warnMsgDialog(choiceFormat(this.i18n.askDelete, this.selectedRows.length), true, 'yes_no')
         .afterClosed().subscribe( ok => {

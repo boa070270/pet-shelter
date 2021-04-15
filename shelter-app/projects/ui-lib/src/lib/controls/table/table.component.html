@@ -33,7 +33,9 @@
         <button (click)="incPage(1)"  [title]="i18n.next"> > </button>
         <button (click)="page = maxPage"  [title]="i18n.last"> >> </button>
       </span>
-    <span><span *ngIf="filteredCount < rowCount"> {{i18n.filteredCount | choiceFormat:filteredCount}}</span> {{i18n.rowsCount | choiceFormat:rowCount}}</span>
+    <span>
+      <span *ngIf="filteredCount < rowCount"> {{i18n.filtered}} {{i18n.countRows | choiceFormat:filteredCount}} {{i18n.filteredOf}}</span>
+      <span *ngIf="filteredCount === rowCount"> {{i18n.totalRows}}</span> {{i18n.countRows | choiceFormat:rowCount}} </span>
   </div>
   <span class="hint">{{pHint}}</span>
 </div>
@@ -42,9 +44,9 @@
   <button (click)="refresh()" class="gm-refresh" [title]="i18n.refresh"></button>
   <button (click)="tableSettings()" class="gm-view_column" [title]="i18n.settings"></button>
   <button (click)="showSearchDialog()" class="gm-search" [title]="i18n.filter"></button>
-  <button (click)="editRow()" class="gm-edit" [title]="i18n.editRow"></button>
+  <button *ngIf="!readonly" (click)="editRow()" class="gm-edit" [title]="i18n.editRow"></button>
   <button (click)="viewRow()" class="gm-tv" [title]="i18n.viewRow"></button>
-  <button (click)="addRow()" class="gm-add" [title]="i18n.addRow"></button>
-  <button (click)="deleteRows()" class="gm-delete" [title]="i18n.deleteRows"></button>
+  <button *ngIf="!readonly" (click)="addRow()" class="gm-add" [title]="i18n.addRow"></button>
+  <button *ngIf="!readonly" (click)="deleteRows()" class="gm-delete" [title]="i18n.deleteRows"></button>
   <button *ngFor="let act of actions" (click)="customAction(act.command)" class="{{act.icon}}" [title]="act.tooltip"></button>
 </ng-template>

@@ -44,6 +44,14 @@ import { AppBarComponent } from './app-bar.component';
 import { SlideContainerDirective } from './slider/slide-container.directive';
 import { SlideContainerComponent } from './slider/slide-container.component';
 import { SlideElementDirective } from './slider/slide-element.directive';
+import {
+  CardComponent,
+  CardContentComponent,
+  CardFooterDirective,
+  CardHeaderComponent, CardSubtitleDirective,
+  CardTitleDirective
+} from './card/card.component';
+import { CardActionsComponent } from './card/card-actions.component';
 // import { CardComponent } from './card.component';
 
 @NgModule({
@@ -77,7 +85,13 @@ import { SlideElementDirective } from './slider/slide-element.directive';
     SlideContainerDirective,
     SlideContainerComponent,
     SlideElementDirective,
-    // CardComponent,
+    CardComponent,
+    CardHeaderComponent,
+    CardTitleDirective,
+    CardSubtitleDirective,
+    CardContentComponent,
+    CardActionsComponent,
+    CardFooterDirective
   ],
     imports: [
         CommonModule,
@@ -118,7 +132,13 @@ import { SlideElementDirective } from './slider/slide-element.directive';
     SlideContainerDirective,
     SlideContainerComponent,
     SlideElementDirective,
-    // CardComponent,
+    CardComponent,
+    CardHeaderComponent,
+    CardTitleDirective,
+    CardSubtitleDirective,
+    CardContentComponent,
+    CardActionsComponent,
+    CardFooterDirective
   ]
 })
 export class ControlsModule {

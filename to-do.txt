@@ -59,16 +59,16 @@ All plugins will ask the pageDataService and obtain their data to properly prese
   - Task! Change AuthDialog (it uses material)
   - Task! Change AppPage
 
-- Task! table-component needs to be readable only
+- Task! dialog use cached
 - Task! What do with table that reference to another table?
 - Task? SwaggerObject, maybe move required to constriction?
 - Task! carousel, masonry-list
--
 
 Task! Is there enough one form of field in the swagger? Let's look at the field that represent <img>,
 to the edit mode we need input to fill the src, but when we in the view mode maybe we need this picture..
 
 
+DONE! Task! table-component needs to be readable only
 DONE! Task! Table! I want extend the table status bar to show number of all rows and number of filtered rows
 DONE! Task! Behaviour! Using parent fields in rules  [ $fieldType: { c: '=string' ... } ]
 DONE! Task! Swagger form do not validate number, allow input string
