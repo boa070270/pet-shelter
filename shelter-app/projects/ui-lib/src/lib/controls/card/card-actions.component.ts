@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {BaseComponent} from "../base.component";
 import {ControlValueAccessor} from "@angular/forms";
-import {SwaggerSchema} from "../../shared";
+import {SwaggerSchema, TitleType} from "../../shared";
 import {SystemLang} from "../../i18n";
 import {Directionality} from "@angular/cdk/bidi";
 
@@ -20,9 +20,18 @@ import {Directionality} from "@angular/cdk/bidi";
 })
 export class CardActionsComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
-  @HostBinding() class = 'lib-card-actions';
+  @HostBinding() class = 'card-actions';
+  _actions: Array<{icon: string, tooltip: string | TitleType[], command: string}> = [];
 
-  @Input() actions: Array<{icon: string, tooltip: string, command: string}> = [];
+  @Input()
+  set actions(arr: Array<{icon: string, tooltip: string | TitleType[], command: string}>) {
+    console.log('CardActionsComponent.set actions', arr);
+    this._actions = arr;
+  }
+  get actions(): Array<{icon: string, tooltip: string | TitleType[], command: string}> {
+    console.log('CardActionsComponent.get actions', this._actions);
+    return this._actions;
+  }
 
   @Output()
   actionEvent: EventEmitter<string> = new EventEmitter<string>();

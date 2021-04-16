@@ -1,4 +1,4 @@
-<ng-template *ngIf="actions.length > 0">
+<ng-container>
   <button *ngFor="let act of actions" (click)="customAction(act.command)" class="{{act.icon}}" [title]="act.tooltip"></button>
-</ng-template>
+</ng-container>
 <ng-content></ng-content>

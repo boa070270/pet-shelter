@@ -31,7 +31,20 @@ import {Validators} from "@angular/forms";
       </select>
       <button (click)="onClick()">Render</button>
       <h1>Swagger builder test</h1>
-      <lib-card><lib-swagger-builder [swagger]="formSwagger"></lib-swagger-builder></lib-card>
+      <lib-card>
+        lib card
+        <lib-card-header>
+          header
+          <lib-card-title>ASd</lib-card-title>
+          <lib-card-subtitle>zxc</lib-card-subtitle>
+        </lib-card-header>
+        <lib-card-content>
+          content
+        </lib-card-content>
+        <lib-card-actions [actions]="actions"></lib-card-actions>
+        <lib-card-footer>footer</lib-card-footer>
+      </lib-card>
+<!--      <lib-swagger-builder [swagger]="formSwagger"></lib-swagger-builder>-->
 <!--      <lib-swagger-form [swagger]="formSwagger"></lib-swagger-form>-->
     </div>
   `,
@@ -65,6 +78,10 @@ export class TestDynamicComponent implements OnInit {
           sex: SwaggerNative.asString( null, {enum: ['m', 'f']})
         })
       });
+  actions: Array<{icon: string, tooltip: string | TitleType[], command: string}> = [
+    {icon: 'gm-keyboard_arrow_up', command: 'move-up', tooltip: 'this.i18n.act'},
+    {icon: 'gm-keyboard_arrow_down', command: 'move-down', tooltip: 'this.i18n.act'}
+  ];
   formSwagger: SwaggerObject = new SwaggerObject(
     ['id', 'constraintMinMax', 'formatNumber', 'description', 'description1', 'description2', 'description3', 'description4',
       'description5', 'description6', 'description7', 'description8', 'description9', 'description90', 'description91', 'description92',

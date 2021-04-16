@@ -9,46 +9,48 @@ import {ChangeDetectionStrategy, Component, Directive, HostBinding, ViewEncapsul
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardComponent {
-  @HostBinding() class = 'lib-card lib-focus-indicator';
+  @HostBinding() class = 'card'; // lib-focus-indicator
 }
 
 @Component({
   selector: 'lib-card-header',
-  templateUrl: 'card-header.html', // TODO ???
+  template: `
+    <div class="lib-card-header-text">
+      <ng-content select="lib-card-title, lib-card-subtitle"></ng-content>
+    </div>
+    <ng-content></ng-content>`,
+  styleUrls: ['./card.component.scss'],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardHeaderComponent {
-  @HostBinding() class = 'lib-card-header';
+  @HostBinding() class = 'card-header';
 }
 
 @Directive({
   selector: 'lib-card-title',
 })
 export class CardTitleDirective {
-  @HostBinding() class = 'lib-card-title';
+  @HostBinding() class = 'card-title';
 }
 
 @Directive({
   selector: 'lib-card-subtitle',
 })
 export class CardSubtitleDirective {
-  @HostBinding() class = 'lib-card-subtitle';
+  @HostBinding() class = 'card-subtitle';
 }
 
-@Component({
+@Directive({
   selector: 'lib-card-content',
-  templateUrl: 'card-header.html', // TODO ???
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardContentComponent {
-  @HostBinding() class = 'lib-card-content';
+  @HostBinding() class = 'card-body';
 }
 
 @Directive({
   selector: 'lib-card-footer',
 })
 export class CardFooterDirective {
-  @HostBinding() class = 'lib-card-footer';
+  @HostBinding() class = 'card-footer';
 }
