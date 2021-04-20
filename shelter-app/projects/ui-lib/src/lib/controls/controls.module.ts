@@ -46,13 +46,12 @@ import { SlideContainerComponent } from './slider/slide-container.component';
 import { SlideElementDirective } from './slider/slide-element.directive';
 import {
   CardComponent,
-  CardContentComponent,
+  CardContentDirective,
   CardFooterDirective,
   CardHeaderComponent, CardSubtitleDirective,
   CardTitleDirective
 } from './card/card.component';
 import { CardActionsComponent } from './card/card-actions.component';
-// import { CardComponent } from './card.component';
 
 @NgModule({
   declarations: [
@@ -89,7 +88,7 @@ import { CardActionsComponent } from './card/card-actions.component';
     CardHeaderComponent,
     CardTitleDirective,
     CardSubtitleDirective,
-    CardContentComponent,
+    CardContentDirective,
     CardActionsComponent,
     CardFooterDirective
   ],
@@ -136,7 +135,7 @@ import { CardActionsComponent } from './card/card-actions.component';
     CardHeaderComponent,
     CardTitleDirective,
     CardSubtitleDirective,
-    CardContentComponent,
+    CardContentDirective,
     CardActionsComponent,
     CardFooterDirective
   ]

@@ -44,7 +44,7 @@ export class CardSubtitleDirective {
 @Directive({
   selector: 'lib-card-content',
 })
-export class CardContentComponent {
+export class CardContentDirective {
   @HostBinding() class = 'card-body';
 }
 

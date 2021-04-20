@@ -12,6 +12,7 @@ import {PlainHtmlPipe} from './plain-html.pipe';
 import {MasonryListComponent} from './masonry-list.component';
 import {AdvertComponent} from './advert.component';
 import {CdkTableModule} from '@angular/cdk/table';
+import {ControlsModule} from "./controls";
 
 @NgModule({
   declarations: [
@@ -25,13 +26,14 @@ import {CdkTableModule} from '@angular/cdk/table';
     MasonryListComponent,
     AdvertComponent,
   ],
-  imports: [
-    DragDropModule,
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    CdkTableModule,
-  ],
+    imports: [
+        DragDropModule,
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        CdkTableModule,
+        ControlsModule,
+    ],
   exports: [
     UiLibComponent,
     ShowMediaValueComponent,

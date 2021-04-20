@@ -3,129 +3,6 @@ $border-radius: 4px !default;
 $header-size: 40px !default;
 $margin: 8px !default;
 
-.lib-card {
-  display: block;
-  position: relative;
-  padding: $padding;
-  margin: $margin;
-  border-radius: $border-radius;
-  border: thin solid #a2a2a2;
-
-  .lib-divider-horizontal {
-    position: absolute;
-    left: 0;
-    width: 100%;
-
-    [dir='rtl'] & {
-      left: auto;
-      right: 0;
-    }
-
-    &.lib-divider-inset {
-      position: static;
-      margin: 0;
-
-      [dir='rtl'] & {
-        // Needs to be reset explicitly since the divider set `margin-right` in particular in RTL.
-        margin-right: 0;
-      }
-    }
-  }
-}
-
-// base styles for each card section preset (mat-card-content, etc)
-%lib-card-section-base {
-  display: block;
-  margin-bottom: 16px;
-}
-
-.lib-card-title {
-  display: block;
-  margin-bottom: 8px;
-}
-
-.lib-card-subtitle, .lib-card-content {
-  @extend %lib-card-section-base;
-}
-
-.lib-card-actions {
-  display: block;
-  margin-bottom: 16px;
-  margin-left: -$padding / 2;
-  margin-right: -$padding / 2;
-  padding: 8px 0;
-}
-
-.lib-card-actions-align-end {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.lib-card-image {
-  width: calc(100% + #{$padding * 2});
-  margin: 0 (-$padding) 16px (-$padding);
-}
-
-.lib-card-footer {
-  // The negative margins pulls out the element, countering the padding
-  // to get the footer to be flush against the side of the card.
-  $margin: -$padding;
-
-  display: block;
-  margin: 0 $margin $margin $margin;
-}
-
-// HEADER STYLES
-
-.lib-card-header {
-  display: flex;
-  flex-direction: row;
-
-  .lib-card-title {
-    margin-bottom: 12px;
-  }
-}
-
-.lib-card-header-text {
-  margin: 0 $padding;
-  display: flex;
-  flex-flow: column;
-}
-
-// FIRST/LAST CHILD ADJUSTMENTS
-
-// top els in mat-card-content and mat-card can't have their default margin-tops (e.g. <p> tags)
-// or they'll incorrectly add to card's top padding
-.lib-card > :first-child, .lib-card-content > :first-child {
-  margin-top: 0;
-}
-
-// last els in mat-card-content and mat-card can't have their default margin-bottoms (e.g. <p> tags)
-// or they'll incorrectly add to card's bottom padding
-.lib-card > :last-child:not(.lib-card-footer),
-.lib-card-content > :last-child:not(.lib-card-footer) {
-  margin-bottom: 0;
-}
-
-// actions panel on bottom should be 8px from bottom of card
-// so must strip 16px from default card padding
-.lib-card > .lib-card-actions:last-child {
-  margin-bottom: -8px;
-  padding-bottom: 0;
-}
-
-// should be 12px space between titles and subtitles generally
-// default margin-bottom is 16px, so need to move lower title up 4px
-.lib-card-title:not(:first-child), .lib-card-subtitle:not(:first-child) {
-  margin-top: -4px;
-}
-
-// should be 8px space between titles and subtitles in header
-// default margin-bottom is 16px, so need to move subtitle in header up 4px
-.lib-card-header .lib-card-subtitle:not(:first-child) {
-  margin-top: -8px;
-}
-
 
 // Cards
 
@@ -141,7 +18,7 @@ $card-border-color:                 rgba(#000000, .125) !default;
 $card-inner-border-radius:          subtract($card-border-radius, $card-border-width) !default;
 $card-cap-padding-y:                $card-spacer-y / 2 !default;
 $card-cap-padding-x:                $card-spacer-x !default;
-$card-cap-bg:                       rgba(#000000, .03) !default;
+$card-cap-bg:                       rgba(#000000, .01) !default;
 $card-cap-color:                    null !default;
 $card-height:                       null !default;
 $card-color:                        null !default;
@@ -179,7 +56,7 @@ $card-actions-bg:                   white !default;
   $return: ();
   @each $value in $radius {
     @if type-of($value) == number {
-      $return: append($return, max($value, 0));
+      $return: append($return, max(#{$value}, 0));
     } @else {
       $return: append($return, $value);
     }
@@ -227,6 +104,7 @@ $card-actions-bg:                   white !default;
   border: $card-border-width solid $card-border-color;
   @include border-radius($card-border-radius);
 
+  width: 50%;
   margin: 10px;
 
   > hr {
@@ -261,7 +139,7 @@ $card-actions-bg:                   white !default;
   // Enable `flex-grow: 1` for decks and groups so that card blocks take up
   // as much space as possible, ensuring footers are aligned to the bottom.
   flex: 1 1 auto;
-  padding: $card-spacer-y $card-spacer-x;
+  //padding: $card-spacer-y $card-spacer-x;
   color: $card-color;
 }
 
