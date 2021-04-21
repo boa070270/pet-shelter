@@ -9,9 +9,10 @@ import {
   SwaggerObject,
   swaggerUI,
   TableProviderService,
-  TitleType
+  TitleType,
 } from 'ui-lib';
 import {BasicService} from './basic.service';
+import {Validators} from "@angular/forms";
 
 @Component({
   selector: 'app-test-dynamic',
@@ -30,8 +31,21 @@ import {BasicService} from './basic.service';
       </select>
       <button (click)="onClick()">Render</button>
       <h1>Swagger builder test</h1>
-      <lib-swagger-builder [swagger]="swagger"></lib-swagger-builder>
-<!--      <lib-swagger-form [swagger]="formSwagger" [(ngModel)]="data"></lib-swagger-form>-->
+      <lib-card>
+        lib card
+        <lib-card-header>
+          header
+          <lib-card-title>ASd</lib-card-title>
+          <lib-card-subtitle>zxc</lib-card-subtitle>
+        </lib-card-header>
+        <lib-card-content>
+          content
+        </lib-card-content>
+        <lib-card-actions [actions]="actions"></lib-card-actions>
+        <lib-card-footer>footer</lib-card-footer>
+      </lib-card>
+<!--      <lib-swagger-builder [swagger]="formSwagger"></lib-swagger-builder>-->
+<!--      <lib-swagger-form [swagger]="formSwagger"></lib-swagger-form>-->
     </div>
   `,
   styleUrls: ['./test-dynamic.component.sass']
@@ -46,6 +60,11 @@ export class TestDynamicComponent implements OnInit {
     e: '<test-table-element></test-table-element>'
   };
   knownText: any;
+  swag: SwaggerObject = new SwaggerObject(
+    ['id'],
+    {
+      id: SwaggerNative.asNumber()
+    });
   swagger: SwaggerObject = new SwaggerObject(
     ['id', 'description', 'child'],
   {
@@ -59,6 +78,35 @@ export class TestDynamicComponent implements OnInit {
           sex: SwaggerNative.asString( null, {enum: ['m', 'f']})
         })
       });
+  actions: Array<{icon: string, tooltip: string | TitleType[], command: string}> = [
+    {icon: 'gm-keyboard_arrow_up', command: 'move-up', tooltip: 'this.i18n.act'},
+    {icon: 'gm-keyboard_arrow_down', command: 'move-down', tooltip: 'this.i18n.act'}
+  ];
+  formSwagger: SwaggerObject = new SwaggerObject(
+    ['id', 'constraintMinMax', 'formatNumber', 'description', 'description1', 'description2', 'description3', 'description4',
+      'description5', 'description6', 'description7', 'description8', 'description9', 'description90', 'description91', 'description92',
+      'description93', 'description94'],
+    {
+      id: SwaggerNative.asNumber(),
+      constraintMinMax: SwaggerNative.asNumber(null, {minimum: 1, maximum: 5}),
+      formatNumber: SwaggerNative.asNumber(null, {format: 'number',
+        validators: [Validators.min(1), Validators.max(5)]}),
+      description: SwaggerNative.asString(),
+      description1: SwaggerNative.asString(),
+      description2: SwaggerNative.asString(),
+      description3: SwaggerNative.asString(),
+      description4: SwaggerNative.asString(),
+      description5: SwaggerNative.asString(),
+      description6: SwaggerNative.asString(),
+      description7: SwaggerNative.asString(),
+      description8: SwaggerNative.asString(),
+      description9: SwaggerNative.asString(),
+      description90: SwaggerNative.asString(),
+      description91: SwaggerNative.asString(),
+      description92: SwaggerNative.asString(),
+      description93: SwaggerNative.asString(),
+      description94: SwaggerNative.asString(),
+    });
 
   change: EventEmitter<any>;
   dataSource: AbstractDataSource<any>;

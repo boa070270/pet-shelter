@@ -32,28 +32,41 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
     {icon: 'gm-keyboard_arrow_down', command: 'move-down', tooltip: this.i18n.act_down, action: (v) => { this.moveDown(v); }}
   ];
   formSwagger: SwaggerObject = new SwaggerObject(
-    ['link', 'isConstriction', 'constriction', 'isObjectConstrictions', 'objectConstrictions', 'isUi', 'ui', 'fields'],
+    ['link', 'constriction', 'isUi', 'ui', 'fields'],
     {
       // TODO check links for duplicates with pattern constraint?
       link: SwaggerNative.asString(),
-      isConstriction: SwaggerNative.asBoolean(null, null,
-        swaggerUI([{lang: 'en', title: 'Add base constrictions?'}, {lang: 'uk', title: 'Додати базові обмеження?'}])),
       constriction: new SwaggerObject(
-        ['control', 'validators', 'asyncValidator'],
+        ['isConstriction', 'control', 'validators', 'asyncValidator',
+          'isObjectConstrictions', 'orderCtrl', 'toFrm', 'fromFrm'],
         {
+          isConstriction: SwaggerNative.asBoolean(null, null,
+            swaggerUI([{lang: 'en', title: 'Add base constrictions?'}, {lang: 'uk', title: 'Додати базові обмеження?'}])),
           control: SwaggerNative.asString(),
-          validators: SwaggerNative.asString(), // TODO use angular Validators
+          validators: new SwaggerArray(new SwaggerObject(
+            ['validator', 'value'],
+            {
+              validator: SwaggerNative.asString(null, { enum: ['min', 'max', 'required',
+                  'requiredTrue', 'email', 'minLength', 'maxLength', 'pattern', 'nullValidator', 'compose', 'composeAsync']}),
+              value: SwaggerNative.asString()
+            }
+          ), {control: 'editable-list'}),
           asyncValidator: SwaggerNative.asString(), // ???
-        }
-      ),
-      isObjectConstrictions: SwaggerNative.asBoolean(null, null,
-        swaggerUI([{lang: 'en', title: 'Add object constrictions?'}, {lang: 'uk', title: 'Додати обмеження об\'єкту?'}])),
-      objectConstrictions: new SwaggerObject(
-        ['orderCtrl', 'toFrm', 'fromFrm'],
-        {
+
+          isObjectConstrictions: SwaggerNative.asBoolean(null, null,
+            swaggerUI([{lang: 'en', title: 'Add object constrictions?'}, {lang: 'uk', title: 'Додати обмеження об\'єкту?'}])),
           orderCtrl: new SwaggerArray(SwaggerNative.asString()),
           toFrm: SwaggerNative.asString(), // ???
           fromFrm: SwaggerNative.asString() // ???
+        }, null, null, null, {
+          isConstriction: [
+            {c: '!true', hide: ['control', 'validators', 'asyncValidator']},
+            {c: '=true', show: ['control', 'validators', 'asyncValidator']}
+          ],
+          isObjectConstrictions: [
+            {c: '!true', hide: ['orderCtrl', 'toFrm', 'fromFrm']},
+            {c: '=true', show: ['orderCtrl', 'toFrm', 'fromFrm']}
+          ]
         }
       ),
       isUi: SwaggerNative.asBoolean(null, null,
@@ -74,31 +87,41 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
       fields: new SwaggerArray(
         new SwaggerObject(
           ['fieldName', 'fieldType', 'itemType', 'nativeType', 'objectLink', 'required',
-            'isConstriction', 'constriction', 'isNativeConstrictions', 'nativeConstrictions',
-            'isNumberConstrictions', 'numberConstrictions', 'isStringConstrictions', 'stringConstrictions',
-            'isArrayConstrictions', 'arrayConstrictions', 'isConstrictionNative', 'constrictionNative',
-            'isUi', 'ui', 'uiNative', 'uiNative'],
+            'constriction', 'isConstrictionNative', 'constrictionNative',
+            'isUi', 'ui', 'isUiNative', 'uiNative'],
           {
             order: SwaggerNative.asInteger(null, {default: 0}),
             fieldName: SwaggerNative.asString(),
             fieldType: SwaggerNative.asString(null,
               {enum: ['SwaggerNative', 'SwaggerArray', 'SwaggerObject']}),
-            isConstriction: SwaggerNative.asBoolean(null, null,
-              swaggerUI([{lang: 'en', title: 'Add base constrictions?'}, {lang: 'uk', title: 'Додати базові обмеження?'}])),
+            itemType: SwaggerNative.asString(null, {enum: ['SwaggerNative', 'SwaggerObject']}),
+            nativeType: SwaggerNative.asString(null,
+              {enum: ['string', 'number', 'integer', 'boolean']}),
+            objectLink: SwaggerNative.asString('select', {enum: this.objectLink.array}),
+
             constriction: new SwaggerObject(
-              ['control', 'validators', 'asyncValidator'],
+              ['isConstriction', 'control', 'validators', 'asyncValidator', 'isArrayConstrictions',
+                'minItems', 'maxItems', 'uniqueItems', 'customTableActions', 'trIn', 'trOut',
+                'isNativeConstrictions', 'readOnly', 'immutable', 'writeOnly', 'nullable', 'enum', 'enumDescriptions',
+                'enumTooltips', 'enumMulti', 'default', 'format',
+                'isNumberConstrictions', 'minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum', 'multipleOf',
+                'isStringConstrictions', 'minLength', 'maxLength', 'pattern'],
               {
+                isConstriction: SwaggerNative.asBoolean(null, null,
+                  swaggerUI([{lang: 'en', title: 'Add base constrictions?'}, {lang: 'uk', title: 'Додати базові обмеження?'}])),
                 control: SwaggerNative.asString(),
-                validators: SwaggerNative.asString(), // TODO use angular Validators
+                validators: new SwaggerArray(new SwaggerObject(
+                  ['validator', 'value'],
+                  {
+                    validator: SwaggerNative.asString(null, { enum: ['min', 'max', 'required',
+                        'requiredTrue', 'email', 'minLength', 'maxLength', 'pattern', 'nullValidator', 'compose', 'composeAsync']}),
+                    value: SwaggerNative.asString()
+                  }
+                ), {control: 'editable-list'}),
                 asyncValidator: SwaggerNative.asString(), // ???
-              }
-            ),
-            isNativeConstrictions: SwaggerNative.asBoolean(null, null,
-              swaggerUI([{lang: 'en', title: 'Add native constrictions?'}, {lang: 'uk', title: 'Додати нативні обмеження?'}])),
-            nativeConstrictions: new SwaggerObject(
-              ['readOnly', 'immutable', 'writeOnly', 'nullable', 'enum',
-                'enumDescriptions', 'enumTooltips', 'enumMulti', 'default', 'format'],
-              {
+
+                isNativeConstrictions: SwaggerNative.asBoolean(null, null,
+                  swaggerUI([{lang: 'en', title: 'Add native constrictions?'}, {lang: 'uk', title: 'Додати нативні обмеження?'}])),
                 readOnly: SwaggerNative.asBoolean(),
                 immutable: SwaggerNative.asBoolean(),
                 writeOnly: SwaggerNative.asBoolean(),
@@ -161,47 +184,89 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
                 format: SwaggerNative.asString(null,
                   {enum: ['date', 'date-time', 'password', 'byte', 'binary', 'email', 'uuid', 'uri', 'hostname',
                       'ipv4', 'ipv6', 'color', 'datetime-local', 'month', 'number', 'search', 'tel', 'text', 'time', 'week']}),
-              }
-            ),
-            isNumberConstrictions: SwaggerNative.asBoolean(null, null,
-              swaggerUI([{lang: 'en', title: 'Add number constrictions?'}, {lang: 'uk', title: 'Додати числові обмеження?'}])),
-            numberConstrictions: new SwaggerObject(
-              ['minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum', 'multipleOf'],
-              {
+
+                isNumberConstrictions: SwaggerNative.asBoolean(null, null,
+                  swaggerUI([{lang: 'en', title: 'Add number constrictions?'}, {lang: 'uk', title: 'Додати числові обмеження?'}])),
                 minimum: SwaggerNative.asNumber(),
                 maximum: SwaggerNative.asNumber(),
                 exclusiveMinimum: SwaggerNative.asNumber(),
                 exclusiveMaximum: SwaggerNative.asNumber(),
-                multipleOf: SwaggerNative.asNumber()
-              }
-            ),
-            isStringConstrictions: SwaggerNative.asBoolean(null, null,
-              swaggerUI([{lang: 'en', title: 'Add string constrictions?'}, {lang: 'uk', title: 'Додати обмеження строки?'}])),
-            stringConstrictions: new SwaggerObject(
-              ['minLength', 'maxLength', 'pattern'],
-              {
+                multipleOf: SwaggerNative.asNumber(),
+
+
+                isStringConstrictions: SwaggerNative.asBoolean(null, null,
+                  swaggerUI([{lang: 'en', title: 'Add string constrictions?'}, {lang: 'uk', title: 'Додати обмеження строки?'}])),
                 minLength: SwaggerNative.asNumber(),
                 maxLength: SwaggerNative.asNumber(),
-                pattern: SwaggerNative.asString()
-              }
-            ),
-            isArrayConstrictions: SwaggerNative.asBoolean(null, null,
-              swaggerUI([{lang: 'en', title: 'Add array constrictions?'}, {lang: 'uk', title: 'Додати обмеження массиву?'}])),
-            arrayConstrictions: new SwaggerObject(
-              ['minItems', 'maxItems', 'uniqueItems', 'customTableActions', 'trIn', 'trOut'],
-              {
+                pattern: SwaggerNative.asString(),
+
+                isArrayConstrictions: SwaggerNative.asBoolean(null, null,
+                  swaggerUI([{lang: 'en', title: 'Add array constrictions?'}, {lang: 'uk', title: 'Додати обмеження массиву?'}])),
                 minItems: SwaggerNative.asNumber(),
                 maxItems: SwaggerNative.asNumber(),
                 uniqueItems: SwaggerNative.asBoolean(),
                 customTableActions: SwaggerNative.asString(), // TODO
                 trIn: SwaggerNative.asString(),
                 trOut: SwaggerNative.asString()
+              }, null, null, null,
+              {
+                $fieldType: [
+                  {c: ',!SwaggerNative,SwaggerArray',
+                    hide: ['isNativeConstrictions', 'isArrayConstrictions', 'isStringConstrictions', 'isNumberConstrictions']},
+                  {c: '=SwaggerNative',
+                    hide: ['isArrayConstrictions'],
+                    show: ['isNativeConstrictions']},
+                  {c: '=SwaggerArray',
+                    hide: ['isNativeConstrictions', 'isStringConstrictions', 'isNumberConstrictions'],
+                    show: ['isArrayConstrictions']}
+                ],
+                isConstriction: [
+                  {c: '!true', hide: ['control', 'validators', 'asyncValidator']},
+                  {c: '=true', show: ['control', 'validators', 'asyncValidator']}
+                ],
+                isNativeConstrictions: [
+                  {c: '!true', hide: ['readOnly', 'immutable', 'writeOnly', 'nullable', 'enum',
+                      'enumDescriptions', 'enumTooltips', 'enumMulti', 'default', 'format']},
+                  {c: '=true', show: ['readOnly', 'immutable', 'writeOnly', 'nullable', 'enum',
+                      'enumDescriptions', 'enumTooltips', 'enumMulti', 'default', 'format']}
+                ],
+                $nativeType: [
+                  {c: ',!string,number,integer', hide: ['isStringConstrictions', 'isNumberConstrictions']},
+                  {c: '=string', show: ['isStringConstrictions']},
+                  {c: ',=number,integer', show: ['isNumberConstrictions']}
+                ],
+                isNumberConstrictions: [
+                  {c: '!true', hide: ['minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum', 'multipleOf']},
+                  {c: '=true', show: ['minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum', 'multipleOf']}
+                ],
+                isStringConstrictions: [
+                  {c: '!true', hide: ['minLength', 'maxLength', 'pattern']},
+                  {c: '=true', show: ['minLength', 'maxLength', 'pattern']}
+                ],
+                isArrayConstrictions: [
+                  {c: '!true', hide: ['minItems', 'maxItems', 'uniqueItems', 'customTableActions', 'trIn', 'trOut']},
+                  {c: '=true', show: ['minItems', 'maxItems', 'uniqueItems', 'customTableActions', 'trIn', 'trOut']}
+                ],
               }
             ),
-            itemType: SwaggerNative.asString(null, {enum: ['SwaggerNative', 'SwaggerObject']}),
-            nativeType: SwaggerNative.asString(null,
-              {enum: ['string', 'number', 'integer', 'boolean']}),
-            objectLink: SwaggerNative.asString('select', {enum: this.objectLink.array}),
+            isConstrictionNative: SwaggerNative.asBoolean(null, null,
+              swaggerUI([{lang: 'en', title: 'Add constrictions for native?'},
+                {lang: 'uk', title: 'Додати обмеження для нативного елементу?'}])),
+            constrictionNative: new SwaggerObject(
+              ['control', 'validators', 'asyncValidator'],
+              {
+                control: SwaggerNative.asString(),
+                validators: new SwaggerArray(new SwaggerObject(
+                  ['validator', 'value'],
+                  {
+                    validator: SwaggerNative.asString(null, { enum: ['min', 'max', 'required',
+                        'requiredTrue', 'email', 'minLength', 'maxLength', 'pattern', 'nullValidator', 'compose', 'composeAsync']}),
+                    value: SwaggerNative.asString()
+                  }
+                ), {control: 'editable-list'}),
+                asyncValidator: SwaggerNative.asString(), // ???
+              }, swaggerUI([{lang: 'en', title: 'Native constrictions'}])
+            ),
             isUi: SwaggerNative.asBoolean(null, null,
               swaggerUI([{lang: 'en', title: 'Add UI?'}, {lang: 'uk', title: 'Додати UI?'}])),
             ui: new SwaggerObject(
@@ -215,17 +280,6 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
                 trailingIcon: SwaggerNative.asString(),
                 nameAsCaption: SwaggerNative.asBoolean(),
               }
-            ),
-            isConstrictionNative: SwaggerNative.asBoolean(null, null,
-              swaggerUI([{lang: 'en', title: 'Add constrictions for native?'},
-                {lang: 'uk', title: 'Додати обмеження для нативного елементу?'}])),
-            constrictionNative: new SwaggerObject(
-              ['control', 'validators', 'asyncValidator'],
-              {
-                control: SwaggerNative.asString(),
-                validators: SwaggerNative.asString(), // TODO use angular Validators
-                asyncValidator: SwaggerNative.asString(), // ???
-              }, swaggerUI([{lang: 'en', title: 'Native constrictions'}])
             ),
             isUiNative: SwaggerNative.asBoolean(null, null,
               swaggerUI([{lang: 'en', title: 'Add UI for native?'},
@@ -249,74 +303,37 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
           {
             fieldType: [
               {c: ',!SwaggerNative,SwaggerObject,SwaggerArray',
-                hide: ['itemType', 'nativeType', 'objectLink', 'isNativeConstrictions',
-                  'isArrayConstrictions', 'isStringConstrictions', 'isNumberConstrictions',
-                  'isConstrictionNative', 'isUiNative']},
+                hide: ['itemType', 'nativeType', 'objectLink', 'isConstrictionNative', 'isUiNative']},
               {c: '=SwaggerNative',
-                hide: ['itemType', 'objectLink', 'isArrayConstrictions', 'isConstrictionNative', 'isUiNative'],
-                show: ['nativeType', 'isNativeConstrictions']},
+                hide: ['itemType', 'objectLink', 'isConstrictionNative', 'isUiNative'],
+                show: ['nativeType']},
               {c: '=SwaggerObject',
-                hide: ['itemType', 'nativeType', 'isNativeConstrictions', 'isConstrictionNative', 'isUiNative',
-                  'isArrayConstrictions', 'isStringConstrictions', 'isNumberConstrictions'],
+                hide: ['itemType', 'nativeType', 'isConstrictionNative', 'isUiNative'],
                 show: ['objectLink']
               },
               {c: '=SwaggerArray',
-                hide: ['isNativeConstrictions', 'isStringConstrictions', 'isNumberConstrictions'],
-                show: ['itemType', 'isArrayConstrictions']}
+                hide: [],
+                show: ['itemType']}
             ],
             itemType: [
-              {c: '=SwaggerNative', hide: ['objectLink'],
-                show: ['nativeType', 'isNativeConstrictions', 'isConstrictionNative', 'isUiNative']},
-              {c: '=SwaggerObject', hide: ['nativeType', 'isNativeConstrictions', 'isStringConstrictions',
-                  'isNumberConstrictions', 'isConstrictionNative', 'isUiNative'], show: ['objectLink']}
-            ],
-            nativeType: [
-              {c: '=string', show: ['isStringConstrictions']},
-              {c: ',=number,integer', show: ['isNumberConstrictions']}
-            ],
-            isConstriction: [
-              {c: ',!true,false', hide: ['constriction']},
-              {c: '=true', show: ['constriction']},
-              {c: '=false', hide: ['constriction']}
-            ],
-            isNativeConstrictions: [
-              {c: ',!true,false', hide: ['nativeConstrictions']},
-              {c: '=true', show: ['nativeConstrictions']},
-              {c: '=false', hide: ['nativeConstrictions']}
-            ],
-            isArrayConstrictions: [
-              {c: ',!true,false', hide: ['arrayConstrictions']},
-              {c: '=true', show: ['arrayConstrictions']},
-              {c: '=false', hide: ['arrayConstrictions']}
-            ],
-            isStringConstrictions: [
-              {c: ',!true,false', hide: ['stringConstrictions']},
-              {c: '=true', show: ['stringConstrictions']},
-              {c: '=false', hide: ['stringConstrictions']}
-            ],
-            isNumberConstrictions: [
-              {c: ',!true,false', hide: ['numberConstrictions']},
-              {c: '=true', show: ['numberConstrictions']},
-              {c: '=false', hide: ['numberConstrictions']}
-            ],
-            isUi: [
-              {c: ',!true,false', hide: ['ui']},
-              {c: '=true', show: ['ui']},
-              {c: '=false', hide: ['ui']}
+              {c: '=SwaggerNative', hide: ['objectLink'], show: ['nativeType', 'isConstrictionNative', 'isUiNative']},
+              {c: '=SwaggerObject', hide: ['nativeType', 'isConstrictionNative', 'isUiNative'], show: ['objectLink']}
             ],
             isConstrictionNative: [
-              {c: ',!true,false', hide: ['constrictionNative']},
-              {c: '=true', show: ['constrictionNative']},
-              {c: '=false', hide: ['constrictionNative']}
+              {c: '!true', hide: ['constrictionNative']},
+              {c: '=true', show: ['constrictionNative']}
+            ],
+            isUi: [
+              {c: '!true', hide: ['ui']},
+              {c: '=true', show: ['ui']}
             ],
             isUiNative: [
-              {c: ',!true,false', hide: ['uiNative']},
-              {c: '=true', show: ['uiNative']},
-              {c: '=false', hide: ['uiNative']}
+              {c: '!true', hide: ['uiNative']},
+              {c: '=true', show: ['uiNative']}
             ]
           }
         ), {
-          displayColumns: ['fieldName', 'fieldType', 'itemType', 'nativeType', 'objectLink', 'required'],
+          displayColumns: ['order', 'fieldName', 'fieldType', 'itemType', 'nativeType', 'objectLink', 'required'],
           customTableActions: this.actions, trIn: v => {
             return v.map((k, i) => {
               k.order = i;
@@ -325,20 +342,9 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
           }}
       )
     }, null, null, null, {
-      isConstriction: [
-        {c: ',!true,false', hide: ['constriction']},
-        {c: '=true', show: ['constriction']},
-        {c: '=false', hide: ['constriction']}
-      ],
-      isObjectConstrictions: [
-        {c: ',!true,false', hide: ['objectConstrictions']},
-        {c: '=true', show: ['objectConstrictions']},
-        {c: '=false', hide: ['objectConstrictions']}
-      ],
       isUi: [
-        {c: ',!true,false', hide: ['ui']},
+        {c: '!true', hide: ['ui']},
         {c: '=true', show: ['ui']},
-        {c: '=false', hide: ['ui']}
       ]
     }
   );
@@ -394,7 +400,7 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
     console.log('SwaggerBuilderComponent.save', v);
     // TODO fix formGroup.value being only one property instead of array
     v.fields = this.data.fields;
-    this.objectLink.addLink(this.objectLink.fromFrm(v), v.link);
+    this.objectLink.addLink(v.link, this.objectLink.fromFrm(v));
     // temporary solution
     this.load(v.link);
   }
@@ -404,7 +410,6 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
       this.data = {
         link,
         constriction: obj.constrictions,
-        objectConstrictions: (obj as SwaggerObject).constrictions,
         ui: obj.ui,
         fields: this.objectLink.toFrm(obj)
       };

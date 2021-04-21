@@ -55,23 +55,28 @@ All plugins will ask the pageDataService and obtain their data to properly prese
   make filter-dialog-component
   show this dialog on showDialogFilter instead simple one input
 
-- Task! Table! I want extend the table status bar to show number of all rows and number of filtered rows
-
 - Task! Exclude material
   - Task! Change AuthDialog (it uses material)
   - Task! Change AppPage
 
-- Task! table-component needs to be readable only
-- Task! Swagger form do not validate number, allow input string
+- Task! lh.8080/docs -> unauthorized upload file -> code 500 instead of 401? auth not working? 500 when password is not right?
+
+- Task! lib-menu disappears before you can use it
+- Proposal? press button to keep menu open until clicked outside/again?
+- Task! dialog use cached
 - Task! What do with table that reference to another table?
 - Task? SwaggerObject, maybe move required to constriction?
 - Task! carousel, masonry-list
--
 
 Task! Is there enough one form of field in the swagger? Let's look at the field that represent <img>,
 to the edit mode we need input to fill the src, but when we in the view mode maybe we need this picture..
 
 
+DONE! Task! small images on banner result in uneven carousel // changed .media-item.height in advert.component.sccs to 100%
+DONE! Task! table-component needs to be readable only
+DONE! Task! Table! I want extend the table status bar to show number of all rows and number of filtered rows
+DONE! Task! Behaviour! Using parent fields in rules  [ $fieldType: { c: '=string' ... } ]
+DONE! Task! Swagger form do not validate number, allow input string
 DONE!
 Task! Swagger! What do I need to do with forms that need dynamically change its content?
   Decision: The Form can be dynamical. To describe its behavior I provide these rules:

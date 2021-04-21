@@ -1,0 +1,326 @@
+$padding: 16px !default;
+$border-radius: 4px !default;
+$header-size: 40px !default;
+$margin: 8px !default;
+
+
+// Cards
+
+// scss-docs-start card-variables
+$spacer:                            1rem !default;
+$enable-rounded:                    true !default;
+$card-spacer-y:                     $spacer !default;
+$card-spacer-x:                     $spacer !default;
+$card-title-spacer-y:               $spacer / 2 !default;
+$card-border-width:                 thin !default;
+$card-border-radius:                $border-radius !default;
+$card-border-color:                 rgba(#000000, .125) !default;
+$card-inner-border-radius:          subtract($card-border-radius, $card-border-width) !default;
+$card-cap-padding-y:                $card-spacer-y / 2 !default;
+$card-cap-padding-x:                $card-spacer-x !default;
+$card-cap-bg:                       rgba(#000000, .01) !default;
+$card-cap-color:                    null !default;
+$card-height:                       null !default;
+$card-color:                        null !default;
+$card-bg:                           white !default;
+$card-img-overlay-padding:          $spacer !default;
+$card-group-margin:                 1.5rem / 2 !default;
+$card-actions-bg:                   white !default;
+// scss-docs-end card-variables
+
+@function subtract($value1, $value2, $return-calc: true) {
+  @if $value1 == null and $value2 == null {
+    @return null;
+  }
+
+  @if $value1 == null {
+    @return -$value2;
+  }
+
+  @if $value2 == null {
+    @return $value1;
+  }
+
+  @if type-of($value1) == number and type-of($value2) == number and comparable($value1, $value2) {
+    @return $value1 - $value2;
+  }
+
+  @return if($return-calc == true, calc(#{$value1} - #{$value2}), $value1 + unquote(" - ") + $value2);
+}
+
+// stylelint-disable property-disallowed-list
+// Single side border-radius
+
+// Helper function to replace negative values with 0
+@function valid-radius($radius) {
+  $return: ();
+  @each $value in $radius {
+    @if type-of($value) == number {
+      $return: append($return, max(#{$value}, 0));
+    } @else {
+      $return: append($return, $value);
+    }
+  }
+  @return $return;
+}
+// scss-docs-start border-radius-mixins
+@mixin border-radius($radius: $border-radius, $fallback-border-radius: false) {
+  @if $enable-rounded {
+    border-radius: valid-radius($radius);
+  }
+  @else if $fallback-border-radius != false {
+    border-radius: $fallback-border-radius;
+  }
+}
+
+@mixin border-top-radius($radius: $border-radius) {
+  @if $enable-rounded {
+    border-top-left-radius: valid-radius($radius);
+    border-top-right-radius: valid-radius($radius);
+  }
+}
+
+@mixin border-bottom-radius($radius: $border-radius) {
+  @if $enable-rounded {
+    border-bottom-right-radius: valid-radius($radius);
+    border-bottom-left-radius: valid-radius($radius);
+  }
+}
+
+
+//
+// Base styles
+//
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; // See https://github.com/twbs/bootstrap/pull/22740#issuecomment-305868106
+  height: $card-height;
+  word-wrap: break-word;
+  background-color: $card-bg;
+  background-clip: border-box;
+  border: $card-border-width solid $card-border-color;
+  @include border-radius($card-border-radius);
+
+  width: 50%;
+  margin: 10px;
+
+  > hr {
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  > .list-group {
+    border-top: inherit;
+    border-bottom: inherit;
+
+    &:first-child {
+      border-top-width: 0;
+      @include border-top-radius($card-inner-border-radius);
+    }
+
+    &:last-child  {
+      border-bottom-width: 0;
+      @include border-bottom-radius($card-inner-border-radius);
+    }
+  }
+
+  // Due to specificity of the above selector (`.card > .list-group`), we must
+  // use a child selector here to prevent double borders.
+  > .card-header + .list-group,
+  > .list-group + .card-footer {
+    border-top: 0;
+  }
+}
+
+.card-body {
+  // Enable `flex-grow: 1` for decks and groups so that card blocks take up
+  // as much space as possible, ensuring footers are aligned to the bottom.
+  flex: 1 1 auto;
+  //padding: $card-spacer-y $card-spacer-x;
+  color: $card-color;
+}
+
+.card-title {
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: larger;
+}
+
+.card-subtitle {
+  margin-top: -0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-text:last-child {
+  margin-bottom: 0;
+}
+
+.card-link {
+  &:hover {
+    text-decoration: none;
+  }
+
+  + .card-link {
+    margin-left: $card-spacer-x;
+  }
+}
+
+//
+// Optional textual caps
+//
+
+.card-header {
+  padding: $card-cap-padding-y $card-cap-padding-x;
+  margin-bottom: 0; // Removes the default margin-bottom of <hN>
+  color: $card-cap-color;
+  background-color: $card-cap-bg;
+  border-bottom: $card-border-width solid $card-border-color;
+
+  &:first-child {
+    @include border-radius($card-inner-border-radius $card-inner-border-radius 0 0);
+  }
+}
+
+.card-actions {
+  //display: block;
+  //margin-bottom: 16px;
+  //margin-left: -$padding / 2;
+  //margin-right: -$padding / 2;
+  //padding: 8px 0;
+  border-top: $card-border-width solid $card-border-color;
+  padding: 0.5rem 0.5rem;
+  background-color: $card-actions-bg;
+}
+
+.card-actions > button {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.card-footer {
+  padding: $card-cap-padding-y $card-cap-padding-x;
+  color: $card-cap-color;
+  background-color: $card-cap-bg;
+  border-top: $card-border-width solid $card-border-color;
+
+  &:last-child {
+    @include border-radius(0 0 $card-inner-border-radius $card-inner-border-radius);
+  }
+}
+
+
+//
+// Header navs
+//
+
+.card-header-tabs {
+  margin-right: -$card-cap-padding-x / 2;
+  margin-bottom: -$card-cap-padding-y;
+  margin-left: -$card-cap-padding-x / 2;
+  border-bottom: 0;
+
+  //@if $nav-tabs-link-active-bg != $card-bg {
+  //  .nav-link.active {
+  //    background-color: $card-bg;
+  //    border-bottom-color: $card-bg;
+  //  }
+  //}
+}
+
+.card-header-pills {
+  margin-right: -$card-cap-padding-x / 2;
+  margin-left: -$card-cap-padding-x / 2;
+}
+
+// Card image
+.card-img-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: $card-img-overlay-padding;
+  @include border-radius($card-inner-border-radius);
+}
+
+.card-img,
+.card-img-top,
+.card-img-bottom {
+  width: 100%; // Required because we use flexbox and this inherently applies align-self: stretch
+}
+
+.card-img,
+.card-img-top {
+  @include border-top-radius($card-inner-border-radius);
+}
+
+.card-img,
+.card-img-bottom {
+  @include border-bottom-radius($card-inner-border-radius);
+}
+
+
+//
+// Card groups
+//
+
+.card-group {
+  // The child selector allows nested `.card` within `.card-group`
+  // to display properly.
+  > .card {
+    margin-bottom: $card-group-margin;
+  }
+
+  //@include media-breakpoint-up(sm) {
+  //  display: flex;
+  //  flex-flow: row wrap;
+  //  // The child selector allows nested `.card` within `.card-group`
+  //  // to display properly.
+  //  > .card {
+  //    // Flexbugs #4: https://github.com/philipwalton/flexbugs#flexbug-4
+  //    flex: 1 0 0%;
+  //    margin-bottom: 0;
+  //
+  //    + .card {
+  //      margin-left: 0;
+  //      border-left: 0;
+  //    }
+  //
+  //    // Handle rounded corners
+  //    @if $enable-rounded {
+  //      &:not(:last-child) {
+  //        @include border-end-radius(0);
+  //
+  //        .card-img-top,
+  //        .card-header {
+  //          // stylelint-disable-next-line property-disallowed-list
+  //          border-top-right-radius: 0;
+  //        }
+  //        .card-img-bottom,
+  //        .card-footer {
+  //          // stylelint-disable-next-line property-disallowed-list
+  //          border-bottom-right-radius: 0;
+  //        }
+  //      }
+  //
+  //      &:not(:first-child) {
+  //        @include border-start-radius(0);
+  //
+  //        .card-img-top,
+  //        .card-header {
+  //          // stylelint-disable-next-line property-disallowed-list
+  //          border-top-left-radius: 0;
+  //        }
+  //        .card-img-bottom,
+  //        .card-footer {
+  //          // stylelint-disable-next-line property-disallowed-list
+  //          border-bottom-left-radius: 0;
+  //        }
+  //      }
+  //    }
+  //  }
+  //}
+}

@@ -341,6 +341,9 @@ export class SwaggerNativeNumber extends SwaggerNative {
   }
   constructor(controlType?: string, constraints?: NumberConstrictions, ui?: SwaggerUI) {
     super(controlType, constraints, ui);
+    if (!(this._constrain as NumberConstrictions).format) {
+      (this._constrain as NumberConstrictions).format = 'number';
+    }
     this._type = 'number';
   }
   compare(p1: number, p2: number): number {
@@ -350,6 +353,9 @@ export class SwaggerNativeNumber extends SwaggerNative {
 export class SwaggerNativeInteger extends SwaggerNativeNumber {
   constructor(controlType?: string, constraints?: NumberConstrictions, ui?: SwaggerUI) {
     super(controlType, constraints, ui);
+    if (!(this._constrain as NumberConstrictions).format) {
+      (this._constrain as NumberConstrictions).format = 'number';
+    }
     this._type = 'integer';
   }
   compare(p1: number, p2: number): number {

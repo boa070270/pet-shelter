@@ -104,6 +104,11 @@ export class Paging {
         }
       }
       this._size = n;
+      if (this.listRange.end === 0 && this._size > 0) {
+        this.listRange.start = Math.floor(n / this._pageSize);
+        this.listRange.end = this.listRange.start + this._pageSize;
+        this.subject.next(this.listRange);
+      }
     }
   }
   get size(): number {

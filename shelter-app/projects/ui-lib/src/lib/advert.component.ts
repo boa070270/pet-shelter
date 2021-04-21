@@ -1,4 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
+import {TitleType} from "./shared";
 
 @Component({
   selector: 'lib-advert',
@@ -10,6 +11,11 @@ export class AdvertComponent implements OnInit {
   @Input() mediaUrl: string;
   @Input() refUrl: string;
   @Input() tooltip: string;
+
+  actions: Array<{icon: string, tooltip: string | TitleType[], command: string}> = [
+    {icon: 'gm-favorite_border', tooltip: 'Like', command: 'like'}, // gm-favorite toggle
+    {icon: 'gm-bookmark', tooltip: 'Bookmark', command: 'bookmark'}
+  ];
 
   constructor() { }
 

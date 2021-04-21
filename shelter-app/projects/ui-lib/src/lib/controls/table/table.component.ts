@@ -30,7 +30,7 @@ import {
 import {SystemLang} from '../../i18n';
 import {BaseComponent} from '../base.component';
 import {CdkTable} from '@angular/cdk/table';
-import {zip} from 'rxjs';
+import {Subscription, zip} from 'rxjs';
 import {Directionality} from '@angular/cdk/bidi';
 import {ComponentType} from '@angular/cdk/overlay';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
@@ -63,6 +63,22 @@ const I18N: I18NType = {
     selected: [
       {lang: 'en', title: 'Selected: {0,0# rows|1# row|[2..) rows}'},
       {lang: 'uk', title: 'Вибрано: {0,0# рядків|1# рядок|[2..4] рядка|[5..) рядків}'},
+    ],
+    totalRows: [
+      {lang: 'en', title: 'Total:'},
+      {lang: 'uk', title: 'Всього:'},
+    ],
+    filtered: [
+      {lang: 'en', title: 'Filtered:'},
+      {lang: 'uk', title: 'Відфільтровано:'},
+    ],
+    filteredOf: [
+      {lang: 'en', title: 'of'},
+      {lang: 'uk', title: 'з'},
+    ],
+    countRows: [
+      {lang: 'en', title: '{0,0# rows|1# row|[2..) rows}'},
+      {lang: 'uk', title: '{0,0# рядків|1# рядок|[2..4] рядка|[5..) рядків}'},
     ]
 };
 const DIALOG_SEARCH = new SwaggerObject(['search'], { search: SwaggerNative.asString()});
@@ -100,6 +116,8 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
   customActions: Array<{icon: string, tooltip: string | TitleType[], command: string}> = [];
   @Input()
   defaultDisplay: string[];
+  @Input()
+  readonly: boolean;
   @Output()
   tableEvent: EventEmitter<{cmd: string, rows: any[]}> = new EventEmitter<{cmd: string; rows: any[]}>();
   private cdkDataSource: CdkDataSource<any, any>;
@@ -113,6 +131,9 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
   get selectedRows(): any[] {
     return (this.cdkDataSource || {}).selectedRows || [];
   }
+  rowCount = 0;
+  filteredCount = 0;
+  private subscriptions: Subscription[] = [];
   orderIcons = {};
   get order(): IOrder[] {
     return (this.cdkDataSource || {}).orderParams || [];
@@ -186,6 +207,8 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
     }
     this.cdkTable.dataSource = this.cdkDataSource;
     this.paging = new Paging(this.cdkTable.viewChange, this.cdkDataSource.totalRecords);
+    this.subscriptions.push(this.cdkDataSource.totalRecords.subscribe((n) => this.rowCount = n));
+    this.subscriptions.push(this.cdkDataSource.filteredRecords.subscribe((n) => this.filteredCount = n));
   }
   ngAfterViewInit(): void {
     this.paging.setPage(0);
@@ -195,12 +218,14 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
     super.ngOnDestroy();
     this.dataSource.unregisterDS(this.cdkDataSource);
     this.dataSource = null;
+    this.subscriptions.forEach(v => v.unsubscribe());
     this.closeDialog();
     this.paging.destroy();
   }
   writeValue(obj: any): void {
     if (this.dataSource && Array.isArray(obj)) {
       this.dataSource.setData(obj);
+      this.paging.setPage(0);
     }
   }
 
@@ -273,6 +298,9 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
 
   editRow(): void {
     this.closeDialog();
+    if (this.readonly) {
+      return;
+    }
     let dialogRef;
     if (this.editForm) {
       dialogRef = this.dialogService.open(this.editForm, {data: this.currentRow});
@@ -302,6 +330,9 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
 
   addRow(): void {
     this.closeDialog();
+    if (this.readonly) {
+      return;
+    }
     let dialogRef;
     if (this.editForm) {
       dialogRef = this.dialogService.open(this.editForm, {data: this.currentRow});
@@ -321,6 +352,9 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
   }
   deleteRows(): void {
     this.closeDialog();
+    if (this.readonly) {
+      return;
+    }
     if (this.selectedRows.length > 0) {
       this.dialogService.warnMsgDialog(choiceFormat(this.i18n.askDelete, this.selectedRows.length), true, 'yes_no')
         .afterClosed().subscribe( ok => {
