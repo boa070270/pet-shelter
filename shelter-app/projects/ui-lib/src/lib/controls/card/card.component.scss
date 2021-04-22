@@ -20,7 +20,7 @@ $card-cap-padding-y:                $card-spacer-y / 2 !default;
 $card-cap-padding-x:                $card-spacer-x !default;
 $card-cap-bg:                       rgba(#000000, .01) !default;
 $card-cap-color:                    null !default;
-$card-height:                       null !default;
+$card-height:                       100% !default;
 $card-color:                        null !default;
 $card-bg:                           white !default;
 $card-img-overlay-padding:          $spacer !default;
@@ -103,9 +103,10 @@ $card-actions-bg:                   white !default;
   background-clip: border-box;
   border: $card-border-width solid $card-border-color;
   @include border-radius($card-border-radius);
-
-  width: 50%;
-  margin: 10px;
+  margin: 0;
+  max-height: 90%;
+  justify-content: center;
+  align-items: center;
 
   > hr {
     margin-right: 0;
@@ -138,9 +139,10 @@ $card-actions-bg:                   white !default;
 .card-body {
   // Enable `flex-grow: 1` for decks and groups so that card blocks take up
   // as much space as possible, ensuring footers are aligned to the bottom.
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   //padding: $card-spacer-y $card-spacer-x;
   color: $card-color;
+  height: 85%;
 }
 
 .card-title {
@@ -191,13 +193,19 @@ $card-actions-bg:                   white !default;
   //margin-right: -$padding / 2;
   //padding: 8px 0;
   border-top: $card-border-width solid $card-border-color;
-  padding: 0.5rem 0.5rem;
+  //padding: 0.5rem 0.5rem;
+  height: 15%;
+  width: 100%;
   background-color: $card-actions-bg;
+  display: flex;
+  align-items: center;
 }
 
 .card-actions > button {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+  margin-left: 0.3rem;
+  margin-right: 0.3rem;
+  padding: 0;
+  max-height: 95%;
 }
 
 .card-footer {
