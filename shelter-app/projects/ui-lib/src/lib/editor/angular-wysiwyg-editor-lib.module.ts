@@ -5,11 +5,13 @@ import {EditorPluginComponent} from './editor-plugin.component';
 import {DynamicHTMLModule} from './dynamic-html';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ControlsModule} from '../controls';
+import { EditorToolbarComponent } from './editor-toolbar.component';
 
 @NgModule({
   declarations: [
       EditorComponent,
-      EditorPluginComponent
+      EditorPluginComponent,
+      EditorToolbarComponent
   ],
   imports: [
     CommonModule,
@@ -22,6 +24,9 @@ import {ControlsModule} from '../controls';
     FormsModule,
     ControlsModule,
   ],
-  exports: [EditorComponent]
+  exports: [
+    EditorComponent,
+    EditorToolbarComponent
+  ]
 })
 export class AngularWysiwygEditorLibModule { }

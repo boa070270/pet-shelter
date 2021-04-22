@@ -126,8 +126,8 @@ export class HelpingTools {
 
     saveResizedImage(clickedImage): void {
         if (clickedImage && window.getComputedStyle(clickedImage.parentElement).resize === 'both') {
-            clickedImage.style.width = clickedImage.parentElement.style.width;
-            clickedImage.style.height = clickedImage.parentElement.style.height;
+            clickedImage.block.width = clickedImage.parentElement.block.width;
+            clickedImage.block.height = clickedImage.parentElement.block.height;
             this.removeNodeSavingChildren(clickedImage.parentNode);
         }
     }

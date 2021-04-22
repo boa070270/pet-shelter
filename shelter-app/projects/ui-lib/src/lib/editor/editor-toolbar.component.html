@@ -1,0 +1,123 @@
+<div class="editor-toolbar-parent">
+  <div class="editor-toolbar">
+    <label>
+      <span>Style</span>
+    <select [(ngModel)]="block" class="gm-style" (change)="tag(block)">
+      <option value="p"><span style="float: left;">Paragraph</span></option>
+      <option value="pre"><span style="font-family: monospace; float: left;">Pre</span></option>
+      <option value="h1"><span style="font-size: 2em; float: left;">Header 1</span></option>
+      <option value="h2"><span style="font-size: 1.5em; float: left;">Header 2</span></option>
+      <option value="h3"><span style="font-size: 1.17em; float: left;">Header 3</span></option>
+      <option value="h4"><span style="float: left;">Header 4</span></option>
+      <option value="h5"><span style="font-size: 0.83em; float: left;">Header 5</span></option>
+      <option value="h6"><span style="font-size: 0.67em; float: left;">Header 6</span></option>
+      <option value="blockquote">Blockquote</option>
+    </select>
+    </label>
+    <div class="editor-multiple-buttons">
+      <button class="gm-format_bold" [ngClass]="{'editor-button-active': bTag}" (click)="tag('b')" title="Bold">
+      </button>
+      <button class="gm-format_underline" [ngClass]="{'editor-button-active': uTag}" (click)="tag('u')" title="Underline">
+      </button>
+      <button class="gm-format_italic" [ngClass]="{'editor-button-active': iTag}" (click)="tag('i')" title="Italic">
+      </button>
+    </div>
+    <label>
+      <span>Font size</span>
+      <select [(ngModel)]="fSize" (change)="tag('span', fSize.split(','))">
+        <option value="'style', 'font-size: smaller'"><span style="font-size: smaller; float: left;">Smaller</span></option>
+        <option value="'style', 'font-size: small'"><span style="font-size: small; float: left;">Small</span></option>
+        <option value="'style', 'font-size: medium'"><span style="font-size: medium; float: left;">Medium</span></option>
+        <option value="'style', 'font-size: larger'"><span style="font-size: larger; float: left;">Larger</span></option>
+        <option value="'style', 'font-size: large'"><span style="font-size: large; float: left;">Large</span></option>
+      </select>
+    </label>
+    <div class="editor-multiple-buttons">
+      <button class="gm-subscript" (click)="tag('sub')" title="subscript">
+      </button>
+      <button class="gm-superscript" (click)="tag('sup')" title="superscript">
+      </button>
+    </div>
+    <div class="editor-multiple-buttons">
+      <button class="gm-format_list_bulleted" (click)="transformToList()" title="Bullet list">
+      </button>
+      <button class="gm-format_list_numbered" (click)="transformToList(true)" title="Number list">
+      </button>
+    </div>
+
+    <div class="editor-multiple-buttons">
+      <button class="gm-format_align_left" [ngClass]="[alignPressed === 1 ? 'editor-button-active' : '']" (click)="align('left')" title="Align left">
+      </button>
+      <button class="gm-format_align_center" [ngClass]="[alignPressed === 2 ? 'editor-button-active' : '']" (click)="align('center')" title="Align center">
+      </button>
+      <button class="gm-format_align_right" [ngClass]="[alignPressed === 3 ? 'editor-button-active' : '']" (click)="align('right')" title="Align right">
+      </button>
+      <button class="gm-format_align_justify" [ngClass]="[alignPressed === 4 ? 'editor-button-active' : '']" (click)="align('justify')" title="Justify">
+      </button>
+      <button class="gm-format_clear" (click)="clearFormatting()" title="Clear formatting">
+      </button>
+    </div>
+
+    <div class="editor-multiple-buttons">
+      <input type="number" class="editor-table-input" placeholder="Cells" #cells min="1" value="1">
+      <input type="number" class="editor-table-input" placeholder="Rows" #rows min="1" value="1">
+      <button class="editor-single-button" (click)="insertTable(cells.value * 1, rows.value * 1)" title="Insert table">
+        <img class="editor-icon-img" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjUxMnB0IiB2aWV3Qm94PSIwIC0yMSA1MTIgNTEyIiB3aWR0aD0iNTEycHQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTQ0OCAwaC0zODRjLTM1LjI4NTE1NiAwLTY0IDI4LjcxNDg0NC02NCA2NHYzNDEuMzMyMDMxYzAgMzUuMjg1MTU3IDI4LjcxNDg0NCA2NCA2NCA2NGgzODRjMzUuMjg1MTU2IDAgNjQtMjguNzE0ODQzIDY0LTY0di0zNDEuMzMyMDMxYzAtMzUuMjg1MTU2LTI4LjcxNDg0NC02NC02NC02NHptLTI4OCAxNDkuMzMyMDMxaDc0LjY2Nzk2OXY2NGgtNzQuNjY3OTY5em0tNDIuNjY3OTY5IDY0aC03NC42NjQwNjJ2LTY0aDc0LjY2NDA2MnptMTYwLTY0aDc0LjY2Nzk2OXY2NGgtNzQuNjY3OTY5em0xMTcuMzM1OTM4IDBoNzQuNjY0MDYydjY0aC03NC42NjQwNjJ6bS0zNTIgMTA2LjY2Nzk2OWg3NC42NjQwNjJ2NjRoLTc0LjY2NDA2MnptMTE3LjMzMjAzMSAwaDc0LjY2Nzk2OXY2NGgtNzQuNjY3OTY5em03NC42Njc5NjkgMTA2LjY2Nzk2OXY2NGgtNzQuNjY3OTY5di02NHptNDIuNjY0MDYyIDBoNzQuNjY3OTY5djY0aC03NC42Njc5Njl6bTAtNDIuNjY3OTY5di02NGg3NC42Njc5Njl2NjR6bTExNy4zMzU5MzgtNjRoNzQuNjY0MDYydjY0aC03NC42NjQwNjJ6bS0zNTIgMTQ5LjMzMjAzMXYtNDIuNjY0MDYyaDc0LjY2NDA2MnY2NGgtNTMuMzMyMDMxYy0xMS43NTM5MDYgMC0yMS4zMzIwMzEtOS41NzgxMjUtMjEuMzMyMDMxLTIxLjMzNTkzOHptNDA1LjMzMjAzMSAyMS4zMzU5MzhoLTUzLjMzMjAzMXYtNjRoNzQuNjY0MDYydjQyLjY2NDA2MmMwIDExLjc1NzgxMy05LjU3ODEyNSAyMS4zMzU5MzgtMjEuMzMyMDMxIDIxLjMzNTkzOHptMCAwIi8+PC9zdmc+" />
+      </button>
+    </div>
+
+    <button class="editor-single-button" (click)="insertPlugin()" title="Insert plugin">
+      <img class="editor-icon-img" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjUxMnB0IiB2aWV3Qm94PSItOTYgMCA1MTIgNTEyIiB3aWR0aD0iNTEycHQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTE2MCA1MTJjLTg4LjIzNDM3NSAwLTE2MC03MS43NjU2MjUtMTYwLTE2MHYtMjI0YzAtMTEuNzk2ODc1IDkuNTU4NTk0LTIxLjMzMjAzMSAyMS4zMzIwMzEtMjEuMzMyMDMxIDExLjc3NzM0NCAwIDIxLjMzNTkzOCA5LjUzNTE1NiAyMS4zMzU5MzggMjEuMzMyMDMxdjIyNGMwIDY0LjY4MzU5NCA1Mi42Mjg5MDYgMTE3LjMzMjAzMSAxMTcuMzMyMDMxIDExNy4zMzIwMzFzMTE3LjMzMjAzMS01Mi42NDg0MzcgMTE3LjMzMjAzMS0xMTcuMzMyMDMxdi0yMzQuNjY3OTY5YzAtNDEuMTcxODc1LTMzLjQ5MjE4Ny03NC42NjQwNjItNzQuNjY0MDYyLTc0LjY2NDA2Mi00MS4xNzU3ODEgMC03NC42Njc5NjkgMzMuNDkyMTg3LTc0LjY2Nzk2OSA3NC42NjQwNjJ2MjEzLjMzNTkzOGMwIDE3LjY0MDYyNSAxNC4zNTU0NjkgMzIgMzIgMzJzMzItMTQuMzU5Mzc1IDMyLTMydi0yMDIuNjY3OTY5YzAtMTEuNzk2ODc1IDkuNTU4NTk0LTIxLjMzMjAzMSAyMS4zMzIwMzEtMjEuMzMyMDMxIDExLjc3NzM0NCAwIDIxLjMzNTkzOCA5LjUzNTE1NiAyMS4zMzU5MzggMjEuMzMyMDMxdjIwMi42Njc5NjljMCA0MS4xNzE4NzUtMzMuNDk2MDk0IDc0LjY2NDA2Mi03NC42Njc5NjkgNzQuNjY0MDYycy03NC42Njc5NjktMzMuNDkyMTg3LTc0LjY2Nzk2OS03NC42NjQwNjJ2LTIxMy4zMzU5MzhjMC02NC42Nzk2ODcgNTIuNjI4OTA3LTExNy4zMzIwMzEgMTE3LjMzNTkzOC0xMTcuMzMyMDMxIDY0LjcwMzEyNSAwIDExNy4zMzIwMzEgNTIuNjUyMzQ0IDExNy4zMzIwMzEgMTE3LjMzMjAzMXYyMzQuNjY3OTY5YzAgODguMjM0Mzc1LTcxLjc2NTYyNSAxNjAtMTYwIDE2MHptMCAwIi8+PC9zdmc+" />
+    </button>
+
+    <button class="gm-web" (click)="showDesigner()" title="Show designer"></button>
+    <button class="gm-source" (click)="showSource()" title="Show source"></button>
+    <button class="gm-help" (click)="showHelp()" title="Help"></button>
+
+  </div>
+  <div class="editor-toolbar">
+    <div class="editor-multiple-buttons" *ngIf="!tableControlsHidden">
+      <button class="editor-button-left" (click)="removeRow()">
+        <img class="editor-icon-img" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pg0KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE4LjEuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPg0KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJDYXBhXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgMTUuMzgxIDE1LjM4MSIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgMTUuMzgxIDE1LjM4MTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGc+DQoJPGc+DQoJCTxwYXRoIHN0eWxlPSJmaWxsOiMwMzAxMDQ7IiBkPSJNMCwxLjczMnY3LjczMmg2LjA1M2MwLTAuMDM1LTAuMDA0LTAuMDctMC4wMDQtMC4xMDRjMC0wLjQzNCwwLjA2MS0wLjg1NCwwLjE2NS0xLjI1NUgxLjM2VjMuMDkyDQoJCQloMTIuNjYydjIuMTkyYzAuNTQ2LDAuMzk2LDEuMDEsMC44OTcsMS4zNTksMS40NzdWMS43MzJIMHoiLz4NCgkJPHBhdGggc3R5bGU9ImZpbGw6IzAzMDEwNDsiIGQ9Ik0xMS4xOTYsNS4yOGMtMi4zMDcsMC00LjE4MywxLjg3Ny00LjE4Myw0LjE4NGMwLDIuMzA4LDEuODc2LDQuMTg1LDQuMTgzLDQuMTg1DQoJCQljMi4zMDksMCw0LjE4NS0xLjg3Nyw0LjE4NS00LjE4NUMxNS4zODEsNy4xNTcsMTMuNTA1LDUuMjgsMTEuMTk2LDUuMjh6IE0xMS4xOTYsMTIuNTEzYy0xLjY3OSwwLTMuMDQ3LTEuMzY3LTMuMDQ3LTMuMDQ5DQoJCQljMC0xLjY4LDEuMzY4LTMuMDQ5LDMuMDQ3LTMuMDQ5YzEuNjg0LDAsMy4wNSwxLjM2OSwzLjA1LDMuMDQ5QzE0LjI0NiwxMS4xNDYsMTIuODgsMTIuNTEzLDExLjE5NiwxMi41MTN6Ii8+DQoJCTxyZWN0IHg9IjkuMzEyIiB5PSI4Ljc1OSIgc3R5bGU9ImZpbGw6IzAzMDEwNDsiIHdpZHRoPSIzLjg0NCIgaGVpZ2h0PSIxLjEwNCIvPg0KCTwvZz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjwvc3ZnPg0K" />
+      </button>
+      <button class="editor-button-right" (click)="removeColumn()">
+        <img class="editor-icon-img" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pg0KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE4LjEuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPg0KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJDYXBhXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgMjYgMjYiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDI2IDI2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8Zz4NCgk8cGF0aCBzdHlsZT0iZmlsbDojMDMwMTA0OyIgZD0iTTEzLjU5NCwyMC44NVYyNGgtMTBWMmgxMHYzLjE1YzAuNjMzLTAuMzIzLDEuMzA0LTAuNTY1LDItMC43MjdWMWMwLTAuNTUxLTAuNDQ4LTEtMS0xaC0xMg0KCQljLTAuNTUsMC0xLDAuNDQ5LTEsMXYyNGMwLDAuNTUxLDAuNDQ5LDEsMSwxaDEyYzAuNTUyLDAsMS0wLjQ0OSwxLTF2LTMuNDI0QzE0Ljg5OCwyMS40MTUsMTQuMjI3LDIxLjE3MywxMy41OTQsMjAuODV6Ii8+DQoJPGc+DQoJCTxwYXRoIHN0eWxlPSJmaWxsOiMwMzAxMDQ7IiBkPSJNMTcuNTk0LDYuMTg4Yy0zLjc2MiwwLTYuODEzLDMuMDUxLTYuODEyLDYuODEzYy0wLjAwMSwzLjc2MSwzLjA1LDYuODEyLDYuODEyLDYuODEyDQoJCQlzNi44MTMtMy4wNTEsNi44MTMtNi44MTNTMjEuMzU1LDYuMTg4LDE3LjU5NCw2LjE4OHogTTIxLjIyNiwxMy45OWwtNy4yNjcsMC4wMDF2LTEuOTgyaDcuMjY4TDIxLjIyNiwxMy45OXoiLz4NCgk8L2c+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8L3N2Zz4NCg==" />
+      </button>
+      <button class="editor-button-left" (click)="insertRow()">
+        <img class="editor-icon-img" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjUxMnB0IiB2aWV3Qm94PSIwIC0yMSA1MTIgNTEyIiB3aWR0aD0iNTEycHQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTEwMi4zNTU0NjkgMTcwLjQxMDE1Ni03NC42NjQwNjMtODBjLTQuNDgwNDY4LTQuODIwMzEyLTExLjQxNDA2Mi02LjQyMTg3NS0xNy41NTg1OTQtMy45Njg3NS02LjEyMTA5MyAyLjQxMDE1Ni0xMC4xMzI4MTIgOC4zMjAzMTMtMTAuMTMyODEyIDE0Ljg5MDYyNXYxNjBjMCA2LjU3MDMxMyA0LjAxMTcxOSAxMi40ODA0NjkgMTAuMTMyODEyIDE0Ljg3MTA5NCAxLjg5ODQzOC43NjU2MjUgMy44ODI4MTMgMS4xMjg5MDYgNS44NjcxODggMS4xMjg5MDYgNC4zNTE1NjIgMCA4LjU5NzY1Ni0xLjc2OTUzMSAxMS42OTE0MDYtNS4wNzQyMTlsNzQuNjY0MDYzLTgwYzUuNzQyMTg3LTYuMTQ0NTMxIDUuNzQyMTg3LTE1LjcwMzEyNCAwLTIxLjg0NzY1NnptMCAwIi8+PHBhdGggZD0ibTQ2OS4zMzIwMzEgMGgtMzIwYy0yMy41MzEyNSAwLTQyLjY2NDA2MiAxOS4xMzY3MTktNDIuNjY0MDYyIDQyLjY2Nzk2OXY0Mi42NjQwNjJjMCAyMy41MzEyNSAxOS4xMzI4MTIgNDIuNjY3OTY5IDQyLjY2NDA2MiA0Mi42Njc5NjloMzIwYzIzLjUzMTI1IDAgNDIuNjY3OTY5LTE5LjEzNjcxOSA0Mi42Njc5NjktNDIuNjY3OTY5di00Mi42NjQwNjJjMC0yMy41MzEyNS0xOS4xMzY3MTktNDIuNjY3OTY5LTQyLjY2Nzk2OS00Mi42Njc5Njl6bS0zMjAgNDIuNjY3OTY5aDEzOC42Njc5Njl2NDIuNjY0MDYyaC0xMzguNjY3OTY5em0xODEuMzM1OTM4IDQyLjY2NDA2MnYtNDIuNjY0MDYyaDEzOC42NjQwNjJsLjAyMzQzOCA0Mi42NjQwNjJ6bTAgMCIvPjxwYXRoIGQ9Im00NjkuMzMyMDMxIDIzNC42Njc5NjloLTMyMGMtMjMuNTMxMjUgMC00Mi42NjQwNjIgMTkuMTMyODEyLTQyLjY2NDA2MiA0Mi42NjQwNjJ2MTQ5LjMzNTkzOGMwIDIzLjUzMTI1IDE5LjEzMjgxMiA0Mi42NjQwNjIgNDIuNjY0MDYyIDQyLjY2NDA2MmgzMjBjMjMuNTMxMjUgMCA0Mi42Njc5NjktMTkuMTMyODEyIDQyLjY2Nzk2OS00Mi42NjQwNjJ2LTE0OS4zMzU5MzhjMC0yMy41MzEyNS0xOS4xMzY3MTktNDIuNjY0MDYyLTQyLjY2Nzk2OS00Mi42NjQwNjJ6bTAgOTZoLTEzOC42NjQwNjJ2LTUzLjMzNTkzOGgxMzguNjY0MDYyem0tMTgxLjMzMjAzMS01My4zMzU5Mzh2NTMuMzM1OTM4aC0xMzguNjY3OTY5di01My4zMzU5Mzh6bS0xMzguNjY3OTY5IDk2aDEzOC42Njc5Njl2NTMuMzM1OTM4aC0xMzguNjY3OTY5em0xODEuMzM1OTM4IDUzLjMzNTkzOHYtNTMuMzM1OTM4aDEzOC42ODc1djUzLjMzNTkzOHptMCAwIi8+PC9zdmc+" />
+      </button>
+      <button class="editor-button-middle" (click)="insertRow(true)">
+        <img class="editor-icon-img" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjUxMnB0IiB2aWV3Qm94PSIwIC0yMSA1MTIgNTEyIiB3aWR0aD0iNTEycHQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTEwMi4zNTU0NjkgMjc3LjA3ODEyNS03NC42NjQwNjMtODBjLTQuNDgwNDY4LTQuODIwMzEzLTExLjQxNDA2Mi02LjQyMTg3NS0xNy41NTg1OTQtMy45Njg3NS02LjEyMTA5MyAyLjQxMDE1Ni0xMC4xMzI4MTIgOC4zMjAzMTMtMTAuMTMyODEyIDE0Ljg5MDYyNXYxNjBjMCA2LjU3MDMxMiA0LjAxMTcxOSAxMi40ODA0NjkgMTAuMTMyODEyIDE0Ljg3MTA5NCAxLjg5ODQzOC43NjU2MjUgMy44ODI4MTMgMS4xMjg5MDYgNS44NjcxODggMS4xMjg5MDYgNC4zNTE1NjIgMCA4LjU5NzY1Ni0xLjc2OTUzMSAxMS42OTE0MDYtNS4wNzgxMjVsNzQuNjY0MDYzLTgwYzUuNzQyMTg3LTYuMTQ0NTMxIDUuNzQyMTg3LTE1LjY5OTIxOSAwLTIxLjg0Mzc1em0wIDAiLz48cGF0aCBkPSJtNDY5LjMzMjAzMSAzNDEuMzMyMDMxaC0zMjBjLTIzLjUzMTI1IDAtNDIuNjY0MDYyIDE5LjEzNjcxOS00Mi42NjQwNjIgNDIuNjY3OTY5djQyLjY2Nzk2OWMwIDIzLjUzMTI1IDE5LjEzMjgxMiA0Mi42NjQwNjIgNDIuNjY0MDYyIDQyLjY2NDA2MmgzMjBjMjMuNTMxMjUgMCA0Mi42Njc5NjktMTkuMTMyODEyIDQyLjY2Nzk2OS00Mi42NjQwNjJ2LTQyLjY2Nzk2OWMwLTIzLjUzMTI1LTE5LjEzNjcxOS00Mi42Njc5NjktNDIuNjY3OTY5LTQyLjY2Nzk2OXptLTMyMC4wMTk1MzEgNDIuNjY3OTY5aDEzOC42ODc1djQyLjY2Nzk2OWgtMTM4LjY2Nzk2OXptMzIwLjAxOTUzMSA0Mi42Njc5NjloLTEzOC42NjQwNjJ2LTQyLjY2Nzk2OWgxMzguNjY0MDYyem0wIDAiLz48cGF0aCBkPSJtNDY5LjMzMjAzMSAwaC0zMjBjLTIzLjUzMTI1IDAtNDIuNjY0MDYyIDE5LjEzNjcxOS00Mi42NjQwNjIgNDIuNjY3OTY5djE0OS4zMzIwMzFjMCAyMy41MzEyNSAxOS4xMzI4MTIgNDIuNjY3OTY5IDQyLjY2NDA2MiA0Mi42Njc5NjloMzIwYzIzLjUzMTI1IDAgNDIuNjY3OTY5LTE5LjEzNjcxOSA0Mi42Njc5NjktNDIuNjY3OTY5di0xNDkuMzMyMDMxYzAtMjMuNTMxMjUtMTkuMTM2NzE5LTQyLjY2Nzk2OS00Mi42Njc5NjktNDIuNjY3OTY5em0wIDk2aC0xMzguNjY0MDYydi01My4zMzIwMzFoMTM4LjY2NDA2MnptLTMyMC01My4zMzIwMzFoMTM4LjY2Nzk2OXY1My4zMzIwMzFoLTEzOC42ODc1em0wIDk2aDEzOC42Njc5Njl2NTMuMzMyMDMxaC0xMzguNjY3OTY5em0xODEuMzM1OTM4IDUzLjMzMjAzMXYtNTMuMzMyMDMxaDEzOC42NjQwNjJ2NTMuMzMyMDMxem0wIDAiLz48L3N2Zz4=" />
+      </button>
+      <button class="editor-button-middle" (click)="insertColumn()">
+        <img class="editor-icon-img" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjUxMnB0IiB2aWV3Qm94PSItMjEgMCA1MTIgNTEyIiB3aWR0aD0iNTEycHQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTI3Ni4yMDMxMjUgMTAuMTMyODEyYy0yLjM5MDYyNS02LjEyMTA5My04LjMwMDc4MS0xMC4xMzI4MTItMTQuODcxMDk0LTEwLjEzMjgxMmgtMTYwYy02LjU3MDMxMiAwLTEyLjQ4MDQ2OSA0LjAxMTcxOS0xNC44NjcxODcgMTAuMTMyODEyLTIuNDEwMTU2IDYuMTI1LS44NTU0NjkgMTMuMDc4MTI2IDMuOTY4NzUgMTcuNTU4NTk0bDgwIDc0LjY2NDA2M2MzLjA3MDMxMiAyLjg4MjgxMiA2Ljk3MjY1NiA0LjMxMjUgMTAuODk4NDM3IDQuMzEyNXM3LjgzMjAzMS0xLjQyOTY4OCAxMC45MjU3ODEtNC4zMTI1bDgwLTc0LjY2NDA2M2M0Ljc5Njg3Ni00LjQ4MDQ2OCA2LjM3NS0xMS40MzM1OTQgMy45NDUzMTMtMTcuNTU4NTk0em0wIDAiLz48cGF0aCBkPSJtODUuMzMyMDMxIDEwNi42Njc5NjloLTQyLjY2NDA2MmMtMjMuNTMxMjUgMC00Mi42Njc5NjkgMTkuMTMyODEyLTQyLjY2Nzk2OSA0Mi42NjQwNjJ2MzIwYzAgMjMuNTMxMjUgMTkuMTM2NzE5IDQyLjY2Nzk2OSA0Mi42Njc5NjkgNDIuNjY3OTY5aDQyLjY2NDA2MmMyMy41MzEyNSAwIDQyLjY2Nzk2OS0xOS4xMzY3MTkgNDIuNjY3OTY5LTQyLjY2Nzk2OXYtMzIwYzAtMjMuNTMxMjUtMTkuMTM2NzE5LTQyLjY2NDA2Mi00Mi42Njc5NjktNDIuNjY0MDYyem0wIDQyLjY0NDUzMXYxMzguNjg3NWgtNDIuNjY0MDYydi0xMzguNjY3OTY5em0tNDIuNjY0MDYyIDMyMC4wMTk1MzF2LTEzOC42NjQwNjJoNDIuNjY0MDYydjEzOC42NjQwNjJ6bTAgMCIvPjxwYXRoIGQ9Im00MjYuNjY3OTY5IDEwNi42Njc5NjloLTE0OS4zMzU5MzhjLTIzLjUzMTI1IDAtNDIuNjY0MDYyIDE5LjEzMjgxMi00Mi42NjQwNjIgNDIuNjY0MDYydjMyMGMwIDIzLjUzMTI1IDE5LjEzMjgxMiA0Mi42Njc5NjkgNDIuNjY0MDYyIDQyLjY2Nzk2OWgxNDkuMzM1OTM4YzIzLjUzMTI1IDAgNDIuNjY0MDYyLTE5LjEzNjcxOSA0Mi42NjQwNjItNDIuNjY3OTY5di0zMjBjMC0yMy41MzEyNS0xOS4xMzI4MTItNDIuNjY0MDYyLTQyLjY2NDA2Mi00Mi42NjQwNjJ6bTAgMTgxLjMzMjAzMWgtNTMuMzM1OTM4di0xMzguNjg3NWg1My4zMzU5Mzh6bS05Ni0xMzguNjg3NXYxMzguNjg3NWgtNTMuMzM1OTM4di0xMzguNjY3OTY5em0tNTMuMzM1OTM4IDE4MS4zNTU0NjloNTMuMzM1OTM4djEzOC42NjQwNjJoLTUzLjMzNTkzOHptOTYgMTM4LjY2NDA2MnYtMTM4LjY2NDA2Mmg1My4zMzU5Mzh2MTM4LjY2NDA2MnptMCAwIi8+PC9zdmc+" />
+      </button>
+      <button class="editor-button-right" (click)="insertColumn(true)">
+        <img class="editor-icon-img" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjUxMnB0IiB2aWV3Qm94PSItMjEgMCA1MTIgNTEyIiB3aWR0aD0iNTEycHQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTM4Mi44OTA2MjUgMTAuMTMyODEyYy0yLjQxMDE1Ni02LjEyMTA5My04LjMyMDMxMy0xMC4xMzI4MTItMTQuODkwNjI1LTEwLjEzMjgxMmgtMTYwYy02LjU3MDMxMiAwLTEyLjQ4MDQ2OSA0LjAxMTcxOS0xNC44OTA2MjUgMTAuMTMyODEyLTIuNDEwMTU2IDYuMTI1LS44MzIwMzEgMTMuMDc4MTI2IDMuOTY4NzUgMTcuNTU4NTk0bDgwIDc0LjY2NDA2M2MzLjA3MDMxMyAyLjg4MjgxMiA2Ljk5NjA5NCA0LjMxMjUgMTAuOTIxODc1IDQuMzEyNXM3Ljg1MTU2Mi0xLjQyOTY4OCAxMC45MjE4NzUtNC4zMTI1bDgwLTc0LjY2NDA2M2M0LjgwMDc4MS00LjQ4MDQ2OCA2LjM3ODkwNi0xMS40MzM1OTQgMy45Njg3NS0xNy41NTg1OTR6bTAgMCIvPjxwYXRoIGQ9Im00MjYuNjY3OTY5IDEwNi42Njc5NjloLTQyLjY2Nzk2OWMtMjMuNTMxMjUgMC00Mi42Njc5NjkgMTkuMTMyODEyLTQyLjY2Nzk2OSA0Mi42NjQwNjJ2MzIwYzAgMjMuNTMxMjUgMTkuMTM2NzE5IDQyLjY2Nzk2OSA0Mi42Njc5NjkgNDIuNjY3OTY5aDQyLjY2Nzk2OWMyMy41MzEyNSAwIDQyLjY2NDA2Mi0xOS4xMzY3MTkgNDIuNjY0MDYyLTQyLjY2Nzk2OXYtMzIwYzAtMjMuNTMxMjUtMTkuMTMyODEyLTQyLjY2NDA2Mi00Mi42NjQwNjItNDIuNjY0MDYyem0wIDQyLjY2NDA2MnYxMzguNjY3OTY5aC00Mi42Njc5Njl2LTEzOC42Njc5Njl6bS00Mi42Njc5NjkgMzIwLjAyMzQzOHYtMTM4LjY4NzVoNDIuNjY3OTY5djEzOC42NjQwNjJ6bTAgMCIvPjxwYXRoIGQ9Im0xOTIgMTA2LjY2Nzk2OWgtMTQ5LjMzMjAzMWMtMjMuNTMxMjUgMC00Mi42Njc5NjkgMTkuMTMyODEyLTQyLjY2Nzk2OSA0Mi42NjQwNjJ2MzIwYzAgMjMuNTMxMjUgMTkuMTM2NzE5IDQyLjY2Nzk2OSA0Mi42Njc5NjkgNDIuNjY3OTY5aDE0OS4zMzIwMzFjMjMuNTMxMjUgMCA0Mi42Njc5NjktMTkuMTM2NzE5IDQyLjY2Nzk2OS00Mi42Njc5Njl2LTMyMGMwLTIzLjUzMTI1LTE5LjEzNjcxOS00Mi42NjQwNjItNDIuNjY3OTY5LTQyLjY2NDA2MnptMCAxODEuMzMyMDMxaC01My4zMzIwMzF2LTEzOC42Njc5NjloNTMuMzMyMDMxem0tOTYtMTM4LjY2Nzk2OXYxMzguNjY3OTY5aC01My4zMzIwMzF2LTEzOC42Njc5Njl6bS01My4zMzIwMzEgMTgxLjMzNTkzOGg1My4zMzIwMzF2MTM4LjY4NzVoLTUzLjMzMjAzMXptOTYgMTM4LjY2NDA2MnYtMTM4LjY2NDA2Mmg1My4zMzIwMzF2MTM4LjY2NDA2MnptMCAwIi8+PC9zdmc+" />
+      </button>
+      <label>
+        <span>Border Style</span>
+        <select [(ngModel)]="borderStyle" (change)="tblBorder('style', borderStyle)">
+          <option value="none">None</option>
+          <option value="hidden">Hidden</option>
+          <option value="dotted">Dotted</option>
+          <option value="dashed">Dashed</option>
+          <option value="solid">Solid</option>
+          <option value="double">Double</option>
+          <option value="groove">Groove</option>
+          <option value="ridge">Ridge</option>
+          <option value="inset">Inset</option>
+          <option value="outset">Outset</option>
+        </select>
+      </label>
+      <label>
+        <span>Border Width</span>
+        <select [(ngModel)]="tblBorderWidth" (change)="tblBorder('width', tblBorderWidth)">
+          <option value="medium">Medium</option>
+          <option value="thick">Thick</option>
+          <option value="thin">Thin</option>
+        </select>
+      </label>
+    </div>
+  </div>
+</div>

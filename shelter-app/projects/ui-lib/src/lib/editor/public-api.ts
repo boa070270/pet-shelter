@@ -5,3 +5,4 @@ export * from './editor-plugin.component';
 export * from './editor.component';
 export * from './helping-tools';
 export * from './insert-tools';
+export * from './editor-toolbar.component';
