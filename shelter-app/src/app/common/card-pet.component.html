@@ -1,11 +1,11 @@
-<mat-card *ngIf="data">
-  <img mat-card-image src="{{imgSrc}}" alt="The photo" *ngIf="imgSrc">
-  <mat-card-content>
+<lib-card *ngIf="data">
+  <img libCardImg src="{{imgSrc}}" alt="The photo" *ngIf="imgSrc">
+  <lib-card-content>
     <table>
       <tr *ngFor="let fld of fields"><th>{{fld.name}}</th><td>{{fld.value}}</td></tr>
     </table>
-  </mat-card-content>
-  <mat-card-actions>
+  </lib-card-content>
+  <lib-card-actions>
     <a [routerLink]="['/pet', data.id]">Read...</a>
-  </mat-card-actions>
-</mat-card>
+  </lib-card-actions>
+</lib-card>

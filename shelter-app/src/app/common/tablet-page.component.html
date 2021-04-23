@@ -1,8 +1,8 @@
-<mat-card *ngIf="data">
-  <mat-card-header>
-    <mat-card-title>{{data.title}}</mat-card-title>
-  </mat-card-header>
-  <mat-card-content class="tablet-content">
+<lib-card *ngIf="data">
+  <lib-card-header>
+    <lib-card-title>{{data.title}}</lib-card-title>
+  </lib-card-header>
+  <lib-card-content class="tablet-content">
     <img src="{{imgSrc}}" alt="The first photo" class="tablet" *ngIf="imgSrc">
     <div>
       <p>{{data.summary}}</p>
@@ -10,5 +10,5 @@
       <a [routerLink]="['/page', data.id]">Read more...</a>
       <p>Date: {{data.created}}</p>
     </div>
-  </mat-card-content>
-</mat-card>
+  </lib-card-content>
+</lib-card>

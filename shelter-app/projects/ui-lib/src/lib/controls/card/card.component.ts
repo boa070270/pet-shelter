@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Directive, HostBinding, ViewEncapsulation} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Directive, ElementRef, HostBinding, ViewEncapsulation} from '@angular/core';
 
 @Component({
   selector: 'lib-card',
@@ -53,4 +53,11 @@ export class CardContentDirective {
 })
 export class CardFooterDirective {
   @HostBinding() class = 'card-footer';
+}
+
+@Directive({
+  selector: '[libCardImg], lib-card-img'
+})
+export class CardImageDirective {
+  @HostBinding() class = 'card-img';
 }

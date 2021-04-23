@@ -61,7 +61,7 @@ All plugins will ask the pageDataService and obtain their data to properly prese
 
 - Task! lh.8080/docs -> unauthorized upload file -> code 500 instead of 401? auth not working? 500 when password is not right?
 
-- Task! lib-menu disappears before you can use it
+- Bug! lib-menu disappears before you can use it?
 - Proposal? press button to keep menu open until clicked outside/again?
 - Task! dialog use cached
 - Task! What do with table that reference to another table?

@@ -80,7 +80,7 @@ export class EditorToolbarComponent extends AbstractComponent {
       return true;
     }
   }
-  tag(tag: string, attr?: {[key: string]: string}): void {
+  tag(tag: string, attr?: string[] | {[key: string]: string}): void { // was without 'string |' and was causing error
     this.emitter.emit({cmd: 'tag', opt: {tag, attr}});
   }
 

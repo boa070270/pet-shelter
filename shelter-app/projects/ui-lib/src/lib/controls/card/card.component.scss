@@ -1,3 +1,15 @@
+:host {
+  --columns: attr(cols string);
+  display: block;
+  position: relative;
+  padding: {
+    top: 2px;
+    bottom: 2px;
+    left: 0;
+    right: 0;
+  };
+  margin: 0;
+}
 $padding: 16px !default;
 $border-radius: 4px !default;
 $header-size: 40px !default;
@@ -94,19 +106,15 @@ $card-actions-bg:                   white !default;
 
 .card {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  min-width: 0; // See https://github.com/twbs/bootstrap/pull/22740#issuecomment-305868106
-  height: $card-height;
+  display: block;
+  //height: $card-height;
   word-wrap: break-word;
   background-color: $card-bg;
   background-clip: border-box;
   border: $card-border-width solid $card-border-color;
   @include border-radius($card-border-radius);
   margin: 0;
-  max-height: 90%;
-  justify-content: center;
-  align-items: center;
+  max-height: 80%;
 
   > hr {
     margin-right: 0;
@@ -137,12 +145,8 @@ $card-actions-bg:                   white !default;
 }
 
 .card-body {
-  // Enable `flex-grow: 1` for decks and groups so that card blocks take up
-  // as much space as possible, ensuring footers are aligned to the bottom.
-  flex: 0 0 auto;
-  //padding: $card-spacer-y $card-spacer-x;
+  display: block;
   color: $card-color;
-  height: 85%;
 }
 
 .card-title {
@@ -175,7 +179,7 @@ $card-actions-bg:                   white !default;
 //
 
 .card-header {
-  padding: $card-cap-padding-y $card-cap-padding-x;
+  display: block;
   margin-bottom: 0; // Removes the default margin-bottom of <hN>
   color: $card-cap-color;
   background-color: $card-cap-bg;
@@ -187,14 +191,7 @@ $card-actions-bg:                   white !default;
 }
 
 .card-actions {
-  //display: block;
-  //margin-bottom: 16px;
-  //margin-left: -$padding / 2;
-  //margin-right: -$padding / 2;
-  //padding: 8px 0;
   border-top: $card-border-width solid $card-border-color;
-  //padding: 0.5rem 0.5rem;
-  height: 15%;
   width: 100%;
   background-color: $card-actions-bg;
   display: flex;
@@ -209,10 +206,11 @@ $card-actions-bg:                   white !default;
 }
 
 .card-footer {
-  padding: $card-cap-padding-y $card-cap-padding-x;
   color: $card-cap-color;
   background-color: $card-cap-bg;
   border-top: $card-border-width solid $card-border-color;
+  display: block;
+  word-break: break-word;
 
   &:last-child {
     @include border-radius(0 0 $card-inner-border-radius $card-inner-border-radius);
@@ -252,6 +250,10 @@ $card-actions-bg:                   white !default;
   left: 0;
   padding: $card-img-overlay-padding;
   @include border-radius($card-inner-border-radius);
+}
+.card-img {
+  max-width: 100%;
+  width: 100%;
 }
 
 .card-img,

@@ -1,25 +1,27 @@
 <ng-container [ngSwitch]="key">
-  <div class="card-item mat-elevation-z4" *ngSwitchCase="'asset'" >
-    <mat-card >
-      <img mat-card-image src="/api/v1/assets/{{searchType.id}}" alt="">
-      <mat-card-content>
+  <div class="card-item" *ngSwitchCase="'asset'">
+    <lib-card>
+      <lib-card-header>
+        <img libCardImg src="/api/v1/assets/{{searchType.id}}" alt="">
+      </lib-card-header>
+      <lib-card-content>
         {{searchType.comment}}
-      </mat-card-content>
-      <mat-card-footer>
+      </lib-card-content>
+      <lib-card-footer>
         <span>Date: {{searchType.created}}</span>
-      </mat-card-footer>
-    </mat-card>
+      </lib-card-footer>
+    </lib-card>
   </div>
-  <div class="card-item mat-elevation-z4" *ngSwitchCase="'card_page'" >
+  <div class="card-item" *ngSwitchCase="'card_page'">
     <app-card-page [data]="searchType" [animate]="false"></app-card-page>
   </div>
-  <div class="card-item mat-elevation-z4" *ngSwitchCase="'card_pet'" >
+  <div class="card-item" *ngSwitchCase="'card_pet'">
     <app-card-pet [data]="searchType" [animate]="false"></app-card-pet>
   </div>
-  <div class="tablet-item mat-elevation-z4" *ngSwitchCase="'tablet_page'" >
+  <div class="tablet-item" *ngSwitchCase="'tablet_page'">
   <app-tablet-page [data]="searchType" [animate]="false"></app-tablet-page>
   </div>
-  <div class="tablet-item mat-elevation-z4" *ngSwitchCase="'tablet_pet'"  >
+  <div class="tablet-item" *ngSwitchCase="'tablet_pet'">
   <app-tablet-pet [data]="searchType" [animate]="false"></app-tablet-pet>
   </div>
 </ng-container>
