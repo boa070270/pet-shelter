@@ -24,12 +24,12 @@
     </div>
     <label>
       <span>Font size</span>
-      <select [(ngModel)]="fSize" (change)="tag('span', fSize.split(','))">
-        <option value="'style', 'font-size: smaller'"><span style="font-size: smaller; float: left;">Smaller</span></option>
-        <option value="'style', 'font-size: small'"><span style="font-size: small; float: left;">Small</span></option>
-        <option value="'style', 'font-size: medium'"><span style="font-size: medium; float: left;">Medium</span></option>
-        <option value="'style', 'font-size: larger'"><span style="font-size: larger; float: left;">Larger</span></option>
-        <option value="'style', 'font-size: large'"><span style="font-size: large; float: left;">Large</span></option>
+      <select [(ngModel)]="fSize" (change)="tag('span', {'font-size': fSize})">
+        <option value="smaller"><span style="font-size: smaller; float: left;">Smaller</span></option>
+        <option value="small"><span style="font-size: small; float: left;">Small</span></option>
+        <option value="medium"><span style="font-size: medium; float: left;">Medium</span></option>
+        <option value="larger"><span style="font-size: larger; float: left;">Larger</span></option>
+        <option value="large"><span style="font-size: large; float: left;">Large</span></option>
       </select>
     </label>
     <div class="editor-multiple-buttons">
@@ -73,7 +73,7 @@
     <button class="gm-web" (click)="showDesigner()" title="Show designer"></button>
     <button class="gm-source" (click)="showSource()" title="Show source"></button>
     <button class="gm-help" (click)="showHelp()" title="Help"></button>
-
+    <button class="gm-help" (click)="switchMove()" title="Move by text"></button>
   </div>
   <div class="editor-toolbar">
     <div class="editor-multiple-buttons" *ngIf="!tableControlsHidden">

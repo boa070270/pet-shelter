@@ -33,6 +33,7 @@ export class EditorToolbarComponent extends AbstractComponent {
   tableControlsHidden: boolean;
   borderStyle: string;
   tblBorderWidth: string;
+  moveByText = true;
   @Output() emitter = new EventEmitter<CmdEditorToolbox>();
   constructor(private changeDetector: ChangeDetectorRef, public systemLang: SystemLang,
               @Optional() @Inject('i18NCfg') public i18NCfg?: I18NType) {
@@ -134,5 +135,10 @@ export class EditorToolbarComponent extends AbstractComponent {
 
   tblBorder(style: string, value: string): void {
     this.emitter.emit({cmd: 'tblBorder', opt: {style, value}});
+  }
+
+  switchMove(): void {
+    this.moveByText = !this.moveByText;
+    this.emitter.emit({cmd: 'switchMove', opt: {moveByText: this.moveByText}});
   }
 }

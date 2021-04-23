@@ -1,5 +1,6 @@
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {CmdEditorToolbox, EditorToolbarComponent, SlideContainerDirective} from 'ui-lib';
+import {CmdEditorToolbox, EditorToolbarComponent, SlideContainerDirective, LibNodeIterator} from 'ui-lib';
+import * as lib from 'ui-lib';
 import {Subscription} from 'rxjs';
 
 const KNOWN_KEYS = ['Enter', 'Tab',
@@ -19,10 +20,6 @@ const PROCESS_NAVIGATION_KEYS = [
 const BLOCK_ELEMENTS = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', 'blockquote'];
 const PHRASING_ELEMENTS = ['b', 'bdo', 'code', 'em', 'i', 'kbd', 'mark', 'samp', 'small', 'strong', 'sub', 'sup', 'var', 'del', 'ins', 'u'];
 const EMPTY_ELEMENTS = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
-const ELEMENT_NODE = 1;
-const TEXT_NODE = 3;
-const CDATA_SECTION_NODE = 4;
-const COMMENT_NODE = 8;
 const DESIGNER_ATTR_NAME = '_design';
 interface Position { n: Node; offset: number; }
 interface StoragePosition { designId: string; offset: number; txtOffset?: number; }
@@ -30,10 +27,10 @@ interface StoragePosition { designId: string; offset: number; txtOffset?: number
 /** remove **/
 function printNode(n: Node): string {
   let s = '';
-  if (n.nodeType === ELEMENT_NODE) {
+  if (n.nodeType === Node.ELEMENT_NODE) {
     const e = n as HTMLElement;
     s += e.tagName.toLowerCase() + ' ' + e.getAttribute(DESIGNER_ATTR_NAME);
-  } else if (n.nodeType === TEXT_NODE) {
+  } else if (n.nodeType === Node.TEXT_NODE) {
     s += '#text ' + n.textContent;
   } else {
     s = 'no-edit';
@@ -61,6 +58,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
   lastRange: Range;
   // tslint:disable-next-line:variable-name
   _sourceModified = false;
+  moveByText = true;
   rollback: Array<{parent: string, before: string, after: string}> = [];
   @ViewChild('editor', {static: true}) editorRef: ElementRef<HTMLDivElement>;
   @ViewChild(EditorToolbarComponent, {static: true}) toolbar: EditorToolbarComponent;
@@ -82,6 +80,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
   private onToolbar(e: CmdEditorToolbox): void {
     switch (e.cmd) {
       case 'tag':
+        this.toolbarTag(e.opt.tag, e.opt.attr);
         break;
       case 'toList':
         break;
@@ -112,11 +111,15 @@ export class TestSyncComponent implements OnInit, OnDestroy {
         break;
       case 'tblBorder':
         break;
+      case 'switchMove':
+        this.moveByText = e.opt.moveByText;
+        break;
     }
   }
   showDesigner(): void {
-    this.updateDesigner();
     this.slide.to(0);
+    this.editor.focus();
+    this.updateDesigner();
   }
   private toolbarTag(tag: string, attr?: {[key: string]: string}): void {
     if (this.focused) {
@@ -154,6 +157,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
   onKeyDown(event: KeyboardEvent): void {
     console.log('onKeyDown', {key: event.key, altKey: event.altKey, ctrlKey: event.ctrlKey, metaKey: event.metaKey});
     printSelection('onKeyDown');
+    console.log('this.moveByText', this.moveByText);
     this.storeRange();
     this.lastRange = this.validateRange(this.lastRange);
 
@@ -175,10 +179,10 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       } else if (PROCESS_NAVIGATION_KEYS.includes(event.key)) {
         switch (event.key) {
           case 'ArrowLeft':
-            this.movePrev(window.getSelection().focusNode, window.getSelection().focusOffset, !event.altKey);
+            this.movePrev(window.getSelection().focusNode, window.getSelection().focusOffset, this.moveByText);
             break;
           case 'ArrowRight':
-            this.moveNext(window.getSelection().focusNode, window.getSelection().focusOffset, !event.altKey);
+            this.moveNext(window.getSelection().focusNode, window.getSelection().focusOffset, this.moveByText);
             break;
         }
       } else {
@@ -190,8 +194,8 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     event.preventDefault();
     printSelection('onKeyDown: exit');
   }
-  private update(start: number, end: number, str: string): void {
-    const part = this.getModifiedPart(this.lastRange);
+  private update(range: Range, start: number, end: number, str: string): void {
+    const part = this.getModifiedPart(range);
     this.source = this.source.substring(0, start) + str + this.source.substring(end);
     const before = part.text;
     part.text = part.text.substring(0, start - part.start) + str + part.text.substring(end - part.start);
@@ -201,7 +205,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       after: part.text
     });
     this.lastRange = null;
-    if (part.parent.nodeType === ELEMENT_NODE) {
+    if (part.parent.nodeType === Node.ELEMENT_NODE) {
       (part.parent as HTMLElement).innerHTML = part.text;
     } else {
       part.parent.textContent = part.text;
@@ -213,16 +217,20 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     const store = this.storePosition(range.startContainer, range.startOffset);
     const str = this.txtSortOut(range.startContainer, range.startOffset,
       range.endContainer, range.endOffset) + ch;
-    this.update(start, end, str);
+    this.update(range, start, end, str);
     const p = this.restorePosition(store);
-    window.getSelection().collapse(p.n, p.offset);
+    if (p.n.nodeType === Node.TEXT_NODE) {
+      window.getSelection().collapse(p.n, Math.min(p.n.textContent.length, p.offset + ch.length));
+    } else {
+      window.getSelection().collapse(p.n, p.offset);
+    }
   }
   private insertTag(range: Range, tag: string, attr?: {[key: string]: string}, invert: boolean = false): void {
     if (range) {
       const start = this.syncPosition(range.startContainer, range.startOffset);
       const end = this.syncPosition(range.endContainer, range.endOffset);
       const id = '' + this.designIndex++;
-      const isEmpty = this.isEmptyElement(tag);
+      const isEmpty = lib.isEmptyTag(tag);
       const s = `<${tag} ${DESIGNER_ATTR_NAME}="${id}"${this.renderAttr(attr)}>`;
       let str = this.txtSortOut(range.startContainer, range.startOffset,
         range.endContainer, range.endOffset);
@@ -233,12 +241,12 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       } else {
         str += s + `</${tag}>`;
       }
-      this.update(start, end, str);
+      this.update(range, start, end, str);
       const node = this.findDesignElement(id) as Node;
       if (isEmpty) {
-        window.getSelection().collapse(node.parentNode, this.orderOfChild(node.parentNode, node) + 1);
+        window.getSelection().collapse(node.parentNode, lib.orderOfChild(node.parentNode, node) + 1);
       } else if (invert) {
-        window.getSelection().collapse(node.parentNode, this.orderOfChild(node.parentNode, node));
+        window.getSelection().collapse(node.parentNode, lib.orderOfChild(node.parentNode, node));
       } else {
         window.getSelection().collapse(node, 0);
       }
@@ -248,7 +256,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     if (this.focused) {
       const res: any = {};
       let e = this.focused as HTMLElement;
-      if (this.focused.nodeType !== ELEMENT_NODE) {
+      if (this.focused.nodeType !== Node.ELEMENT_NODE) {
         e = e.parentElement;
       }
       const cs = window.getComputedStyle(e);
@@ -261,6 +269,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
         if (PHRASING_ELEMENTS.includes(tag)) {
           res[tag + 'Tag'] = true;
         }
+        e = e.parentElement;
       }
       this.toolbar.updateToolbar(res);
     }
@@ -279,7 +288,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     return s;
   }
   private wrap(range: Range, tag: string, attr?: {[key: string]: string}, invert: boolean = false): void {
-    if (range.collapsed || this.isEmptyElement(tag)) {
+    if (range.collapsed || lib.isEmptyTag(tag)) {
       this.insertTag(range, tag, attr);
     } else {
       const start = this.syncPosition(range.startContainer, range.startOffset);
@@ -302,7 +311,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
         str = str.substring(0, res.index) + s + str.substr(res.index, res[0].length) + e + str.substring(res.index + res[0].length);
       }
       str = s + str + e;
-      this.update(start, end, str);
+      this.update(range, start, end, str);
       const p = this.restorePosition(store);
       window.getSelection().collapse(p.n, p.offset);
     }
@@ -313,7 +322,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       const end = this.syncPosition(range.endContainer, range.endOffset);
       const store = this.storePosition(range.startContainer, range.startOffset);
       const str = this.txtSortOut(range.startContainer, range.startOffset, range.endContainer, range.endOffset);
-      this.update(start, end, str);
+      this.update(range, start, end, str);
       const p = this.restorePosition(store);
       window.getSelection().collapse(p.n, p.offset);
     } else {
@@ -403,30 +412,21 @@ export class TestSyncComponent implements OnInit, OnDestroy {
   }
   private getAttribute(n: Node): string {
     if (n) {
-      if (n.nodeType === TEXT_NODE) {
+      if (n.nodeType === Node.TEXT_NODE) {
         return n.parentElement.getAttribute(DESIGNER_ATTR_NAME);
       }
-      if (n.nodeType === ELEMENT_NODE) {
+      if (n.nodeType === Node.ELEMENT_NODE) {
         return (n as HTMLElement).getAttribute(DESIGNER_ATTR_NAME);
       }
     }
     return null;
-  }
-  private orderOfChild(parent: Node, child: Node): number {
-    let n = 0; for (; parent.childNodes[n] !== child; ++n){}
-    return n;
-  }
-  private isContainer(n: Node): boolean {
-    if (n && n.nodeType === ELEMENT_NODE) {
-      return !EMPTY_ELEMENTS.includes((n as HTMLElement).tagName.toLowerCase());
-    }
   }
   private isAncestor(parent: Node, child: Node): boolean {
     while (child.parentNode !== null && child !== parent) { child = child.parentNode; }
     return child === parent;
   }
   private isInTag(n: Node, tag: string): boolean {
-    if (n.nodeType === TEXT_NODE) {
+    if (n.nodeType === Node.TEXT_NODE) {
       n = n.parentNode;
     }
     while (n !== this.editor) {
@@ -437,102 +437,22 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     }
   }
   private belong(n: Node, offset?: number): boolean {
-    if (typeof offset === 'number' && n && n.nodeType === ELEMENT_NODE) {
+    if (typeof offset === 'number' && n && n.nodeType === Node.ELEMENT_NODE) {
       return this.getAttribute(n.childNodes[offset]) !== null;
     }
     return n === this.editor || this.getAttribute(n) !== null;
   }
   private startPosition(): void {
-    if (this.editor.hasChildNodes()) {
-      if (this.editor.childNodes[0].nodeType === TEXT_NODE) {
-        window.getSelection().collapse(this.editor.childNodes[0], 0);
+    for (let i = 0; i < this.editor.childNodes.length; ++i) {
+      if (this.editor.childNodes[i].nodeType === Node.TEXT_NODE) {
+        window.getSelection().collapse(this.editor.childNodes[i], 0);
         return;
-      }
-      const res = this.findSiblingDown(this.editor, 0, (p, n, offset) => {
-        if (this.belong(n) && n.nodeType === TEXT_NODE) {
-          return {n, offset: 0};
-        }
-      });
-      if (res) {
-        window.getSelection().collapse(res.n, res.offset);
+      } else if (this.editor.childNodes[i].nodeType === Node.ELEMENT_NODE) {
+        window.getSelection().collapse(this.editor, i);
         return;
       }
     }
-    window.getSelection().collapse(this.editor, 0);
-  }
-  // tslint:disable-next-line:max-line-length
-  private findSiblingDown(n: Node, offset: number, criteria: (p: Node, n: Node, offset) => Position): Position {
-    for (let o = offset; o <= n.childNodes.length; ++o) {
-      let res = criteria(n, n.childNodes[o], o);
-      if (!res && this.isContainer(n.childNodes[o])) {
-        res = this.findSiblingDown(n.childNodes[o], 0, criteria);
-      }
-      if (res) {
-        return res;
-      }
-    }
-    return null;
-  }
-  // tslint:disable-next-line:max-line-length
-  private findNodeDown(n: Node, offset: number, criteria: (p: Node, n: Node, offset: number) => Position): Position {
-    if (n.nodeType === TEXT_NODE) {
-      offset = this.orderOfChild(n.parentNode, n) + 1;
-      n = n.parentNode;
-    }
-    while (n !== this.editor) {
-      const res = this.findSiblingDown(n, offset + 1, criteria);
-      if (res) {
-        return res;
-      }
-      offset = this.orderOfChild(n.parentNode, n);
-      n = n.parentNode;
-    }
-    for (let o = offset + 1;  o <= this.editor.childNodes.length; ++o) {
-      const res = this.findSiblingDown(n, o, criteria);
-      if (res) {
-        return res;
-      }
-    }
-    return null;
-  }
-  // tslint:disable-next-line:max-line-length
-  private findSiblingUp(n: Node, offset: number, criteria: (p: Node, n: Node, offset) => Position): Position {
-    for (let o = offset; o >= 0; o--) {
-      let res;
-      if (this.isContainer(n.childNodes[o])) {
-        res = this.findSiblingUp(n.childNodes[o], n.childNodes.length, criteria);
-        if (res) {
-          return res;
-        }
-      }
-      res = criteria(n, n.childNodes[o], o);
-      if (res) {
-        return res;
-      }
-    }
-    return null;
-  }
-  // tslint:disable-next-line:max-line-length
-  private findNodeUp(n: Node, offset: number, criteria: (p: Node, n: Node, offset: number) => Position): Position {
-    if (n.nodeType === TEXT_NODE) {
-      offset = this.orderOfChild(n.parentNode, n) + 1;
-      n = n.parentNode;
-    }
-    while (n !== this.editor) {
-      const res = this.findSiblingUp(n, offset - 1, criteria);
-      if (res) {
-        return res;
-      }
-      offset = this.orderOfChild(n.parentNode, n);
-      n = n.parentNode;
-    }
-    for (let o = offset - 1; o >= 0; o--) {
-      const res = criteria(n, n.childNodes[o], offset);
-      if (res) {
-        return res;
-      }
-    }
-    return null;
+    window.getSelection().collapse(this.editor, this.editor.childNodes.length);
   }
   private storeRange(): void {
     if (window.getSelection().rangeCount === 1) {
@@ -554,27 +474,33 @@ export class TestSyncComponent implements OnInit, OnDestroy {
   }
   private validateRange(range: Range): Range {
     if (this.focused && this.isAncestor(this.editor, range.commonAncestorContainer)) {
-      if (this.belong(range.commonAncestorContainer) && (range.collapsed || range.commonAncestorContainer.nodeType === TEXT_NODE)) {
+      if (this.belong(range.commonAncestorContainer) && (range.collapsed || range.commonAncestorContainer.nodeType === Node.TEXT_NODE)) {
         return range;
       }
       const start = this.focused === range.startContainer;
       let startPos: Position; let endPos: Position;
       if (!this.belong(range.startContainer, range.startOffset)) {
-        startPos = this.findNodeDown(range.startContainer, range.startOffset, (p, n, offset) => {
+        startPos = this.findNode(range.startContainer, range.startOffset, (n, o) => {
           if (this.belong(n) || n === this.toNode(range.endContainer, range.endOffset)) {
-            return {n: p, offset};
+            if (n.nodeType === Node.TEXT_NODE) {
+              return {n, offset: 0};
+            }
+            return {n: n.parentNode, offset: lib.orderOfChild(n.parentNode, n)};
           }
-        });
+        }, true);
         if (start) {
           this.focused = startPos.n;
         }
       }
       if (!this.belong(range.endContainer, range.endOffset)) {
-        endPos = this.findNodeUp(range.endContainer, range.endOffset, (p, n, offset) => {
+        endPos = this.findNode(range.endContainer, range.endOffset, (n) => {
           if (this.belong(n) || n === this.toNode(range.startContainer, range.startOffset)) {
-            return {n: p, offset};
+            if (n.nodeType === Node.TEXT_NODE) {
+              return {n, offset: n.textContent.length};
+            }
+            return {n, offset: lib.orderOfChild(n.parentNode, n)};
           }
-        });
+        }, false);
         if (!start) {
           this.focused = endPos.n;
         }
@@ -658,26 +584,29 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       return all;
     }
     if (!this.belong(parent)) {
-      const res = this.findNodeUp(parent, this.orderOfChild(parent.parentNode, parent), (p, n, offset) => {
-        if (this.belong(n) && n.nodeType === ELEMENT_NODE) { // there cannot be text node
-          return {n: p, offset};
+      const res = this.findNode(parent, lib.orderOfChild(parent.parentNode, parent), (n) => {
+        if (this.belong(n) && n.nodeType === Node.ELEMENT_NODE) { // there cannot be text node
+          return {n, offset: lib.orderOfChild(n.parentNode, n)};
         }
-      });
+      }, false);
       if (res !== null) {
         parent = res.n;
       } else { // TODO remove
         throw new Error('getModifiedPart: TODO it is not possible 1');
       }
     }
-    const attr = this.getAttribute(parent);
-    if (attr === null) { // TODO remove
-      throw new Error('getModifiedPart: TODO it is not possible 2');
-    }
-    if (attr === '0') {
+    if (parent === this.editor) {
       return all;
     }
-    const start = this.endSourceMark(attr);
-    const end = this.endOfElementIn((parent as HTMLElement).tagName, start);
+    let start: number; let end: number;
+    if (parent.nodeType === Node.ELEMENT_NODE) {
+      const attr = this.getAttribute(parent);
+      start = this.endSourceMark(attr);
+      end = this.endOfElementIn((parent as HTMLElement).tagName, start);
+    } else {
+      start = this.syncPosition(range.startContainer, 0);
+      end = this.syncPosition(range.endContainer, range.endContainer.textContent.length);
+    }
     return {parent, text: this.source.substring(start, end), start, end};
   }
   private findDesignElement(attr: string): Element {
@@ -685,9 +614,6 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       return this.editor;
     }
     return this.editor.querySelector(`[${DESIGNER_ATTR_NAME}="${attr}"]`);
-  }
-  private isEmptyElement(tag: string): boolean {
-    return EMPTY_ELEMENTS.includes(tag.toLowerCase());
   }
   private rangeSourceMarkOut(attr): {start: number, end: number} {
     if (attr === '0') {
@@ -698,7 +624,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       const start = res.index;
       const e = this.findDesignElement(attr);
       if (e) {
-        if (this.isEmptyElement(e.tagName)) {
+        if (lib.isEmptyNode(e)) {
           return {start, end: start + res[0].length};
         }
         return {start, end: this.endOfElementOut(e.tagName, start + res[0].length)};
@@ -710,28 +636,28 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     return {start: 0, end: this.source.length};
   }
   private syncPosition(n: Node, offset: number): number {
-    if (n.nodeType === ELEMENT_NODE) {
+    if (n.nodeType === Node.ELEMENT_NODE) {
       let start = 0;
       if (n !== this.editor) {
         start = this.endSourceMark(this.getAttribute(n));
       }
       for (let i = 0; n.childNodes[i] && i < offset; ++i) {
         const ch = n.childNodes[i];
-        if (ch.nodeType === TEXT_NODE) {
+        if (ch.nodeType === Node.TEXT_NODE) {
           // nothing
-        } else if (ch.nodeType === ELEMENT_NODE) {
+        } else if (ch.nodeType === Node.ELEMENT_NODE) {
           const range = this.rangeSourceMarkOut(this.getAttribute(ch));
           start = range.end;
-        } else if (ch.nodeType === COMMENT_NODE) {
+        } else if (ch.nodeType === Node.COMMENT_NODE) {
           start = this.source.indexOf('-->', start) + 3;
-        } else if (ch.nodeType === CDATA_SECTION_NODE) {
+        } else if (ch.nodeType === Node.CDATA_SECTION_NODE) {
           start = this.source.indexOf(']]>', start) + 3;
         }
       }
       return start;
     } else {
       // I expect only TEXT_NODE here
-      let start = this.orderOfChild(n.parentNode, n);
+      let start = lib.orderOfChild(n.parentNode, n);
       start = this.syncPosition(n.parentNode, start);
       return start + offset + this.unicodes(start, offset);
     }
@@ -761,9 +687,9 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     if (!range.collapsed) {
       let e: Node;
       if (end !== p) {
-        e = (end.nodeType === TEXT_NODE) ? end.parentNode : end;
+        e = (end.nodeType === Node.TEXT_NODE) ? end.parentNode : end;
         while (e !== p) {
-          const designId = e.nodeType === ELEMENT_NODE ? this.getAttribute(e) : null;
+          const designId = e.nodeType === Node.ELEMENT_NODE ? this.getAttribute(e) : null;
           if (designId) {
             result.open.push({
               tag: (e as HTMLElement).tagName, designId,
@@ -775,9 +701,9 @@ export class TestSyncComponent implements OnInit, OnDestroy {
         }
       }
       if (start !== p) {
-        e = (start.nodeType === TEXT_NODE) ? start.parentNode : start;
+        e = (start.nodeType === Node.TEXT_NODE) ? start.parentNode : start;
         while (e !== p) {
-          const designId = e.nodeType === ELEMENT_NODE ? this.getAttribute(e) : null;
+          const designId = e.nodeType === Node.ELEMENT_NODE ? this.getAttribute(e) : null;
           if (designId) {
             const i = result.open.findIndex(v => v.designId === designId);
             if (i >= 0) {
@@ -808,90 +734,19 @@ export class TestSyncComponent implements OnInit, OnDestroy {
   }
   private storePosition(n: Node, offset: number): StoragePosition {
     const result: any = {designId: this.getAttribute(n), offset};
-    if (n.nodeType === TEXT_NODE) {
+    if (n.nodeType === Node.TEXT_NODE) {
       result.txtOffset = offset;
-      result.offset = this.orderOfChild(n.parentNode, n);
+      result.offset = lib.orderOfChild(n.parentNode, n);
     }
     return result;
   }
   private restorePosition(store: StoragePosition): Position {
     const p = {n: this.findDesignElement(store.designId) as Node, offset: store.offset};
-    if (typeof store.txtOffset === 'number' && p.n.childNodes[p.offset] && p.n.childNodes[p.offset].nodeType === TEXT_NODE) {
+    if (p.n.childNodes[p.offset] && p.n.childNodes[p.offset].nodeType === Node.TEXT_NODE) {
       p.n = p.n.childNodes[p.offset];
-      p.offset = store.txtOffset;
+      p.offset = store.txtOffset || 0;
     }
     return p;
-  }
-  private nextDown(n: Node, offset: number, stepText: boolean = true): Position {
-    if (n.nodeType === TEXT_NODE && n.textContent.length > offset) {
-      return {n, offset: offset + 1};
-    }
-    if (n.nodeType === TEXT_NODE) {
-      offset = this.orderOfChild(n.parentNode, n) + 1;
-      n = n.parentNode;
-    }
-    if (stepText) {
-      return this.findNodeDown(n, offset, (p, c, o) => {
-        if (this.belong(p) && c === undefined) {
-          if (offset === 0) {
-            if (p.childNodes[0] && p.childNodes[0].nodeType === TEXT_NODE) {
-              return {n: p.childNodes[0], offset: p.childNodes[0].textContent.length};
-            }
-          }
-          if (p.childNodes[offset - 1] && p.childNodes[offset - 1].nodeType === TEXT_NODE) {
-            return {n: p.childNodes[offset - 1], offset: p.childNodes[offset - 1].textContent.length};
-          }
-          return {n: p, offset};
-        }
-        if (this.belong(c) && c.nodeType === TEXT_NODE) {
-          return {n: c, offset: 0};
-        }
-      });
-    }
-    return this.findNodeDown(n, offset, (p, c, o) => {
-      if (this.belong(p) && c === undefined) {
-        if (offset === 0) {
-          if (p.childNodes[0] && p.childNodes[0].nodeType === TEXT_NODE) {
-            return {n: p.childNodes[0], offset: p.childNodes[0].textContent.length};
-          }
-        }
-        if (p.childNodes[offset - 1] && p.childNodes[offset - 1].nodeType === TEXT_NODE) {
-          return {n: p.childNodes[offset - 1], offset: p.childNodes[offset - 1].textContent.length};
-        }
-        return {n: p, offset};
-      }
-      if (this.belong(c)) {
-        if (c.nodeType === TEXT_NODE) {
-          return {n: c, offset: 0};
-        }
-      }
-    });
-  }
-  private nextUp(n: Node, offset: number, stepText: boolean = true): Position {
-    if (n.nodeType === TEXT_NODE && offset > 0) {
-      return {n, offset: offset - 1};
-    }
-    if (n.nodeType === TEXT_NODE) {
-      offset = this.orderOfChild(n.parentNode, n) + 1;
-      n = n.parentNode;
-    }
-    if (stepText) {
-      return this.findNodeUp(n, offset, (p, c, o) => {
-        if (this.belong(c) && c.nodeType === TEXT_NODE) {
-          return {n: c, offset: c.textContent.length};
-        }
-      });
-    }
-    return this.findNodeUp(n, offset, (p, c, o) => {
-      if (this.belong(c)) {
-        if (c === undefined || c.nodeType === ELEMENT_NODE) {
-          return {n: p, offset};
-        }
-        if (c.nodeType === TEXT_NODE) {
-          return {n: c, offset: c.textContent.length};
-        }
-      }
-    });
   }
   private moveNext(n: Node, offset: number, stepText: boolean = true): void {
     const p = this.nextDown(n, offset, stepText);
@@ -906,9 +761,73 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     }
   }
   private toNode(n: Node, offset: number): Node {
-    if (n.nodeType === TEXT_NODE) {
+    if (n.nodeType === Node.TEXT_NODE) {
       return n;
     }
     return n.childNodes[offset];
   }
+  private findNode(n: Node, offset: number, criteria: (p: Node, offset: number) => Position, down: boolean): Position {
+    if (n.nodeType === Node.ELEMENT_NODE) {
+      n = n.childNodes[offset] || n;
+    }
+    const iterator = new LibNodeIterator(this.editor, n, !down);
+    for (const next of iterator) {
+      const res = criteria(next.n, next.offset);
+      if (res) {
+        return res;
+      }
+    }
+    return null;
+  }
+  private criteriaTextNode(n: Node, o: number, down: boolean = true): Position {
+    if (n.nodeType === Node.TEXT_NODE && this.belong(n)) {
+      console.error('IMPOSSIBLE!!!', n, o);
+      console.log('criteriaTextNode', n, o, true);
+      return {n, offset: down ? 0 : n.textContent.length};
+    }
+    const t = n.childNodes[o];
+    if (this.belong(t) && t.nodeType === Node.TEXT_NODE) {
+      console.log('criteriaTextNode', n, o, true);
+      return {n: t, offset: down ? 0 : t.textContent.length};
+    }
+    console.log('criteriaTextNode', n, o, false);
+  }
+  private criteriaAllNode(n: Node, o: number, down: boolean = true): Position {
+    const res = this.criteriaTextNode(n, o, down);
+    if (res) {
+      return res;
+    }
+    const t = n.childNodes[o];
+    if (!t) {
+      if (this.belong(n)) {
+        console.log('criteriaAllNode', n, o, true);
+        return {n, offset: o};
+      }
+    } else {
+      if (this.belong(t)) {
+        console.log('criteriaAllNode', n, o, true);
+        return {n, offset: o};
+      }
+    }
+    console.log('criteriaAllNode', n, o, false);
+  }
+  private nextDown(n: Node, offset: number, stepText: boolean = true): Position {
+    if (n.nodeType === Node.TEXT_NODE && n.textContent.length > offset) {
+      return {n, offset: offset + 1};
+    }
+    if (stepText) {
+      return this.findNode(n, offset, (p, o) => this.criteriaTextNode(p, o), true);
+    }
+    return this.findNode(n, offset, (p, o) => this.criteriaAllNode(p, o), true);
+  }
+  private nextUp(n: Node, offset: number, stepText: boolean = true): Position {
+    if (n.nodeType === Node.TEXT_NODE && offset > 0) {
+      return {n, offset: offset - 1};
+    }
+    if (stepText) {
+      return this.findNode(n, offset, (p, o) => this.criteriaTextNode(p, o, false), false);
+    }
+    return this.findNode(n, offset, (p, o) => this.criteriaAllNode(p, o, false), false);
+  }
+
 }

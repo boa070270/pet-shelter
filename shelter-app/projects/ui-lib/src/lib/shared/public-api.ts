@@ -13,3 +13,4 @@ export * from './menu.service';
 export * from './services-api';
 export * from './scroll-event.service';
 export * from './interval-observable.service';
+export * from './lib-node-iterator';
