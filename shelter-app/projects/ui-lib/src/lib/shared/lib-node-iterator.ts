@@ -1,6 +1,92 @@
-
 const EMPTY_ELEMENTS = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
-
+export interface Position { n: Node; offset: number; isImpl?: boolean; }
+export class PositionImpl implements Position {
+  readonly isImpl = true;
+  get n(): Node { return this._n; }
+  get offset(): number { return this._offset; }
+  constructor(private _n: Node, private _offset: number) {}
+  static newObject(p: Position): PositionImpl {
+    return new PositionImpl(p.n, p.offset);
+  }
+  static fromNode(n: Node): PositionImpl {
+    return new PositionImpl(n.parentNode, orderOfChild(n.parentNode, n));
+  }
+  toNode(): Node {
+    if (this._n.nodeType === Node.TEXT_NODE) {
+      return this._n;
+    }
+    return this._n.childNodes[this._offset];
+  }
+  present(): boolean {
+    return !!this.toNode();
+  }
+  tagName(): string {
+    return tagName(this.toNode());
+  }
+  order(): number {
+    const t = this.toNode();
+    if (t) {
+      return orderOfChild(t.parentNode, t);
+    }
+    return -1;
+  }
+  hasOffset(): boolean {
+    return hasOffset(this.toNode());
+  }
+  container(): boolean {
+    return isContainer(this.toNode());
+  }
+  emptyNode(): boolean {
+    return isEmptyNode(this.toNode());
+  }
+  textOrElement(): boolean {
+    const n = this.toNode();
+    return n && (n.nodeType === Node.TEXT_NODE || n.nodeType === Node.ELEMENT_NODE);
+  }
+  private exitContainer(): PositionImpl {
+    return new PositionImpl(this._n.parentNode, orderOfChild(this._n.parentNode, this._n));
+  }
+  private lastPosition(): PositionImpl {
+    if (this.container()) {
+      const n = this.toNode();
+      return new PositionImpl(n, n.childNodes.length);
+    }
+    return null;
+  }
+  private nodePosition(): Position {
+    let offset = this._offset;
+    let n = this._n;
+    if (this._n.nodeType === Node.TEXT_NODE) {
+      offset = orderOfChild(this._n.parentNode, this._n);
+      n = this._n.parentNode;
+    }
+    return {n, offset};
+  }
+  prevNode(): PositionImpl {
+    const {n, offset} = this.nodePosition();
+    if (offset > 0) {
+      const prev = new PositionImpl(n, offset - 1);
+      if (prev.container()) {
+        return prev.lastPosition();
+      }
+      return prev;
+    } else {
+      return this.exitContainer();
+    }
+  }
+  nextNode(checkContainer = true): PositionImpl {
+    const {n, offset} = this.nodePosition();
+    if (checkContainer && this.container()) {
+      return new PositionImpl(this.toNode(), 0);
+    }
+    if (offset < n.childNodes.length) {
+      return new PositionImpl(n, offset + 1);
+    } else {
+      const p = this.exitContainer();
+      return p.nextNode(false);
+    }
+  }
+}
 export function orderOfChild(parent: Node, child: Node): number {
   let n = 0; for (; parent.childNodes[n] !== child && parent.childNodes[n]; ++n){}
   return parent.childNodes[n] ? n : -1;
@@ -23,79 +109,30 @@ export function isEmptyNode(n: Node): boolean {
   const tag = tagName(n);
   return tag && EMPTY_ELEMENTS.includes(tag);
 }
-export class LibNodeIterator implements Iterable<{ n: Node, offset: number }>, Iterator<{ n: Node, offset: number }>{
-  private readonly iterator: NodeIterator;
-  private current: Node;
+export class LibNodeIterator implements Iterable<Position>, Iterator<Position>{
+  private current: PositionImpl;
   private done: boolean;
-  private prepared: { n: Node, offset: number };
-  constructor(private root: Node, from: Node, private revert = false,
-              private readonly whatToShow?: number, private filter?: NodeFilter) {
-    if (this.whatToShow === undefined) {
-      this.whatToShow = NodeFilter.SHOW_COMMENT + NodeFilter.SHOW_CDATA_SECTION + NodeFilter.SHOW_TEXT + NodeFilter.SHOW_ELEMENT;
-    }
-    this.iterator = document.createNodeIterator(root, this.whatToShow, filter);
-    do {
-      this.current = this.iterator.nextNode();
-    } while (this.current !== from && this.current !== null);
-    this.done = this.current === null && !this.revert;
+  constructor(private root: Node, private from: Position, private revert = false) {
+    this.current = from.isImpl ? from as PositionImpl : PositionImpl.newObject(from);
+    this.done = this.isDone();
   }
-  next(...args: [] | [undefined]): IteratorResult<{ n: Node; offset: number }> {
+  private isDone(): boolean {
+    return (this.revert && this.current.n === this.root && this.current.offset === 0)
+      || (!this.revert && this.current.n === this.root && this.current.offset === this.root.childNodes.length);
+  }
+  next(...args: [] | [undefined]): IteratorResult<Position> {
     if (this.done) {
-      return this.result();
-    }
-    if (this.prepared) {
-      const r = this.prepared;
-      this.prepared = null;
-      return this.result(r.n, r.offset);
+      return {done: true, value: null};
     }
     if (this.revert) {
-      this.current = this.iterator.previousNode();
+      this.current = this.current.prevNode();
     } else {
-      this.current = this.iterator.nextNode();
+      this.current = this.current.nextNode();
     }
-    if (this.current && this.current !== this.root) {
-      const offset = orderOfChild(this.current.parentNode, this.current);
-      if (offset + 1 === this.current.parentNode.childNodes.length) {
-        if (this.revert) {
-          this.prepared = {n: this.current.parentNode, offset};
-          return this.result(this.current.parentNode, offset + 1);
-        } else {
-          this.prepared = {n: this.current.parentNode, offset: offset + 1};
-          return this.resultNode(this.current);
-        }
-      }
-      if (isContainer(this.current) && !this.current.hasChildNodes()) {
-        if (this.revert) {
-          this.prepared = {n: this.current.parentNode, offset};
-          return this.result(this.current, 0);
-        } else {
-          this.prepared = {n: this.current, offset: 0};
-          return this.resultNode(this.current);
-        }
-      }
-      return this.resultNode(this.current);
-    } else {
-      let res;
-      if (this.revert) {
-        res = this.result(this.root, 0);
-      } else {
-        res = this.result(this.root, this.root.childNodes.length);
-      }
-      this.done = true;
-      return res;
-    }
+    this.done = this.isDone();
+    return {done: false, value: this.current};
   }
-  private resultNode(n: Node): IteratorResult<{ n: Node; offset: number }> {
-    return this.result(n.parentNode, orderOfChild(n.parentNode, n));
-  }
-  private result(n?: Node, offset?: number): IteratorResult<{ n: Node; offset: number }> {
-    if (!this.done) {
-      return {done: false, value: {n, offset}};
-    }
-    return {done: true, value: null};
-  }
-  [Symbol.iterator](): Iterator<{ n: Node; offset: number }> {
+  [Symbol.iterator](): Iterator<Position> {
     return this;
   }
-
 }

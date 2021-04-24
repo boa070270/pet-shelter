@@ -1,5 +1,5 @@
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {CmdEditorToolbox, EditorToolbarComponent, SlideContainerDirective, LibNodeIterator} from 'ui-lib';
+import {CmdEditorToolbox, EditorToolbarComponent, SlideContainerDirective, LibNodeIterator, Position} from 'ui-lib';
 import * as lib from 'ui-lib';
 import {Subscription} from 'rxjs';
 
@@ -19,9 +19,8 @@ const PROCESS_NAVIGATION_KEYS = [
 ];
 const BLOCK_ELEMENTS = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', 'blockquote'];
 const PHRASING_ELEMENTS = ['b', 'bdo', 'code', 'em', 'i', 'kbd', 'mark', 'samp', 'small', 'strong', 'sub', 'sup', 'var', 'del', 'ins', 'u'];
-const EMPTY_ELEMENTS = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
 const DESIGNER_ATTR_NAME = '_design';
-interface Position { n: Node; offset: number; }
+
 interface StoragePosition { designId: string; offset: number; txtOffset?: number; }
 // tslint:disable-next-line:jsdoc-format
 /** remove **/
@@ -767,10 +766,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     return n.childNodes[offset];
   }
   private findNode(n: Node, offset: number, criteria: (p: Node, offset: number) => Position, down: boolean): Position {
-    if (n.nodeType === Node.ELEMENT_NODE) {
-      n = n.childNodes[offset] || n;
-    }
-    const iterator = new LibNodeIterator(this.editor, n, !down);
+    const iterator = new LibNodeIterator(this.editor, {n, offset}, !down);
     for (const next of iterator) {
       const res = criteria(next.n, next.offset);
       if (res) {
