@@ -234,31 +234,38 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       window.getSelection().collapse(p.n, p.offset);
     }
   }
+  private selectContent(n: Node): Range {
+    const r = document.createRange();
+    r.selectNodeContents(n);
+    return r;
+  }
   private insertTag(range: Range, tag: string, attr?: {[key: string]: string}, invert: boolean = false): void {
-    if (range) {
-      const start = this.syncPosition(range.startContainer, range.startOffset);
-      const end = this.syncPosition(range.endContainer, range.endOffset);
-      const id = '' + this.designIndex++;
-      const isEmpty = lib.isEmptyTag(tag);
-      const s = `<${tag} ${DESIGNER_ATTR_NAME}="${id}"${this.renderAttr(attr)}>`;
-      let str = this.txtSortOut(range.startContainer, range.startOffset,
-        range.endContainer, range.endOffset);
-      if (isEmpty) {
-        str += s;
-      } else if (invert) {
-        str += `</${tag}>` + s;
-      } else {
-        str += s + `</${tag}>`;
-      }
-      this.update(range, start, end, str);
-      const node = this.findDesignElement(id) as Node;
-      if (isEmpty) {
-        window.getSelection().collapse(node.parentNode, lib.orderOfChild(node.parentNode, node) + 1);
-      } else if (invert) {
-        window.getSelection().collapse(node.parentNode, lib.orderOfChild(node.parentNode, node));
-      } else {
-        window.getSelection().collapse(node, 0);
-      }
+    let updRange = range;
+    if (range.commonAncestorContainer.nodeType === Node.TEXT_NODE) {
+      updRange = this.selectContent(range.commonAncestorContainer.parentNode);
+    }
+    const start = this.syncPosition(range.startContainer, range.startOffset);
+    const end = this.syncPosition(range.endContainer, range.endOffset);
+    const id = '' + this.designIndex++;
+    const isEmpty = lib.isEmptyTag(tag);
+    const s = `<${tag} ${DESIGNER_ATTR_NAME}="${id}"${this.renderAttr(attr)}>`;
+    let str = this.txtSortOut(range.startContainer, range.startOffset,
+      range.endContainer, range.endOffset);
+    if (isEmpty) {
+      str += s;
+    } else if (invert) {
+      str += `</${tag}>` + s;
+    } else {
+      str += s + `</${tag}>`;
+    }
+    this.update(updRange, start, end, str);
+    const node = this.findDesignElement(id) as Node;
+    if (isEmpty) {
+      window.getSelection().collapse(node.parentNode, lib.orderOfChild(node.parentNode, node) + 1);
+    } else if (invert) {
+      window.getSelection().collapse(node.parentNode, lib.orderOfChild(node.parentNode, node));
+    } else {
+      window.getSelection().collapse(node, 0);
     }
   }
   private updateToolbar(): void {
@@ -432,7 +439,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
   }
   private isAncestor(child: Node): boolean {
     // tslint:disable-next-line:no-bitwise
-    return (this.editor.compareDocumentPosition(child) & Node.DOCUMENT_POSITION_CONTAINED_BY) !== 0;
+    return this.editor === child || (this.editor.compareDocumentPosition(child) & Node.DOCUMENT_POSITION_CONTAINED_BY) !== 0;
   }
   private isInTag(n: Node, tag: string): boolean {
     if (n.nodeType === Node.TEXT_NODE) {
@@ -547,7 +554,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
   private findSourceMark(attr: string, source?: string): RegExpExecArray {
     if (!source) { source = this.source; }
     const regexp = new RegExp(`<([a-zA-Z][^<>]*\\s${DESIGNER_ATTR_NAME}="${attr}"[^<>]*)>`, 'gs');
-    return regexp.exec(this.source);
+    return regexp.exec(source);
   }
   private startSourceMark(attr: string): number {
     return this.findSourceMark(attr).index;
@@ -597,14 +604,13 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       return all;
     }
     if (!this.belong(parent)) {
-      const res = this.findNode(parent, (p) => {
-        if (this.belong(p) && p.n.nodeType === Node.ELEMENT_NODE) { // there cannot be text node
+      parent = asPositionImpl(this.findNode(parent, (p) => {
+        const n = asPositionImpl(p).toNode();
+        if (n && this.belong(p) && n.nodeType === Node.ELEMENT_NODE) { // there cannot be text node
           return p;
         }
-      }, false);
-      if (res !== null) {
-        parent = asPositionImpl(res);
-      } else { // TODO remove
+      }, false));
+      if (parent === null) {
         throw new Error('getModifiedPart: TODO it is not possible 1');
       }
     }
@@ -612,15 +618,15 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       return all;
     }
     let start: number; let end: number;
-    if (parent.n.nodeType === Node.ELEMENT_NODE) {
-      const attr = parent.getAttribute(DESIGNER_ATTR_NAME);
-      start = this.endSourceMark(attr);
+    const node = parent.toNode();
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      start = this.endSourceMark(this.getAttribute(node));
       end = this.endOfElementIn(parent.tagName(), start);
     } else {
       start = this.syncPosition(range.startContainer, 0);
       end = this.syncPosition(range.endContainer, range.endContainer.textContent.length);
     }
-    return {parent: parent.toNode(), text: this.source.substring(start, end), start, end};
+    return {parent: node, text: this.source.substring(start, end), start, end};
   }
   private findDesignElement(attr: string): Element {
     if (attr === '0') {
@@ -773,12 +779,6 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       window.getSelection().collapse(p.n, p.offset);
     }
   }
-  private toNode(n: Node, offset: number): Node {
-    if (n.nodeType === Node.TEXT_NODE) {
-      return n;
-    }
-    return n.childNodes[offset];
-  }
   private findNode(p: Position, criteria: (p: Position) => Position, down: boolean): Position {
     const iterator = new LibNodeIterator(this.editor, p, !down);
     for (const next of iterator) {
@@ -792,7 +792,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
   private criteriaTextNode(p: Position, down: boolean = true): Position {
     const i = asPositionImpl(p);
     const n = i.toNode();
-    if (n.nodeType === Node.TEXT_NODE && this.belong(i)) {
+    if (n && n.nodeType === Node.TEXT_NODE && this.belong(i)) {
       console.log('criteriaTextNode', p.n, p.offset, true);
       return {n, offset: down ? 0 : n.textContent.length};
     }
