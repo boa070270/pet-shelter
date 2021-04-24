@@ -1,5 +1,12 @@
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {CmdEditorToolbox, EditorToolbarComponent, SlideContainerDirective, LibNodeIterator, Position} from 'ui-lib';
+import {
+  CmdEditorToolbox,
+  EditorToolbarComponent,
+  SlideContainerDirective,
+  LibNodeIterator,
+  Position,
+  PositionImpl
+} from 'ui-lib';
 import * as lib from 'ui-lib';
 import {Subscription} from 'rxjs';
 
@@ -21,6 +28,9 @@ const BLOCK_ELEMENTS = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', 'blockqu
 const PHRASING_ELEMENTS = ['b', 'bdo', 'code', 'em', 'i', 'kbd', 'mark', 'samp', 'small', 'strong', 'sub', 'sup', 'var', 'del', 'ins', 'u'];
 const DESIGNER_ATTR_NAME = '_design';
 
+function asPositionImpl(p: Position): PositionImpl {
+  return p.isImpl ? p as PositionImpl : PositionImpl.newObject(p);
+}
 interface StoragePosition { designId: string; offset: number; txtOffset?: number; }
 // tslint:disable-next-line:jsdoc-format
 /** remove **/
@@ -329,15 +339,15 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       let endPos: Position;
       if (after) {
         startPos = {n: range.startContainer, offset: range.startOffset};
-        endPos = this.nextDown(startPos.n, startPos.offset);
+        endPos = this.nextDown(startPos);
         if (!endPos) {
-          endPos = this.nextDown(startPos.n, startPos.offset, false);
+          endPos = this.nextDown(startPos, false);
         }
       } else {
         endPos = {n: range.startContainer, offset: range.startOffset};
-        startPos = this.nextUp(endPos.n, endPos.offset);
+        startPos = this.nextUp(endPos);
         if (!startPos) {
-          startPos = this.nextUp(endPos.n, endPos.offset, false);
+          startPos = this.nextUp(endPos, false);
         }
       }
       const r = document.createRange();
@@ -420,9 +430,9 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     }
     return null;
   }
-  private isAncestor(parent: Node, child: Node): boolean {
-    while (child.parentNode !== null && child !== parent) { child = child.parentNode; }
-    return child === parent;
+  private isAncestor(child: Node): boolean {
+    // tslint:disable-next-line:no-bitwise
+    return (this.editor.compareDocumentPosition(child) & Node.DOCUMENT_POSITION_CONTAINED_BY) !== 0;
   }
   private isInTag(n: Node, tag: string): boolean {
     if (n.nodeType === Node.TEXT_NODE) {
@@ -435,11 +445,11 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       n = n.parentNode;
     }
   }
-  private belong(n: Node, offset?: number): boolean {
-    if (typeof offset === 'number' && n && n.nodeType === Node.ELEMENT_NODE) {
-      return this.getAttribute(n.childNodes[offset]) !== null;
+  private belong(p: Position): boolean {
+    if (p) {
+      const n = asPositionImpl(p).toNode() || p.n;
+      return n === this.editor || this.getAttribute(n) !== null;
     }
-    return n === this.editor || this.getAttribute(n) !== null;
   }
   private startPosition(): void {
     for (let i = 0; i < this.editor.childNodes.length; ++i) {
@@ -472,40 +482,44 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     }
   }
   private validateRange(range: Range): Range {
-    if (this.focused && this.isAncestor(this.editor, range.commonAncestorContainer)) {
-      if (this.belong(range.commonAncestorContainer) && (range.collapsed || range.commonAncestorContainer.nodeType === Node.TEXT_NODE)) {
+    if (this.focused && this.isAncestor(range.commonAncestorContainer)) {
+      if (this.belong(PositionImpl.fromNode(range.commonAncestorContainer))
+        && (range.collapsed || range.commonAncestorContainer.nodeType === Node.TEXT_NODE)) {
         return range;
       }
       const start = this.focused === range.startContainer;
-      let startPos: Position; let endPos: Position;
-      if (!this.belong(range.startContainer, range.startOffset)) {
-        startPos = this.findNode(range.startContainer, range.startOffset, (n, o) => {
-          if (this.belong(n) || n === this.toNode(range.endContainer, range.endOffset)) {
+      let startPos = new PositionImpl(range.startContainer, range.startOffset);
+      let endPos = new PositionImpl(range.endContainer, range.endOffset);
+      if (!this.belong(startPos)) {
+        startPos = asPositionImpl(this.findNode(startPos, (p) => {
+          const n = asPositionImpl(p).toNode();
+          if (n && (this.belong(p) || n === endPos.toNode())) {
             if (n.nodeType === Node.TEXT_NODE) {
-              return {n, offset: 0};
+              return new PositionImpl(n, 0);
             }
-            return {n: n.parentNode, offset: lib.orderOfChild(n.parentNode, n)};
+            return p;
           }
-        }, true);
+        }, true));
         if (start) {
           this.focused = startPos.n;
         }
       }
-      if (!this.belong(range.endContainer, range.endOffset)) {
-        endPos = this.findNode(range.endContainer, range.endOffset, (n) => {
-          if (this.belong(n) || n === this.toNode(range.startContainer, range.startOffset)) {
+      if (!this.belong(endPos)) {
+        endPos = asPositionImpl(this.findNode(endPos, (p) => {
+          const n = asPositionImpl(p).toNode();
+          if (n && (this.belong(p) || n === startPos.toNode())) {
             if (n.nodeType === Node.TEXT_NODE) {
-              return {n, offset: n.textContent.length};
+              return new PositionImpl(n, n.textContent.length);
             }
-            return {n, offset: lib.orderOfChild(n.parentNode, n)};
+            return p;
           }
-        }, false);
+        }, false));
         if (!start) {
           this.focused = endPos.n;
         }
       }
       if (startPos.n === range.endContainer && startPos.offset === range.endOffset) {
-        if (this.belong(startPos.n, startPos.offset)) {
+        if (this.belong(startPos)) {
           range.collapse(false);
           return range;
         } else {
@@ -513,7 +527,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
         }
       }
       if (endPos.n === range.startContainer && endPos.offset === range.startOffset) {
-        if (this.belong(endPos.n, endPos.offset)) {
+        if (this.belong(endPos)) {
           range.collapse(true);
           return range;
         } else {
@@ -577,36 +591,36 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     return res.index + res[0].length;
   }
   private getModifiedPart(range: Range): {parent: Node, text: string, start: number, end: number} {
-    let parent = range.commonAncestorContainer;
+    let parent = PositionImpl.fromNode(range.commonAncestorContainer);
     const all = {parent: this.editor, text: this.source, start: 0, end: this.source.length};
-    if (parent === this.editor) {
+    if (parent.toNode() === this.editor) {
       return all;
     }
     if (!this.belong(parent)) {
-      const res = this.findNode(parent, lib.orderOfChild(parent.parentNode, parent), (n) => {
-        if (this.belong(n) && n.nodeType === Node.ELEMENT_NODE) { // there cannot be text node
-          return {n, offset: lib.orderOfChild(n.parentNode, n)};
+      const res = this.findNode(parent, (p) => {
+        if (this.belong(p) && p.n.nodeType === Node.ELEMENT_NODE) { // there cannot be text node
+          return p;
         }
       }, false);
       if (res !== null) {
-        parent = res.n;
+        parent = asPositionImpl(res);
       } else { // TODO remove
         throw new Error('getModifiedPart: TODO it is not possible 1');
       }
     }
-    if (parent === this.editor) {
+    if (parent.toNode() === this.editor) {
       return all;
     }
     let start: number; let end: number;
-    if (parent.nodeType === Node.ELEMENT_NODE) {
-      const attr = this.getAttribute(parent);
+    if (parent.n.nodeType === Node.ELEMENT_NODE) {
+      const attr = parent.getAttribute(DESIGNER_ATTR_NAME);
       start = this.endSourceMark(attr);
-      end = this.endOfElementIn((parent as HTMLElement).tagName, start);
+      end = this.endOfElementIn(parent.tagName(), start);
     } else {
       start = this.syncPosition(range.startContainer, 0);
       end = this.syncPosition(range.endContainer, range.endContainer.textContent.length);
     }
-    return {parent, text: this.source.substring(start, end), start, end};
+    return {parent: parent.toNode(), text: this.source.substring(start, end), start, end};
   }
   private findDesignElement(attr: string): Element {
     if (attr === '0') {
@@ -748,13 +762,13 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     return p;
   }
   private moveNext(n: Node, offset: number, stepText: boolean = true): void {
-    const p = this.nextDown(n, offset, stepText);
+    const p = this.nextDown({n, offset}, stepText);
     if (p) {
       window.getSelection().collapse(p.n, p.offset);
     }
   }
   private movePrev(n: Node, offset: number, stepText: boolean = true): void {
-    const p = this.nextUp(n, offset, stepText);
+    const p = this.nextUp({n, offset}, stepText);
     if (p) {
       window.getSelection().collapse(p.n, p.offset);
     }
@@ -765,65 +779,51 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     }
     return n.childNodes[offset];
   }
-  private findNode(n: Node, offset: number, criteria: (p: Node, offset: number) => Position, down: boolean): Position {
-    const iterator = new LibNodeIterator(this.editor, {n, offset}, !down);
+  private findNode(p: Position, criteria: (p: Position) => Position, down: boolean): Position {
+    const iterator = new LibNodeIterator(this.editor, p, !down);
     for (const next of iterator) {
-      const res = criteria(next.n, next.offset);
+      const res = criteria(next);
       if (res) {
         return res;
       }
     }
     return null;
   }
-  private criteriaTextNode(n: Node, o: number, down: boolean = true): Position {
-    if (n.nodeType === Node.TEXT_NODE && this.belong(n)) {
-      console.error('IMPOSSIBLE!!!', n, o);
-      console.log('criteriaTextNode', n, o, true);
+  private criteriaTextNode(p: Position, down: boolean = true): Position {
+    const i = asPositionImpl(p);
+    const n = i.toNode();
+    if (n.nodeType === Node.TEXT_NODE && this.belong(i)) {
+      console.log('criteriaTextNode', p.n, p.offset, true);
       return {n, offset: down ? 0 : n.textContent.length};
     }
-    const t = n.childNodes[o];
-    if (this.belong(t) && t.nodeType === Node.TEXT_NODE) {
-      console.log('criteriaTextNode', n, o, true);
-      return {n: t, offset: down ? 0 : t.textContent.length};
-    }
-    console.log('criteriaTextNode', n, o, false);
+    console.log('criteriaTextNode', p.n, p.offset, false);
   }
-  private criteriaAllNode(n: Node, o: number, down: boolean = true): Position {
-    const res = this.criteriaTextNode(n, o, down);
-    if (res) {
-      return res;
+  private criteriaAllNode(p: Position, down: boolean = true): Position {
+    const r = this.criteriaTextNode(p, down);
+    if (r) { return r; }
+    if (this.belong(p)) {
+      console.log('criteriaAllNode', p.n, p.offset, true);
+      return p;
     }
-    const t = n.childNodes[o];
-    if (!t) {
-      if (this.belong(n)) {
-        console.log('criteriaAllNode', n, o, true);
-        return {n, offset: o};
-      }
-    } else {
-      if (this.belong(t)) {
-        console.log('criteriaAllNode', n, o, true);
-        return {n, offset: o};
-      }
-    }
-    console.log('criteriaAllNode', n, o, false);
+    console.log('criteriaAllNode', p.n, p.offset, false);
   }
-  private nextDown(n: Node, offset: number, stepText: boolean = true): Position {
-    if (n.nodeType === Node.TEXT_NODE && n.textContent.length > offset) {
-      return {n, offset: offset + 1};
+  private nextDown(p: Position, stepText: boolean = true): Position {
+    if (p.n.nodeType === Node.TEXT_NODE && p.n.textContent.length > p.offset) {
+      return {n: p.n, offset: p.offset + 1};
     }
     if (stepText) {
-      return this.findNode(n, offset, (p, o) => this.criteriaTextNode(p, o), true);
+      return this.findNode(p, (c) => this.criteriaTextNode(c), true);
     }
-    return this.findNode(n, offset, (p, o) => this.criteriaAllNode(p, o), true);
+    return this.findNode(p, (c) => this.criteriaAllNode(c), true);
   }
-  private nextUp(n: Node, offset: number, stepText: boolean = true): Position {
-    if (n.nodeType === Node.TEXT_NODE && offset > 0) {
-      return {n, offset: offset - 1};
+  private nextUp(p: Position, stepText: boolean = true): Position {
+    if (p.n.nodeType === Node.TEXT_NODE && p.offset > 0) {
+      return {n: p.n, offset: p.offset - 1};
     }
     if (stepText) {
-      return this.findNode(n, offset, (p, o) => this.criteriaTextNode(p, o, false), false);
+      return this.findNode(p, (c) => this.criteriaTextNode(c, false), false);
     }
-    return this.findNode(n, offset, (p, o) => this.criteriaAllNode(p, o, false), false);
+    return this.findNode(p, (c) => this.criteriaAllNode(c, false), false);
   }
 
 }

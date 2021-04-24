@@ -23,6 +23,13 @@ export class PositionImpl implements Position {
   tagName(): string {
     return tagName(this.toNode());
   }
+  getAttribute(s: string): string {
+    const n = this.toNode();
+    if (n && n.nodeType === Node.ELEMENT_NODE) {
+      return (n as HTMLElement).getAttribute(s);
+    }
+    return null;
+  }
   order(): number {
     const t = this.toNode();
     if (t) {
