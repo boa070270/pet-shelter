@@ -78,7 +78,12 @@ export class PositionImpl implements Position {
       }
       return prev;
     } else {
-      return this.exitContainer();
+      const p = this.exitContainer();
+      if (this.toNode().nodeType === Node.TEXT_NODE) {
+        return p.prevNode();
+      } else {
+        return p;
+      }
     }
   }
   nextNode(checkContainer = true): PositionImpl {

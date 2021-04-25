@@ -226,7 +226,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     const store = this.storePosition(range.startContainer, range.startOffset);
     const str = this.txtSortOut(range.startContainer, range.startOffset,
       range.endContainer, range.endOffset) + ch;
-    this.update(range, start, end, str);
+    this.update(this.changeRange(range), start, end, str);
     const p = this.restorePosition(store);
     if (p.n.nodeType === Node.TEXT_NODE) {
       window.getSelection().collapse(p.n, Math.min(p.n.textContent.length, p.offset + ch.length));
@@ -234,16 +234,15 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       window.getSelection().collapse(p.n, p.offset);
     }
   }
-  private selectContent(n: Node): Range {
-    const r = document.createRange();
-    r.selectNodeContents(n);
-    return r;
+  private changeRange(range: Range): Range {
+    if (range.commonAncestorContainer.nodeType === Node.TEXT_NODE) {
+      const r = document.createRange();
+      r.selectNodeContents(range.commonAncestorContainer.parentNode);
+      return r;
+    }
+    return range;
   }
   private insertTag(range: Range, tag: string, attr?: {[key: string]: string}, invert: boolean = false): void {
-    let updRange = range;
-    if (range.commonAncestorContainer.nodeType === Node.TEXT_NODE) {
-      updRange = this.selectContent(range.commonAncestorContainer.parentNode);
-    }
     const start = this.syncPosition(range.startContainer, range.startOffset);
     const end = this.syncPosition(range.endContainer, range.endOffset);
     const id = '' + this.designIndex++;
@@ -258,7 +257,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     } else {
       str += s + `</${tag}>`;
     }
-    this.update(updRange, start, end, str);
+    this.update(this.changeRange(range), start, end, str);
     const node = this.findDesignElement(id) as Node;
     if (isEmpty) {
       window.getSelection().collapse(node.parentNode, lib.orderOfChild(node.parentNode, node) + 1);
@@ -303,7 +302,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     }
     return s;
   }
-  private wrap(range: Range, tag: string, attr?: {[key: string]: string}, invert: boolean = false): void {
+  private wrap(range: Range, tag: string, attr?: {[key: string]: string}, invert: Node = null): void {
     if (range.collapsed || lib.isEmptyTag(tag)) {
       this.insertTag(range, tag, attr);
     } else {
@@ -311,7 +310,8 @@ export class TestSyncComponent implements OnInit, OnDestroy {
       const end = this.syncPosition(range.endContainer, range.endOffset);
       const store = this.storePosition(range.startContainer, range.startOffset);
       const id = '' + this.designIndex++;
-      const so = this.sortOut(range.startContainer, range.startOffset, range.endContainer, range.endOffset);
+      const startPos = invert ? PositionImpl.fromNode(invert) : {n: range.startContainer, offset: range.startOffset};
+      const so = this.sortOut(startPos.n, startPos.offset, range.endContainer, range.endOffset);
       let s = `<${tag} ${DESIGNER_ATTR_NAME}="${id}"${this.renderAttr(attr)}>`;
       let e = `</${tag}>`;
       if (invert) {
@@ -327,7 +327,7 @@ export class TestSyncComponent implements OnInit, OnDestroy {
         str = str.substring(0, res.index) + s + str.substr(res.index, res[0].length) + e + str.substring(res.index + res[0].length);
       }
       str = s + str + e;
-      this.update(range, start, end, str);
+      this.update(this.changeRange(range), start, end, str);
       const p = this.restorePosition(store);
       window.getSelection().collapse(p.n, p.offset);
     }
@@ -441,13 +441,13 @@ export class TestSyncComponent implements OnInit, OnDestroy {
     // tslint:disable-next-line:no-bitwise
     return this.editor === child || (this.editor.compareDocumentPosition(child) & Node.DOCUMENT_POSITION_CONTAINED_BY) !== 0;
   }
-  private isInTag(n: Node, tag: string): boolean {
+  private isInTag(n: Node, tag: string): Node {
     if (n.nodeType === Node.TEXT_NODE) {
       n = n.parentNode;
     }
     while (n !== this.editor) {
       if ((n as HTMLElement).tagName.toLowerCase() === tag) {
-        return true;
+        return n;
       }
       n = n.parentNode;
     }
