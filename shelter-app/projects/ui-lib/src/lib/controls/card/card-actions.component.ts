@@ -25,11 +25,9 @@ export class CardActionsComponent extends BaseComponent implements OnInit, OnCha
 
   @Input()
   set actions(arr: Array<{icon: string, tooltip: string | TitleType[], command: string}>) {
-    console.log('CardActionsComponent.set actions', arr);
     this._actions = arr;
   }
   get actions(): Array<{icon: string, tooltip: string | TitleType[], command: string}> {
-    console.log('CardActionsComponent.get actions', this._actions);
     return this._actions;
   }
 

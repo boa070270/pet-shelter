@@ -114,7 +114,7 @@ $card-actions-bg:                   white !default;
   border: $card-border-width solid $card-border-color;
   @include border-radius($card-border-radius);
   margin: 0;
-  max-height: 80%;
+  max-height: 100%;
 
   > hr {
     margin-right: 0;
@@ -245,13 +245,16 @@ $card-actions-bg:                   white !default;
 
 // Card image
 .card-img-overlay {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding: $card-img-overlay-padding;
-  @include border-radius($card-inner-border-radius);
+  --columns: attr(cols string);
+  display: block;
+  position: relative;
+  padding: {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  };
+  margin: 0;
 }
 .card-img {
   max-width: 100%;

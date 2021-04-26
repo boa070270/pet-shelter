@@ -1,1 +1,15 @@
-<ng-content></ng-content>
+<div #self>
+  <div #header>
+    <ng-content select="lib-card-header"></ng-content>
+  </div>
+  <div #content>
+    <ng-content select="lib-card-content"></ng-content>
+    <ng-content></ng-content>
+  </div>
+  <div #actions>
+    <ng-content select="lib-card-actions"></ng-content>
+  </div>
+  <div #footer>
+    <ng-content select="lib-card-footer"></ng-content>
+  </div>
+</div>

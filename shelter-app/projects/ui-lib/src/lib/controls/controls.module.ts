@@ -1,4 +1,4 @@
-import {NgModule} from '@angular/core';
+import {Directive, NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CheckboxControlComponent} from './checkbox-control.component';
@@ -49,7 +49,8 @@ import {
   CardContentDirective,
   CardFooterDirective,
   CardHeaderComponent, CardSubtitleDirective,
-  CardTitleDirective, CardImageDirective
+  CardTitleDirective, CardImageDirective,
+  CardImageComponent
 } from './card/card.component';
 import { CardActionsComponent } from './card/card-actions.component';
 
@@ -91,7 +92,8 @@ import { CardActionsComponent } from './card/card-actions.component';
     CardContentDirective,
     CardActionsComponent,
     CardFooterDirective,
-    CardImageDirective
+    CardImageDirective,
+    CardImageComponent
   ],
     imports: [
         CommonModule,
@@ -139,7 +141,8 @@ import { CardActionsComponent } from './card/card-actions.component';
     CardContentDirective,
     CardActionsComponent,
     CardFooterDirective,
-    CardImageDirective
+    CardImageDirective,
+    CardImageComponent
   ]
 })
 export class ControlsModule {

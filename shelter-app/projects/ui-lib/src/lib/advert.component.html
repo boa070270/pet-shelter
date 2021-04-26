@@ -1,12 +1,14 @@
-<lib-card>
-  <lib-card-content>
-    <a [href]="refUrl" title="{{tooltip}}">
-      <div></div>
-      <video class="media-item" *ngIf="mimeType && mimeType.startsWith('video')">
-        <source src="{{mediaUrl}}" type="{{mimeType}}">
-      </video>
-      <img src="{{mediaUrl}}" class="media-item" *ngIf="mimeType && mimeType.startsWith('image')" alt="Advertisement place">
-    </a>
-  </lib-card-content>
-  <lib-card-actions [actions]="actions"></lib-card-actions>
+<lib-card limitByHeight="true">
+    <lib-card-content>
+      <a [href]="refUrl" title="{{tooltip}}">
+        <div></div>
+        <video class="media-item" *ngIf="mimeType && mimeType.startsWith('video')">
+          <source src="{{mediaUrl}}" type="{{mimeType}}">
+        </video>
+        <lib-card-img>
+          <img src="{{mediaUrl}}" class="media-item" *ngIf="mimeType && mimeType.startsWith('image')" alt="Advertisement place">
+        </lib-card-img>
+      </a>
+    </lib-card-content>
+    <lib-card-actions [actions]="actions"></lib-card-actions>
 </lib-card>
