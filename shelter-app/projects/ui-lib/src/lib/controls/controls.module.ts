@@ -49,8 +49,7 @@ import {
   CardContentDirective,
   CardFooterDirective,
   CardHeaderComponent, CardSubtitleDirective,
-  CardTitleDirective, CardImageDirective,
-  CardImageComponent
+  CardTitleDirective, CardImageDirective
 } from './card/card.component';
 import { CardActionsComponent } from './card/card-actions.component';
 
@@ -92,8 +91,7 @@ import { CardActionsComponent } from './card/card-actions.component';
     CardContentDirective,
     CardActionsComponent,
     CardFooterDirective,
-    CardImageDirective,
-    CardImageComponent
+    CardImageDirective
   ],
     imports: [
         CommonModule,
@@ -141,8 +139,7 @@ import { CardActionsComponent } from './card/card-actions.component';
     CardContentDirective,
     CardActionsComponent,
     CardFooterDirective,
-    CardImageDirective,
-    CardImageComponent
+    CardImageDirective
   ]
 })
 export class ControlsModule {

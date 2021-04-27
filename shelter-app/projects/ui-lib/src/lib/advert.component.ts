@@ -1,5 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {TitleType} from "./shared";
+import {CardActions} from "./controls/card/card-actions.component";
 
 @Component({
   selector: 'lib-advert',
@@ -12,9 +13,9 @@ export class AdvertComponent implements OnInit {
   @Input() refUrl: string;
   @Input() tooltip: string;
 
-  actions: Array<{icon: string, tooltip: string | TitleType[], command: string}> = [
-    {icon: 'gm-favorite_border', tooltip: 'Like', command: 'like'}, // gm-favorite toggle
-    {icon: 'gm-bookmark', tooltip: 'Bookmark', command: 'bookmark'}
+  actions: CardActions[] = [
+    {icon: 'gm-favorite_border', tooltip: 'Like', command: 'like', toggle: {icon: 'gm-favorite'}},
+    {icon: 'gm-bookmark_border', tooltip: 'Bookmark', command: 'bookmark', toggle: {icon: 'gm-bookmark'}}
   ];
 
   constructor() { }

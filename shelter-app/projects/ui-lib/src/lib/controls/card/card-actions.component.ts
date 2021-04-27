@@ -13,6 +13,16 @@ import {SwaggerSchema, TitleType} from "../../shared";
 import {SystemLang} from "../../i18n";
 import {Directionality} from "@angular/cdk/bidi";
 
+export interface CardActions {
+  icon: string;
+  tooltip: string | TitleType[];
+  command: string;
+  toggle?: {
+    icon: string;
+    toggled?: boolean;
+  };
+}
+
 @Component({
   selector: 'lib-card-actions',
   templateUrl: './card-actions.component.html',
@@ -21,15 +31,8 @@ import {Directionality} from "@angular/cdk/bidi";
 export class CardActionsComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
   @HostBinding() class = 'card-actions';
-  _actions: Array<{icon: string, tooltip: string | TitleType[], command: string}> = [];
 
-  @Input()
-  set actions(arr: Array<{icon: string, tooltip: string | TitleType[], command: string}>) {
-    this._actions = arr;
-  }
-  get actions(): Array<{icon: string, tooltip: string | TitleType[], command: string}> {
-    return this._actions;
-  }
+  @Input() actions: CardActions[] = [];
 
   @Output()
   actionEvent: EventEmitter<string> = new EventEmitter<string>();
@@ -41,8 +44,9 @@ export class CardActionsComponent extends BaseComponent implements OnInit, OnCha
   ngOnInit(): void {
   }
 
-  customAction(cmd: string): void {
-    this.actionEvent.next(cmd);
+  customAction(action: CardActions): void {
+    action.toggle.toggled = !action.toggle.toggled;
+    this.actionEvent.next(action.command);
   }
 
 }

@@ -5,9 +5,7 @@
         <video class="media-item" *ngIf="mimeType && mimeType.startsWith('video')">
           <source src="{{mediaUrl}}" type="{{mimeType}}">
         </video>
-        <lib-card-img>
-          <img src="{{mediaUrl}}" class="media-item" *ngIf="mimeType && mimeType.startsWith('image')" alt="Advertisement place">
-        </lib-card-img>
+        <img src="{{mediaUrl}}" class="media-item" *ngIf="mimeType && mimeType.startsWith('image')" alt="Advertisement place">
       </a>
     </lib-card-content>
     <lib-card-actions [actions]="actions"></lib-card-actions>
