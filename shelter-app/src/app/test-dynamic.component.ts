@@ -31,20 +31,7 @@ import {Validators} from "@angular/forms";
       </select>
       <button (click)="onClick()">Render</button>
       <h1>Swagger builder test</h1>
-      <lib-card>
-        lib card
-        <lib-card-header>
-          header
-          <lib-card-title>ASd</lib-card-title>
-          <lib-card-subtitle>zxc</lib-card-subtitle>
-        </lib-card-header>
-        <lib-card-content>
-          content
-        </lib-card-content>
-        <lib-card-actions [actions]="actions"></lib-card-actions>
-        <lib-card-footer>footer</lib-card-footer>
-      </lib-card>
-<!--      <lib-swagger-builder [swagger]="formSwagger"></lib-swagger-builder>-->
+      <lib-swagger-builder [swagger]="formSwagger"></lib-swagger-builder>
 <!--      <lib-swagger-form [swagger]="formSwagger"></lib-swagger-form>-->
     </div>
   `,

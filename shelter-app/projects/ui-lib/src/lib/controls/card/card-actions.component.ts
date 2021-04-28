@@ -45,7 +45,9 @@ export class CardActionsComponent extends BaseComponent implements OnInit, OnCha
   }
 
   customAction(action: CardActions): void {
-    action.toggle.toggled = !action.toggle.toggled;
+    if (action.toggle) {
+      action.toggle.toggled = !action.toggle.toggled;
+    }
     this.actionEvent.next(action.command);
   }
 
