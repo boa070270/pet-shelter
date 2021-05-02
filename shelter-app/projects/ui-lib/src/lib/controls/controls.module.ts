@@ -1,4 +1,4 @@
-import {NgModule} from '@angular/core';
+import {Directive, NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CheckboxControlComponent} from './checkbox-control.component';

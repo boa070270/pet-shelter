@@ -57,7 +57,6 @@ All plugins will ask the pageDataService and obtain their data to properly prese
 
 - Task! Exclude material
   - Task! Change AuthDialog (it uses material)
-  - Task! Change AppPage
 
 - Task! lh.8080/docs -> unauthorized upload file -> code 500 instead of 401? auth not working? 500 when password is not right?
 

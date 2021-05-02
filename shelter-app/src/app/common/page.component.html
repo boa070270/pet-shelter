@@ -1,21 +1,17 @@
 <div class="mat-elevation-z4 page-container">
-  <mat-card *ngIf="data">
-    <mat-card-header>
-      <mat-card-title>{{data.title}}</mat-card-title>
-      <mat-card-subtitle>{{data.summary}}</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+  <lib-card *ngIf="data">
+    <lib-card-header>
+      <lib-card-title>{{data.title}}</lib-card-title>
+      <lib-card-subtitle>{{data.summary}}</lib-card-subtitle>
+    </lib-card-header>
+    <lib-card-content>
       <lib-dynamic-html [content]="body"></lib-dynamic-html>
-    </mat-card-content>
-    <mat-card-footer>
-      <mat-card-actions>
-        <button mat-icon-button>
-          <mat-icon>thumb_up_alt</mat-icon>
-        </button>
-        <button mat-icon-button>
-          <mat-icon>thumb_down_alt</mat-icon>
-        </button>
-      </mat-card-actions>
-    </mat-card-footer>
-  </mat-card>
+    </lib-card-content>
+    <lib-card-actions>
+      <button class="gm-thumb_up_alt">
+      </button>
+      <button class="gm-thumb_up_alt">
+      </button>
+    </lib-card-actions>
+  </lib-card>
 </div>
