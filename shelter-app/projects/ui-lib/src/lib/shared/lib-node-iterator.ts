@@ -1,5 +1,8 @@
-const EMPTY_ELEMENTS = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+export const EMPTY_ELEMENTS = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
 export interface Position { n: Node; offset: number; isImpl?: boolean; }
+export function asPositionImpl(p: Position): PositionImpl {
+  return p.isImpl ? p as PositionImpl : PositionImpl.newObject(p);
+}
 export class PositionImpl implements Position {
   readonly isImpl = true;
   get n(): Node { return this._n; }
@@ -11,11 +14,20 @@ export class PositionImpl implements Position {
   static fromNode(n: Node): PositionImpl {
     return new PositionImpl(n.parentNode, orderOfChild(n.parentNode, n));
   }
-  toNode(): Node {
-    if (this._n.nodeType === Node.TEXT_NODE) {
-      return this._n;
+  static nodeOfPoints(n: Node, offset: number): Node {
+    if (n.nodeType === Node.ELEMENT_NODE) {
+      return n.childNodes[offset] || n;
     }
-    return this._n.childNodes[this._offset];
+    return n;
+  }
+  static nodeOfPosition(p: Position): Node {
+    return this.nodeOfPoints(p.n, p.offset);
+  }
+  toNode(): Node {
+    if (this._n.nodeType === Node.ELEMENT_NODE) {
+      return this._n.childNodes[this._offset];
+    }
+    return this._n;
   }
   present(): boolean {
     return !!this.toNode();
@@ -78,7 +90,12 @@ export class PositionImpl implements Position {
       }
       return prev;
     } else {
-      return this.exitContainer();
+      const p = this.exitContainer();
+      if (this.toNode() && this.toNode().nodeType === Node.TEXT_NODE) {
+        return p.prevNode();
+      } else {
+        return p;
+      }
     }
   }
   nextNode(checkContainer = true): PositionImpl {
@@ -116,7 +133,7 @@ export function isEmptyNode(n: Node): boolean {
   const tag = tagName(n);
   return tag && EMPTY_ELEMENTS.includes(tag);
 }
-export class LibNodeIterator implements Iterable<Position>, Iterator<Position>{
+export class LibNodeIterator implements Iterable<PositionImpl>, Iterator<PositionImpl>{
   private current: PositionImpl;
   private done: boolean;
   constructor(private root: Node, private from: Position, private revert = false) {
@@ -127,7 +144,7 @@ export class LibNodeIterator implements Iterable<Position>, Iterator<Position>{
     return (this.revert && this.current.n === this.root && this.current.offset === 0)
       || (!this.revert && this.current.n === this.root && this.current.offset === this.root.childNodes.length);
   }
-  next(...args: [] | [undefined]): IteratorResult<Position> {
+  next(...args: [] | [undefined]): IteratorResult<PositionImpl> {
     if (this.done) {
       return {done: true, value: null};
     }
@@ -139,7 +156,7 @@ export class LibNodeIterator implements Iterable<Position>, Iterator<Position>{
     this.done = this.isDone();
     return {done: false, value: this.current};
   }
-  [Symbol.iterator](): Iterator<Position> {
+  [Symbol.iterator](): Iterator<PositionImpl> {
     return this;
   }
 }
