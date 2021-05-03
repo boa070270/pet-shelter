@@ -3,8 +3,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MasonryListComponent } from './masonry-list.component';
 
 describe('MasonryListComponent', () => {
-  let component: MasonryListComponent;
-  let fixture: ComponentFixture<MasonryListComponent>;
+  let component: MasonryListComponent<any>;
+  let fixture: ComponentFixture<MasonryListComponent<any>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({

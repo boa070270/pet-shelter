@@ -60,9 +60,8 @@ All plugins will ask the pageDataService and obtain their data to properly prese
 
 - Task! lh.8080/docs -> unauthorized upload file -> code 500 instead of 401? auth not working? 500 when password is not right?
 
-- Bug! lib-menu disappears before you can use it?
+- Bug! lib-menu disappears before you can use it, if there is no banners
 - Proposal? press button to keep menu open until clicked outside/again?
-- Task! dialog use cached
 - Task! What do with table that reference to another table?
 - Task? SwaggerObject, maybe move required to constriction?
 - Task! carousel, masonry-list
@@ -70,6 +69,7 @@ All plugins will ask the pageDataService and obtain their data to properly prese
 Task! Is there enough one form of field in the swagger? Let's look at the field that represent <img>,
 to the edit mode we need input to fill the src, but when we in the view mode maybe we need this picture..
 
+- Task! dialog use cached  -- dialogs are deleted after being closed?
 
 DONE! Task! small images on banner result in uneven carousel // changed .media-item.height in advert.component.sccs to 100%
 DONE! Task! table-component needs to be readable only
