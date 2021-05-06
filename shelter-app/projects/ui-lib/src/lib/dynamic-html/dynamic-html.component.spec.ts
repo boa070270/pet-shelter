@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DynamicHtmlComponent } from './dynamic-html.component';
+import { DynamicHTMLComponent } from './dynamic-html.component';
 
-describe('DynamicHtmlComponent', () => {
-  let component: DynamicHtmlComponent;
-  let fixture: ComponentFixture<DynamicHtmlComponent>;
+describe('DynamicHTMLComponent', () => {
+  let component: DynamicHTMLComponent;
+  let fixture: ComponentFixture<DynamicHTMLComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DynamicHtmlComponent ]
+      declarations: [ DynamicHTMLComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(DynamicHtmlComponent);
+    fixture = TestBed.createComponent(DynamicHTMLComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

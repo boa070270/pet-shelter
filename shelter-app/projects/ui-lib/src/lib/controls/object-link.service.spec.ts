@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { ObjectLinkService } from './object-list.service';
+import { ObjectLinkService } from './object-link.service';
 
 describe('ObjectListService', () => {
   let service: ObjectLinkService;
