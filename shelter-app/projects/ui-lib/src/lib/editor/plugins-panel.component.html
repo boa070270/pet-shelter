@@ -1,5 +1,8 @@
 <div class="border-container">
-  <div class="toolbar" draggable="true" (drag)="onDragDialog($event)">
+  <div class="toolbar" draggable="true"
+       (drag)="onDragDialog($event)"
+       (dragend)="onDragDialog($event)"
+  >
     <button class="gm-close" (click)="close()" *ngIf="!!dialogRef"></button>
     <span>Plugins</span>
     <button class="gm-grid_view" (click)="showIcons = true"></button>
@@ -8,12 +11,20 @@
   <div class="panel">
     <div *ngIf="showIcons" class="icon-grid">
       <button *ngFor="let i of list" title="{{i.caption}}" class="icon-btn {{i.icon}}"
-              (click)="select(i.selectorName)" draggable="true" (drag)="drag($event, i.selectorName)"></button>
+              (click)="select(i.selectorName)" draggable="true"
+              (drag)="drag($event, i.selectorName)"
+              (dragstart)="drag($event, i.selectorName)"
+              (dragend)="drag($event, i.selectorName)"
+      ></button>
     </div>
     <div *ngIf="!showIcons" class="icon-list">
       <ul>
         <li *ngFor="let i of list" title="{{i.caption}}"
-            (click)="select(i.selectorName)" class="{{i.icon}}" title="{{i.description}}" draggable="true" (drag)="drag($event, i.selectorName)">{{i.caption}}</li>
+            (click)="select(i.selectorName)" class="{{i.icon}}" title="{{i.description}}" draggable="true"
+            (drag)="drag($event, i.selectorName)"
+            (dragstart)="dragStart($event, i.selectorName)"
+            (dragend)="dragEnd($event, i.selectorName)"
+        >{{i.caption}}</li>
       </ul>
     </div>
   </div>

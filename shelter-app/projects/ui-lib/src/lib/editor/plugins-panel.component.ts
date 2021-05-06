@@ -37,6 +37,13 @@ export class PluginsPanelComponent implements OnInit {
     }
   }
 
+  onDragDialogStart(event: DragEvent): void {
+    if (this.dialogRef) {
+      event.dataTransfer.setDragImage(this.dialogRef._overlayRef.overlayElement, 0, 0);
+      console.log('onDrag', event);
+    }
+    event.preventDefault();
+  }
   onDragDialog(event: DragEvent): void {
     if (this.dialogRef) {
       this.dialogRef.updatePosition({top: event.clientY + 'px', left: event.clientX + 'px'});
@@ -46,6 +53,15 @@ export class PluginsPanelComponent implements OnInit {
   }
 
   drag(event: DragEvent, selectorName: string): void {
+    // event.dataTransfer.setData('text', selectorName);
+    console.log('drag', event.dataTransfer);
+  }
+  dragStart(event: DragEvent, selectorName: string): void {
     event.dataTransfer.setData('text', selectorName);
+    console.log('dragStart', event.dataTransfer);
+  }
+  dragEnd(event: DragEvent, selectorName: string): void {
+    event.dataTransfer.setData('text', selectorName);
+    console.log('dragEnd', event.dataTransfer);
   }
 }
