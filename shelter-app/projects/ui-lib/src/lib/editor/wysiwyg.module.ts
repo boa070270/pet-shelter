@@ -6,12 +6,14 @@ import {DynamicHTMLModule} from './dynamic-html';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ControlsModule} from '../controls';
 import { EditorToolbarComponent } from './editor-toolbar.component';
+import { PluginsPanelComponent } from './plugins-panel.component';
 
 @NgModule({
   declarations: [
       EditorComponent,
       EditorPluginComponent,
-      EditorToolbarComponent
+      EditorToolbarComponent,
+      PluginsPanelComponent
   ],
   imports: [
     CommonModule,
@@ -26,7 +28,8 @@ import { EditorToolbarComponent } from './editor-toolbar.component';
   ],
   exports: [
     EditorComponent,
-    EditorToolbarComponent
+    EditorToolbarComponent,
+    PluginsPanelComponent
   ]
 })
-export class AngularWysiwygEditorLibModule { }
+export class WysiwygModule { }

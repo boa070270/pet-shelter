@@ -12,7 +12,7 @@ import {
   UiElementsModule,
   LoggerModule,
   DialogServiceModule, UILoggerWriterToken,
-  AngularWysiwygEditorLibModule
+  WysiwygModule
 } from 'ui-lib';
 import {HttpClientModule} from '@angular/common/http';
 import {MainPageComponent} from './main-page.component';
@@ -47,7 +47,7 @@ import { TestEditorComponent } from './test-editor.component';
     HttpClientModule,
     FormsModule,
     ScrollingModule,
-    AngularWysiwygEditorLibModule,
+    WysiwygModule,
     ShelterCommonModule,
     SharedModule,
     ControlsModule,
