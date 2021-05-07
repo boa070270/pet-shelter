@@ -1,22 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableComponent } from './table.component';
-import {Observable} from "rxjs";
+import {Observable} from 'rxjs';
 import {
   LanguageType, LoggerConfiguration,
   LoggerConfigurationToken,
   LogLevel,
-  ObtainSystemLanguage, SharedModule,
+  ObtainSystemLanguage, SharedModule, SwaggerNative, SwaggerObject,
   UILogger,
   UILoggerToken, UILoggerWriterToken, UILogWriter
-} from "../../shared";
-import {OverlayModule} from "@angular/cdk/overlay";
-import {LoggerService} from "../../logger";
-import {CommonModule} from "@angular/common";
-import {ControlsModule} from "../controls.module";
+} from '../../shared';
+import {OverlayModule} from '@angular/cdk/overlay';
+import {LoggerService} from '../../logger';
+import {CommonModule} from '@angular/common';
+import {ControlsModule} from '../controls.module';
 
-// const UILoggerToken =
-//   new InjectionToken<UILogger>('LoggerService');
+const data = [
+  ['cell1', 'cell2', 'cell3'],
+  ['a', 0, false],
+  ['b', 1, true]
+];
 
 describe('TestTableComponent', () => {
   let component: TableComponent<any, any>;
@@ -38,48 +41,41 @@ describe('TestTableComponent', () => {
     .compileComponents();
   });
 
-  // beforeEach(() => {
-  //   fixture = TestBed.createComponent(TableComponent);
-  //   component = fixture.componentInstance;
-  //   fixture.detectChanges();
-  // });
-
-  it('should create', () => {
+  beforeEach(() => {
     fixture = TestBed.createComponent(TableComponent);
     component = fixture.componentInstance;
-    // const dataSource = component.dataSource;
-    // fixture.detectChanges();
-    //
-    // const initialDataLength = dataSource.total.getValue();
-    // expect(dataSource.total.getValue()).toBe(0);
-    // const tableElement = fixture.nativeElement.querySelector('.lib-table');
-    //
-    // let data = dataSource.data;
-    // expectTableToMatchContent(tableElement, [
-    //   ['Column A', 'Column B', 'Column C'],
-    //   [data[0].a, data[0].b, data[0].c],
-    //   [data[1].a, data[1].b, data[1].c],
-    //   [data[2].a, data[2].b, data[2].c],
-    //   ['Footer A', 'Footer B', 'Footer C'],
-    // ]);
-    //
-    // // Add data to the table and recreate what the rendered output should be.
-    // dataSource.setData(['a']);
-    // expect(dataSource.data.length).toBe(initialDataLength + 1); // Make sure data was added
-    // fixture.detectChanges();
-    //
-    // data = dataSource.data;
-    // expectTableToMatchContent(tableElement, [
-    //   ['Column A', 'Column B', 'Column C'],
-    //   [data[0].a, data[0].b, data[0].c],
-    //   [data[1].a, data[1].b, data[1].c],
-    //   [data[2].a, data[2].b, data[2].c],
-    //   [data[3].a, data[3].b, data[3].c],
-    //   ['Footer A', 'Footer B', 'Footer C'],
-    // ]);
-    // expect(new TableComponent(null, null, null, null, null)).toBeTruthy();
+    component.swagger = new SwaggerObject(['cell1', 'cell2', 'cell3'], {
+      cell1: SwaggerNative.asString(),
+      cell2: SwaggerNative.asNumber(),
+      cell3: SwaggerNative.asBoolean(),
+    });
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('data should change', () => {
+    const dataSource = component.dataSource;
+    fixture.detectChanges();
+
+    const initialDataLength = dataSource.total.getValue();
+    expect(dataSource.total.getValue()).toBe(0);
+    const tableElement = fixture.nativeElement.querySelector('table');
+    expect(tableElement).toBeTruthy();
+    // Add data to the table and recreate what the rendered output should be.
+    dataSource.setData([
+      {cell1: data[1][0], cell2: data[1][1], cell3: data[1][2]},
+      {cell1: data[2][0], cell2: data[2][1], cell3: data[2][2]},
+    ]);
+    expect(dataSource.total.getValue()).toBe(initialDataLength + 2); // Make sure data was added
+    fixture.detectChanges();
+
+    expectTableToMatchContent(tableElement, data);
+  });
+
+
 });
 
 
@@ -91,10 +87,6 @@ function getHeaderRows(tableElement: Element): HTMLElement[] {
   return [].slice.call(tableElement.querySelectorAll('.cdk-header-row'));
 }
 
-function getFooterRows(tableElement: Element): HTMLElement[] {
-  return [].slice.call(tableElement.querySelectorAll('.cdk-footer-row'));
-}
-
 function getRows(tableElement: Element): HTMLElement[] {
   return getElements(tableElement, '.cdk-row');
 }
@@ -104,45 +96,35 @@ function getCells(row: Element): HTMLElement[] {
     return [];
   }
 
-  let cells = getElements(row, 'cdk-cell');
+  let cells = getElements(row, '.cdk-cell');
   if (!cells.length) {
-    cells = getElements(row, 'td.cdk-cell');
+    cells = getElements(row, '.td.cdk-cell');
   }
-
   return cells;
 }
 
 function getHeaderCells(headerRow: Element): HTMLElement[] {
-  let cells = getElements(headerRow, 'cdk-header-cell');
+  let cells = getElements(headerRow, '.cdk-header-cell');
   if (!cells.length) {
-    cells = getElements(headerRow, 'th.cdk-header-cell');
+    cells = getElements(headerRow, '.th.cdk-header-cell');
   }
-
-  return cells;
-}
-
-function getFooterCells(footerRow: Element): HTMLElement[] {
-  let cells = getElements(footerRow, 'cdk-footer-cell');
-  if (!cells.length) {
-    cells = getElements(footerRow, 'td.cdk-footer-cell');
-  }
-
   return cells;
 }
 
 function getActualTableContent(tableElement: Element): string[][] {
   let actualTableContent: Element[][] = [];
   getHeaderRows(tableElement).forEach(row => {
-    actualTableContent.push(getHeaderCells(row));
+    const cells = getHeaderCells(row);
+    if (cells.length) {
+      actualTableContent.push(cells);
+    }
   });
 
   // Check data row cells
   const rows = getRows(tableElement).map(row => getCells(row));
-  actualTableContent = actualTableContent.concat(rows);
-
-  getFooterRows(tableElement).forEach(row => {
-    actualTableContent.push(getFooterCells(row));
-  });
+  if (rows.length) {
+    actualTableContent = actualTableContent.concat(rows);
+  }
 
   // Convert the nodes into their text content;
   return actualTableContent.map(row => row.map(cell => cell.textContent.trim()));
@@ -157,6 +139,7 @@ export function expectTableToMatchContent(tableElement: Element, expected: any[]
   }
 
   const actual = getActualTableContent(tableElement);
+  console.log(actual);
 
   // Make sure the number of rows match
   if (actual.length !== expected.length) {
@@ -175,7 +158,8 @@ export function expectTableToMatchContent(tableElement: Element, expected: any[]
 
     row.forEach((actualCell, cellIndex) => {
       const expectedCell = expectedRow ? expectedRow[cellIndex] : null;
-      checkCellContent(actualCell, expectedCell);
+      // actualCell obtains from dom as string
+      checkCellContent(actualCell, expectedCell + '');
     });
   });
 
@@ -194,22 +178,3 @@ class ObtainSystemLanguageMock implements ObtainSystemLanguage {
     });
   }
 }
-
-// class LoggerServiceMock implements LoggerService {
-//   constructor(@Optional() @Inject(LoggerConfigurationToken) private loggerConfig: LoggerConfiguration,
-//               @Inject(UILoggerWriterToken) private writer: UILogWriter) { }
-//   debug(message: any, ...params): void {
-//   }
-//
-//   error(message: any, ...params): void {
-//   }
-//
-//   info(message: any, ...params): void {
-//   }
-//
-//   private out(level: LogLevel, message: any, ...params): void {
-//   }
-//
-//   warn(message: any, ...params): void {
-//   }
-// }

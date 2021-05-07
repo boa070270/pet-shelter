@@ -1,4 +1,5 @@
 import {
+  AfterViewChecked,
   AfterViewInit,
   Component,
   ElementRef,
@@ -133,6 +134,8 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
   }
   rowCount = 0;
   filteredCount = 0;
+  @ViewChild('filteredSpan') filteredSpan: ElementRef<HTMLSpanElement>;
+  @ViewChild('rowCountSpan') rowCountSpan: ElementRef<HTMLSpanElement>;
   private subscriptions: Subscription[] = [];
   orderIcons = {};
   get order(): IOrder[] {

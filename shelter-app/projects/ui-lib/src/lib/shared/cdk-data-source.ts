@@ -89,7 +89,7 @@ function simpleEquals(o1: any, o2: any): boolean {
 }
 export abstract class AbstractDataSource<T> {
   protected readonly consumers: Array<CdkDataSource<T, any>> = [];
-  data: T[];
+  protected data: T[];
   protected lastModified: Date;
   protected equalData: (o1: any, o2: any) => boolean;
   total = new BehaviorSubject(0);
