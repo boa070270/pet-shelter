@@ -11,7 +11,7 @@ import {PetsTableComponent} from './pets-table.component';
 import {BannersTableComponent} from './banners-table.component';
 import {PageTableComponent} from './page-table.component';
 import {UserTableComponent} from './user-table.component';
-import {ControlsModule, UiLibModule, DialogServiceModule, AngularWysiwygEditorLibModule} from 'ui-lib';
+import {ControlsModule, UiLibModule, DialogServiceModule, WysiwygModule} from 'ui-lib';
 import {ShelterCommonModule} from '../common';
 import {FormsModule} from '@angular/forms';
 import { TestSyncComponent } from './test-sync.component';
@@ -35,7 +35,7 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
     AdminRoutingModule,
     UiLibModule,
     FormsModule,
-    AngularWysiwygEditorLibModule,
+    WysiwygModule,
     ShelterCommonModule,
     FormsModule,
     ControlsModule,

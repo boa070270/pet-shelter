@@ -1,7 +1,9 @@
-import {ChangeDetectorRef, Component, EventEmitter, Inject, Optional, Output} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, Inject, OnDestroy, Optional, Output} from '@angular/core';
 import {AbstractComponent} from '../controls';
 import {SystemLang} from '../i18n';
 import {I18NType} from '../shared';
+import {DialogService} from '../dialog-service';
+import {PluginsPanelComponent} from './plugins-panel.component';
 
 export interface CmdEditorToolbox {
   cmd: string;
@@ -23,7 +25,7 @@ export interface CmdEditorToolbox {
   templateUrl: './editor-toolbar.component.html',
   styleUrls: ['./editor-toolbar.component.scss']
 })
-export class EditorToolbarComponent extends AbstractComponent {
+export class EditorToolbarComponent extends AbstractComponent implements OnDestroy {
   block: string;
   bTag: boolean;
   uTag: boolean;
@@ -34,10 +36,18 @@ export class EditorToolbarComponent extends AbstractComponent {
   borderStyle: string;
   tblBorderWidth: string;
   moveByText = true;
+  private pluginEmitter: EventEmitter<string>;
   @Output() emitter = new EventEmitter<CmdEditorToolbox>();
-  constructor(private changeDetector: ChangeDetectorRef, public systemLang: SystemLang,
+  constructor(private changeDetector: ChangeDetectorRef, public systemLang: SystemLang, private dialogService: DialogService,
               @Optional() @Inject('i18NCfg') public i18NCfg?: I18NType) {
     super(systemLang); // TODO add i18N
+    this.pluginEmitter = new EventEmitter<string>();
+    this.pluginEmitter.subscribe((s) => this.emitter.emit({cmd: 'plugin', opt: {name: s}}) );
+  }
+  ngOnDestroy(): void {
+    super.ngOnDestroy();
+    this.pluginEmitter.complete();
+    this.emitter.complete();
   }
 
   updateToolbar(what: any): void {
@@ -140,5 +150,9 @@ export class EditorToolbarComponent extends AbstractComponent {
   switchMove(): void {
     this.moveByText = !this.moveByText;
     this.emitter.emit({cmd: 'switchMove', opt: {moveByText: this.moveByText}});
+  }
+
+  showPlugins(): void {
+    this.dialogService.open(PluginsPanelComponent, {data: {emitter: this.pluginEmitter}, hasBackdrop: false});
   }
 }

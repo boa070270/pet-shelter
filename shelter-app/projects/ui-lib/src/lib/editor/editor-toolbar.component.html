@@ -71,9 +71,10 @@
     </button>
 
     <button class="gm-web" (click)="showDesigner()" title="Show designer"></button>
-    <button class="gm-source" (click)="showSource()" title="Show source"></button>
+    <button class="gm-code" (click)="showSource()" title="Show source"></button>
     <button class="gm-help" (click)="showHelp()" title="Help"></button>
-    <button class="gm-help" (click)="switchMove()" title="Move by text"></button>
+    <button class="gm-multiple_stop" (click)="switchMove()" title="Move by text"></button>
+    <button class="gm-badge" (click)="showPlugins()" title="Show plugins"></button>
   </div>
   <div class="editor-toolbar">
     <div class="editor-multiple-buttons" *ngIf="!tableControlsHidden">
