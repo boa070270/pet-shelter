@@ -4,6 +4,7 @@ import {SystemLang} from '../i18n';
 import {I18NType} from '../shared';
 import {DialogService} from '../dialog-service';
 import {PluginsPanelComponent} from './plugins-panel.component';
+import {DragDrop} from "@angular/cdk/drag-drop";
 
 export interface CmdEditorToolbox {
   cmd: string;

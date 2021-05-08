@@ -7,6 +7,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ControlsModule} from '../controls';
 import { EditorToolbarComponent } from './editor-toolbar.component';
 import { PluginsPanelComponent } from './plugins-panel.component';
+import {DragDropModule} from "@angular/cdk/drag-drop";
 
 @NgModule({
   declarations: [
@@ -15,17 +16,18 @@ import { PluginsPanelComponent } from './plugins-panel.component';
       EditorToolbarComponent,
       PluginsPanelComponent
   ],
-  imports: [
-    CommonModule,
-    DynamicHTMLModule.forRoot({
-      components: [
-        {component: EditorPluginComponent, selector: 'editor-plugin'}
-      ]
-    }),
-    ReactiveFormsModule,
-    FormsModule,
-    ControlsModule,
-  ],
+    imports: [
+        CommonModule,
+        DynamicHTMLModule.forRoot({
+            components: [
+                {component: EditorPluginComponent, selector: 'editor-plugin'}
+            ]
+        }),
+        ReactiveFormsModule,
+        FormsModule,
+        ControlsModule,
+        DragDropModule,
+    ],
   exports: [
     EditorComponent,
     EditorToolbarComponent,
