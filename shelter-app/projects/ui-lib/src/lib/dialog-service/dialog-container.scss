@@ -5,3 +5,32 @@ cdk-dialog-container {
   display: block;
   padding: 2px;
 }
+.border-container {
+  margin: 0;
+  padding: 0;
+  display: block;
+  border: {
+    color: black;
+    style: solid;
+    width: 2px;
+  };
+  box-shadow: 6px 4px 4px grey;
+  background-color: #0b7d87;
+}
+.toolbar {
+  display: grid;
+  grid-template-columns:  16px calc(100% - 49px) 16px 16px;
+  background: grey;
+  margin: 1px;
+  padding: 1px;
+  border: {
+    color: whitesmoke;
+    width: 1px;
+    style: solid;
+  }
+  button {
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+}

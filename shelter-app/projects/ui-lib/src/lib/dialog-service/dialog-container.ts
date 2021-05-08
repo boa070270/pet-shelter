@@ -22,10 +22,10 @@ import {
   Component,
   ComponentRef,
   ElementRef,
-  EmbeddedViewRef,
+  EmbeddedViewRef, EventEmitter,
   HostBinding,
-  Inject,
-  OnDestroy,
+  Inject, Input,
+  OnDestroy, OnInit,
   Optional,
   ViewChild,
   ViewEncapsulation,
@@ -33,6 +33,7 @@ import {
 import {Subject} from 'rxjs';
 import {distinctUntilChanged} from 'rxjs/operators';
 import {DialogConfig} from './dialog-config';
+import {TitleType} from "../shared";
 
 
 export function throwDialogContentAlreadyAttachedError(): void {
@@ -75,7 +76,7 @@ export function throwDialogContentAlreadyAttachedError(): void {
   },
 })
 // tslint:disable-next-line:component-class-suffix
-export class CdkDialogContainer extends BasePortalOutlet implements OnDestroy {
+export class CdkDialogContainer extends BasePortalOutlet implements OnInit, OnDestroy {
 
   private readonly _document: Document;
 
@@ -136,6 +137,10 @@ export class CdkDialogContainer extends BasePortalOutlet implements OnDestroy {
 
   _animationDone = new Subject<AnimationEvent>();
 
+  _toolbar: {title: string, customActions?:
+      { actions: Array<{icon: string, tooltip: string | TitleType[], command: string }>, emitter?: EventEmitter<string> }
+  };
+
   constructor(
 
     private _elementRef: ElementRef<HTMLElement>,
@@ -148,9 +153,12 @@ export class CdkDialogContainer extends BasePortalOutlet implements OnDestroy {
     /** The dialog configuration. */
 
     public _config: DialogConfig) {
+
     super();
 
     this._document = _document;
+
+    this._toolbar = _config.toolbar;
 
     // We use a Subject with a distinctUntilChanged, rather than a callback attached to .done,
     // because some browsers fire the done event twice and we don't want to emit duplicate events.
@@ -182,6 +190,9 @@ export class CdkDialogContainer extends BasePortalOutlet implements OnDestroy {
     // Move focus onto the dialog immediately in order to prevent the user
     // from accidentally opening multiple dialogs at the same time.
     this._focusDialogContainer();
+  }
+
+  ngOnInit(): void {
   }
 
   /** Destroy focus trap to place focus back to the element focused before the dialog opened. */
@@ -318,5 +329,8 @@ export class CdkDialogContainer extends BasePortalOutlet implements OnDestroy {
         toFocus.focus();
       }
     }
+  }
+  customAction(cmd: string): void {
+    this._toolbar.customActions.emitter.next(cmd);
   }
 }

@@ -13,9 +13,6 @@ export class PluginsPanelComponent implements OnInit {
   list: PluginDescription[];
   @Input()
   emitter: EventEmitter<string>;
-  @ViewChild('titleBar', {static: true}) titleBar: ElementRef<HTMLDivElement>;
-  private dragDialogRef: DragRef<any>;
-  overToolbar = false;
 
   constructor(private element: ElementRef<HTMLElement>, private componentsPlugin: ComponentsPluginService,
               @Optional() @Inject(DIALOG_DATA) protected dialogData: any, private dragDrop: DragDrop,
@@ -27,8 +24,6 @@ export class PluginsPanelComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.dragDialogRef = this.dragDrop.createDrag(this.titleBar);
-    this.dragDialogRef.withRootElement(this.element);
   }
 
   close(): void {

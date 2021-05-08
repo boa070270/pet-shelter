@@ -19,6 +19,8 @@ import {
   DIALOG_REF,
   MAT_DIALOG_SCROLL_STRATEGY_PROVIDER
 } from './dialog-injectors';
+import {DragDropModule} from "@angular/cdk/drag-drop";
+import {CommonModule} from "@angular/common";
 
 
 @NgModule({
@@ -26,6 +28,8 @@ import {
     OverlayModule,
     PortalModule,
     A11yModule,
+    DragDropModule,
+    CommonModule,
   ],
   exports: [
     // Re-export the PortalModule so that people extending the `CdkDialogContainer`
