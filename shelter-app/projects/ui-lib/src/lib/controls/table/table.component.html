@@ -35,7 +35,9 @@
       </span>
     <span>
       <span *ngIf="filteredCount < rowCount"> {{i18n.filtered}} {{i18n.countRows | choiceFormat:filteredCount}} {{i18n.filteredOf}}</span>
-      <span *ngIf="filteredCount === rowCount"> {{i18n.totalRows}}</span> {{i18n.countRows | choiceFormat:rowCount}} </span>
+      <span *ngIf="filteredCount === rowCount"> {{i18n.totalRows}}</span>
+      {{i18n.countRows | choiceFormat:rowCount}}
+    </span>
   </div>
   <span class="hint">{{pHint}}</span>
 </div>

@@ -52,6 +52,7 @@ import {
   CardTitleDirective, CardImageDirective
 } from './card/card.component';
 import { CardActionsComponent } from './card/card-actions.component';
+import { DraggableDialogComponent } from './dialogs/draggable-dialog.component';
 
 @NgModule({
   declarations: [
@@ -91,7 +92,8 @@ import { CardActionsComponent } from './card/card-actions.component';
     CardContentDirective,
     CardActionsComponent,
     CardFooterDirective,
-    CardImageDirective
+    CardImageDirective,
+    DraggableDialogComponent
   ],
     imports: [
         CommonModule,
