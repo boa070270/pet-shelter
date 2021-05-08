@@ -12,6 +12,7 @@ export class PluginsPanelComponent implements OnInit {
   list: PluginDescription[];
   @Input()
   emitter: EventEmitter<string>;
+  offset;
 
   constructor(private componentsPlugin: ComponentsPluginService,
               @Optional() @Inject(DIALOG_DATA) protected dialogData: any,
@@ -37,19 +38,21 @@ export class PluginsPanelComponent implements OnInit {
     }
   }
 
-  onDragDialogStart(event: DragEvent): void {
-    if (this.dialogRef) {
-      event.dataTransfer.setDragImage(this.dialogRef._overlayRef.overlayElement, 0, 0);
-      console.log('onDrag', event);
+  onDragDialog(event: MouseEvent): void {
+    if (this.dialogRef && this.offset) {
+      this.dialogRef.updatePosition({top: event.clientY - this.offset.top + 'px', left: event.clientX - this.offset.left + 'px'});
+      // console.log('onDrag', event);
     }
     event.preventDefault();
   }
-  onDragDialog(event: DragEvent): void {
+  startDrag(event: MouseEvent): void {
     if (this.dialogRef) {
-      this.dialogRef.updatePosition({top: event.clientY + 'px', left: event.clientX + 'px'});
-      console.log('onDrag', event);
+      const rect = this.dialogRef._overlayRef.overlayElement.getBoundingClientRect();
+      this.offset = {top: event.clientY - rect.top, left: event.clientX - rect.left};
     }
-    event.preventDefault();
+  }
+  endDrag(): void {
+    this.offset = null;
   }
 
   drag(event: DragEvent, selectorName: string): void {
