@@ -1,4 +1,19 @@
 <div class="{{dialogBorderClass}} dialog-container">
+  <div *ngIf="titleBar" class="toolbar"
+       (mousedown)="startDrag($event)"
+       (mousemove)="dragDialog($event)"
+       (mouseup)="endDrag()"
+  >
+    <ng-container *ngIf="titleBar.predefinedActions">
+      <button *ngIf="titleBar.predefinedActions.cancel" class="gm-close" (click)="cancel()"></button>
+      <button *ngIf="titleBar.predefinedActions.save" class="gm-save" (click)="save()"></button>
+    </ng-container>
+    <span>{{titleBar.title}}</span>
+    <ng-container *ngIf="titleBar.customActions">
+      <button *ngFor="let act of titleBar.customActions.actions" (click)="customAction(act.command)" class="{{act.icon}}" [title]="act.tooltip"></button>
+    </ng-container>
+  </div>
+
   <div class="dialog-caption" *ngIf="caption"><span [ngClass]="iconClasses"></span><span>{{ caption }}</span></div>
   <lib-swagger-form [swagger]="swagger" *ngIf="swagger" [(ngModel)]="data" [readOnly]="disabled"></lib-swagger-form>
   <span class="dialog-message" *ngIf="!swagger">{{data}}</span>

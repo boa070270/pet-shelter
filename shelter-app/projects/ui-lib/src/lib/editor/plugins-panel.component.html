@@ -1,5 +1,9 @@
-<div class="border-container" cdkDrag>
-  <div class="toolbar" cdkDragHandle>
+<div class="border-container">
+  <div class="toolbar"
+       (mousedown)="startDrag($event)"
+       (mousemove)="dragDialog($event)"
+       (mouseup)="endDrag()"
+  >
     <button class="gm-close" (click)="close()" *ngIf="!!dialogRef"></button>
     <span>Plugins</span>
     <button class="gm-grid_view" (click)="showIcons = true"></button>

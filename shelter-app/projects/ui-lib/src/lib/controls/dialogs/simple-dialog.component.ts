@@ -1,6 +1,6 @@
 import {Component, Inject, OnDestroy, ViewChild} from '@angular/core';
 import {SystemLang} from '../../i18n';
-import {ActionType, DictionaryService, ExtendedData, I18NType, SwaggerObject} from '../../shared';
+import {ActionType, DictionaryService, ExtendedData, I18NType, SwaggerObject, TitleBarData} from '../../shared';
 import {SwaggerFormComponent} from '../swagger-form/swagger-form.component';
 import {Subscription} from 'rxjs';
 import {AbstractComponent} from '../abstract.component';
@@ -30,8 +30,10 @@ export class SimpleDialogComponent extends AbstractComponent implements OnDestro
   iconClasses: any;
   dialogBorderClass: string;
   disabled: boolean;
+  titleBar: TitleBarData;
   @ViewChild(SwaggerFormComponent) form: SwaggerFormComponent;
   private subscription: Subscription;
+  private offset: {top: number, left: number};
 
   constructor(protected dialogRef: DialogRef<any>,
               protected dialogContainer: CdkDialogContainer,
@@ -56,6 +58,7 @@ export class SimpleDialogComponent extends AbstractComponent implements OnDestro
         this.iconClasses[dialogData.iconColor] = true;
         this.dialogBorderClass = 'border-' + dialogData.iconColor;
       }
+      this.titleBar = dialogData.titleBar;
     } else {
       this.data = dialogData;
     }
@@ -100,5 +103,25 @@ export class SimpleDialogComponent extends AbstractComponent implements OnDestro
     } else {
       this.dialogRef.close('ok');
     }
+  }
+  customAction(cmd: string): void {
+    this.titleBar.customActions.emitter.next(cmd);
+  }
+
+  startDrag(event: MouseEvent): void {
+    if (this.dialogRef) {
+      const rect = this.dialogRef._overlayRef.overlayElement.getBoundingClientRect();
+      this.offset = {top: event.clientY - rect.top, left: event.clientX - rect.left};
+    }
+    event.preventDefault();
+  }
+  dragDialog(event: MouseEvent): void {
+    if (this.dialogRef && this.offset) {
+      this.dialogRef.updatePosition({top: event.clientY - this.offset.top + 'px', left: event.clientX - this.offset.left + 'px'});
+    }
+    event.preventDefault();
+  }
+  endDrag(): void {
+    this.offset = null;
   }
 }

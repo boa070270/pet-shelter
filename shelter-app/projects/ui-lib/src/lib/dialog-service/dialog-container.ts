@@ -137,10 +137,6 @@ export class CdkDialogContainer extends BasePortalOutlet implements OnInit, OnDe
 
   _animationDone = new Subject<AnimationEvent>();
 
-  _toolbar: {title: string, customActions?:
-      { actions: Array<{icon: string, tooltip: string | TitleType[], command: string }>, emitter?: EventEmitter<string> }
-  };
-
   constructor(
 
     private _elementRef: ElementRef<HTMLElement>,
@@ -157,8 +153,6 @@ export class CdkDialogContainer extends BasePortalOutlet implements OnInit, OnDe
     super();
 
     this._document = _document;
-
-    this._toolbar = _config.toolbar;
 
     // We use a Subject with a distinctUntilChanged, rather than a callback attached to .done,
     // because some browsers fire the done event twice and we don't want to emit duplicate events.
@@ -329,8 +323,5 @@ export class CdkDialogContainer extends BasePortalOutlet implements OnInit, OnDe
         toFocus.focus();
       }
     }
-  }
-  customAction(cmd: string): void {
-    this._toolbar.customActions.emitter.next(cmd);
   }
 }

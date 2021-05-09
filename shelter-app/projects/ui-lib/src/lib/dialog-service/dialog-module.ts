@@ -28,7 +28,6 @@ import {CommonModule} from "@angular/common";
     OverlayModule,
     PortalModule,
     A11yModule,
-    DragDropModule,
     CommonModule,
   ],
   exports: [

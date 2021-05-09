@@ -2,13 +2,13 @@ import {Component, ElementRef, EventEmitter, OnInit, ViewChild} from '@angular/c
 import {
   AbstractDataSource,
   ArrayDataSource,
-  DialogService, SimpleDialogComponent,
+  DialogService, ExtendedData, SimpleDialogComponent,
   SwaggerArray,
   SwaggerFormService,
   SwaggerNative,
   SwaggerObject,
   swaggerUI,
-  TableProviderService,
+  TableProviderService, TitleBarData,
   TitleType,
 } from 'ui-lib';
 import {BasicService} from './basic.service';
@@ -122,16 +122,9 @@ export class TestDynamicComponent implements OnInit {
   }
 
   openDialog(): void {
-    const emitter = new EventEmitter<string>();
-    this.dialogService.open(SimpleDialogComponent, {data: 'a', disableClose: true, hasBackdrop: false, toolbar: {title: 'Test plugin',
-        customActions: {actions: [
-            {icon: 'gm-keyboard_arrow_up', command: 'move-up', tooltip: 'a'},
-            {icon: 'gm-keyboard_arrow_down', command: 'move-down', tooltip: 'b'}
-          ], emitter}
-    }});
-    emitter.subscribe(s => {
-      console.log(s);
-    });
+    let dialogRef;
+    dialogRef = this.dialogService.open(SimpleDialogComponent, {data: ExtendedData.create({}, true, this.swagger, null,
+      null, null, null, TitleBarData.create('Test dialog', {save: true})), hasBackdrop: false});
   }
 
 }

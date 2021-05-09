@@ -13,9 +13,10 @@ export class PluginsPanelComponent implements OnInit {
   list: PluginDescription[];
   @Input()
   emitter: EventEmitter<string>;
+  offset: {top: number, left: number};
 
   constructor(private element: ElementRef<HTMLElement>, private componentsPlugin: ComponentsPluginService,
-              @Optional() @Inject(DIALOG_DATA) protected dialogData: any, private dragDrop: DragDrop,
+              @Optional() @Inject(DIALOG_DATA) protected dialogData: any,
               @Optional() public dialogRef: DialogRef<any>) {
     this.list = componentsPlugin.listPlugins();
     if (dialogData && dialogData.emitter) {
@@ -36,6 +37,23 @@ export class PluginsPanelComponent implements OnInit {
     if (this.emitter) {
       this.emitter.emit(selectorName);
     }
+  }
+
+  startDrag(event: MouseEvent): void {
+    if (this.dialogRef) {
+      const rect = this.dialogRef._overlayRef.overlayElement.getBoundingClientRect();
+      this.offset = {top: event.clientY - rect.top, left: event.clientX - rect.left};
+    }
+    event.preventDefault();
+  }
+  dragDialog(event: MouseEvent): void {
+    if (this.dialogRef && this.offset) {
+      this.dialogRef.updatePosition({top: event.clientY - this.offset.top + 'px', left: event.clientX - this.offset.left + 'px'});
+    }
+    event.preventDefault();
+  }
+  endDrag(): void {
+    this.offset = null;
   }
 
   drag(event: DragEvent, selectorName: string): void {

@@ -1,8 +1,1 @@
-<div class="border-container" cdkDrag>
-  <div *ngIf="_toolbar" class="toolbar" cdkDragHandle>
-    <button class="gm-close" (click)="_startExiting()"></button>
-    <span>Plugins</span>
-    <button *ngFor="let act of _toolbar.customActions.actions" (click)="customAction(act.command)" class="{{act.icon}}" [title]="act.tooltip"></button>
-  </div>
-  <ng-template cdkPortalOutlet></ng-template>
-</div>
+<ng-template cdkPortalOutlet></ng-template>
