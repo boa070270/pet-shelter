@@ -1,11 +1,13 @@
-<lib-editor-toolbar></lib-editor-toolbar>
+<lib-editor-toolbar [fCdkDropList]="getCdkDropList"></lib-editor-toolbar>
 <div class="work-space">
   <div class="work-table" libSlideContainer>
     <div class="work-table" libSlideElement>
-      <div class="editor-editable" [contentEditable]="true" #editor _design="0"
-           (keydown)="onKeyDown($event)" (dragover)="allowDrop($event)" (drop)="drop($event)" (click)="onClick($event)"
-           (dragstart)="dragStart($event)" (focus)="focusin($event)" (focusout)="focusout($event)">
-
+      <div class="editor-editable" [contentEditable]="true" #editor _design="0" cdkDropList
+           (keydown)="onKeyDown($event)" (click)="onClick($event)"
+           (focus)="focusin($event)" (focusout)="focusout($event)"
+           (dragstart)="dragStart($event)" (dragend)="dragEnd($event)" (dragover)="dragOver($event)" (drop)="drop($event)" (dragexit)="dragExit($event)"
+           (drag)="drag($event)" (dragenter)="dragEnter($event)" (dragleave)="dragLeave($event)"
+      >
       </div>
     </div>
     <div class="work-table" libSlideElement>

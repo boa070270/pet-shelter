@@ -4,14 +4,16 @@ import {TitleType} from './language';
 
 export interface PluginDescription {
   selectorName?: string; // this field is set by system
-  icon?: string;
-  caption?: string | TitleType[];
-  description?: string | TitleType[];
-  phrasing?: boolean; // true if this component is inline-block, false for block element
+  icon?: string; // to show on plugin panel
+  caption?: string | TitleType[]; // to show on plugin panel
+  description?: string | TitleType[]; // to show on plugin panel
+  tag?: string; // if this is present this tag would be published by ui-element module
+  attr?: {[key: string]: string}; // the default attributes that will be added to on drag preview and in editor
+  isPhrasing?: boolean; // true - this tag can be placed in <p>, <pre>, <h1-n> tags
 }
 export interface ComponentPlugin {
   component: Type<any>;
-  schema: SwaggerObject;
+  schema: SwaggerObject; // describes form that will displayed in editor to collect need parameters
   description?: PluginDescription;
 }
 @Injectable({
