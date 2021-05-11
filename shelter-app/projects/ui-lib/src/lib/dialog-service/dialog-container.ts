@@ -22,10 +22,10 @@ import {
   Component,
   ComponentRef,
   ElementRef,
-  EmbeddedViewRef,
+  EmbeddedViewRef, EventEmitter,
   HostBinding,
-  Inject,
-  OnDestroy,
+  Inject, Input,
+  OnDestroy, OnInit,
   Optional,
   ViewChild,
   ViewEncapsulation,
@@ -33,6 +33,7 @@ import {
 import {Subject} from 'rxjs';
 import {distinctUntilChanged} from 'rxjs/operators';
 import {DialogConfig} from './dialog-config';
+import {TitleType} from "../shared";
 
 
 export function throwDialogContentAlreadyAttachedError(): void {
@@ -75,7 +76,7 @@ export function throwDialogContentAlreadyAttachedError(): void {
   },
 })
 // tslint:disable-next-line:component-class-suffix
-export class CdkDialogContainer extends BasePortalOutlet implements OnDestroy {
+export class CdkDialogContainer extends BasePortalOutlet implements OnInit, OnDestroy {
 
   private readonly _document: Document;
 
@@ -148,6 +149,7 @@ export class CdkDialogContainer extends BasePortalOutlet implements OnDestroy {
     /** The dialog configuration. */
 
     public _config: DialogConfig) {
+
     super();
 
     this._document = _document;
@@ -182,6 +184,9 @@ export class CdkDialogContainer extends BasePortalOutlet implements OnDestroy {
     // Move focus onto the dialog immediately in order to prevent the user
     // from accidentally opening multiple dialogs at the same time.
     this._focusDialogContainer();
+  }
+
+  ngOnInit(): void {
   }
 
   /** Destroy focus trap to place focus back to the element focused before the dialog opened. */

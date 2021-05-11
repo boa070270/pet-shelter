@@ -5,10 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import {ViewContainerRef} from '@angular/core';
+import {EventEmitter, ViewContainerRef} from '@angular/core';
 import {Direction} from '@angular/cdk/bidi';
 import {ComponentType} from '@angular/cdk/overlay';
 import {CdkDialogContainer} from './dialog-container';
+import {TitleType} from "../shared";
 
 /** Valid ARIA roles for a dialog element. */
 export type DialogRole = 'dialog' | 'alertdialog';
@@ -93,4 +94,8 @@ export class DialogConfig<D = any> {
   /** Duration of the exit animation. Has to be a valid CSS value (e.g. 50ms). */
   exitAnimationDuration?: string = '225ms';
   scrollStrategies?: any;
+
+  toolbar?: {title: string, customActions?:
+      { actions: Array<{icon: string, tooltip: string | TitleType[], command: string }>, emitter?: EventEmitter<string> }
+  };
 }

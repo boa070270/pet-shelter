@@ -13,6 +13,7 @@ import {
   MAT_DIALOG_SCROLL_STRATEGY_PROVIDER
 } from './dialog-injectors';
 import {ComponentsPluginService} from '../shared';
+import {DragDropModule} from "@angular/cdk/drag-drop";
 @NgModule({
   declarations: [
     CdkDialogContainer,
@@ -20,6 +21,7 @@ import {ComponentsPluginService} from '../shared';
   imports: [
     CommonModule,
     OverlayModule,
+    DragDropModule,
     PortalModule,
     A11yModule
   ],

@@ -41,9 +41,7 @@ import { MenuBarComponent } from './menu/menu-bar.component';
 import { EditableListComponent } from './editable-list.component';
 import { SwaggerBuilderComponent } from './swagger-builder.component';
 import { AppBarComponent } from './app-bar.component';
-import { SlideContainerDirective } from './slider/slide-container.directive';
-import { SlideContainerComponent } from './slider/slide-container.component';
-import { SlideElementDirective } from './slider/slide-element.directive';
+import { SlideContainerDirective, SlideContainerComponent, SlideElementDirective } from './slider';
 import {
   CardComponent,
   CardContentDirective,
@@ -52,7 +50,6 @@ import {
   CardTitleDirective, CardImageDirective
 } from './card/card.component';
 import { CardActionsComponent } from './card/card-actions.component';
-import { DraggableDialogComponent } from './dialogs/draggable-dialog.component';
 import { PluginComponent } from './plugin.component';
 
 @NgModule({
@@ -94,7 +91,6 @@ import { PluginComponent } from './plugin.component';
     CardActionsComponent,
     CardFooterDirective,
     CardImageDirective,
-    DraggableDialogComponent,
     PluginComponent
   ],
     imports: [

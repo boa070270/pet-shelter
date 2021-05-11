@@ -2,13 +2,13 @@ import {Component, ElementRef, EventEmitter, OnInit, ViewChild} from '@angular/c
 import {
   AbstractDataSource,
   ArrayDataSource,
-  DialogService,
+  DialogService, ExtendedData, SimpleDialogComponent,
   SwaggerArray,
   SwaggerFormService,
   SwaggerNative,
   SwaggerObject,
   swaggerUI,
-  TableProviderService,
+  TableProviderService, TitleBarData,
   TitleType,
 } from 'ui-lib';
 import {BasicService} from './basic.service';
@@ -31,8 +31,9 @@ import {Validators} from "@angular/forms";
       </select>
       <button (click)="onClick()">Render</button>
       <h1>Swagger builder test</h1>
-      <lib-swagger-builder [swagger]="formSwagger"></lib-swagger-builder>
+<!--      <lib-swagger-builder [swagger]="formSwagger"></lib-swagger-builder>-->
 <!--      <lib-swagger-form [swagger]="formSwagger"></lib-swagger-form>-->
+      <button (click)="openDialog()"></button>
     </div>
   `,
   styleUrls: ['./test-dynamic.component.sass']
@@ -118,6 +119,12 @@ export class TestDynamicComponent implements OnInit {
 
   onChange(): void {
     this.textHtml = this.knownTexts[this.knownText];
+  }
+
+  openDialog(): void {
+    let dialogRef;
+    dialogRef = this.dialogService.open(SimpleDialogComponent, {data: ExtendedData.create({}, true, this.swagger, null,
+      null, null, null, TitleBarData.create('Test dialog', {save: true})), hasBackdrop: false});
   }
 
 }
