@@ -7,14 +7,17 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ControlsModule} from '../controls';
 import { EditorToolbarComponent } from './editor-toolbar.component';
 import { PluginsPanelComponent } from './plugins-panel.component';
-import {DragDropModule} from "@angular/cdk/drag-drop";
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import { ExtCdkDragDirective, WhateverComponent } from './ext-cdk-drag.directive';
 
 @NgModule({
   declarations: [
       EditorComponent,
       EditorPluginComponent,
       EditorToolbarComponent,
-      PluginsPanelComponent
+      PluginsPanelComponent,
+      ExtCdkDragDirective,
+      WhateverComponent
   ],
     imports: [
         CommonModule,
@@ -31,7 +34,9 @@ import {DragDropModule} from "@angular/cdk/drag-drop";
   exports: [
     EditorComponent,
     EditorToolbarComponent,
-    PluginsPanelComponent
+    PluginsPanelComponent,
+    ExtCdkDragDirective,
+    WhateverComponent
   ]
 })
 export class WysiwygModule { }

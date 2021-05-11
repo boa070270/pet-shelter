@@ -7,22 +7,26 @@
   </div>
   <div class="panel">
     <div *ngIf="showIcons" class="icon-grid">
-      <button *ngFor="let i of list" title="{{i.caption}}" class="icon-btn {{i.icon}}"
-              (click)="select(i.selectorName)" draggable="true"
+      <button *ngFor="let i of list" title="{{i.caption}}" class="icon-btn {{i.icon}}" draggable="true"
+              (dragstart)="dragStart($event, i.selectorName)"
               (drag)="drag($event, i.selectorName)"
-              (dragstart)="drag($event, i.selectorName)"
-              (dragend)="drag($event, i.selectorName)"
+              (dragend)="dragEnd($event, i.selectorName)"
       ></button>
     </div>
     <div *ngIf="!showIcons" class="icon-list">
       <ul>
         <li *ngFor="let i of list" title="{{i.caption}}"
             (click)="select(i.selectorName)" class="{{i.icon}}" title="{{i.description}}" draggable="true"
-            (drag)="drag($event, i.selectorName)"
             (dragstart)="dragStart($event, i.selectorName)"
+            (drag)="drag($event, i.selectorName)"
             (dragend)="dragEnd($event, i.selectorName)"
-        >{{i.caption}}</li>
+        >{{i.caption}}
+        </li>
       </ul>
     </div>
   </div>
 </div>
+<ng-template let-context #tmpl>
+  <lib-whatever selectorName="{{context.selectorName}}"></lib-whatever>
+</ng-template>
+<div style="display: none" #vc></div>

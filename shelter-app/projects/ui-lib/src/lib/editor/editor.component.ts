@@ -1,9 +1,11 @@
-import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {SlideContainerDirective} from '../controls';
 import {CmdEditorToolbox, EditorToolbarComponent} from './editor-toolbar.component';
 import {Subscription} from 'rxjs';
 import {LibNode, LibNodeIterator, LibPosition, LibRange, Position} from '../shared';
 import {AddModification} from './add-modification';
+import {CdkDragDrop, CdkDragEnter, CdkDragExit, CdkDragSortEvent, CdkDropList} from '@angular/cdk/drag-drop';
+import {DOCUMENT} from '@angular/common';
 
 const KNOWN_KEYS = ['Enter', 'Tab',
   'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'End', 'Home', 'PageDown', 'PageUp',
@@ -38,12 +40,14 @@ export class EditorComponent implements OnInit, OnDestroy {
   _sourceModified = false;
   moveByText = true;
   rollback: Array<{parent: string, before: string, after: string}> = [];
+  @ViewChild(CdkDropList, {static: true}) dropList: CdkDropList;
   @ViewChild('editor', {static: true}) editorRef: ElementRef<HTMLDivElement>;
   @ViewChild(EditorToolbarComponent, {static: true}) toolbar: EditorToolbarComponent;
   @ViewChild(SlideContainerDirective, {static: true}) slide: SlideContainerDirective;
   private subsTb: Subscription = null;
   private focusNode: Node;
-  constructor() { }
+  constructor(@Inject(DOCUMENT) private _document: Document) { }
+  getCdkDropList: () => CdkDropList = () => this.dropList;
 
   ngOnInit(): void {
     this.editor = this.editorRef.nativeElement;
@@ -53,6 +57,19 @@ export class EditorComponent implements OnInit, OnDestroy {
       } catch (e) {
         console.error(e); // TODO If subscriber throw error, the link is closed
       }
+    });
+    this.dropList.disabled = false;
+    this.dropList.dropped.subscribe((e: CdkDragDrop<any, any>) => {
+      console.log('editor:dropped', e);
+    });
+    this.dropList.entered.subscribe( (e: CdkDragEnter<any>) => {
+      console.log('editor:entered', e);
+    });
+    this.dropList.exited.subscribe( (e: CdkDragExit<any>) => {
+      console.log('editor:exited', e);
+    });
+    this.dropList.sorted.subscribe((e: CdkDragSortEvent<any>) => {
+      // console.log('editor:sorted', e);
     });
   }
   ngOnDestroy(): void {
@@ -241,16 +258,22 @@ export class EditorComponent implements OnInit, OnDestroy {
       this.newPosition(p.n, p.offset);
     }
   }
-  private insertTag(range: Range, tag: string, attr?: {[key: string]: string}, invert = false): void {
+  private insertTag(range: Range, tag: string, attr?: {[key: string]: string}, invert = false, isPhrasing?: boolean): void {
     const mod = this.newModification(range);
     const isEmpty = LibNode.isEmptyTag(tag);
-    mod.insertTag(tag, attr, invert);
+    mod.insertTag(tag, attr, invert, isPhrasing);
     const node = this.findDesignElement('' + (this.designIndex - 1)) as Node;
     if (isEmpty) {
       this.newPosition(node.parentNode, LibNode.orderOfChild(node.parentNode, node) + 1);
     } else {
       this.newPosition(node, 0);
     }
+  }
+  private insertPlugin(range: Range, tag: string, attr?: {[key: string]: string}, isPhrasing?: boolean): void {
+    const mod = this.newModification(range);
+    mod.insertPlugin(tag, attr); // TODO need to process isPhrasing
+    const node = this.findDesignElement('' + (this.designIndex - 1)) as Node;
+    this.newPosition(node, 0);
   }
   private delete(range: Range, after = true): void {
     if (!range.collapsed) {
@@ -327,15 +350,77 @@ export class EditorComponent implements OnInit, OnDestroy {
     }
     this._sourceModified = true;
   }
-  allowDrop(event: DragEvent): void {
-    console.log('allowDrop', event);
-    event.preventDefault();
+  dragOver(e: DragEvent): void {
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(this.defineRange(e));
+    this.storeRange();
+    this.lastRange = this.validateRange(this.lastRange);
+    if (!this.lastRange) {
+      this.clearRange();
+    } else {
+      e.preventDefault();
+    }
   }
-  drop(event: DragEvent): void {
-    console.log('drop', event);
+  defineRange(e: DragEvent): Range {
+    const x = e.clientX;
+    const y = e.clientY;
+    const r = this._document.createRange();
+    r.selectNodeContents(e.target as Node);
+    return this.collapseRange(r, x, y);
   }
-  dragStart(event: DragEvent): void {
-    console.log('dragStart', event);
+  collapseRange(r: Range, x: number, y: number): Range {
+    const rect = r.getBoundingClientRect();
+    console.log(rect, x, y);
+    if (x >= rect.right || y >= rect.bottom) {
+      r.collapse(false);
+    } else if (x <= rect.left || y <= rect.top) {
+      r.collapse();
+    } else {
+      const st = LibPosition.nextText({n: r.startContainer, offset: r.startOffset})
+        || LibPosition.asLibPosition({n: r.startContainer, offset: r.startOffset}).nextNode();
+      const en = LibPosition.prevText({n: r.endContainer, offset: r.endOffset})
+        || LibPosition.asLibPosition({n: r.startContainer, offset: r.startOffset}).prevNode();
+      if (st) {
+        r.setStart(st.n, st.offset);
+      } else {
+        r.collapse(false);
+        return r;
+      }
+      if (en) {
+        r.setEnd(en.n, en.offset);
+      } else {
+        r.collapse();
+        return r;
+      }
+      r = this.collapseRange(r, x, y);
+    }
+    return r;
+  }
+  drop(e: DragEvent): void {
+    console.log('drop', e);
+    if (this.lastRange) {
+      const selectorName = e.dataTransfer.getData('text/plain');
+      // TODO there need to be attributes
+      this.insertPlugin(this.lastRange, selectorName);
+    }
+  }
+  dragStart(e: DragEvent): void {
+    console.log('dragStart', e);
+  }
+  dragEnd(e: DragEvent): void {
+    console.log('dragEnd', e);
+  }
+  dragExit(e: Event): void {
+    console.log('dragExit', e);
+  }
+  drag(e: DragEvent): void {
+    console.log('drag', e);
+  }
+  dragEnter(e: DragEvent): void {
+    console.log('dragEnter', e);
+  }
+  dragLeave(e: DragEvent): void {
+    console.log('dragLeave', e);
   }
   focusin(event: FocusEvent): void {
     console.log('focusin', event);
@@ -495,4 +580,6 @@ export class EditorComponent implements OnInit, OnDestroy {
     }
     return this.findNode(p, (c) => this.criteriaAllNode(c, false), false);
   }
+
+
 }

@@ -8,3 +8,4 @@ export * from './insert-tools';
 export * from './editor-toolbar.component';
 export * from './html-validator';
 export * from './plugins-panel.component';
+export * from './ext-cdk-drag.directive';

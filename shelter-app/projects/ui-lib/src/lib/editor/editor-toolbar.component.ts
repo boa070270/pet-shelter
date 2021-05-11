@@ -1,10 +1,10 @@
-import {ChangeDetectorRef, Component, EventEmitter, Inject, OnDestroy, Optional, Output} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, Optional, Output} from '@angular/core';
 import {AbstractComponent} from '../controls';
 import {SystemLang} from '../i18n';
 import {I18NType} from '../shared';
 import {DialogService} from '../dialog-service';
 import {PluginsPanelComponent} from './plugins-panel.component';
-import {DragDrop} from "@angular/cdk/drag-drop";
+import {CdkDropList, DragDrop} from "@angular/cdk/drag-drop";
 
 export interface CmdEditorToolbox {
   cmd: string;
@@ -37,6 +37,7 @@ export class EditorToolbarComponent extends AbstractComponent implements OnDestr
   borderStyle: string;
   tblBorderWidth: string;
   moveByText = true;
+  @Input() fCdkDropList: () => CdkDropList;
   private pluginEmitter: EventEmitter<string>;
   @Output() emitter = new EventEmitter<CmdEditorToolbox>();
   constructor(private changeDetector: ChangeDetectorRef, public systemLang: SystemLang, private dialogService: DialogService,
@@ -154,6 +155,7 @@ export class EditorToolbarComponent extends AbstractComponent implements OnDestr
   }
 
   showPlugins(): void {
-    this.dialogService.open(PluginsPanelComponent, {data: {emitter: this.pluginEmitter}, hasBackdrop: false});
+    this.dialogService.open(PluginsPanelComponent,
+      {data: {emitter: this.pluginEmitter, fCdkDropList: this.fCdkDropList}, hasBackdrop: false});
   }
 }

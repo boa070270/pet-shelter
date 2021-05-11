@@ -172,14 +172,18 @@ export class AddModification {
     }
     return this.startTag(tag, attr) + str + '</' + tag + '>';
   }
-  private txtSortOut(str: string, tag?: string, attr?: {[key: string]: string}, invert?: boolean, isPhrasing?: boolean): Modify {
-    if (tag) {
-      tag = tag.toLowerCase();
-    }
+  private getParent(): HTMLElement {
     let parent = this.range.commonAncestorContainer as HTMLElement;
     if (parent.nodeType !== Node.ELEMENT_NODE) {
       parent = parent.parentElement;
     }
+    return parent;
+  }
+  private txtSortOut(str: string, tag?: string, attr?: {[key: string]: string}, invert?: boolean, isPhrasing?: boolean): Modify {
+    if (tag) {
+      tag = tag.toLowerCase();
+    }
+    let parent = this.getParent();
     // case when are selected all node's content (all siblings)
     if (tag && !LibNode.isEmptyTag(tag) && this.startPos.n === this.endPos.n && this.endPos.n.nodeType === Node.ELEMENT_NODE
       && (this.endPos.n.childNodes.length <= 1 || (LibPosition.isFirst(this.startPos) && LibPosition.isLast(this.endPos)))) {
@@ -506,6 +510,9 @@ export class AddModification {
       isPhrasing = LibNode.isPhrasingTag(tag);
     }
     this.upd(this.txtSortOut('', tag, attr, invert, isPhrasing));
+  }
+  insertPlugin(tag: string, attr?: {[key: string]: string}): void {
+    this.upd({parent: this.getParent(), start: this.start, end: this.end, txt: this.startTag(tag, attr) + '</' + tag + '>'});
   }
   public delete(): void {
     if (!this.range.collapsed) {
