@@ -192,8 +192,6 @@ export class TopMenuPageComponent implements OnInit {
           sex: SwaggerNative.asString(null, {enum: ['m', 'f']})
         })
       });
-// <<<<<<< HEAD
-// =======
   swaggerOption = [this.swagger];
   /******* Table *******/
   tableDataSet = [
@@ -212,7 +210,6 @@ export class TopMenuPageComponent implements OnInit {
   tableCaption = 'Test table';
   tableData = new BehaviorSubject<any>(this.tableDataSet);
   tableColumns = this.tableColumnSet;
-// >>>>>>> editable-list
   listOptions = ['first', 'second', 'third', 'fifth', 'sixth'];
   listOptions2 = ['first', 'second', 'third', 'fifth', 'sixth'];
   lustTitles: TitleType[] = [

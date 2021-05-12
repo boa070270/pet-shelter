@@ -26,7 +26,6 @@ import {SpinnerComponent} from './spinner.component';
 import {SimpleDialogComponent} from './dialogs/simple-dialog.component';
 import {SnakeBarComponent} from './dialogs/snake-bar.component';
 import {CommentComponent, VoteComponent, DiscussionComponent} from './survey';
-import {CarouselComponent} from './slider/carousel.component';
 import {LinkComponent} from './link.component';
 import {
   GeneratorFormComponent,
@@ -41,7 +40,7 @@ import { MenuBarComponent } from './menu/menu-bar.component';
 import { EditableListComponent } from './editable-list.component';
 import { SwaggerBuilderComponent } from './swagger-builder.component';
 import { AppBarComponent } from './app-bar.component';
-import { SlideContainerDirective, SlideContainerComponent, SlideElementDirective } from './slider';
+import { CarouselComponent, SlideContainerDirective, SlideContainerComponent, SlideElementDirective } from './slider';
 import {
   CardComponent,
   CardContentDirective,
