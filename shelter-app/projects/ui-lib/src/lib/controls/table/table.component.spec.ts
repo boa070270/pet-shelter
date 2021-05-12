@@ -3,6 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TableComponent } from './table.component';
 import {Observable} from 'rxjs';
 import {
+  AbstractDataSource,
+  CdkDataSource,
   LanguageType, LoggerConfiguration,
   LoggerConfigurationToken,
   LogLevel,
@@ -14,16 +16,24 @@ import {OverlayModule} from '@angular/cdk/overlay';
 import {LoggerService} from '../../logger';
 import {CommonModule} from '@angular/common';
 import {ControlsModule} from '../controls.module';
+import {ObtainSystemLanguageMock} from "../../../../test/system-language-mock";
 
 const data = [
   ['cell1', 'cell2', 'cell3'],
   ['a', 0, false],
   ['b', 1, true]
 ];
+const inputData = [
+  {cell1: data[1][0], cell2: data[1][1], cell3: data[1][2]},
+  {cell1: data[2][0], cell2: data[2][1], cell3: data[2][2]},
+];
 
 describe('TestTableComponent', () => {
   let component: TableComponent<any, any>;
   let fixture: ComponentFixture<TableComponent<any, any>>;
+  let dataSource: AbstractDataSource<any>;
+  let cdkDataSource: CdkDataSource<any, any>;
+  let tableElement: HTMLTableElement;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -44,6 +54,7 @@ describe('TestTableComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableComponent);
     component = fixture.componentInstance;
+    expect(component).toBeTruthy();
     component.swagger = new SwaggerObject(['cell1', 'cell2', 'cell3'], {
       cell1: SwaggerNative.asString(),
       cell2: SwaggerNative.asNumber(),
@@ -52,29 +63,97 @@ describe('TestTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  beforeEach(() => {
+    dataSource = component.dataSource;
+    cdkDataSource = dataSource.registerDS();
+    expect(cdkDataSource).toBeTruthy();
+    fixture.detectChanges();
+    tableElement = fixture.nativeElement.querySelector('table');
+    expect(tableElement).toBeTruthy();
   });
 
-  it('data should change', () => {
-    const dataSource = component.dataSource;
+  it('data should be writable', () => {
     fixture.detectChanges();
 
     const initialDataLength = dataSource.total.getValue();
-    expect(dataSource.total.getValue()).toBe(0);
-    const tableElement = fixture.nativeElement.querySelector('table');
-    expect(tableElement).toBeTruthy();
+    expect(cdkDataSource.totalRecords.getValue()).toBe(0);
+    expect(cdkDataSource.totalRecords.getValue()).toEqual(dataSource.total.getValue());
     // Add data to the table and recreate what the rendered output should be.
-    dataSource.setData([
-      {cell1: data[1][0], cell2: data[1][1], cell3: data[1][2]},
-      {cell1: data[2][0], cell2: data[2][1], cell3: data[2][2]},
-    ]);
-    expect(dataSource.total.getValue()).toBe(initialDataLength + 2); // Make sure data was added
+    component.writeValue(inputData);
+    expect(cdkDataSource.totalRecords.getValue()).toBe(initialDataLength + inputData.length); // Make sure data was added
+    expect(cdkDataSource.totalRecords.getValue()).toEqual(dataSource.total.getValue());
     fixture.detectChanges();
 
     expectTableToMatchContent(tableElement, data);
   });
 
+  describe('row should change', () => {
+    it('added', () => {
+      const row = {cell1: 'c', cell2: 3, cell3: true};
+      cdkDataSource.insertRow(row).subscribe(() => {
+        fixture.detectChanges();
+        expectTableToMatchContent(tableElement, [data[0], [row.cell1, row.cell2, row.cell3]]);
+      });
+    });
+
+    it('edited', () => {
+      const row = {cell1: 'c', cell2: 3, cell3: true};
+      const editedRow = {cell1: 'd', cell2: 4, cell3: false};
+      component.writeValue([row]);
+      expect(cdkDataSource.totalRecords.getValue()).toBe(1);
+      cdkDataSource.updateRow(editedRow, row).subscribe(() => {
+        fixture.detectChanges();
+        expectTableToMatchContent(tableElement,
+          [data[0], [editedRow.cell1, editedRow.cell2, editedRow.cell3]]);
+      });
+    });
+
+    it('deleted', () => {
+      const row = {cell1: 'c', cell2: 3, cell3: true};
+      component.writeValue([row]);
+      expect(cdkDataSource.totalRecords.getValue()).toBe(1);
+      cdkDataSource.deleteRow(row).subscribe(() => {
+        fixture.detectChanges();
+        expectTableToMatchContent(tableElement, [data[0]]);
+      });
+    });
+  });
+
+  it('data should be filtered', () => {
+    component.writeValue(inputData);
+    expect(cdkDataSource.totalRecords.getValue()).toBe(2);
+    fixture.detectChanges();
+    component.inputSearch.nativeElement.value = 'b';
+    component.keyUp();
+    cdkDataSource.filteredRecords.subscribe((n) => {
+      expect(n).toBe(1);
+    });
+    fixture.detectChanges();
+    expectTableToMatchContent(tableElement, [data[0], data[2]]);
+  });
+
+  it('order should change (this works strangely)', () => {
+    component.writeValue([inputData[1], inputData[0]]);
+    expect(cdkDataSource.totalRecords.getValue()).toBe(2);
+    component.orderCell('cell1');
+    component.orderCell('cell1');
+    fixture.detectChanges();
+    expectTableToMatchContent(tableElement, data);
+  });
+
+  it('page should change', () => {
+    const input = [];
+    for (let i = 0; i < 6; i++) {
+      input.push(inputData[0], inputData[1]);
+    }
+    component.writeValue(input);
+    component.page = 2;
+    fixture.detectChanges();
+    expectTableToMatchContent(tableElement, data);
+  });
+
+  // todo custom actions, trIn, trOut
+  // todo rowClick()
 
 });
 
@@ -114,17 +193,11 @@ function getHeaderCells(headerRow: Element): HTMLElement[] {
 function getActualTableContent(tableElement: Element): string[][] {
   let actualTableContent: Element[][] = [];
   getHeaderRows(tableElement).forEach(row => {
-    const cells = getHeaderCells(row);
-    if (cells.length) {
-      actualTableContent.push(cells);
-    }
+    actualTableContent.push(getHeaderCells(row));
   });
 
   // Check data row cells
-  const rows = getRows(tableElement).map(row => getCells(row));
-  if (rows.length) {
-    actualTableContent = actualTableContent.concat(rows);
-  }
+  actualTableContent = actualTableContent.concat(getRows(tableElement).map(row => getCells(row)));
 
   // Convert the nodes into their text content;
   return actualTableContent.map(row => row.map(cell => cell.textContent.trim()));
@@ -139,7 +212,6 @@ export function expectTableToMatchContent(tableElement: Element, expected: any[]
   }
 
   const actual = getActualTableContent(tableElement);
-  console.log(actual);
 
   // Make sure the number of rows match
   if (actual.length !== expected.length) {
@@ -165,16 +237,5 @@ export function expectTableToMatchContent(tableElement: Element, expected: any[]
 
   if (missedExpectations.length) {
     fail(missedExpectations.join('\n'));
-  }
-}
-class ObtainSystemLanguageMock implements ObtainSystemLanguage {
-  getSystemLanguages(): Observable<Array<LanguageType>> {
-    return new Observable(s => {
-      s.next([{
-        lang: 'en',
-        displayName: 'en',
-        rate: 0
-      }]);
-    });
   }
 }

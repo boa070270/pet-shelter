@@ -18,9 +18,6 @@ import {BaseSwaggerComponent} from './base-swagger.component';
 import {EditableListComponent} from "../editable-list.component";
 import {CdkPortalOutlet, ComponentPortal} from "@angular/cdk/portal";
 import {BaseComponent} from "../base.component";
-import {InputControlComponent} from "../input-control.component";
-import {CheckboxControlComponent} from "../checkbox-control.component";
-import {ListBuilderComponent} from "../list-builder.component";
 
 @Component({
   selector: 'lib-swagger-array',
