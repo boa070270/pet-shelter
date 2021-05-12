@@ -16,6 +16,7 @@ import {OverlayModule} from '@angular/cdk/overlay';
 import {LoggerService} from '../../logger';
 import {CommonModule} from '@angular/common';
 import {ControlsModule} from '../controls.module';
+import {ObtainSystemLanguageMock} from "../../../../test/system-language-mock";
 
 const data = [
   ['cell1', 'cell2', 'cell3'],
@@ -236,16 +237,5 @@ export function expectTableToMatchContent(tableElement: Element, expected: any[]
 
   if (missedExpectations.length) {
     fail(missedExpectations.join('\n'));
-  }
-}
-class ObtainSystemLanguageMock implements ObtainSystemLanguage {
-  getSystemLanguages(): Observable<Array<LanguageType>> {
-    return new Observable(s => {
-      s.next([{
-        lang: 'en',
-        displayName: 'en',
-        rate: 0
-      }]);
-    });
   }
 }
