@@ -35,6 +35,7 @@ import {Subscription, zip} from 'rxjs';
 import {Directionality} from '@angular/cdk/bidi';
 import {ComponentType} from '@angular/cdk/overlay';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
+import {RootPageService} from "../../shared/root-page.service";
 
 // i18n
 const I18N: I18NType = {
@@ -157,9 +158,10 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
               protected dialogService: DialogService,
               protected directionality: Directionality,
               dictionary: DictionaryService,
+              protected rootPage: RootPageService,
               @Inject(UILoggerToken) protected logger: UILogger) {
     // TODO IE doesn't support assign, how angular solves this
-    super(systemLang, directionality, dictionary.getLibDictionary('TableComponent', I18N));
+    super(systemLang, directionality, rootPage, dictionary.getLibDictionary('TableComponent', I18N));
   }
   onChangeLang(): void {
     super.onChangeLang();

@@ -145,7 +145,9 @@ export class TextareaControlComponent extends BaseComponent implements  OnInit, 
   onKeyUp(event: KeyboardEvent): void {
     const target = event.target as any;
     if (target) {
-      this.change(target.value);
+      if (typeof this.change === 'function') {
+        this.change(target.value);
+      }
     }
   }
 }

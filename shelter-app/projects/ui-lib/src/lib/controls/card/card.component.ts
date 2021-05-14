@@ -4,7 +4,7 @@ import {
   Component,
   Directive,
   ElementRef,
-  HostBinding, Input,
+  HostBinding, Input, OnInit,
   ViewChild,
   ViewEncapsulation
 } from '@angular/core';
@@ -25,6 +25,7 @@ interface CardProportions {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardComponent implements AfterViewInit {
+
   @HostBinding() class = 'card'; // lib-focus-indicator
   @Input() limitByHeight: boolean;
   private _proportions: CardProportions = {header: {percentage: 35}, content: {percentage: 45},
@@ -74,6 +75,31 @@ export class CardComponent implements AfterViewInit {
       });
       (this.content.nativeElement.firstElementChild as HTMLElement).style.height = this.content.nativeElement.style.maxHeight;
     }
+    this.self.nativeElement.querySelectorAll('lib-card-content').forEach(e => {
+      if (!e.classList.contains('card-content')) {
+        e.classList.add('card-content');
+      }
+    });
+    this.self.nativeElement.querySelectorAll('lib-card-footer').forEach(e => {
+      if (!e.classList.contains('card-footer')) {
+        e.classList.add('card-footer');
+      }
+    });
+    this.self.nativeElement.querySelectorAll('lib-card-title').forEach(e => {
+      if (!e.classList.contains('card-title')) {
+        e.classList.add('card-title');
+      }
+    });
+    this.self.nativeElement.querySelectorAll('lib-card-subtitle').forEach(e => {
+      if (!e.classList.contains('card-subtitle')) {
+        e.classList.add('card-subtitle');
+      }
+    });
+    this.self.nativeElement.querySelectorAll('.libCardImg').forEach(e => {
+      if (!e.classList.contains('card-img')) {
+        e.classList.add('card-img');
+      }
+    });
   }
 }
 
@@ -81,6 +107,8 @@ export class CardComponent implements AfterViewInit {
   selector: 'lib-card-header',
   template: `
     <div>
+      <lib-card-title *ngIf="title">{{title}}</lib-card-title>
+      <lib-card-subtitle *ngIf="subtitle">{{subtitle}}</lib-card-subtitle>
       <ng-content select="lib-card-title, lib-card-subtitle"></ng-content>
     </div>
     <ng-content></ng-content>`,
@@ -90,6 +118,8 @@ export class CardComponent implements AfterViewInit {
 })
 export class CardHeaderComponent {
   @HostBinding() class = 'card-header';
+  @Input() title: string;
+  @Input() subtitle: string;
 }
 
 @Directive({
@@ -110,11 +140,11 @@ export class CardSubtitleDirective {
   selector: 'lib-card-content'
 })
 export class CardContentDirective {
-  @HostBinding() class = 'card-body';
+  @HostBinding() class = 'card-content';
 }
 
 @Directive({
-  selector: 'lib-card-footer',
+  selector: 'lib-card-footer'
 })
 export class CardFooterDirective {
   @HostBinding() class = 'card-footer';

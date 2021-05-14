@@ -33,7 +33,8 @@ import {Validators} from "@angular/forms";
       <h1>Swagger builder test</h1>
 <!--      <lib-swagger-builder [swagger]="formSwagger"></lib-swagger-builder>-->
 <!--      <lib-swagger-form [swagger]="formSwagger"></lib-swagger-form>-->
-      <button (click)="openDialog()"></button>
+<!--      <button (click)="openDialog()"></button>-->
+      <lib-root-page></lib-root-page>
     </div>
   `,
   styleUrls: ['./test-dynamic.component.sass']

@@ -5,6 +5,7 @@ import {distinctTitleId, I18NType, isTitleType, TitleType} from '../shared';
 import {ControlValueAccessor} from '@angular/forms';
 import {Directionality} from '@angular/cdk/bidi';
 import {AbstractComponent} from './abstract.component';
+import {RootPageService} from "../shared/root-page.service";
 
 export interface CommonParameters {
   id?: string;
@@ -94,7 +95,8 @@ export class BaseComponent extends AbstractComponent implements OnInit, OnDestro
   protected change: (_: any) => {};
   protected touch: () => {};
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality, @Inject('i18NCfg') public i18NCfg?: I18NType) {
+  constructor(public systemLang: SystemLang, protected directionality: Directionality, protected rootPage: RootPageService,
+              @Inject('i18NCfg') public i18NCfg?: I18NType) {
     super(systemLang, i18NCfg);
     this.dir = directionality.value;
     this.subsDir = directionality.change.subscribe(d => {
@@ -111,8 +113,17 @@ export class BaseComponent extends AbstractComponent implements OnInit, OnDestro
   }
   ngOnChanges(changes: SimpleChanges): void {
     // console.log('BaseControlComponent.ngOnChanges', this, changes);
+    Object.keys(changes).forEach(k => {
+      const v = changes[k].currentValue;
+      if (typeof v === 'string' && v.startsWith('{{') && v.endsWith('}}')) {
+        const d = this.rootPage.getData(v.replace(/{{|}}/g, ''));
+        if (d) {
+          this[k] = changes[k].currentValue = d;
+        }
+      }
+    });
     if (changes.name) {
-      console.log('BaseControlComponent.ngOnChanges was changed name');
+      console.log('BaseControlComponent.ngOnChanges was changed name', changes);
     }
   }
   ngOnDestroy(): void {

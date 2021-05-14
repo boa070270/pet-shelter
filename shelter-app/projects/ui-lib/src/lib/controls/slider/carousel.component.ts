@@ -32,7 +32,7 @@ import {Subscription} from 'rxjs';
 })
 export class CarouselComponent<T, U> extends AbstractComponent implements OnInit, OnDestroy {
   @Input() itemTemplate: TemplateRef<T>;
-  @Input() cdkDataSource: CdkDataSource<U, T>;
+  @Input() cdkDataSource: CdkDataSource<U, T>; // {{ds1}}
   @ViewChild(SlideContainerDirective, {static: true}) slideContainer: SlideContainerDirective;
   private readonly collectionViewer;
   data: T[] | ReadonlyArray<T> = null;

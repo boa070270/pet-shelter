@@ -74,6 +74,7 @@
 .dialog-container {
   overflow: auto;
   max-height: 80vh;
+  padding: 0;
 }
 .border-container {
   margin: 0;
@@ -92,11 +93,11 @@
   grid-auto-flow: column;
   grid-auto-columns: max-content;
   background: grey;
-  margin: 1px;
+  margin: 0;
   padding: 1px;
   border: {
     color: whitesmoke;
-    width: 1px;
+    width: 0;
     style: solid;
   }
   button {

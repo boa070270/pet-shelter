@@ -6,6 +6,7 @@ import {Directionality} from '@angular/cdk/bidi';
 import {SwaggerArray, SwaggerNative, SwaggerObject, swaggerUI, TitleType} from '../shared';
 import {ObjectLinkService} from './object-link.service';
 import {SwaggerFormComponent} from './swagger-form';
+import {RootPageService} from "../shared/root-page.service";
 
 const I18N = {
   act_up: [{lang: 'en', title: 'Move one position up'}, {lang: 'uk', title: 'Підняти на одну позицію'}],
@@ -350,8 +351,9 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
     return this.swagger.properties;
   }
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality, public objectLink: ObjectLinkService) {
-    super(systemLang, directionality);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality,
+              public objectLink: ObjectLinkService, protected rootPage: RootPageService) {
+    super(systemLang, directionality, rootPage);
   }
 
   ngOnInit(): void {

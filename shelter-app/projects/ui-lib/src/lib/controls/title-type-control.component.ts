@@ -4,6 +4,7 @@ import {BaseComponent} from './base.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {DictionaryService, TitleType} from '../shared';
 import {Directionality} from '@angular/cdk/bidi';
+import {RootPageService} from "../shared/root-page.service";
 
 // i18n
 const I18N = {
@@ -31,9 +32,9 @@ export class TitleTypeControlComponent extends BaseComponent implements OnInit, 
   str: string;
   titles: TitleType[] = [];
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality,
+  constructor(public systemLang: SystemLang, protected directionality: Directionality, protected rootPage: RootPageService,
               dictionary: DictionaryService) {
-    super(systemLang, directionality, dictionary.getLibDictionary('TitleTypeControlComponent', I18N));
+    super(systemLang, directionality, rootPage, dictionary.getLibDictionary('TitleTypeControlComponent', I18N));
     systemLang.getLanguages().forEach(l => {
       this.titles.push({id: '', title: l.displayName, lang: l.lang});
     });

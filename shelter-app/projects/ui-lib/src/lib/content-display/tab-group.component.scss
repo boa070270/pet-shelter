@@ -1,0 +1,18 @@
+.tab-group {
+  margin: 0 0.3em;
+  border: gray solid 1px;
+  box-shadow: 0.1em 0.1em 0.1em gainsboro;
+}
+.tab-chosen {
+  background-color: lightgray;
+}
+.group-header {
+  border-bottom: gray solid 1px;
+  button {
+    padding: 0.3em;
+    border-radius: 0;
+  }
+}
+.group-content {
+  padding: 0.2em 0.1em 0.2em 0.1em;
+}
