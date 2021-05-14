@@ -5,6 +5,7 @@ import {AbstractControl, ControlValueAccessor, FormGroup} from '@angular/forms';
 import {SystemLang} from '../../i18n';
 import {Directionality} from '@angular/cdk/bidi';
 import {Subscription} from 'rxjs';
+import {RootPageService} from "../../shared/root-page.service";
 
 @Component({
   selector: 'lib-base-swagger',
@@ -30,8 +31,8 @@ export class BaseSwaggerComponent extends BaseComponent implements OnInit, OnDes
   get constrictions(): BaseConstrictions {
     return this._swagger.constrictions;
   }
-  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
-    super(systemLang, directionality);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality, protected rootPage: RootPageService) {
+    super(systemLang, directionality, rootPage);
   }
   ngOnInit(): void {
     super.ngOnInit();

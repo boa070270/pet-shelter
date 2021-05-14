@@ -8,6 +8,7 @@ import {BaseComponent} from './base.component';
 import {DictionaryService, TitleType} from '../shared';
 import {CheckboxParameters} from './checkbox-control.component';
 import {Directionality} from '@angular/cdk/bidi';
+import {RootPageService} from "../shared/root-page.service";
 
 export const LIST_BUILDER_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -76,8 +77,8 @@ export class ListBuilderComponent extends BaseComponent implements OnInit, OnCha
   @ViewChild(ListSelectComponent, {static: true}) result: ListSelectComponent;
 
   constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              dictionary: DictionaryService) {
-    super(systemLang, directionality, dictionary.getLibDictionary('ListBuilderComponent', I18N));
+              dictionary: DictionaryService, protected rootPage: RootPageService) {
+    super(systemLang, directionality, rootPage, dictionary.getLibDictionary('ListBuilderComponent', I18N));
   }
 
   ngOnInit(): void {

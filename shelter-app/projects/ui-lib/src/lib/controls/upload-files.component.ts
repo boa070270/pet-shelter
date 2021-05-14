@@ -5,6 +5,7 @@ import {DialogService} from '../dialog-service';
 import {DictionaryService, I18NType} from '../shared';
 import {SystemLang} from '../i18n';
 import {Directionality} from '@angular/cdk/bidi';
+import {RootPageService} from "../shared/root-page.service";
 
 const I18N: I18NType = {
   welcomeDropFile: [
@@ -40,8 +41,8 @@ export class UploadFilesComponent extends BaseComponent implements OnInit, Contr
   files: File[] = [];
   progress: number[] = [];
   constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              private dialogService: DialogService, dictionary: DictionaryService) {
-    super(systemLang, directionality, dictionary.getLibDictionary('UploadFilesComponent', I18N));
+              private dialogService: DialogService, dictionary: DictionaryService, protected rootPage: RootPageService) {
+    super(systemLang, directionality, rootPage, dictionary.getLibDictionary('UploadFilesComponent', I18N));
   }
 
   ngOnInit(): void {

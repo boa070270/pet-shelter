@@ -16,6 +16,7 @@ import {BaseComponent} from '../base.component';
 import {InputControlComponent} from '../input-control.component';
 import {CheckboxControlComponent} from '../checkbox-control.component';
 import {ListBuilderComponent} from '../list-builder.component';
+import {RootPageService} from "../../shared/root-page.service";
 
 @Component({
   selector: 'lib-swagger-native',
@@ -38,8 +39,8 @@ export class SwaggerNativeComponent extends BaseSwaggerComponent implements OnIn
   }
   constructor(public systemLang: SystemLang, protected directionality: Directionality,
               protected componentsPlugin: ComponentsPluginService,
-              protected formErrors: FormErrorsService) {
-    super(systemLang, directionality);
+              protected formErrors: FormErrorsService, protected rootPage: RootPageService) {
+    super(systemLang, directionality, rootPage);
   }
 
   writeValue(obj: any): void {

@@ -13,6 +13,7 @@ import {SystemLang} from '../i18n';
 import {BaseComponent} from './base.component';
 import {TitleType} from '../shared';
 import {Directionality} from '@angular/cdk/bidi';
+import {RootPageService} from "../shared/root-page.service";
 
 export const CHECKBOX_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -107,8 +108,8 @@ export class CheckboxControlComponent extends BaseComponent implements OnInit, O
   tips: {[id: string]: string};
 
   constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              protected changeDetect: ChangeDetectorRef) {
-    super(systemLang, directionality);
+              protected changeDetect: ChangeDetectorRef, protected rootPage: RootPageService) {
+    super(systemLang, directionality, rootPage);
   }
 
   ngOnInit(): void {

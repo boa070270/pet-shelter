@@ -18,6 +18,7 @@ import {BaseSwaggerComponent} from './base-swagger.component';
 import {EditableListComponent} from "../editable-list.component";
 import {CdkPortalOutlet, ComponentPortal} from "@angular/cdk/portal";
 import {BaseComponent} from "../base.component";
+import {RootPageService} from "../../shared/root-page.service";
 
 @Component({
   selector: 'lib-swagger-array',
@@ -58,8 +59,8 @@ export class SwaggerArrayComponent extends BaseSwaggerComponent implements OnIni
     }
   }
   constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              protected formErrors: FormErrorsService, protected componentsPlugin: ComponentsPluginService) {
-    super(systemLang, directionality);
+              protected formErrors: FormErrorsService, protected componentsPlugin: ComponentsPluginService, protected rootPage: RootPageService) {
+    super(systemLang, directionality, rootPage);
   }
 
   ngOnInit(): void {

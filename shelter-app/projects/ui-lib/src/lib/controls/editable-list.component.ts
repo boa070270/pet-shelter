@@ -8,6 +8,7 @@ import {CheckboxParameters} from './checkbox-control.component';
 import {ListSelectComponent} from './list-select.component';
 import {coerceArray} from '@angular/cdk/coercion';
 import {DialogService} from '../dialog-service';
+import { RootPageService } from '../shared/root-page.service';
 
 const I18N = {
   DEF_REMOVE_TITLES: [{lang: 'en', title: 'Remove'}, {lang: 'uk', title: 'Видалити'}],
@@ -104,8 +105,8 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
   @ViewChild(ListSelectComponent, {static: true}) result: ListSelectComponent;
 
   constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              private dialogService: DialogService, dictionary: DictionaryService) {
-    super(systemLang, directionality, dictionary.getLibDictionary('EditableListComponent', I18N));
+              private dialogService: DialogService, dictionary: DictionaryService, protected rootPage: RootPageService) {
+    super(systemLang, directionality, rootPage, dictionary.getLibDictionary('EditableListComponent', I18N));
   }
 
   ngOnInit(): void {

@@ -3,6 +3,7 @@ import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SystemLang} from '../i18n';
 import {CheckboxControlComponent} from './checkbox-control.component';
 import {Directionality} from '@angular/cdk/bidi';
+import {RootPageService} from "../shared/root-page.service";
 
 export const RADIO_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -18,8 +19,8 @@ export const RADIO_VALUE_ACCESSOR: any = {
 })
 export class RadioControlComponent extends CheckboxControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
   constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              protected changeDetect: ChangeDetectorRef) {
-    super(systemLang, directionality, changeDetect);
+              protected changeDetect: ChangeDetectorRef, protected rootPage: RootPageService) {
+    super(systemLang, directionality, changeDetect, rootPage);
   }
 
   ngOnInit(): void {

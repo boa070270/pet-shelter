@@ -4,6 +4,7 @@ import {Directionality} from '@angular/cdk/bidi';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {BaseComponent} from './base.component';
 import {TitleType} from '../shared';
+import {RootPageService} from "../shared/root-page.service";
 
 export interface TextareaParameters {
   tooltip?: string | TitleType[];
@@ -94,8 +95,8 @@ export class TextareaControlComponent extends BaseComponent implements  OnInit, 
   iconsClass: any;
 
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
-    super(systemLang, directionality);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality, protected rootPage: RootPageService) {
+    super(systemLang, directionality, rootPage);
   }
 
   ngOnInit(): void {

@@ -4,6 +4,7 @@ import {SystemLang} from '../i18n';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {coerceBooleanProperty} from '@angular/cdk/coercion';
 import {Directionality} from '@angular/cdk/bidi';
+import {RootPageService} from "../shared/root-page.service";
 
 export const BOOLEAN_INPUT_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -19,8 +20,8 @@ export const BOOLEAN_INPUT_ACCESSOR: any = {
 export class BooleanControlComponent extends CheckboxControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
   constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              protected changeDetect: ChangeDetectorRef) {
-    super(systemLang, directionality, changeDetect);
+              protected changeDetect: ChangeDetectorRef, protected rootPage: RootPageService) {
+    super(systemLang, directionality, changeDetect, rootPage);
   }
 
   ngOnInit(): void {

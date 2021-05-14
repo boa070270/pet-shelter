@@ -12,6 +12,7 @@ import {ControlValueAccessor} from "@angular/forms";
 import {SwaggerSchema, TitleType} from "../../shared";
 import {SystemLang} from "../../i18n";
 import {Directionality} from "@angular/cdk/bidi";
+import {RootPageService} from "../../shared/root-page.service";
 
 export interface CardActions {
   icon: string;
@@ -37,8 +38,8 @@ export class CardActionsComponent extends BaseComponent implements OnInit, OnCha
   @Output()
   actionEvent: EventEmitter<string> = new EventEmitter<string>();
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality) {
-    super(systemLang, directionality);
+  constructor(public systemLang: SystemLang, protected directionality: Directionality, protected rootPage: RootPageService) {
+    super(systemLang, directionality, rootPage);
   }
 
   ngOnInit(): void {
