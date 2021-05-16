@@ -1,10 +1,11 @@
 import {
+  AfterViewInit,
   ChangeDetectorRef,
-  Component,
+  Component, ContentChild, ContentChildren, ElementRef, forwardRef,
   OnChanges,
   OnDestroy,
   OnInit,
-  SimpleChanges,
+  SimpleChanges, TemplateRef,
   ViewContainerRef
 } from '@angular/core';
 import {AbstractComponent} from '../abstract.component';
@@ -19,15 +20,19 @@ import {AbstractIteratorComponent} from '../abstract-iterator.component';
         <label for="a.id">{{a.label}}</label>
         <div class="accordion-content">
           {{a.data}}
-          <ng-content></ng-content>
+          <!-- ng-content></ng-content -->
         </div>
       </switch-page-data>
     </ng-container>
   </div>`,
   styleUrls: ['./accordion.component.scss'],
 })
-export class AccordionComponent<T, U> extends AbstractIteratorComponent<T, U> implements OnInit, OnChanges, OnDestroy {
-
+export class AccordionComponent<T, U> extends AbstractIteratorComponent<T, U> implements OnInit, OnChanges, OnDestroy, AfterViewInit {
+  // @ContentChild(TemplateRef, {static: true}) child: any;
+  // @ContentChild(ViewContainerRef, {static: true}) child2: any;
+  // @ContentChildren(TemplateRef, {descendants: true}) children: any;
+  // @ContentChildren(ViewContainerRef, {descendants: true}) children2: any;
+  @ContentChildren(ElementRef, {descendants: true}) children3: any;
   constructor(protected _view: ViewContainerRef,
               protected changeDetector: ChangeDetectorRef) {
     super(_view, changeDetector);
@@ -43,5 +48,8 @@ export class AccordionComponent<T, U> extends AbstractIteratorComponent<T, U> im
       this.prefix = AbstractComponent.pageDataKey(v.currentValue);
     }
     super.ngOnChanges(changes);
+  }
+  ngAfterViewInit(): void {
+    // console.log(this.child, this.child2, this.children, this.children2);
   }
 }

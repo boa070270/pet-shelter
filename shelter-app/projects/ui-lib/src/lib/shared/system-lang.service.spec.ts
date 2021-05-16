@@ -1,4 +1,4 @@
-import { SystemLang } from './system-lang.service';
+import { SystemLangImpl } from './system-lang.service';
 import {LanguageType, ObtainSystemLanguage} from './language';
 import {BrowserStorageService} from './index';
 import {Observable} from 'rxjs';
@@ -12,6 +12,6 @@ describe('SystemLang', () => {
   const obtainSystemLanguage = new ObtainSystemLanguageMock();
   const storage = new Storage();
   it('should create an instance', () => {
-    expect(new SystemLang(obtainSystemLanguage, new BrowserStorageService(storage))).toBeTruthy();
+    expect(new SystemLangImpl(obtainSystemLanguage, new BrowserStorageService(storage))).toBeTruthy();
   });
 });

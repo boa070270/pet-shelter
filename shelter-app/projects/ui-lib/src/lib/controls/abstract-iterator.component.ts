@@ -1,12 +1,13 @@
 import {
+  AfterContentInit,
   ChangeDetectorRef,
-  Component,
-  EventEmitter,
+  Component, ContentChild, ContentChildren,
+  EventEmitter, forwardRef,
   Input,
   OnChanges,
   OnDestroy,
   OnInit,
-  SimpleChanges,
+  SimpleChanges, TemplateRef,
   ViewContainerRef
 } from '@angular/core';
 import {AbstractComponent} from './abstract.component';
@@ -19,9 +20,13 @@ import {ListRange} from '@angular/cdk/collections';
   template: '',
   styleUrls: ['./abstract-iterator.component.css']
 })
-export class AbstractIteratorComponent<T, U> extends AbstractComponent implements OnInit, OnChanges, OnDestroy {
+export class AbstractIteratorComponent<T, U> extends AbstractComponent implements OnInit, OnChanges, AfterContentInit, OnDestroy {
 
   @Input() ds: CdkDataSource<U, T>;
+  // @ContentChild(TemplateRef) child: any;
+  // @ContentChild(ViewContainerRef) child2: any;
+  // @ContentChildren(TemplateRef) children: any;
+  // @ContentChildren(ViewContainerRef) children2: any;
   prefix: string;
   data: T[] | ReadonlyArray<T> = null;
   protected readonly collectionViewer;
@@ -48,6 +53,10 @@ export class AbstractIteratorComponent<T, U> extends AbstractComponent implement
     }
     super.ngOnChanges(changes);
   }
+  ngAfterContentInit(): void {
+    // console.log(this.child, this.child2, this.children, this.children2);
+  }
+
   ngOnDestroy(): void {
     super.ngOnDestroy();
     if (this.dataSubs !== null) {

@@ -1,13 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 
-import { RootPageService } from './root-page.service';
+import { RootPageServiceImpl } from './root-page.service';
+import {ROOT_PAGE_DATA, RootPageService} from './services-api';
 
 describe('RootPageService', () => {
   let service: RootPageService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(RootPageService);
+    service = TestBed.inject(ROOT_PAGE_DATA);
   });
 
   it('should be created', () => {
