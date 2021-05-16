@@ -1,7 +1,20 @@
 import { Injectable } from '@angular/core';
-import {ArrayDataSource} from "./cdk-data-source";
-import {PeriodicElement} from "../controls";
-import {SwaggerNative, SwaggerObject, swaggerUI} from "./swagger-object";
+import {ArrayDataSource} from './cdk-data-source';
+import {PeriodicElement} from '../controls';
+import {SwaggerNative, SwaggerObject, swaggerUI} from './swagger-object';
+
+/*
+ {
+   key1,
+   key2,
+   [view-parent]: {
+   },
+   [view] : {
+     key1:{}, key2:{}
+     parent: view-parent
+   }
+ }
+ */
 
 @Injectable({
   providedIn: 'root'
@@ -10,20 +23,25 @@ export class RootPageService {
   private dbData = {
     'test-dynamic': {
       properties: {
-        dataSource: new ArrayDataSource(ELEMENT_DATA),
+        dataSource,
+        ds1: dataSource.registerDS(),
         swagger: SWAGGER,
       },
       // html: '<table-element swagger="{{swagger}}" data-source="{{dataSource}}"></table-element>'
       // html: '<lib-card-element><lib-card-content>ASd asd</lib-card-content></lib-card-element>'
       // html: '<lib-tab-group-element><lib-card input="{{item.header}}"></lib-card></lib-tab-group-element>'
-      html: '<lib-accordion><lib-panel></lib-panel></lib-accordion>'
+      html: '<lib-accordion-element ds="{{ds1}}"><ui-span txt="{{ds1.position}}"></ui-span></lib-accordion-element>'
     }
   };
 
   private data;
   constructor() {
   }
-
+  static fromRoot(root: RootPageService): RootPageService {
+    const r = new RootPageService();
+    r.data = root.data;
+    return r;
+  }
   getPageData(key: string): string {
     this.data = this.dbData[key];
     return this.data.html;
@@ -53,6 +71,8 @@ const ELEMENT_DATA: PeriodicElement[] = [
   {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F', colA: 'A9 some text', colB: 'B9 some text', colC: 'C9 some text', colD: 'D9 some text', colE: 'E9 some text'},
   {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne', colA: 'A10 some text', colB: 'B10 some text', colC: 'C10 some text', colD: 'D10 some text', colE: 'E10 some text'},
 ];
+const dataSource = new ArrayDataSource(ELEMENT_DATA);
+
 const SWAGGER = new SwaggerObject(
   ['position', 'name', 'weight', 'symbol', 'colA', 'colB', 'colC', 'colD', 'colE'],
   {

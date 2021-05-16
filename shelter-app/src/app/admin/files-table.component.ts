@@ -18,6 +18,7 @@ import {AddSwaggerBannerType, SwaggerFileType, SwaggerPageType, SwaggerPetType} 
 import {DataSources} from '../datasources';
 import {BasicService} from '../basic.service';
 import {HttpEventType, HttpResponse} from '@angular/common/http';
+import {RootPageService} from "../../../projects/ui-lib/src/lib/shared";
 
 const i18N = {
   dlg_caption: [{lang: 'en', title: 'Upload {0,1# file,[1..) files?}'}, {lang: 'uk', title: 'Загрузити {0,1# файл,[1..) файлів}?'}],
@@ -52,9 +53,9 @@ export class FilesTableComponent extends AbstractComponent implements OnDestroy 
   constructor(protected dataSources: DataSources,
               protected  basicService: BasicService,
               protected  dialogService: DialogService,
-              public  systemLang: SystemLang,
+              public  systemLang: SystemLang, protected rootPage: RootPageService,
               protected  dictionary: DictionaryService) {
-    super(systemLang, dictionary.getAppDictionary('FilesTableComponent', i18N));
+    super(systemLang, rootPage, dictionary.getAppDictionary('FilesTableComponent', i18N));
     this.dataSource = this.dataSources.Files;
   }
   ngOnDestroy(): void {

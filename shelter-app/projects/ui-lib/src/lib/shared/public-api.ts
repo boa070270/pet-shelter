@@ -14,3 +14,5 @@ export * from './services-api';
 export * from './scroll-event.service';
 export * from './interval-observable.service';
 export * from './lib-node-iterator';
+export * from './root-page.component';
+export * from './root-page.service';

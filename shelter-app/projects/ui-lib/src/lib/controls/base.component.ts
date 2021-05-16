@@ -97,7 +97,7 @@ export class BaseComponent extends AbstractComponent implements OnInit, OnDestro
 
   constructor(public systemLang: SystemLang, protected directionality: Directionality, protected rootPage: RootPageService,
               @Inject('i18NCfg') public i18NCfg?: I18NType) {
-    super(systemLang, i18NCfg);
+    super(systemLang, rootPage, i18NCfg);
     this.dir = directionality.value;
     this.subsDir = directionality.change.subscribe(d => {
       this.dir = d;
@@ -112,16 +112,7 @@ export class BaseComponent extends AbstractComponent implements OnInit, OnDestro
     }
   }
   ngOnChanges(changes: SimpleChanges): void {
-    // console.log('BaseControlComponent.ngOnChanges', this, changes);
-    Object.keys(changes).forEach(k => {
-      const v = changes[k].currentValue;
-      if (typeof v === 'string' && v.startsWith('{{') && v.endsWith('}}')) {
-        const d = this.rootPage.getData(v.replace(/{{|}}/g, ''));
-        if (d) {
-          this[k] = changes[k].currentValue = d;
-        }
-      }
-    });
+    super.ngOnChanges(changes);
     if (changes.name) {
       console.log('BaseControlComponent.ngOnChanges was changed name', changes);
     }

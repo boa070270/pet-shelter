@@ -4,6 +4,7 @@ import {AbstractComponent, AbstractDataSource, SystemLang} from 'ui-lib';
 import {BannerType} from '../common/types';
 import {SwaggerBannerType} from '../common/swagger-objects';
 import {DataSources} from '../datasources';
+import {RootPageService} from 'ui-lib';
 
 
 @Component({
@@ -17,8 +18,8 @@ export class BannersTableComponent extends AbstractComponent implements OnDestro
   dataSource: AbstractDataSource<BannerType>;
   swagger = SwaggerBannerType;
 
-  constructor(datasources: DataSources, public systemLang: SystemLang) {
-    super(systemLang, {});
+  constructor(datasources: DataSources, public systemLang: SystemLang, protected rootPage: RootPageService) {
+    super(systemLang, rootPage, {});
     this.dataSource = datasources.Banners;
   }
 }

@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, Optional, Output} from '@angular/core';
 import {AbstractComponent} from '../controls';
 import {SystemLang} from '../i18n';
-import {I18NType} from '../shared';
+import {I18NType, RootPageService} from '../shared';
 import {DialogService} from '../dialog-service';
 import {PluginsPanelComponent} from './plugins-panel.component';
 import {CdkDropList, DragDrop} from "@angular/cdk/drag-drop";
@@ -41,8 +41,9 @@ export class EditorToolbarComponent extends AbstractComponent implements OnDestr
   private pluginEmitter: EventEmitter<string>;
   @Output() emitter = new EventEmitter<CmdEditorToolbox>();
   constructor(private changeDetector: ChangeDetectorRef, public systemLang: SystemLang, private dialogService: DialogService,
+              protected rootPage: RootPageService,
               @Optional() @Inject('i18NCfg') public i18NCfg?: I18NType) {
-    super(systemLang); // TODO add i18N
+    super(systemLang, rootPage); // TODO add i18N
     this.pluginEmitter = new EventEmitter<string>();
     this.pluginEmitter.subscribe((s) => this.emitter.emit({cmd: 'plugin', opt: {name: s}}) );
   }

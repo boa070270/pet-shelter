@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {AbstractComponent} from './abstract.component';
 import {SystemLang} from '../i18n';
-import {TitleType} from '../shared';
+import {RootPageService, TitleType} from '../shared';
 
 @Component({
   selector: 'lib-toolbar',
@@ -16,8 +16,8 @@ export class ToolbarComponent extends AbstractComponent implements OnDestroy {
   actions: Array<{icon: string, tooltip: string, command: string}> = [];
   @Output()
   toolbarEvent = new EventEmitter<string>();
-  constructor(public systemLang: SystemLang) {
-    super(systemLang);
+  constructor(public systemLang: SystemLang, protected rootPage: RootPageService) {
+    super(systemLang, rootPage);
   }
 
   ngOnDestroy(): void {

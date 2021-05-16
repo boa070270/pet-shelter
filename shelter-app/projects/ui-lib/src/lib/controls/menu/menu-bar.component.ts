@@ -1,6 +1,6 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {SystemLang} from '../../i18n';
-import {UIMenu} from '../../shared';
+import {RootPageService, UIMenu} from '../../shared';
 import {AbstractComponent} from '../abstract.component';
 
 @Component({
@@ -22,8 +22,8 @@ export class MenuBarComponent extends AbstractComponent implements OnInit, OnDes
   //   return host.width < elm.clientWidth;
   // }
   // @ViewChild('table', {static: true}) tbl: ElementRef<HTMLTableElement>;
-  constructor(public systemLang: SystemLang) {
-    super(systemLang);
+  constructor(public systemLang: SystemLang, protected rootPage: RootPageService) {
+    super(systemLang, rootPage);
   }
   ngOnInit(): void {
     this.onChangeLang();

@@ -4,12 +4,13 @@ import { RootPageComponent } from './root-page.component';
 
 @NgModule({
   declarations: [
-  RootPageComponent],
+    RootPageComponent,
+  ],
   imports: [
     CommonModule
   ],
   exports: [
-    RootPageComponent
+    RootPageComponent,
   ]
 })
 export class SharedModule {

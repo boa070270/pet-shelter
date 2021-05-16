@@ -1,17 +1,17 @@
-import {Component, Inject, OnDestroy} from '@angular/core';
+import {Component, Inject, OnChanges, OnDestroy, SimpleChanges} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {SystemLang} from '../i18n';
-import {distinctTitleId, I18NType, isTitleType, TitleType} from '../shared';
+import {distinctTitleId, I18NType, isTitleType, TitleType, RootPageService} from '../shared';
 
 @Component({
   selector: 'lib-abstract',
   template: '',
   providers: [{provide: 'i18NCfg', useValue: null}]
 })
-export class AbstractComponent implements OnDestroy {
+export class AbstractComponent implements OnDestroy, OnChanges {
   private subs: Subscription;
   i18n: any;
-  constructor(public systemLang: SystemLang,
+  constructor(public systemLang: SystemLang, protected rootPage: RootPageService,
               @Inject('i18NCfg') public i18NCfg?: I18NType) {
     this.subs = this.systemLang.onChange().subscribe( l => {
       if (typeof l === 'string') {
@@ -19,6 +19,12 @@ export class AbstractComponent implements OnDestroy {
       }
     });
     this.i18n = this.systemLang.i18n(this.i18NCfg);
+  }
+  static isPageData(s: string): boolean {
+    return typeof s === 'string' && s.startsWith('{{') && s.endsWith('}}');
+  }
+  static pageDataKey(s: string): string {
+    return s.replace(/{{|}}/g, '');
   }
   ngOnDestroy(): void {
     this.subs.unsubscribe();
@@ -57,4 +63,19 @@ export class AbstractComponent implements OnDestroy {
     return (typeof what === 'object' !== null) && (isTitleType(what) || (Array.isArray(what) && isTitleType(what[0])));
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    // console.log('BaseControlComponent.ngOnChanges', this, changes);
+    Object.keys(changes).forEach(k => {
+      const v = changes[k].currentValue;
+      if (AbstractComponent.isPageData(v)) {
+        const d = this.rootPage.getData(AbstractComponent.pageDataKey(v));
+        if (d) {
+          this[k] = changes[k].currentValue = d;
+        }
+      }
+    });
+    if (changes.name) {
+      console.log('BaseControlComponent.ngOnChanges was changed name', changes);
+    }
+  }
 }

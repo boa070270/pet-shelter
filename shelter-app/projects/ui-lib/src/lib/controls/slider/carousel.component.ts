@@ -10,7 +10,7 @@ import {
   TemplateRef,
   ViewChild
 } from '@angular/core';
-import {CdkDataSource, I18NType, IntervalObservableService} from '../../shared';
+import {CdkDataSource, I18NType, IntervalObservableService, RootPageService} from '../../shared';
 import {AbstractComponent} from '../abstract.component';
 import {SystemLang} from '../../i18n';
 import {SlideContainerDirective} from './slide-container.directive';
@@ -41,9 +41,9 @@ export class CarouselComponent<T, U> extends AbstractComponent implements OnInit
   private dataSubs: Subscription;
   private interval: Subscription;
   constructor(public systemLang: SystemLang, private intervalObserver: IntervalObservableService,
-              protected changeDetector: ChangeDetectorRef,
+              protected changeDetector: ChangeDetectorRef, protected rootPage: RootPageService,
               @Optional() @Inject('i18NCfg') public i18NCfg?: I18NType) {
-    super(systemLang, i18NCfg);
+    super(systemLang, rootPage, i18NCfg);
     this.collectionViewer = {viewChange: new EventEmitter<ListRange>()};
     this.interval = this.intervalObserver.scheduler( () => this.updateData(), 10);
   }

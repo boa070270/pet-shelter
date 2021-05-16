@@ -1,6 +1,14 @@
 import {Component, Inject, OnDestroy, ViewChild} from '@angular/core';
 import {SystemLang} from '../../i18n';
-import {ActionType, DictionaryService, ExtendedData, I18NType, SwaggerObject, TitleBarData} from '../../shared';
+import {
+  ActionType,
+  DictionaryService,
+  ExtendedData,
+  I18NType,
+  RootPageService,
+  SwaggerObject,
+  TitleBarData
+} from '../../shared';
 import {SwaggerFormComponent} from '../swagger-form/swagger-form.component';
 import {Subscription} from 'rxjs';
 import {AbstractComponent} from '../abstract.component';
@@ -38,9 +46,9 @@ export class SimpleDialogComponent extends AbstractComponent implements OnDestro
   constructor(protected dialogRef: DialogRef<any>,
               protected dialogContainer: CdkDialogContainer,
               @Inject(DIALOG_DATA) protected dialogData: any,
-              public systemLang: SystemLang,
+              public systemLang: SystemLang, protected rootPage: RootPageService,
               protected dictionary: DictionaryService) {
-    super(systemLang, dictionary.getLibDictionary('SimpleDialogComponent', I18N));
+    super(systemLang, rootPage, dictionary.getLibDictionary('SimpleDialogComponent', I18N));
     this.needActionBlk = dialogRef.disableClose;
     if (dialogData instanceof ExtendedData) {
       this.needActionBlk = !!dialogData.action;

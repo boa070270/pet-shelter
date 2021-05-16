@@ -1,7 +1,7 @@
 import {Component, Inject, OnDestroy} from '@angular/core';
 import {SimpleDialogComponent} from './simple-dialog.component';
 import {SystemLang} from '../../i18n';
-import {DictionaryService} from '../../shared';
+import {DictionaryService, RootPageService} from '../../shared';
 import {DialogRef, CdkDialogContainer, DIALOG_DATA} from '../../dialog-service';
 
 @Component({
@@ -14,9 +14,9 @@ export class SnakeBarComponent extends SimpleDialogComponent implements OnDestro
   constructor(protected dialogRef: DialogRef<any>,
               protected dialogContainer: CdkDialogContainer,
               @Inject(DIALOG_DATA) protected dialogData: any,
-              public systemLang: SystemLang,
+              public systemLang: SystemLang, protected rootPage: RootPageService,
               protected dictionary: DictionaryService) {
-    super(dialogRef, dialogContainer, dialogData, systemLang, dictionary);
+    super(dialogRef, dialogContainer, dialogData, systemLang, rootPage, dictionary);
   }
 
   ngOnDestroy(): void {

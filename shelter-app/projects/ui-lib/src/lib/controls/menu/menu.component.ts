@@ -13,7 +13,7 @@ import {SystemLang} from '../../i18n';
 import {UiMenuDirective} from './ui-menu.directive';
 import {AbstractMenu, AbstractMenuClass, Menu} from './abstract-menu';
 import {ViewportRuler} from '@angular/cdk/overlay';
-import {UIMenu} from '../../shared';
+import {RootPageService, UIMenu} from '../../shared';
 import {AbstractComponent} from '../abstract.component';
 
 class AbstractMenuWrap extends AbstractMenuClass {
@@ -57,9 +57,9 @@ export class MenuComponent extends AbstractComponent implements OnInit, OnDestro
   constructor(public systemLang: SystemLang,
               protected element: ElementRef,
               @Optional() @SkipSelf() protected parent: UiMenuDirective,
-              protected viewPort: ViewportRuler,
+              protected viewPort: ViewportRuler, protected rootPage: RootPageService,
               protected changeDetector: ChangeDetectorRef) {
-    super(systemLang);
+    super(systemLang, rootPage);
     this.menuCounter = new AbstractMenuWrap(parent, element, () => { this.onCounterChange(); },
       () => { this.changeDetector.detectChanges(); });
     if (this.parent) {

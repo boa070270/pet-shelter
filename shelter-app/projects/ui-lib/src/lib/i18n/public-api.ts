@@ -1,2 +1,2 @@
 export * from './i18n.module';
-export * from './system-lang.service';
+export * from '../shared/system-lang.service';

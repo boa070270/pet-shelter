@@ -1,6 +1,6 @@
 import { SystemLang } from './system-lang.service';
-import {LanguageType, ObtainSystemLanguage} from '../shared/language';
-import {BrowserStorageService} from '../shared';
+import {LanguageType, ObtainSystemLanguage} from './language';
+import {BrowserStorageService} from './index';
 import {Observable} from 'rxjs';
 
 class ObtainSystemLanguageMock implements ObtainSystemLanguage {

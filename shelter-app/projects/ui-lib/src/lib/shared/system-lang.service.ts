@@ -1,4 +1,4 @@
-import {BrowserStorageService, I18NType, isTitleType, LanguageType, ObtainSystemLanguage, TitleType} from '../shared';
+import {BrowserStorageService, I18NType, isTitleType, LanguageType, ObtainSystemLanguage, TitleType} from './index';
 import {EventEmitter, Inject, Injectable, OnDestroy} from '@angular/core';
 import {Subscription} from 'rxjs';
 

@@ -12,12 +12,11 @@ import {
   GeneratorFormComponent,
   SwaggerArrayComponent,
   SwaggerFormComponent,
-  SwaggerNativeComponent, AppBarComponent, LinkComponent, CardComponent, CardContentDirective
+  SwaggerNativeComponent, AppBarComponent, LinkComponent, CardComponent, CardContentDirective,
+  TabGroupComponent, AccordionComponent, SpanComponent
 } from '../controls';
 import { DynamicPageComponent } from './dynamic-page.component';
 import {createCustomElement} from '@angular/elements';
-import {TabGroupComponent} from "../content-display/tab-group.component";
-import {AccordionComponent} from "../content-display/accordion.component";
 
 @NgModule({
   declarations: [DynamicPageComponent],
@@ -70,5 +69,8 @@ export class UiElementsModule {
     customElements.define('lib-tab-group-element', tabGroup);
     const accordion = createCustomElement(AccordionComponent, {injector});
     customElements.define('lib-accordion-element', accordion);
+    const span = createCustomElement(SpanComponent, {injector});
+    customElements.define('ui-span', span);
+
   }
 }

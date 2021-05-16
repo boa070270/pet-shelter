@@ -12,9 +12,7 @@ import {PlainHtmlPipe} from './plain-html.pipe';
 import {MasonryListComponent} from './masonry-list.component';
 import {AdvertComponent} from './advert.component';
 import {CdkTableModule} from '@angular/cdk/table';
-import {ControlsModule} from "./controls";
-import {TabDirective, TabGroupComponent} from './content-display/tab-group.component';
-import { AccordionComponent } from './content-display/accordion.component';
+import {ControlsModule} from './controls';
 
 @NgModule({
   declarations: [
@@ -27,9 +25,6 @@ import { AccordionComponent } from './content-display/accordion.component';
     PlainHtmlPipe,
     MasonryListComponent,
     AdvertComponent,
-    TabGroupComponent,
-    TabDirective,
-    AccordionComponent,
   ],
     imports: [
         DragDropModule,
@@ -49,9 +44,6 @@ import { AccordionComponent } from './content-display/accordion.component';
     PlainHtmlPipe,
     MasonryListComponent,
     AdvertComponent,
-    TabGroupComponent,
-    TabDirective,
-    AccordionComponent,
   ]
 })
 export class UiLibModule {}

@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {BasicService} from './basic.service';
-import {AbstractComponent, DictionaryService, SystemLang} from 'ui-lib';
+import {AbstractComponent, DictionaryService, RootPageService, SystemLang} from 'ui-lib';
 
 const I18N = {
   searchCaption: [{lang: 'en', title: 'Search'}, {lang: 'uk', title: 'Пошук'}],
@@ -26,8 +26,8 @@ export class SearchPageComponent extends AbstractComponent implements OnInit, On
   displayOptions: ['card', 'tablet'];
   placeOptions: ['all', 'page', 'pet', 'asset'];
   constructor(private route: ActivatedRoute, private service: BasicService,
-              public systemLang: SystemLang, dictionary: DictionaryService) {
-    super(systemLang, dictionary.getAppDictionary('SearchPageComponent', I18N));
+              public systemLang: SystemLang, protected rootPage: RootPageService, dictionary: DictionaryService) {
+    super(systemLang, rootPage, dictionary.getAppDictionary('SearchPageComponent', I18N));
   }
 
   ngOnInit(): void {
