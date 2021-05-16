@@ -7,13 +7,13 @@ import {
   OnDestroy,
   OnInit,
   Optional,
-  SkipSelf
+  SkipSelf,
+  ViewContainerRef
 } from '@angular/core';
-import {SystemLang} from '../../i18n';
 import {UiMenuDirective} from './ui-menu.directive';
 import {AbstractMenu, AbstractMenuClass, Menu} from './abstract-menu';
 import {ViewportRuler} from '@angular/cdk/overlay';
-import {RootPageService, UIMenu} from '../../shared';
+import {UIMenu} from '../../shared';
 import {AbstractComponent} from '../abstract.component';
 
 class AbstractMenuWrap extends AbstractMenuClass {
@@ -54,12 +54,11 @@ export class MenuComponent extends AbstractComponent implements OnInit, OnDestro
   @HostBinding('style')
   visibility = 'visibility: collapse;';
 
-  constructor(public systemLang: SystemLang,
-              protected element: ElementRef,
+  constructor(protected element: ElementRef, protected _view: ViewContainerRef,
               @Optional() @SkipSelf() protected parent: UiMenuDirective,
-              protected viewPort: ViewportRuler, protected rootPage: RootPageService,
+              protected viewPort: ViewportRuler,
               protected changeDetector: ChangeDetectorRef) {
-    super(systemLang, rootPage);
+    super(_view);
     this.menuCounter = new AbstractMenuWrap(parent, element, () => { this.onCounterChange(); },
       () => { this.changeDetector.detectChanges(); });
     if (this.parent) {

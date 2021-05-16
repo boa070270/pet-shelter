@@ -1,10 +1,9 @@
-import {Component, OnDestroy} from '@angular/core';
-import {AbstractComponent, AbstractDataSource, SystemLang} from 'ui-lib';
+import {Component, OnDestroy, ViewContainerRef} from '@angular/core';
+import {AbstractComponent, AbstractDataSource} from 'ui-lib';
 // from x-payload
 import {BannerType} from '../common/types';
 import {SwaggerBannerType} from '../common/swagger-objects';
 import {DataSources} from '../datasources';
-import {RootPageService} from 'ui-lib';
 
 
 @Component({
@@ -18,8 +17,9 @@ export class BannersTableComponent extends AbstractComponent implements OnDestro
   dataSource: AbstractDataSource<BannerType>;
   swagger = SwaggerBannerType;
 
-  constructor(datasources: DataSources, public systemLang: SystemLang, protected rootPage: RootPageService) {
-    super(systemLang, rootPage, {});
+  // tslint:disable-next-line:variable-name
+  constructor(protected _view: ViewContainerRef, datasources: DataSources) {
+    super(_view);
     this.dataSource = datasources.Banners;
   }
 }

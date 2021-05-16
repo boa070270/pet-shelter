@@ -1,8 +1,8 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Inject, Input, OnInit} from '@angular/core';
 import {FieldValueType, PetType} from './types';
 import {BasicService} from '../basic.service';
 import {FieldsService} from '../fields.service';
-import {AbstractDataSource, ArrayDataSource, ShowMediaType, SystemLang} from 'ui-lib';
+import {AbstractDataSource, ArrayDataSource, ShowMediaType, SYSTEM_LANG_TOKEN, SystemLang} from 'ui-lib';
 import {ActivatedRoute} from '@angular/router';
 
 @Component({
@@ -18,7 +18,7 @@ export class PetComponent implements OnInit {
 
   constructor(private service: BasicService, private route: ActivatedRoute,
               private fieldsService: FieldsService,
-              private systemLang: SystemLang) { }
+              @Inject(SYSTEM_LANG_TOKEN) private systemLang: SystemLang) { }
 
   ngOnInit(): void {
     if (!this.data) {

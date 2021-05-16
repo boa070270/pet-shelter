@@ -1,4 +1,4 @@
-import {Component, ComponentRef, forwardRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, ComponentRef, forwardRef, OnDestroy, OnInit, ViewChild, ViewContainerRef} from '@angular/core';
 import {
   coerceNativeValue,
   ComponentsPluginService,
@@ -9,14 +9,11 @@ import {
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {CdkPortalOutlet, ComponentPortal} from '@angular/cdk/portal';
 import {FormErrorsService} from './form-errors.service';
-import {SystemLang} from '../../i18n';
-import {Directionality} from '@angular/cdk/bidi';
 import {BaseSwaggerComponent} from './base-swagger.component';
 import {BaseComponent} from '../base.component';
 import {InputControlComponent} from '../input-control.component';
 import {CheckboxControlComponent} from '../checkbox-control.component';
 import {ListBuilderComponent} from '../list-builder.component';
-import {RootPageService} from "../../shared/root-page.service";
 
 @Component({
   selector: 'lib-swagger-native',
@@ -37,10 +34,10 @@ export class SwaggerNativeComponent extends BaseSwaggerComponent implements OnIn
   get constrictions(): NativeConstrictions {
     return this._swagger.constrictions;
   }
-  constructor(public systemLang: SystemLang, protected directionality: Directionality,
+  constructor(protected _view: ViewContainerRef,
               protected componentsPlugin: ComponentsPluginService,
-              protected formErrors: FormErrorsService, protected rootPage: RootPageService) {
-    super(systemLang, directionality, rootPage);
+              protected formErrors: FormErrorsService) {
+    super(_view);
   }
 
   writeValue(obj: any): void {

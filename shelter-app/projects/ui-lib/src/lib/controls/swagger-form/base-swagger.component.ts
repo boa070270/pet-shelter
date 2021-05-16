@@ -1,11 +1,8 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnDestroy, OnInit, ViewContainerRef} from '@angular/core';
 import {BaseComponent} from '../base.component';
 import {BaseConstrictions, SwaggerSchema, SwaggerUI} from '../../shared';
 import {AbstractControl, ControlValueAccessor, FormGroup} from '@angular/forms';
-import {SystemLang} from '../../i18n';
-import {Directionality} from '@angular/cdk/bidi';
 import {Subscription} from 'rxjs';
-import {RootPageService} from "../../shared/root-page.service";
 
 @Component({
   selector: 'lib-base-swagger',
@@ -31,8 +28,8 @@ export class BaseSwaggerComponent extends BaseComponent implements OnInit, OnDes
   get constrictions(): BaseConstrictions {
     return this._swagger.constrictions;
   }
-  constructor(public systemLang: SystemLang, protected directionality: Directionality, protected rootPage: RootPageService) {
-    super(systemLang, directionality, rootPage);
+  constructor(protected _view: ViewContainerRef) {
+    super(_view);
   }
   ngOnInit(): void {
     super.ngOnInit();

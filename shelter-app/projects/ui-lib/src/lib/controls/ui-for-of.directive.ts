@@ -1,7 +1,7 @@
 import {
   AfterContentInit,
   Directive,
-  DoCheck, Input,
+  DoCheck, Inject, Input,
   IterableDiffers,
   NgIterable,
   Self,
@@ -10,12 +10,12 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import {NgForOf, NgForOfContext} from '@angular/common';
-import {RootPageService} from '../shared';
+import {ROOT_PAGE_DATA, RootPageService, RootPageServiceImpl} from '../shared';
 
 @Directive({
   selector: '[uiFor][uiForOf]',
   providers: [
-    {provide: RootPageService, useClass: RootPageService}
+    {provide: ROOT_PAGE_DATA, useClass: RootPageServiceImpl}
   ]
 })
 export class UiForOfDirective<T, U extends NgIterable<T> = NgIterable<T>> extends NgForOf<T, U> implements AfterContentInit, DoCheck{
@@ -26,7 +26,7 @@ export class UiForOfDirective<T, U extends NgIterable<T> = NgIterable<T>> extend
   constructor(private viewContainer: ViewContainerRef,
               private template: TemplateRef<NgForOfContext<T, U>>,
               private differs: IterableDiffers,
-              @Self() private root: RootPageService, @SkipSelf() parent: RootPageService
+              @Self() @Inject(ROOT_PAGE_DATA) private root: RootPageService, @SkipSelf() @Inject(ROOT_PAGE_DATA) parent: RootPageService
               ) {
     super(viewContainer, template, differs);
   }

@@ -1,10 +1,19 @@
-import {AfterContentInit, ChangeDetectorRef, Component, forwardRef, Input, OnDestroy, OnInit} from '@angular/core';
+import {
+  AfterContentInit,
+  ChangeDetectorRef,
+  Component,
+  forwardRef,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewContainerRef
+} from '@angular/core';
 import {
   coerceToSwaggerArray,
   coerceToSwaggerNative,
   coerceToSwaggerObject,
-  NativeConstrictions, NumberConstrictions,
-  Rule, StringConstrictions,
+  NativeConstrictions,
+  Rule,
   SwaggerArray,
   SwaggerGroupComponent,
   SwaggerNative,
@@ -15,13 +24,11 @@ import {
   ControlValueAccessor,
   FormControl,
   FormGroup,
-  NG_VALUE_ACCESSOR, ValidatorFn,
+  NG_VALUE_ACCESSOR,
+  ValidatorFn,
   Validators
 } from '@angular/forms';
 import {BaseSwaggerComponent} from './base-swagger.component';
-import {SystemLang} from '../../i18n';
-import {Directionality} from '@angular/cdk/bidi';
-import {RootPageService} from "../../shared/root-page.service";
 
 export const SWAGGER_FORM_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -61,9 +68,9 @@ export class SwaggerFormComponent extends BaseSwaggerComponent implements OnInit
     return (this._swagger as SwaggerObject).behavior;
   }
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality, protected changeDetector: ChangeDetectorRef,
-              protected rootPage: RootPageService) {
-    super(systemLang, directionality, rootPage);
+  constructor(protected _view: ViewContainerRef,
+              protected changeDetector: ChangeDetectorRef) {
+    super(_view);
   }
 
   ngAfterContentInit(): void {

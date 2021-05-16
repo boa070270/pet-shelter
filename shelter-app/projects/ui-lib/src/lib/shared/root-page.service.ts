@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {ArrayDataSource} from './cdk-data-source';
 import {PeriodicElement} from '../controls';
 import {SwaggerNative, SwaggerObject, swaggerUI} from './swagger-object';
+import {RootPageService} from './services-api';
 
 /*
  {
@@ -16,10 +17,8 @@ import {SwaggerNative, SwaggerObject, swaggerUI} from './swagger-object';
  }
  */
 
-@Injectable({
-  providedIn: 'root'
-})
-export class RootPageService {
+@Injectable()
+export class RootPageServiceImpl implements RootPageService {
   private dbData = {
     'test-dynamic': {
       properties: {
@@ -37,8 +36,8 @@ export class RootPageService {
   private data;
   constructor() {
   }
-  static fromRoot(root: RootPageService): RootPageService {
-    const r = new RootPageService();
+  static fromRoot(root: RootPageServiceImpl): RootPageService {
+    const r = new RootPageServiceImpl();
     r.data = root.data;
     return r;
   }

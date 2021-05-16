@@ -6,14 +6,12 @@ import {
   OnChanges,
   OnDestroy,
   OnInit,
-  SimpleChanges
+  SimpleChanges,
+  ViewContainerRef
 } from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
-import {SystemLang} from '../i18n';
 import {BaseComponent} from './base.component';
 import {TitleType} from '../shared';
-import {Directionality} from '@angular/cdk/bidi';
-import {RootPageService} from "../shared/root-page.service";
 
 export const CHECKBOX_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -107,9 +105,9 @@ export class CheckboxControlComponent extends BaseComponent implements OnInit, O
   pTitles: {[id: string]: string};
   tips: {[id: string]: string};
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              protected changeDetect: ChangeDetectorRef, protected rootPage: RootPageService) {
-    super(systemLang, directionality, rootPage);
+  constructor(protected _view: ViewContainerRef,
+              protected changeDetect: ChangeDetectorRef) {
+    super(_view);
   }
 
   ngOnInit(): void {

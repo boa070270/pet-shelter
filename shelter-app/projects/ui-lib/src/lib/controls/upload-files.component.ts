@@ -1,11 +1,8 @@
-import {Component, EventEmitter, forwardRef, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, forwardRef, OnInit, Output, ViewContainerRef} from '@angular/core';
 import {BaseComponent} from './base.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {DialogService} from '../dialog-service';
-import {DictionaryService, I18NType} from '../shared';
-import {SystemLang} from '../i18n';
-import {Directionality} from '@angular/cdk/bidi';
-import {RootPageService} from "../shared/root-page.service";
+import {I18N_CFG, I18NType} from '../shared';
 
 const I18N: I18NType = {
   welcomeDropFile: [
@@ -33,16 +30,19 @@ const I18N: I18NType = {
     </label>
   </div>`,
   styleUrls: ['./upload-files.component.scss'],
-  providers: [{provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => UploadFilesComponent), multi: true}]
+  providers: [
+    {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => UploadFilesComponent), multi: true},
+    {provide: I18N_CFG, useValue: I18N}
+  ]
 })
 export class UploadFilesComponent extends BaseComponent implements OnInit, ControlValueAccessor {
   @Output()
   selected: EventEmitter<File[]> = new EventEmitter<File[]>();
   files: File[] = [];
   progress: number[] = [];
-  constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              private dialogService: DialogService, dictionary: DictionaryService, protected rootPage: RootPageService) {
-    super(systemLang, directionality, rootPage, dictionary.getLibDictionary('UploadFilesComponent', I18N));
+  constructor(protected _view: ViewContainerRef,
+              private dialogService: DialogService) {
+    super(_view);
   }
 
   ngOnInit(): void {

@@ -2,17 +2,15 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
-  Inject,
   Input,
   OnDestroy,
   OnInit,
-  Optional,
   TemplateRef,
-  ViewChild
+  ViewChild,
+  ViewContainerRef
 } from '@angular/core';
-import {CdkDataSource, I18NType, IntervalObservableService, RootPageService} from '../../shared';
+import {CdkDataSource, IntervalObservableService} from '../../shared';
 import {AbstractComponent} from '../abstract.component';
-import {SystemLang} from '../../i18n';
 import {SlideContainerDirective} from './slide-container.directive';
 import {ListRange} from '@angular/cdk/collections';
 import {Subscription} from 'rxjs';
@@ -40,10 +38,10 @@ export class CarouselComponent<T, U> extends AbstractComponent implements OnInit
   private cycle = 0;
   private dataSubs: Subscription;
   private interval: Subscription;
-  constructor(public systemLang: SystemLang, private intervalObserver: IntervalObservableService,
-              protected changeDetector: ChangeDetectorRef, protected rootPage: RootPageService,
-              @Optional() @Inject('i18NCfg') public i18NCfg?: I18NType) {
-    super(systemLang, rootPage, i18NCfg);
+  constructor(protected _view: ViewContainerRef,
+              private intervalObserver: IntervalObservableService,
+              protected changeDetector: ChangeDetectorRef) {
+    super(_view);
     this.collectionViewer = {viewChange: new EventEmitter<ListRange>()};
     this.interval = this.intervalObserver.scheduler( () => this.updateData(), 10);
   }

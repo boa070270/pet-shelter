@@ -1,16 +1,16 @@
 import {
   ChangeDetectorRef,
-  Component, ElementRef,
+  Component,
   EventEmitter,
-  Inject,
-  Input, OnChanges, OnDestroy,
+  Input,
+  OnChanges,
+  OnDestroy,
   OnInit,
-  Optional,
-  SimpleChanges, ViewContainerRef
+  SimpleChanges,
+  ViewContainerRef
 } from '@angular/core';
 import {AbstractComponent} from './abstract.component';
-import {SystemLang} from '../i18n';
-import {CdkDataSource, I18NType, RootPageService} from '../shared';
+import {CdkDataSource} from '../shared';
 import {Subscription} from 'rxjs';
 import {ListRange} from '@angular/cdk/collections';
 
@@ -27,10 +27,9 @@ export class AbstractIteratorComponent<T, U> extends AbstractComponent implement
   protected readonly collectionViewer;
   private dataSubs: Subscription;
   protected initListRange: ListRange = {start: 0, end: 100};
-  constructor(protected view: ViewContainerRef, public systemLang: SystemLang, protected rootPage: RootPageService,
-              protected changeDetector: ChangeDetectorRef,
-              @Optional() @Inject('i18NCfg') public i18NCfg?: I18NType) {
-    super(view.injector.get(SystemLang), view.injector.get(RootPageService), i18NCfg);
+  constructor(protected _view: ViewContainerRef,
+              protected changeDetector: ChangeDetectorRef) {
+    super(_view);
     this.collectionViewer = {viewChange: new EventEmitter<ListRange>()};
   }
 

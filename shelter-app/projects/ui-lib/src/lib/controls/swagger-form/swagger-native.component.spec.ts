@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SwaggerNativeComponent } from './swagger-native.component';
 import {ObtainSystemLanguageMock} from "../../../../test/system-language-mock";
-import {SwaggerNative} from "../../shared";
+import {EXT_SYSTEM_LANG, SwaggerNative} from "../../shared";
 
 describe('SwaggerControlComponent', () => {
   let component: SwaggerNativeComponent;
@@ -12,7 +12,7 @@ describe('SwaggerControlComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ SwaggerNativeComponent ],
       providers: [
-        {provide: 'ObtainSystemLanguage', useClass: ObtainSystemLanguageMock},
+        {provide: EXT_SYSTEM_LANG, useClass: ObtainSystemLanguageMock},
       ]
     })
     .compileComponents();

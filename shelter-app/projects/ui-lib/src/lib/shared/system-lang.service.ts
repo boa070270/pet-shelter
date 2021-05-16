@@ -1,19 +1,19 @@
-import {BrowserStorageService, I18NType, isTitleType, LanguageType, ObtainSystemLanguage, TitleType} from './index';
+import {I18NType, isTitleType, LanguageType, ObtainSystemLanguage, SystemLang, TitleType} from './language';
 import {EventEmitter, Inject, Injectable, OnDestroy} from '@angular/core';
 import {Subscription} from 'rxjs';
+import {BROWSER_STORAGE, EXT_SYSTEM_LANG, StorageService} from './services-api';
 
 const KEY_LANGUAGES = 'SystemLanguages';
 const KEY_LOCALE = 'Locale';
-@Injectable({
-  providedIn: 'root'
-})
-export class SystemLang implements OnDestroy {
+@Injectable()
+export class SystemLangImpl implements SystemLang, OnDestroy {
   private locale: string;
   private languages: LanguageType[] = [];
   private readonly subscription: Subscription;
   private readonly change = new EventEmitter<any>();
 
-  constructor(@Inject('ObtainSystemLanguage') private service: ObtainSystemLanguage, private storage: BrowserStorageService) {
+  constructor(@Inject(EXT_SYSTEM_LANG) private service: ObtainSystemLanguage,
+              @Inject(BROWSER_STORAGE) private storage: StorageService) {
     console.log('constructor SystemLang');
     this.languages = storage.getObj(KEY_LANGUAGES);
     const locale = storage.get(KEY_LOCALE);
@@ -24,7 +24,7 @@ export class SystemLang implements OnDestroy {
     }
     this.refresh();
   }
-  refresh(): void {
+  private refresh(): void {
     this.service.getSystemLanguages().subscribe(languages => {
       this.languages = languages.sort(a => a.rate);
       this.storage.setObj(KEY_LANGUAGES, languages);

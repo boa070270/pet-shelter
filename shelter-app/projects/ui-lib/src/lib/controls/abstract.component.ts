@@ -1,18 +1,32 @@
-import {Component, Inject, OnChanges, OnDestroy, SimpleChanges} from '@angular/core';
+import {Component, OnChanges, OnDestroy, SimpleChanges, ViewContainerRef} from '@angular/core';
 import {Subscription} from 'rxjs';
-import {SystemLang} from '../i18n';
-import {distinctTitleId, I18NType, isTitleType, TitleType, RootPageService} from '../shared';
+import {
+  distinctTitleId,
+  I18N_CFG,
+  I18NType,
+  isTitleType,
+  ROOT_PAGE_DATA,
+  RootPageService,
+  SYSTEM_LANG_TOKEN,
+  SystemLang,
+  TitleType
+} from '../shared';
 
 @Component({
   selector: 'lib-abstract',
-  template: '',
-  providers: [{provide: 'i18NCfg', useValue: null}]
+  template: ''
 })
 export class AbstractComponent implements OnDestroy, OnChanges {
   private subs: Subscription;
   i18n: any;
-  constructor(public systemLang: SystemLang, protected rootPage: RootPageService,
-              @Inject('i18NCfg') public i18NCfg?: I18NType) {
+  public systemLang: SystemLang;
+  protected rootPage: RootPageService;
+  public i18NCfg?: I18NType;
+
+  constructor(protected _view: ViewContainerRef) {
+    this.systemLang = _view.injector.get(SYSTEM_LANG_TOKEN);
+    this.i18NCfg = _view.injector.get(I18N_CFG, null);
+    this.rootPage = _view.injector.get(ROOT_PAGE_DATA, null);
     this.subs = this.systemLang.onChange().subscribe( l => {
       if (typeof l === 'string') {
         this.onChangeLang();
@@ -67,7 +81,7 @@ export class AbstractComponent implements OnDestroy, OnChanges {
     // console.log('BaseControlComponent.ngOnChanges', this, changes);
     Object.keys(changes).forEach(k => {
       const v = changes[k].currentValue;
-      if (AbstractComponent.isPageData(v)) {
+      if (this.rootPage && AbstractComponent.isPageData(v)) {
         const d = this.rootPage.getData(AbstractComponent.pageDataKey(v));
         if (d) {
           this[k] = changes[k].currentValue = d;

@@ -5,13 +5,14 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
 import {
-  UiLibModule,
-  SharedModule,
   ControlsModule,
-  ObtainSystemLanguage,
-  UiElementsModule,
+  DialogServiceModule,
+  EXT_SYSTEM_LANG,
   LoggerModule,
-  DialogServiceModule, UILoggerWriterToken,
+  SharedModule,
+  UiElementsModule,
+  UiLibModule,
+  UILoggerWriterToken,
   WysiwygModule
 } from 'ui-lib';
 import {HttpClientModule} from '@angular/common/http';
@@ -26,7 +27,7 @@ import {MenuPageComponent} from './menu-page.component';
 import {BasicService} from './basic.service';
 import {TestDynamicComponent} from './test-dynamic.component';
 import {LogWriterService} from './log-writer.service';
-import { TestEditorComponent } from './test-editor.component';
+import {TestEditorComponent} from './test-editor.component';
 
 @NgModule({
   declarations: [
@@ -56,7 +57,7 @@ import { TestEditorComponent } from './test-editor.component';
     DialogServiceModule,
   ],
   providers: [
-    {provide: 'ObtainSystemLanguage', useClass: BasicService},
+    {provide: EXT_SYSTEM_LANG, useClass: BasicService},
     {provide: UILoggerWriterToken, useClass: LogWriterService}
   ],
   bootstrap: [AppComponent]

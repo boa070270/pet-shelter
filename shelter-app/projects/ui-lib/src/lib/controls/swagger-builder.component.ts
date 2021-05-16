@@ -1,12 +1,18 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild} from '@angular/core';
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import {BaseComponent} from './base.component';
 import {ControlValueAccessor} from '@angular/forms';
-import {SystemLang} from '../i18n';
-import {Directionality} from '@angular/cdk/bidi';
-import {SwaggerArray, SwaggerNative, SwaggerObject, swaggerUI, TitleType} from '../shared';
+import {I18N_CFG, SwaggerArray, SwaggerNative, SwaggerObject, swaggerUI, TitleType} from '../shared';
 import {ObjectLinkService} from './object-link.service';
 import {SwaggerFormComponent} from './swagger-form';
-import {RootPageService} from "../shared/root-page.service";
 
 const I18N = {
   act_up: [{lang: 'en', title: 'Move one position up'}, {lang: 'uk', title: 'Підняти на одну позицію'}],
@@ -16,7 +22,10 @@ const I18N = {
 @Component({
   selector: 'lib-swagger-builder',
   templateUrl: './swagger-builder.component.html',
-  styleUrls: ['./checkbox-control.component.scss']
+  styleUrls: ['./checkbox-control.component.scss'],
+  providers: [
+    {provide: I18N_CFG, useValue: I18N}
+  ]
 })
 export class SwaggerBuilderComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
@@ -351,9 +360,9 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
     return this.swagger.properties;
   }
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              public objectLink: ObjectLinkService, protected rootPage: RootPageService) {
-    super(systemLang, directionality, rootPage);
+  constructor(protected _view: ViewContainerRef,
+              public objectLink: ObjectLinkService) {
+    super(_view);
   }
 
   ngOnInit(): void {

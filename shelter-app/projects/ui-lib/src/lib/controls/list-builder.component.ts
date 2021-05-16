@@ -1,14 +1,21 @@
-import {Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild} from '@angular/core';
+import {
+  Component,
+  forwardRef,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import {SelectControlComponent} from './select-control.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
-import {SystemLang} from '../i18n';
 import {coerceArray} from '@angular/cdk/coercion';
 import {ListSelectComponent} from './list-select.component';
 import {BaseComponent} from './base.component';
-import {DictionaryService, TitleType} from '../shared';
+import {I18N_CFG, TitleType} from '../shared';
 import {CheckboxParameters} from './checkbox-control.component';
-import {Directionality} from '@angular/cdk/bidi';
-import {RootPageService} from "../shared/root-page.service";
 
 export const LIST_BUILDER_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -27,7 +34,10 @@ const I18N = {
   selector: 'lib-list-builder',
   templateUrl: './list-builder.component.html',
   styleUrls: ['./checkbox-control.component.scss'],
-  providers: [LIST_BUILDER_VALUE_ACCESSOR]
+  providers: [
+    LIST_BUILDER_VALUE_ACCESSOR,
+    {provide: I18N_CFG, useValue: I18N}
+  ]
 })
 export class ListBuilderComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
@@ -76,9 +86,8 @@ export class ListBuilderComponent extends BaseComponent implements OnInit, OnCha
   @ViewChild(SelectControlComponent, {static: true}) available: SelectControlComponent;
   @ViewChild(ListSelectComponent, {static: true}) result: ListSelectComponent;
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              dictionary: DictionaryService, protected rootPage: RootPageService) {
-    super(systemLang, directionality, rootPage, dictionary.getLibDictionary('ListBuilderComponent', I18N));
+  constructor(protected _view: ViewContainerRef) {
+    super(_view);
   }
 
   ngOnInit(): void {

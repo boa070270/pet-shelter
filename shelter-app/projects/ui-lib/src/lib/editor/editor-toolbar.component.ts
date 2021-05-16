@@ -1,10 +1,8 @@
-import {ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, Optional, Output} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, Output, ViewContainerRef} from '@angular/core';
 import {AbstractComponent} from '../controls';
-import {SystemLang} from '../i18n';
-import {I18NType, RootPageService} from '../shared';
 import {DialogService} from '../dialog-service';
 import {PluginsPanelComponent} from './plugins-panel.component';
-import {CdkDropList, DragDrop} from "@angular/cdk/drag-drop";
+import {CdkDropList} from '@angular/cdk/drag-drop';
 
 export interface CmdEditorToolbox {
   cmd: string;
@@ -40,10 +38,8 @@ export class EditorToolbarComponent extends AbstractComponent implements OnDestr
   @Input() fCdkDropList: () => CdkDropList;
   private pluginEmitter: EventEmitter<string>;
   @Output() emitter = new EventEmitter<CmdEditorToolbox>();
-  constructor(private changeDetector: ChangeDetectorRef, public systemLang: SystemLang, private dialogService: DialogService,
-              protected rootPage: RootPageService,
-              @Optional() @Inject('i18NCfg') public i18NCfg?: I18NType) {
-    super(systemLang, rootPage); // TODO add i18N
+  constructor(private changeDetector: ChangeDetectorRef, protected _view: ViewContainerRef, private dialogService: DialogService) {
+    super(_view); // TODO add i18N
     this.pluginEmitter = new EventEmitter<string>();
     this.pluginEmitter.subscribe((s) => this.emitter.emit({cmd: 'plugin', opt: {name: s}}) );
   }

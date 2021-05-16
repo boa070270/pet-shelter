@@ -1,10 +1,7 @@
-import {Component, forwardRef, OnChanges, OnDestroy, OnInit} from '@angular/core';
-import {SystemLang} from '../i18n';
+import {Component, forwardRef, OnChanges, OnDestroy, OnInit, ViewContainerRef} from '@angular/core';
 import {BaseComponent} from './base.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
-import {DictionaryService, TitleType} from '../shared';
-import {Directionality} from '@angular/cdk/bidi';
-import {RootPageService} from "../shared/root-page.service";
+import {I18N_CFG, TitleType} from '../shared';
 
 // i18n
 const I18N = {
@@ -25,17 +22,18 @@ const I18N = {
     provide: NG_VALUE_ACCESSOR,
     useExisting: forwardRef(() => TitleTypeControlComponent),
     multi: true
-  }]
+  },
+    {provide: I18N_CFG, useValue: I18N}
+  ]
 })
 export class TitleTypeControlComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
   ctrl: boolean;
   str: string;
   titles: TitleType[] = [];
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality, protected rootPage: RootPageService,
-              dictionary: DictionaryService) {
-    super(systemLang, directionality, rootPage, dictionary.getLibDictionary('TitleTypeControlComponent', I18N));
-    systemLang.getLanguages().forEach(l => {
+  constructor(protected _view: ViewContainerRef) {
+    super(_view);
+    this.systemLang.getLanguages().forEach(l => {
       this.titles.push({id: '', title: l.displayName, lang: l.lang});
     });
   }

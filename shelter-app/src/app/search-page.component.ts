@@ -1,7 +1,7 @@
-import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewContainerRef} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {BasicService} from './basic.service';
-import {AbstractComponent, DictionaryService, RootPageService, SystemLang} from 'ui-lib';
+import {AbstractComponent, I18N_CFG} from 'ui-lib';
 
 const I18N = {
   searchCaption: [{lang: 'en', title: 'Search'}, {lang: 'uk', title: 'Пошук'}],
@@ -15,7 +15,10 @@ const I18N = {
   selector: 'app-search-page',
   templateUrl: './search-page.component.html',
   styleUrls: ['./search-page.component.sass'],
-  changeDetection: ChangeDetectionStrategy.Default
+  changeDetection: ChangeDetectionStrategy.Default,
+  providers: [
+    {provide: I18N_CFG, useValue: I18N}
+  ]
 })
 export class SearchPageComponent extends AbstractComponent implements OnInit, OnDestroy {
   query: string;
@@ -26,8 +29,9 @@ export class SearchPageComponent extends AbstractComponent implements OnInit, On
   displayOptions: ['card', 'tablet'];
   placeOptions: ['all', 'page', 'pet', 'asset'];
   constructor(private route: ActivatedRoute, private service: BasicService,
-              public systemLang: SystemLang, protected rootPage: RootPageService, dictionary: DictionaryService) {
-    super(systemLang, rootPage, dictionary.getAppDictionary('SearchPageComponent', I18N));
+              // tslint:disable-next-line:variable-name
+              protected _view: ViewContainerRef) {
+    super(_view);
   }
 
   ngOnInit(): void {

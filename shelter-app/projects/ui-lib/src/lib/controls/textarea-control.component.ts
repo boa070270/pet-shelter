@@ -1,10 +1,16 @@
-import {Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
-import {SystemLang} from '../i18n';
-import {Directionality} from '@angular/cdk/bidi';
+import {
+  Component,
+  forwardRef,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  ViewContainerRef
+} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {BaseComponent} from './base.component';
 import {TitleType} from '../shared';
-import {RootPageService} from "../shared/root-page.service";
 
 export interface TextareaParameters {
   tooltip?: string | TitleType[];
@@ -95,8 +101,8 @@ export class TextareaControlComponent extends BaseComponent implements  OnInit, 
   iconsClass: any;
 
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality, protected rootPage: RootPageService) {
-    super(systemLang, directionality, rootPage);
+  constructor(protected _view: ViewContainerRef) {
+    super(_view);
   }
 
   ngOnInit(): void {
@@ -132,7 +138,7 @@ export class TextareaControlComponent extends BaseComponent implements  OnInit, 
   setDisabledState(isDisabled: boolean): void {
     super.setDisabledState(isDisabled);
   }
-  onChange($event: Event): void {
+  onChange(event: Event): void {
     if (typeof this.change === 'function') {
       this.change(this.value);
     }

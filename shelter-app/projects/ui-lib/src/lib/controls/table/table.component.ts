@@ -1,41 +1,43 @@
 import {
-  AfterViewChecked,
   AfterViewInit,
   Component,
   ElementRef,
   EventEmitter,
-  forwardRef, Inject,
+  forwardRef,
+  Inject,
   Input,
   OnDestroy,
   OnInit,
   Output,
   TemplateRef,
-  ViewChild
+  ViewChild,
+  ViewContainerRef
 } from '@angular/core';
 import {DialogRef, DialogService} from '../../dialog-service';
 import {
-  AbstractDataSource, ArrayDataSource,
+  AbstractDataSource,
+  ArrayDataSource,
   CdkDataSource,
   choiceFormat,
   coerceToSwaggerNative,
-  DictionaryService,
   ExtendedData,
+  I18N_CFG,
   I18NType,
   IOrder,
   Paging,
   PagingSize,
   SwaggerNative,
   SwaggerObject,
-  TitleType, UILogger, UILoggerToken
+  TitleType,
+  UILogger,
+  UILoggerToken
 } from '../../shared';
-import {SystemLang} from '../../i18n';
 import {BaseComponent} from '../base.component';
 import {CdkTable} from '@angular/cdk/table';
 import {Subscription, zip} from 'rxjs';
 import {Directionality} from '@angular/cdk/bidi';
 import {ComponentType} from '@angular/cdk/overlay';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
-import {RootPageService} from "../../shared/root-page.service";
 
 // i18n
 const I18N: I18NType = {
@@ -90,7 +92,8 @@ const DIALOG_SEARCH = new SwaggerObject(['search'], { search: SwaggerNative.asSt
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
   providers: [
-    {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => TableComponent), multi: true}
+    {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => TableComponent), multi: true},
+    {provide: I18N_CFG, useValue: I18N}
   ]
 })
 export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDestroy, AfterViewInit, ControlValueAccessor {
@@ -154,14 +157,12 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
   @Input()
   trOut: (v: T[]) => U[];
 
-  constructor(public systemLang: SystemLang,
+  constructor(protected _view: ViewContainerRef,
               protected dialogService: DialogService,
               protected directionality: Directionality,
-              dictionary: DictionaryService,
-              protected rootPage: RootPageService,
               @Inject(UILoggerToken) protected logger: UILogger) {
     // TODO IE doesn't support assign, how angular solves this
-    super(systemLang, directionality, rootPage, dictionary.getLibDictionary('TableComponent', I18N));
+    super(_view);
   }
   onChangeLang(): void {
     super.onChangeLang();

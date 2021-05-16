@@ -1,4 +1,3 @@
-import {ElementRef} from '@angular/core';
 import {UIMenu} from '../../shared';
 
 export interface AbstractMenu {

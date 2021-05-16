@@ -1,6 +1,16 @@
-import {AfterViewInit, Component, Input, OnChanges, OnDestroy, OnInit, ViewChild, SimpleChanges} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  SimpleChanges,
+  Inject
+} from '@angular/core';
 import {SearchType} from '../types';
-import {IsVisibleDirective} from 'ui-lib';
+import {IsVisibleDirective, SYSTEM_LANG_TOKEN} from 'ui-lib';
 import {Subscription} from 'rxjs';
 import {BasicService} from '../../basic.service';
 import {SystemLang} from 'ui-lib';
@@ -26,7 +36,7 @@ export class LengthenListComponent implements OnInit, OnDestroy, OnChanges, Afte
   size = 12;
 
   constructor(private service: BasicService,
-              private  systemLang: SystemLang) {
+              @Inject(SYSTEM_LANG_TOKEN) private  systemLang: SystemLang) {
   }
 
   ngOnInit(): void {

@@ -1,9 +1,16 @@
-import {Component, ElementRef, forwardRef, Input, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {SystemLang} from '../i18n';
+import {
+  Component,
+  ElementRef,
+  forwardRef,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
-import {Directionality} from '@angular/cdk/bidi';
 import {TextareaControlComponent, TextareaParameters} from './textarea-control.component';
-import {RootPageService} from "../shared/root-page.service";
 
 export const INPUT_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -78,8 +85,8 @@ export class InputControlComponent extends TextareaControlComponent implements O
     return this.extraParams.formEnctype;
   }
   @ViewChild('input', {static: true}) input: ElementRef<HTMLInputElement>;
-  constructor(public systemLang: SystemLang, protected directionality: Directionality, protected rootPage: RootPageService) {
-    super(systemLang, directionality, rootPage);
+  constructor(protected _view: ViewContainerRef) {
+    super(_view);
   }
 
 }

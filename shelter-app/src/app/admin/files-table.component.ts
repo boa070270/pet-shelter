@@ -1,16 +1,15 @@
-import {Component, OnDestroy, ViewChild} from '@angular/core';
+import {Component, OnDestroy, ViewChild, ViewContainerRef} from '@angular/core';
 import {
   AbstractComponent,
   AbstractDataSource,
   DialogService,
-  DictionaryService,
   ExtendedData,
   SwaggerNative,
   SwaggerObject,
   swaggerUI,
-  SystemLang,
   TitleType,
-  UploadFilesComponent
+  UploadFilesComponent,
+  I18N_CFG
 } from 'ui-lib';
 // from x-payload
 import {BannerType, FileType, PageType, PetType} from '../common/types';
@@ -18,7 +17,6 @@ import {AddSwaggerBannerType, SwaggerFileType, SwaggerPageType, SwaggerPetType} 
 import {DataSources} from '../datasources';
 import {BasicService} from '../basic.service';
 import {HttpEventType, HttpResponse} from '@angular/common/http';
-import {RootPageService} from "../../../projects/ui-lib/src/lib/shared";
 
 const i18N = {
   dlg_caption: [{lang: 'en', title: 'Upload {0,1# file,[1..) files?}'}, {lang: 'uk', title: 'Загрузити {0,1# файл,[1..) файлів}?'}],
@@ -34,7 +32,10 @@ const i18N = {
       <button class="upload-files" (click)="uploadFiles()">Upload files</button>
     <lib-table [dataSource]="dataSource" [swagger]="swagger" (tableEvent)="tableAction($event)" [customActions]="actions"></lib-table>
   </div>`,
-  styleUrls: ['./files-table.component.sass'] // TODO change to ...
+  styleUrls: ['./files-table.component.sass'], // TODO change to ...
+  providers: [
+    {provide: I18N_CFG, useValue: i18N}
+  ]
 })
 export class FilesTableComponent extends AbstractComponent implements OnDestroy {
   dataSource: AbstractDataSource<FileType>;
@@ -53,9 +54,10 @@ export class FilesTableComponent extends AbstractComponent implements OnDestroy 
   constructor(protected dataSources: DataSources,
               protected  basicService: BasicService,
               protected  dialogService: DialogService,
-              public  systemLang: SystemLang, protected rootPage: RootPageService,
-              protected  dictionary: DictionaryService) {
-    super(systemLang, rootPage, dictionary.getAppDictionary('FilesTableComponent', i18N));
+              // tslint:disable-next-line:variable-name
+              protected _view: ViewContainerRef
+              ) {
+    super(_view);
     this.dataSource = this.dataSources.Files;
   }
   ngOnDestroy(): void {

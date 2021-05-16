@@ -1,7 +1,6 @@
-import {ChangeDetectorRef, Component, ElementRef, Inject, Input, OnDestroy, OnInit, Optional} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewContainerRef} from '@angular/core';
 import {AbstractComponent} from './abstract.component';
-import {SystemLang} from '../i18n';
-import {I18NType, RootPageService, ScrollEvent, ScrollEventService} from '../shared';
+import {ScrollEvent, ScrollEventService} from '../shared';
 import {Subscription} from 'rxjs';
 
 @Component({
@@ -19,10 +18,9 @@ export class AppBarComponent extends AbstractComponent implements OnInit, OnDest
   private stick = 0;
   private slide = 0;
   private initTop: any;
-  constructor(public systemLang: SystemLang, protected scrollService: ScrollEventService, protected rootPage: RootPageService,
-              protected changeDetector: ChangeDetectorRef, protected element: ElementRef,
-              @Optional() @Inject('i18NCfg') public i18NCfg?: I18NType) {
-    super(systemLang, rootPage, i18NCfg);
+  constructor(protected _view: ViewContainerRef, protected scrollService: ScrollEventService,
+              protected changeDetector: ChangeDetectorRef, protected element: ElementRef) {
+    super(_view);
     this.scrollSubs = scrollService.eventEmitter.subscribe((se) => this.onScrollEvent(se));
   }
 

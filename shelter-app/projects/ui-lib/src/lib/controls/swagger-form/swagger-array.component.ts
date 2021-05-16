@@ -1,10 +1,18 @@
-import {Component, ComponentRef, forwardRef, Inject, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import {
+  Component,
+  ComponentRef,
+  forwardRef,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {
   ArrayConstrictions,
   ArrayDataSource,
-  BaseConstrictions, coerceToSwaggerArray, coerceToSwaggerNative, coerceToSwaggerObject, ComponentsPluginService,
-  I18NType,
+  ComponentsPluginService,
   SwaggerArray,
   SwaggerComponent,
   SwaggerNative,
@@ -12,13 +20,10 @@ import {
 } from '../../shared';
 import {TableComponent} from '../table/table.component';
 import {FormErrorsService} from './form-errors.service';
-import {SystemLang} from '../../i18n';
-import {Directionality} from '@angular/cdk/bidi';
 import {BaseSwaggerComponent} from './base-swagger.component';
-import {EditableListComponent} from "../editable-list.component";
-import {CdkPortalOutlet, ComponentPortal} from "@angular/cdk/portal";
-import {BaseComponent} from "../base.component";
-import {RootPageService} from "../../shared/root-page.service";
+import {EditableListComponent} from '../editable-list.component';
+import {CdkPortalOutlet, ComponentPortal} from '@angular/cdk/portal';
+import {BaseComponent} from '../base.component';
 
 @Component({
   selector: 'lib-swagger-array',
@@ -58,9 +63,10 @@ export class SwaggerArrayComponent extends BaseSwaggerComponent implements OnIni
       }
     }
   }
-  constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              protected formErrors: FormErrorsService, protected componentsPlugin: ComponentsPluginService, protected rootPage: RootPageService) {
-    super(systemLang, directionality, rootPage);
+  constructor(protected _view: ViewContainerRef,
+              protected formErrors: FormErrorsService,
+              protected componentsPlugin: ComponentsPluginService) {
+    super(_view);
   }
 
   ngOnInit(): void {

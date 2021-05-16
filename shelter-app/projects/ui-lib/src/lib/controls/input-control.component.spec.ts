@@ -3,6 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {INPUT_VALUE_ACCESSOR, InputControlComponent} from './input-control.component';
 import {ObtainSystemLanguageMock} from "../../../test/system-language-mock";
 import {FormsModule} from "@angular/forms";
+import {EXT_SYSTEM_LANG} from "../shared";
 
 describe('InputControlComponent', () => {
   let component: InputControlComponent;
@@ -13,7 +14,7 @@ describe('InputControlComponent', () => {
       imports: [ FormsModule ],
       declarations: [ InputControlComponent ],
       providers: [
-        {provide: 'ObtainSystemLanguage', useClass: ObtainSystemLanguageMock}
+        {provide: EXT_SYSTEM_LANG, useClass: ObtainSystemLanguageMock}
       ]
     })
     .compileComponents();

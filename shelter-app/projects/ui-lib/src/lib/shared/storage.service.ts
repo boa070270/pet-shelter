@@ -1,19 +1,9 @@
-// #docregion
-import { Inject, Injectable, InjectionToken } from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
+import {LOCAL_STORAGE, StorageService} from './services-api';
 
-// #docregion storage-token
-export const BROWSER_STORAGE = new InjectionToken<Storage>('Browser Storage', {
-  providedIn: 'root',
-  factory: () => localStorage
-});
-// #enddocregion storage-token
-
-// #docregion inject-storage-token
-@Injectable({
-  providedIn: 'root'
-})
-export class BrowserStorageService {
-  constructor(@Inject(BROWSER_STORAGE) public storage: Storage) {}
+@Injectable()
+export class BrowserStorageService implements StorageService {
+  constructor(@Inject(LOCAL_STORAGE) public storage: Storage) {}
 
   get(key: string): string {
     return this.storage.getItem(key);

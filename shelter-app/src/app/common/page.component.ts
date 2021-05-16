@@ -1,10 +1,10 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Inject, Input, OnInit} from '@angular/core';
 import {
   AbstractDataSource,
   ArrayDataSource,
   DynamicHTMLOptions,
   DynamicHTMLRenderer,
-  ShowMediaType,
+  ShowMediaType, SYSTEM_LANG_TOKEN,
   SystemLang,
 } from 'ui-lib';
 import {BasicService} from '../basic.service';
@@ -39,7 +39,7 @@ export class PageComponent implements OnInit {
   datasource: AbstractDataSource<ShowMediaType>;
 
   constructor(private service: BasicService, private route: ActivatedRoute,
-              private systemLang: SystemLang,
+              @Inject(SYSTEM_LANG_TOKEN) private systemLang: SystemLang,
               private sanitizer: DomSanitizer) { }
 
   ngOnInit(): void {

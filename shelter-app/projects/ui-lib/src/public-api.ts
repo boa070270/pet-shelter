@@ -13,7 +13,6 @@ export * from './lib/masonry-list.component';
 export * from './lib/visibility-change.service';
 export * from './lib/advert.component';
 export * from './lib/shared';
-export * from './lib/i18n';
 export * from './lib/controls';
 export * from './lib/ui-elements';
 export * from './lib/dialog-service';

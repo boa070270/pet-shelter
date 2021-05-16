@@ -1,6 +1,6 @@
-import {NgModule} from '@angular/core';
+import {Inject, NgModule} from '@angular/core';
 import {Route, Router, RouterModule, Routes} from '@angular/router';
-import {SystemLang} from 'ui-lib';
+import {SYSTEM_LANG_TOKEN, SystemLang} from 'ui-lib';
 import {MenuTree} from './common';
 import {SubMenuPageComponent} from './sub-menu-page/sub-menu-page.component';
 import {TopMenuPageComponent} from './top-menu-page.component';
@@ -35,7 +35,7 @@ const KnownComponents = {
   exports: [RouterModule]
 })
 export class AppRoutingModule {
-  constructor(private systemMenu: SystemMenuService, private systemLang: SystemLang, private router: Router) {
+  constructor(private systemMenu: SystemMenuService, @Inject(SYSTEM_LANG_TOKEN) private systemLang: SystemLang, private router: Router) {
     console.log('Constructor AppRoutingModule');
     this.systemMenu.observable.subscribe(() => {
       const menuTree = this.systemMenu.menuTree();

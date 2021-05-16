@@ -1,5 +1,5 @@
-import {EventEmitter, Injectable, OnDestroy, Output} from '@angular/core';
-import {BrowserStorageService, SwaggerSchema} from '../../shared';
+import {EventEmitter, Inject, Injectable, OnDestroy, Output} from '@angular/core';
+import {BROWSER_STORAGE, StorageService, SwaggerSchema} from '../../shared';
 
 const FORM_KEYS = 'ui-lib-swagger-form-keys';
 const KEY_PREFIX = 'ui-lib-swagger-form-key-';
@@ -10,7 +10,7 @@ export class SwaggerFormService implements OnDestroy {
   private formCollection: {[key: string]: {swagger: SwaggerSchema, modified: boolean}} = {};
   @Output() changeEmitter: EventEmitter<string> = new EventEmitter<string>();
 
-  constructor(private storageService: BrowserStorageService) {
+  constructor(@Inject(BROWSER_STORAGE) private storageService: StorageService) {
     this.loadCollection();
   }
 

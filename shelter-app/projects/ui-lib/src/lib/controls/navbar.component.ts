@@ -1,6 +1,5 @@
 import {Component, ElementRef, EventEmitter, Inject, Input, OnDestroy, Output} from '@angular/core';
-import {LanguageType, MenuService, UILogger, UILoggerToken, UIMenu} from '../shared';
-import {SystemLang} from '../i18n';
+import {LanguageType, MenuService, SYSTEM_LANG_TOKEN, SystemLang, UILogger, UILoggerToken, UIMenu} from '../shared';
 import {Subscription} from 'rxjs';
 
 @Component({
@@ -53,7 +52,7 @@ export class NavbarComponent implements OnDestroy {
   emitter = new EventEmitter<any>();
   languages: LanguageType[];
   value: string;
-  constructor(private el: ElementRef, private menuService: MenuService, private systemLang: SystemLang,
+  constructor(private el: ElementRef, private menuService: MenuService, @Inject(SYSTEM_LANG_TOKEN) private systemLang: SystemLang,
               @Inject(UILoggerToken) private logger: UILogger) {
     this.languages = systemLang.getLanguages();
     this.subs = systemLang.onChange().subscribe(l => {

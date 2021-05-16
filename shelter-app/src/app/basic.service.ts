@@ -2,11 +2,14 @@ import {Inject, Injectable, OnDestroy} from '@angular/core';
 import {HttpClient, HttpEvent, HttpHeaders, HttpResponse} from '@angular/common/http';
 import {Observable, Subscription} from 'rxjs';
 import {
-  BrowserStorageService,
+  BROWSER_STORAGE,
   CommentResponse,
-  LanguageType as UILanguageType, UILogger,
-  ObtainSystemLanguage, UILoggerToken,
-  VoteType, LogLevel
+  LanguageType as UILanguageType,
+  ObtainSystemLanguage,
+  StorageService,
+  UILogger,
+  UILoggerToken,
+  VoteType
 } from 'ui-lib';
 import {map, tap} from 'rxjs/operators';
 import {
@@ -44,7 +47,7 @@ export class BasicService implements ObtainSystemLanguage, OnDestroy {
 
   constructor(@Inject(UILoggerToken) private logger: UILogger,
               private http: HttpClient, private authService: AuthorizationService,
-              private storage: BrowserStorageService) {
+              @Inject(BROWSER_STORAGE) private storage: StorageService) {
     this.authSubscription = authService.authEmitter.subscribe(u => {
       if (u) {
         this.authHeaders = u.authHeaders;

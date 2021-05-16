@@ -1,11 +1,9 @@
-import {Component, Inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
-import {SystemLang} from '../i18n';
+import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewContainerRef} from '@angular/core';
 import {Subscription} from 'rxjs';
-import {distinctTitleId, I18NType, isTitleType, TitleType} from '../shared';
+import {RootPageService, TitleType} from '../shared';
 import {ControlValueAccessor} from '@angular/forms';
 import {Directionality} from '@angular/cdk/bidi';
 import {AbstractComponent} from './abstract.component';
-import {RootPageService} from "../shared/root-page.service";
 
 export interface CommonParameters {
   id?: string;
@@ -94,14 +92,18 @@ export class BaseComponent extends AbstractComponent implements OnInit, OnDestro
   private subsDir: Subscription;
   protected change: (_: any) => {};
   protected touch: () => {};
+  protected directionality: Directionality;
+  protected rootPage: RootPageService;
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality, protected rootPage: RootPageService,
-              @Inject('i18NCfg') public i18NCfg?: I18NType) {
-    super(systemLang, rootPage, i18NCfg);
-    this.dir = directionality.value;
-    this.subsDir = directionality.change.subscribe(d => {
-      this.dir = d;
-    });
+  constructor(protected _view: ViewContainerRef) {
+    super(_view);
+    this.directionality = this._view.injector.get(Directionality, null);
+    if (this.directionality) {
+      this.dir = this.directionality.value;
+      this.subsDir = this.directionality.change.subscribe(d => {
+        this.dir = d;
+      });
+    }
   }
 
 

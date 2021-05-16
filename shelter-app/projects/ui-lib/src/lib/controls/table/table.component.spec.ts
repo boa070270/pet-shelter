@@ -4,7 +4,7 @@ import { TableComponent } from './table.component';
 import {Observable} from 'rxjs';
 import {
   AbstractDataSource,
-  CdkDataSource,
+  CdkDataSource, EXT_SYSTEM_LANG,
   LanguageType, LoggerConfiguration,
   LoggerConfigurationToken,
   LogLevel,
@@ -40,7 +40,7 @@ describe('TestTableComponent', () => {
       imports: [OverlayModule, CommonModule, SharedModule, ControlsModule],
       declarations: [ TableComponent ],
       providers: [
-        {provide: 'ObtainSystemLanguage', useClass: ObtainSystemLanguageMock},
+        {provide: EXT_SYSTEM_LANG, useClass: ObtainSystemLanguageMock},
         {provide: UILoggerToken, useClass: LoggerService},
         {provide: LoggerConfigurationToken, useValue: {level: LogLevel.Debug}},
         {provide: UILoggerWriterToken, useValue: {

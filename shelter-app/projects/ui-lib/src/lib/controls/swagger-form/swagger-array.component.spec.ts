@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SwaggerArrayComponent } from './swagger-array.component';
 import {ObtainSystemLanguageMock} from "../../../../test/system-language-mock";
-import {SwaggerArray, SwaggerNative, SwaggerNativeString, SwaggerObject} from "../../shared";
+import {EXT_SYSTEM_LANG, SwaggerArray, SwaggerNative, SwaggerNativeString, SwaggerObject} from "../../shared";
 import {logger} from "codelyzer/util/logger";
 
 describe('TableControlComponent', () => {
@@ -13,7 +13,7 @@ describe('TableControlComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ SwaggerArrayComponent ],
       providers: [
-        {provide: 'ObtainSystemLanguage', useClass: ObtainSystemLanguageMock},
+        {provide: EXT_SYSTEM_LANG, useClass: ObtainSystemLanguageMock},
       ]
     })
     .compileComponents();

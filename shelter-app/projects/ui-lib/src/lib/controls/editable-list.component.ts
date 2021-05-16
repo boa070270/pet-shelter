@@ -1,14 +1,20 @@
-import {Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild} from '@angular/core';
-import {DictionaryService, ExtendedData, SwaggerNative, SwaggerObject, swaggerUI, TitleType} from '../shared';
+import {
+  Component,
+  forwardRef,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
+import {ExtendedData, I18N_CFG, SwaggerNative, SwaggerObject, swaggerUI, TitleType} from '../shared';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {BaseComponent} from './base.component';
-import {SystemLang} from '../i18n';
-import {Directionality} from '@angular/cdk/bidi';
 import {CheckboxParameters} from './checkbox-control.component';
 import {ListSelectComponent} from './list-select.component';
-import {coerceArray} from '@angular/cdk/coercion';
 import {DialogService} from '../dialog-service';
-import { RootPageService } from '../shared/root-page.service';
 
 const I18N = {
   DEF_REMOVE_TITLES: [{lang: 'en', title: 'Remove'}, {lang: 'uk', title: 'Видалити'}],
@@ -28,7 +34,10 @@ export const EDITABLE_LIST_VALUE_ACCESSOR: any = {
   selector: 'lib-editable-list',
   templateUrl: './editable-list.component.html',
   styleUrls: ['./checkbox-control.component.scss'],
-  providers: [EDITABLE_LIST_VALUE_ACCESSOR]
+  providers: [
+    EDITABLE_LIST_VALUE_ACCESSOR,
+    {provide: I18N_CFG, useValue: I18N}
+  ]
 })
 export class EditableListComponent extends BaseComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
@@ -104,9 +113,9 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
 
   @ViewChild(ListSelectComponent, {static: true}) result: ListSelectComponent;
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              private dialogService: DialogService, dictionary: DictionaryService, protected rootPage: RootPageService) {
-    super(systemLang, directionality, rootPage, dictionary.getLibDictionary('EditableListComponent', I18N));
+  constructor(protected _view: ViewContainerRef,
+              private dialogService: DialogService) {
+    super(_view);
   }
 
   ngOnInit(): void {

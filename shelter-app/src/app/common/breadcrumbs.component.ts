@@ -1,6 +1,6 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Inject, Input, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {SystemLang} from 'ui-lib';
+import {SYSTEM_LANG_TOKEN, SystemLang} from 'ui-lib';
 import {SystemMenuService} from '../system-menu.service';
 import {Subscription} from 'rxjs';
 
@@ -14,7 +14,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   titles: string[];
   private subscription: Subscription;
 
-  constructor(private systemLang: SystemLang, private systemMenu: SystemMenuService) {
+  constructor(@Inject(SYSTEM_LANG_TOKEN) private systemLang: SystemLang, private systemMenu: SystemMenuService) {
     this.subscription = systemLang.onChange().subscribe(v => {
       if (typeof v === 'string') {
         this.refreshTitles();

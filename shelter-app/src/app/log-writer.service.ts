@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {BrowserStorageService, LogLevel, UILogWriter} from 'ui-lib';
+import {Inject, Injectable} from '@angular/core';
+import {BROWSER_STORAGE, LogLevel, StorageService, UILogWriter} from 'ui-lib';
 import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
 import {Response} from './common';
 import {map} from 'rxjs/operators';
@@ -12,7 +12,7 @@ const API_URL = '/api/v1';
 export class LogWriterService implements UILogWriter{
   private clientId: string;
 
-  constructor(private http: HttpClient, private storage: BrowserStorageService) {
+  constructor(private http: HttpClient, @Inject(BROWSER_STORAGE) private storage: StorageService) {
     this.clientId = storage.get('x-client-id');
   }
   httpOptions(extHeader?: any): object {

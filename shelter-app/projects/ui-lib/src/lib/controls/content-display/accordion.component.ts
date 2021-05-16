@@ -1,21 +1,14 @@
 import {
   ChangeDetectorRef,
   Component,
-  EventEmitter, Host,
-  Inject,
-  Input,
-  OnChanges, OnDestroy,
+  OnChanges,
+  OnDestroy,
   OnInit,
-  Optional, Self,
-  SimpleChanges, ViewContainerRef
+  SimpleChanges,
+  ViewContainerRef
 } from '@angular/core';
 import {AbstractComponent} from '../abstract.component';
-import {SystemLang} from '../../i18n';
-import {RootPageService} from '../../shared/root-page.service';
-import {CdkDataSource, I18NType} from '../../shared';
-import {ListRange} from '@angular/cdk/collections';
-import {Subscription} from 'rxjs';
-import {AbstractIteratorComponent} from "../abstract-iterator.component";
+import {AbstractIteratorComponent} from '../abstract-iterator.component';
 
 @Component({
   selector: 'lib-accordion',
@@ -35,10 +28,9 @@ import {AbstractIteratorComponent} from "../abstract-iterator.component";
 })
 export class AccordionComponent<T, U> extends AbstractIteratorComponent<T, U> implements OnInit, OnChanges, OnDestroy {
 
-  constructor(protected view: ViewContainerRef, public systemLang: SystemLang, protected rootPage: RootPageService,
-              protected changeDetector: ChangeDetectorRef,
-              @Optional() @Inject('i18NCfg') public i18NCfg?: I18NType) {
-    super(view, systemLang, rootPage, changeDetector, i18NCfg);
+  constructor(protected _view: ViewContainerRef,
+              protected changeDetector: ChangeDetectorRef) {
+    super(_view, changeDetector);
   }
 
   ngOnInit(): void {

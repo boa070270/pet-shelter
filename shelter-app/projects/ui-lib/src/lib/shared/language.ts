@@ -1,4 +1,5 @@
 import {Observable} from 'rxjs';
+import {EventEmitter} from '@angular/core';
 
 export interface LanguageType {
   lang: string;
@@ -32,4 +33,12 @@ export function distinctTitleId(tt: TitleType | TitleType[]): string[] {
 }
 export interface ObtainSystemLanguage {
   getSystemLanguages(): Observable<Array<LanguageType>>;
+}
+export interface SystemLang {
+  onChange(): EventEmitter<any>;
+  getLanguages(): LanguageType[];
+  setLocale(locale: string): void;
+  getLocale(): string;
+  getTitle(titles: TitleType | TitleType[]): string;
+  i18n(src: I18NType): any;
 }

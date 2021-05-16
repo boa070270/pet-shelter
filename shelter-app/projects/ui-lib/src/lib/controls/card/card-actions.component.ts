@@ -1,18 +1,17 @@
 import {
-  ChangeDetectionStrategy,
-  Component, EventEmitter,
-  HostBinding, Input,
+  Component,
+  EventEmitter,
+  HostBinding,
+  Input,
   OnChanges,
   OnDestroy,
-  OnInit, Output,
-  ViewEncapsulation
+  OnInit,
+  Output,
+  ViewContainerRef
 } from '@angular/core';
-import {BaseComponent} from "../base.component";
-import {ControlValueAccessor} from "@angular/forms";
-import {SwaggerSchema, TitleType} from "../../shared";
-import {SystemLang} from "../../i18n";
-import {Directionality} from "@angular/cdk/bidi";
-import {RootPageService} from "../../shared/root-page.service";
+import {BaseComponent} from '../base.component';
+import {ControlValueAccessor} from '@angular/forms';
+import {TitleType} from '../../shared';
 
 export interface CardActions {
   icon: string;
@@ -38,8 +37,8 @@ export class CardActionsComponent extends BaseComponent implements OnInit, OnCha
   @Output()
   actionEvent: EventEmitter<string> = new EventEmitter<string>();
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality, protected rootPage: RootPageService) {
-    super(systemLang, directionality, rootPage);
+  constructor(protected _view: ViewContainerRef) {
+    super(_view);
   }
 
   ngOnInit(): void {

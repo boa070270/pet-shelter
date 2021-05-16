@@ -1,6 +1,6 @@
-import {Injectable, OnDestroy} from '@angular/core';
+import {Inject, Injectable, OnDestroy} from '@angular/core';
 import {BasicService} from './basic.service';
-import {BrowserStorageService} from 'ui-lib';
+import {BROWSER_STORAGE, BrowserStorageService, StorageService, SYSTEM_LANG_TOKEN} from 'ui-lib';
 import {AdminMenu, MenusAndTitlesType, MenuTree, MenuType} from './common/types';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {SystemLang} from 'ui-lib';
@@ -25,7 +25,7 @@ export class SystemMenuService implements OnDestroy {
     this.storage.setObj(KEY_SYSTEM_MENU, m);
   }
   constructor(private service: BasicService,
-              private storage: BrowserStorageService, private systemLang: SystemLang
+              @Inject(BROWSER_STORAGE) private storage: StorageService, @Inject(SYSTEM_LANG_TOKEN) private systemLang: SystemLang
   ) {
     console.log('constructor SystemMenuService');
     const menu = this.storage.getObj(KEY_SYSTEM_MENU);

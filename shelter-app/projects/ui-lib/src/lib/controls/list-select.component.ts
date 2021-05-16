@@ -1,10 +1,16 @@
-import {ChangeDetectorRef, Component, forwardRef, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  forwardRef,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  ViewContainerRef
+} from '@angular/core';
 import {SelectControlComponent} from './select-control.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
-import {SystemLang} from '../i18n';
 import {coerceArray} from '@angular/cdk/coercion';
-import {Directionality} from '@angular/cdk/bidi';
-import {RootPageService} from "../shared/root-page.service";
 
 export const LIST_SELECT_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -19,9 +25,9 @@ export const LIST_SELECT_VALUE_ACCESSOR: any = {
 })
 export class ListSelectComponent extends SelectControlComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
-  constructor(public systemLang: SystemLang, protected directionality: Directionality,
-              protected changeDetect: ChangeDetectorRef, protected rootPage: RootPageService) {
-    super(systemLang, directionality, changeDetect, rootPage);
+  constructor(protected _view: ViewContainerRef,
+              protected changeDetect: ChangeDetectorRef) {
+    super(_view, changeDetect);
     this.multiple = true;
   }
   ngOnInit(): void {

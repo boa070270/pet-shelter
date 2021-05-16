@@ -1,7 +1,7 @@
 import {
   Component,
   ElementRef,
-  EventEmitter,
+  EventEmitter, Inject,
   Input,
   OnChanges,
   OnDestroy,
@@ -10,9 +10,9 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import {SystemLang} from '../../i18n';
 import {Subscription} from 'rxjs';
 import {VoteOption, VoteType} from './disscution-api';
+import {SYSTEM_LANG_TOKEN, SystemLang} from '../../shared';
 
 export type ShowResultType = 'always' | 'oncomplete' | 'never';
 export type Direction = 'row' | 'column';
@@ -36,7 +36,7 @@ export class VoteComponent implements OnInit, OnDestroy, OnChanges {
   classForResult: any;
   private subsLang: Subscription;
 
-  constructor(private systemLang: SystemLang) {
+  constructor(@Inject(SYSTEM_LANG_TOKEN) private systemLang: SystemLang) {
     this.subsLang = systemLang.onChange().subscribe(next => this.onLangChange(next));
   }
 

@@ -1,4 +1,4 @@
-import {Directive, NgModule} from '@angular/core';
+import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CheckboxControlComponent} from './checkbox-control.component';
@@ -25,7 +25,7 @@ import {MenuComponent} from './menu/menu.component';
 import {SpinnerComponent} from './spinner.component';
 import {SimpleDialogComponent} from './dialogs/simple-dialog.component';
 import {SnakeBarComponent} from './dialogs/snake-bar.component';
-import {CommentComponent, VoteComponent, DiscussionComponent} from './survey';
+import {CommentComponent, DiscussionComponent, VoteComponent} from './survey';
 import {LinkComponent} from './link.component';
 import {
   GeneratorFormComponent,
@@ -35,27 +35,29 @@ import {
 } from './swagger-form';
 import {PortalModule} from '@angular/cdk/portal';
 import {ScrollingModule} from '@angular/cdk/scrolling';
-import { UiMenuDirective } from './menu/ui-menu.directive';
-import { MenuBarComponent } from './menu/menu-bar.component';
-import { EditableListComponent } from './editable-list.component';
-import { SwaggerBuilderComponent } from './swagger-builder.component';
-import { AppBarComponent } from './app-bar.component';
-import { CarouselComponent, SlideContainerDirective, SlideContainerComponent, SlideElementDirective } from './slider';
+import {UiMenuDirective} from './menu/ui-menu.directive';
+import {MenuBarComponent} from './menu/menu-bar.component';
+import {EditableListComponent} from './editable-list.component';
+import {SwaggerBuilderComponent} from './swagger-builder.component';
+import {AppBarComponent} from './app-bar.component';
+import {CarouselComponent, SlideContainerComponent, SlideContainerDirective, SlideElementDirective} from './slider';
 import {
   CardComponent,
   CardContentDirective,
   CardFooterDirective,
-  CardHeaderComponent, CardSubtitleDirective,
-  CardTitleDirective, CardImageDirective
+  CardHeaderComponent,
+  CardImageDirective,
+  CardSubtitleDirective,
+  CardTitleDirective
 } from './card/card.component';
-import { CardActionsComponent } from './card/card-actions.component';
-import { PluginComponent } from './plugin.component';
+import {CardActionsComponent} from './card/card-actions.component';
+import {PluginComponent} from './plugin.component';
 import {TabDirective, TabGroupComponent} from './content-display/tab-group.component';
-import { AccordionComponent } from './content-display/accordion.component';
-import { SwitchPageDataComponent } from './switch-page-data.component';
-import { SpanComponent } from './content-display/span.component';
-import { UiForOfDirective } from './ui-for-of.directive';
-import { AbstractIteratorComponent } from './abstract-iterator.component';
+import {AccordionComponent} from './content-display/accordion.component';
+import {SwitchPageDataComponent} from './switch-page-data.component';
+import {SpanComponent} from './content-display/span.component';
+import {UiForOfDirective} from './ui-for-of.directive';
+import {AbstractIteratorComponent} from './abstract-iterator.component';
 
 @NgModule({
   declarations: [

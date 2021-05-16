@@ -1,5 +1,5 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {AbstractDataSource, CdkDataSource, IFilter, SystemLang} from 'ui-lib';
+import {Component, Inject, Input, OnDestroy, OnInit} from '@angular/core';
+import {AbstractDataSource, CdkDataSource, IFilter, SYSTEM_LANG_TOKEN, SystemLang} from 'ui-lib';
 import {CarouselType} from '../types';
 import {Subscription} from 'rxjs';
 import {ViewportRuler} from '@angular/cdk/overlay';
@@ -19,7 +19,7 @@ export class CarouselComponent implements OnInit, OnDestroy {
 
   private langSubs: Subscription;
 
-  constructor(private dataSources: DataSources, private systemLang: SystemLang, private viewportRuler: ViewportRuler) {
+  constructor(private dataSources: DataSources, @Inject(SYSTEM_LANG_TOKEN) private systemLang: SystemLang, private viewportRuler: ViewportRuler) {
     this.langSubs = systemLang.onChange().subscribe(v => {
       if (typeof v === 'string') {
         this.setFilter();

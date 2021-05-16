@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SwaggerFormComponent } from './swagger-form.component';
-import {SwaggerArray, SwaggerNative, SwaggerObject} from "../../shared";
+import {EXT_SYSTEM_LANG, SwaggerArray, SwaggerNative, SwaggerObject} from "../../shared";
 import {ObtainSystemLanguageMock} from "../../../../test/system-language-mock";
 
 describe('SwaggerFormComponent', () => {
@@ -12,7 +12,7 @@ describe('SwaggerFormComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ SwaggerFormComponent ],
       providers: [
-        {provide: 'ObtainSystemLanguage', useClass: ObtainSystemLanguageMock},
+        {provide: EXT_SYSTEM_LANG, useClass: ObtainSystemLanguageMock},
       ]
     })
     .compileComponents();

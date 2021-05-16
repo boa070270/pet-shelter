@@ -1,9 +1,9 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Inject, Input, OnDestroy, OnInit} from '@angular/core';
 import {FieldValueType, PetType} from './types';
 import {Subscription} from 'rxjs';
 import {BasicService} from '../basic.service';
 import {ActivatedRoute} from '@angular/router';
-import {IntervalObservableService} from 'ui-lib';
+import {IntervalObservableService, SYSTEM_LANG_TOKEN} from 'ui-lib';
 import {FieldsService} from '../fields.service';
 import {SystemLang} from 'ui-lib';
 
@@ -28,7 +28,7 @@ export class TabletPetComponent implements OnInit, OnDestroy {
   constructor(private service: BasicService, private route: ActivatedRoute,
               private intervalObservable: IntervalObservableService,
               private fieldService: FieldsService,
-              private systemLang: SystemLang) { }
+              @Inject(SYSTEM_LANG_TOKEN) private systemLang: SystemLang) { }
 
   ngOnInit(): void {
     if (!this.data) {

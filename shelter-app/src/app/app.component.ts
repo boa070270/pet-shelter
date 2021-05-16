@@ -2,14 +2,14 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
-  ElementRef,
+  ElementRef, Inject,
   OnDestroy,
   OnInit,
   TemplateRef,
   ViewChild, ViewContainerRef
 } from '@angular/core';
 import {BasicService} from './basic.service';
-import {DialogService, NavbarComponent, SystemLang, UIMenu} from 'ui-lib';
+import {DialogService, NavbarComponent, SYSTEM_LANG_TOKEN, SystemLang, UIMenu} from 'ui-lib';
 import {Subscription} from 'rxjs';
 import {LanguageType, MenuTree} from './common/types';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
@@ -36,7 +36,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   languages: LanguageType[];
 
   constructor(private service: BasicService,
-              private systemLang: SystemLang,
+              @Inject(SYSTEM_LANG_TOKEN) private systemLang: SystemLang,
               private systemMenu: SystemMenuService,
               private changeDetectorRef: ChangeDetectorRef,
               private router: Router,

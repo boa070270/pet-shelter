@@ -1,15 +1,6 @@
-import {Component, Inject, OnDestroy, ViewChild} from '@angular/core';
-import {SystemLang} from '../../i18n';
-import {
-  ActionType,
-  DictionaryService,
-  ExtendedData,
-  I18NType,
-  RootPageService,
-  SwaggerObject,
-  TitleBarData
-} from '../../shared';
-import {SwaggerFormComponent} from '../swagger-form/swagger-form.component';
+import {Component, OnDestroy, ViewChild, ViewContainerRef} from '@angular/core';
+import {ActionType, ExtendedData, I18N_CFG, I18NType, SwaggerObject, TitleBarData} from '../../shared';
+import {SwaggerFormComponent} from '../swagger-form/';
 import {Subscription} from 'rxjs';
 import {AbstractComponent} from '../abstract.component';
 import {CdkDialogContainer, DIALOG_DATA, DialogRef} from '../../dialog-service';
@@ -25,7 +16,10 @@ const I18N: I18NType = {
 @Component({
   selector: 'lib-simple-dialog',
   templateUrl: './simple-dialog.component.html',
-  styleUrls: ['./simple-dialog.component.scss']
+  styleUrls: ['./simple-dialog.component.scss'],
+  providers: [
+    {provide: I18N_CFG, useValue: I18N}
+  ]
 })
 export class SimpleDialogComponent extends AbstractComponent implements OnDestroy {
   needActionBlk: boolean;
@@ -42,33 +36,33 @@ export class SimpleDialogComponent extends AbstractComponent implements OnDestro
   @ViewChild(SwaggerFormComponent) form: SwaggerFormComponent;
   private subscription: Subscription;
   private offset: {top: number, left: number};
+  protected dialogData: any;
 
   constructor(protected dialogRef: DialogRef<any>,
               protected dialogContainer: CdkDialogContainer,
-              @Inject(DIALOG_DATA) protected dialogData: any,
-              public systemLang: SystemLang, protected rootPage: RootPageService,
-              protected dictionary: DictionaryService) {
-    super(systemLang, rootPage, dictionary.getLibDictionary('SimpleDialogComponent', I18N));
+              protected _view: ViewContainerRef) {
+    super(_view);
+    this.dialogData = this._view.injector.get(DIALOG_DATA);
     this.needActionBlk = dialogRef.disableClose;
-    if (dialogData instanceof ExtendedData) {
-      this.needActionBlk = !!dialogData.action;
-      this.swagger = dialogData.swagger;
-      this.data = dialogData.data;
-      this.caption = dialogData.caption;
-      this.action = dialogData.action;
-      this.disabled = dialogData.readOnly;
+    if (this.dialogData instanceof ExtendedData) {
+      this.needActionBlk = !!this.dialogData.action;
+      this.swagger = this.dialogData.swagger;
+      this.data = this.dialogData.data;
+      this.caption = this.dialogData.caption;
+      this.action = this.dialogData.action;
+      this.disabled = this.dialogData.readOnly;
       this.iconClasses = {};
       this.dialogBorderClass = 'border-dialog';
-      if (dialogData.icon) {
-        this.iconClasses[dialogData.icon] = true;
+      if (this.dialogData.icon) {
+        this.iconClasses[this.dialogData.icon] = true;
       }
-      if (dialogData.iconColor) {
-        this.iconClasses[dialogData.iconColor] = true;
-        this.dialogBorderClass = 'border-' + dialogData.iconColor;
+      if (this.dialogData.iconColor) {
+        this.iconClasses[this.dialogData.iconColor] = true;
+        this.dialogBorderClass = 'border-' + this.dialogData.iconColor;
       }
-      this.titleBar = dialogData.titleBar;
+      this.titleBar = this.dialogData.titleBar;
     } else {
-      this.data = dialogData;
+      this.data = this.dialogData;
     }
     this.prepareTitle();
     this.subscription = this.systemLang.onChange().subscribe(v => {

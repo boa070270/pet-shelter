@@ -1,8 +1,7 @@
 import {Component, Inject, Input, OnDestroy, OnInit} from '@angular/core';
-import {DiscussionMediator, CommentType, VoteOption, VoteType, CommentResponse} from './disscution-api';
-import {BrowserStorageService} from '../../shared';
+import {CommentResponse, CommentType, DiscussionMediator, VoteOption, VoteType} from './disscution-api';
+import {BROWSER_STORAGE, StorageService} from '../../shared';
 import {Observable, Subscription} from 'rxjs';
-import {SystemLang} from '../../i18n';
 
 @Component({
   selector: 'lib-discussion',
@@ -36,7 +35,7 @@ export class DiscussionComponent implements OnInit, OnDestroy {
     this.nick = s;
   }
   constructor(@Inject('DiscussionMediator') private mediator: DiscussionMediator,
-              private storageService: BrowserStorageService) {
+              @Inject(BROWSER_STORAGE) private storageService: StorageService) {
     this.nick = storageService.get('discussion_component_nickName');
   }
 

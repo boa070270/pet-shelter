@@ -1,6 +1,5 @@
-import {entryPointKeyFor} from "@angular/compiler-cli/src/ngtsc/routing";
-
 export * from './abstract.component';
+export * from './abstract-iterator.component';
 export * from './controls.module';
 export * from './base.component';
 export * from './checkbox-control.component';
@@ -38,3 +37,5 @@ export * from './content-display/tab-group.component';
 export * from './content-display/accordion.component';
 export * from './switch-page-data.component';
 export * from './content-display/span.component';
+export * from './plugin.component';
+export * from './ui-for-of.directive';
