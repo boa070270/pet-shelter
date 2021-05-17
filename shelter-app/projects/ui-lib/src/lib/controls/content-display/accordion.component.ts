@@ -1,7 +1,7 @@
 import {
   AfterViewInit,
   ChangeDetectorRef,
-  Component, ContentChild, ContentChildren, ElementRef, forwardRef,
+  Component, ContentChild, ContentChildren, ElementRef, forwardRef, Input,
   OnChanges,
   OnDestroy,
   OnInit,
@@ -11,16 +11,22 @@ import {
 import {AbstractComponent} from '../abstract.component';
 import {AbstractIteratorComponent} from '../abstract-iterator.component';
 
+export interface AccordionData {
+  prefix?: string;
+  label: string;
+  data: string;
+}
+
 @Component({
   selector: 'lib-accordion',
   template: `<div class="accordion">
-    <ng-container *uiFor="let a of data">
-      <switch-page-data [data]="a" [prefix]="prefix">
-        <input type="checkbox" name="panel" [id]="a.id">
-        <label for="a.id">{{a.label}}</label>
-        <div class="accordion-content">
+    <ng-container *uiFor="let a of data; index as i">
+      <switch-page-data [data]="a" [prefix]="prefix" class="accordion-item">
+        <input type="checkbox" name="panel" [id]="i" class="hide">
+        <label for="{{i}}" class="accordion-label">{{a.label}}</label>
+        <div class="accordion-child">
           {{a.data}}
-          <!-- ng-content></ng-content -->
+<!--           <ng-container #container></ng-container>-->
         </div>
       </switch-page-data>
     </ng-container>
@@ -28,6 +34,8 @@ import {AbstractIteratorComponent} from '../abstract-iterator.component';
   styleUrls: ['./accordion.component.scss'],
 })
 export class AccordionComponent<T, U> extends AbstractIteratorComponent<T, U> implements OnInit, OnChanges, OnDestroy, AfterViewInit {
+  @Input() data: T[] | ReadonlyArray<T> = null;
+
   // @ContentChild(TemplateRef, {static: true}) child: any;
   // @ContentChild(ViewContainerRef, {static: true}) child2: any;
   // @ContentChildren(TemplateRef, {descendants: true}) children: any;
@@ -43,10 +51,6 @@ export class AccordionComponent<T, U> extends AbstractIteratorComponent<T, U> im
     super.ngOnInit();
   }
   ngOnChanges(changes: SimpleChanges): void {
-    const v = changes.accs;
-    if (v && AbstractComponent.isPageData(v.currentValue)) {
-      this.prefix = AbstractComponent.pageDataKey(v.currentValue);
-    }
     super.ngOnChanges(changes);
   }
   ngAfterViewInit(): void {

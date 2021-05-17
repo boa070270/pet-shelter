@@ -39,12 +39,17 @@ export class AbstractIteratorComponent<T, U> extends AbstractComponent implement
   }
 
   ngOnInit(): void {
-    const data = this.ds.connect(this.collectionViewer);
-    this.dataSubs = data.subscribe(d => {
-      this.data = d;
-      this.changeDetector.detectChanges();
-    });
-    this.collectionViewer.viewChange.emit(this.initListRange);
+    if (this.ds) {
+      const data = this.ds.connect(this.collectionViewer);
+      this.dataSubs = data.subscribe(d => {
+        this.data = d;
+        this.changeDetector.detectChanges();
+      });
+      this.collectionViewer.viewChange.emit(this.initListRange);
+    }
+    // else if (AbstractComponent.isPageData(this.data)) {
+    //   this.data = this.rootPage.getData(AbstractComponent.pageDataKey(this.data as string));
+    // }
   }
   ngOnChanges(changes: SimpleChanges): void {
     const v = changes.ds;

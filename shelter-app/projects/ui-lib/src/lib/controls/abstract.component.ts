@@ -34,7 +34,7 @@ export class AbstractComponent implements OnDestroy, OnChanges {
     });
     this.i18n = this.systemLang.i18n(this.i18NCfg);
   }
-  static isPageData(s: string): boolean {
+  static isPageData(s: any): boolean {
     return typeof s === 'string' && s.startsWith('{{') && s.endsWith('}}');
   }
   static pageDataKey(s: string): string {
