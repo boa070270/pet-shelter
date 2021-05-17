@@ -1,4 +1,4 @@
-import {Injector, NgModule, Optional, SkipSelf} from '@angular/core';
+import {ComponentFactoryResolver, Injector, NgModule, Optional, SkipSelf} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   BooleanControlComponent,
@@ -17,6 +17,7 @@ import {
 } from '../controls';
 import { DynamicPageComponent } from './dynamic-page.component';
 import {createCustomElement} from '@angular/elements';
+import {ExtComponentFactory} from "../shared/ext-component-factory";
 
 @NgModule({
   declarations: [DynamicPageComponent],
@@ -34,6 +35,9 @@ export class UiElementsModule {
     if (parentModule) {
       throw new Error('UiElementsModule is already loaded');
     }
+    const replaceInjector = Injector.create({parent: injector, providers: [
+        {provide: ComponentFactoryResolver, useValue: new ExtComponentFactory(injector)}
+      ]});
     const checkboxControlComponent = createCustomElement(CheckboxControlComponent, {injector});
     const inputControlComponent = createCustomElement(InputControlComponent, {injector});
     const radioControlComponent = createCustomElement(RadioControlComponent, {injector});
@@ -67,7 +71,7 @@ export class UiElementsModule {
     customElements.define('lib-card-element', card);
     const tabGroup = createCustomElement(TabGroupComponent, {injector});
     customElements.define('lib-tab-group-element', tabGroup);
-    const accordion = createCustomElement(AccordionComponent, {injector});
+    const accordion = createCustomElement(AccordionComponent, {injector: replaceInjector});
     customElements.define('lib-accordion-element', accordion);
     const span = createCustomElement(SpanComponent, {injector});
     customElements.define('ui-span', span);
