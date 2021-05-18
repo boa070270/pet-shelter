@@ -7,7 +7,10 @@
  */
 
 /** Creates a deep clone of an element. */
-export function deepCloneNode(node: HTMLElement): HTMLElement {
+export function deepCloneNode(node: Node): Node {
+  if (node.nodeType !== Node.ELEMENT_NODE) {
+    return node.cloneNode(false);
+  }
   const clone = node.cloneNode(true) as HTMLElement;
   const descendantsWithId = clone.querySelectorAll('[id]');
   const nodeName = node.nodeName.toLowerCase();
@@ -25,14 +28,14 @@ export function deepCloneNode(node: HTMLElement): HTMLElement {
     transferInputData(node as HTMLInputElement, clone as HTMLInputElement);
   }
 
-  transferData('canvas', node, clone, transferCanvasData);
-  transferData('input, textarea, select', node, clone, transferInputData);
+  transferData('canvas', node as HTMLElement, clone, transferCanvasData);
+  transferData('input, textarea, select', node as HTMLElement, clone, transferInputData);
   return clone;
 }
 
 /** Matches elements between an element and its clone and allows for their data to be cloned. */
 function transferData<T extends Element>(selector: string, node: HTMLElement, clone: HTMLElement,
-                                         callback: (source: T, clone: T) => void) {
+                                         callback: (source: T, clone: T) => void): void {
   const descendantElements = node.querySelectorAll<T>(selector);
 
   if (descendantElements.length) {
@@ -49,7 +52,7 @@ let cloneUniqueId = 0;
 
 /** Transfers the data of one input element to another. */
 function transferInputData(source: Element & {value: string},
-                           clone: Element & {value: string; name: string; type: string}) {
+                           clone: Element & {value: string; name: string; type: string}): void {
   // Browsers throw an error when assigning the value of a file input programmatically.
   if (clone.type !== 'file') {
     clone.value = source.value;
@@ -64,7 +67,7 @@ function transferInputData(source: Element & {value: string},
 }
 
 /** Transfers the data of one canvas element to another. */
-function transferCanvasData(source: HTMLCanvasElement, clone: HTMLCanvasElement) {
+function transferCanvasData(source: HTMLCanvasElement, clone: HTMLCanvasElement): void {
   const context = clone.getContext('2d');
 
   if (context) {

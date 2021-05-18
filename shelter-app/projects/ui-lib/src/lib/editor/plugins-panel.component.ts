@@ -89,7 +89,7 @@ export class PluginsPanelComponent implements OnInit, AfterViewInit {
     this.createDragImage(result, e);
     this._previewRef = viewRef;
     removeNodes(viewRef);
-    return result;
+    return result as HTMLElement;
   }
   createDragImage(node: Node, e: DragEvent): void {
     const img = node.cloneNode(true) as HTMLElement;
