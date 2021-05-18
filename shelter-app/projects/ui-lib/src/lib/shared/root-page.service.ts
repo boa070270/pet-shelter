@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {ArrayDataSource} from './cdk-data-source';
-import {PeriodicElement} from '../controls';
+import {AccordionData, PeriodicElement} from '../controls';
 import {SwaggerNative, SwaggerObject, swaggerUI} from './swagger-object';
 import {RootPageService} from './services-api';
 
@@ -19,17 +19,20 @@ import {RootPageService} from './services-api';
 
 @Injectable()
 export class RootPageServiceImpl implements RootPageService {
+  accData: AccordionData[] = [{label: 'AAAAaaa', data: 'a data'}, {label: 'BBBBBbbbb', data: 'b data'}];
   private dbData = {
     'test-dynamic': {
       properties: {
         dataSource,
         ds1: dataSource.registerDS(),
         swagger: SWAGGER,
+        accData: this.accData
       },
       // html: '<table-element swagger="{{swagger}}" data-source="{{dataSource}}"></table-element>'
       // html: '<lib-card-element><lib-card-content>ASd asd</lib-card-content></lib-card-element>'
       // html: '<lib-tab-group-element><lib-card input="{{item.header}}"></lib-card></lib-tab-group-element>'
       html: '<lib-accordion-element ds="{{ds1}}"><ui-span txt="{{ds1.position}}"></ui-span></lib-accordion-element>'
+      // html: '<lib-accordion-element data="{{accData}}"></lib-accordion-element>'
     }
   };
 

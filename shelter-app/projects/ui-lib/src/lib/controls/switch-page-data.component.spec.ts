@@ -1,8 +1,8 @@
-import { SwitchPageDataComponent } from './switch-page-data.component';
+import { SwitchPageDataDirective } from './switch-page-data.directive';
 
 describe('PageDataDirective', () => {
   it('should create an instance', () => {
-    const directive = new SwitchPageDataComponent(null);
+    const directive = new SwitchPageDataDirective(null);
     expect(directive).toBeTruthy();
   });
 });

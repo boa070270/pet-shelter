@@ -54,10 +54,10 @@ import {CardActionsComponent} from './card/card-actions.component';
 import {PluginComponent} from './plugin.component';
 import {TabDirective, TabGroupComponent} from './content-display/tab-group.component';
 import {AccordionComponent} from './content-display/accordion.component';
-import {SwitchPageDataComponent} from './switch-page-data.component';
+import {SwitchPageDataDirective} from './switch-page-data.directive';
 import {SpanComponent} from './content-display/span.component';
 import {UiForOfDirective} from './ui-for-of.directive';
-import {AbstractIteratorComponent} from './abstract-iterator.component';
+import {AbstractIteratorComponent, IteratorDirective} from './abstract-iterator.component';
 
 @NgModule({
   declarations: [
@@ -101,10 +101,11 @@ import {AbstractIteratorComponent} from './abstract-iterator.component';
     PluginComponent,
     TabDirective, TabGroupComponent,
     AccordionComponent,
-    SwitchPageDataComponent,
+    SwitchPageDataDirective,
     SpanComponent,
     UiForOfDirective,
-    AbstractIteratorComponent
+    AbstractIteratorComponent,
+    IteratorDirective
   ],
     imports: [
         CommonModule,
@@ -156,10 +157,11 @@ import {AbstractIteratorComponent} from './abstract-iterator.component';
     PluginComponent,
     TabDirective, TabGroupComponent,
     AccordionComponent,
-    SwitchPageDataComponent,
+    SwitchPageDataDirective,
     SpanComponent,
     UiForOfDirective,
-    AbstractIteratorComponent
+    AbstractIteratorComponent,
+    IteratorDirective
   ]
 })
 export class ControlsModule {
