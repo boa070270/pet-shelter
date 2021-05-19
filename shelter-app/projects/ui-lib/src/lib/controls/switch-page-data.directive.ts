@@ -9,7 +9,7 @@ import {deepCloneNode} from "../editor/clone-node";
     {provide: ROOT_PAGE_DATA, useClass: RootPageServiceImpl}
   ]
 })
-export class SwitchPageDataComponent implements OnInit {
+export class SwitchPageDataDirective implements OnInit {
   @Input() data: any;
   @Input() prefix: string;
   @Input('index') index: number;
@@ -41,25 +41,3 @@ export class SwitchPageDataComponent implements OnInit {
     }
   }
 }
-// @Directive({
-//   selector: '[renderNgContent]'
-// })
-// // tslint:disable-next-line:directive-class-suffix
-// export class RenderNgContentDirective implements OnInit {
-//   constructor(private element: ElementRef,
-//               @Host() private iterator: IteratorDirective,
-//               @Inject(ROOT_PAGE_DATA) protected parentRoot: RootPageService) {
-//     console.log(iterator);
-//     console.log(this.iterator.projectableNodes);
-//     if (this.iterator.projectableNodes && this.iterator.projectableNodes.length > 0) {
-//       const e: HTMLElement = this.element.nativeElement;
-//       this.iterator.projectableNodes.forEach(
-//         a => a.forEach(n => e.appendChild(deepCloneNode(n as HTMLElement)))
-//       );
-//       console.log(e);
-//     }
-//   }
-//   ngOnInit(): void {
-//
-//   }
-// }

@@ -34,7 +34,11 @@ export interface AccordionData {
   styleUrls: ['./accordion.component.scss'],
 })
 export class AccordionComponent<T, U> extends AbstractIteratorComponent<T, U> implements OnInit, OnChanges, OnDestroy, AfterViewInit {
-  // @Input() data: T[] | ReadonlyArray<T> = null;
+  @Input()
+  data: T[] | ReadonlyArray<T>;
+  // set data(d: T[] | ReadonlyArray<T>) {
+  //   this._data = d;
+  // }
   @Input() label: string = '';
   @ViewChild(IteratorDirective, {static: true}) iterDirective: IteratorDirective;
   constructor(protected _view: ViewContainerRef,

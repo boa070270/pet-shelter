@@ -54,7 +54,7 @@ import {CardActionsComponent} from './card/card-actions.component';
 import {PluginComponent} from './plugin.component';
 import {TabDirective, TabGroupComponent} from './content-display/tab-group.component';
 import {AccordionComponent} from './content-display/accordion.component';
-import {SwitchPageDataComponent} from './switch-page-data.component';
+import {SwitchPageDataDirective} from './switch-page-data.directive';
 import {SpanComponent} from './content-display/span.component';
 import {UiForOfDirective} from './ui-for-of.directive';
 import {AbstractIteratorComponent, IteratorDirective} from './abstract-iterator.component';
@@ -101,7 +101,7 @@ import {AbstractIteratorComponent, IteratorDirective} from './abstract-iterator.
     PluginComponent,
     TabDirective, TabGroupComponent,
     AccordionComponent,
-    SwitchPageDataComponent,
+    SwitchPageDataDirective,
     SpanComponent,
     UiForOfDirective,
     AbstractIteratorComponent,
@@ -157,7 +157,7 @@ import {AbstractIteratorComponent, IteratorDirective} from './abstract-iterator.
     PluginComponent,
     TabDirective, TabGroupComponent,
     AccordionComponent,
-    SwitchPageDataComponent,
+    SwitchPageDataDirective,
     SpanComponent,
     UiForOfDirective,
     AbstractIteratorComponent,

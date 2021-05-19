@@ -37,7 +37,10 @@ export class AbstractIteratorComponent<T, U> extends AbstractComponent implement
   protected get __mark__(): string { return MARK; }
   @Input() ds: CdkDataSource<U, T>;
   prefix: string;
-  data: T[] | ReadonlyArray<T> = null;
+  protected data: T[] | ReadonlyArray<T>;
+  // get data(): T[] | ReadonlyArray<T> {
+  //   return this._data;
+  // }
   iteratorDirective: IteratorDirective;
   protected readonly collectionViewer;
   private dataSubs: Subscription;
@@ -54,13 +57,17 @@ export class AbstractIteratorComponent<T, U> extends AbstractComponent implement
   }
 
   ngOnInit(): void {
+    // if (this.iteratorDirective) {
     this.iteratorDirective.projectableNodes = this.projection;
-    const data = this.ds.connect(this.collectionViewer);
-    this.dataSubs = data.subscribe(d => {
-      this.data = d;
-      this.changeDetector.detectChanges();
-    });
-    this.collectionViewer.viewChange.emit(this.initListRange);
+    // }
+    if (this.ds) {
+      const data = this.ds.connect(this.collectionViewer);
+      this.dataSubs = data.subscribe(d => {
+        this.data = d;
+        this.changeDetector.detectChanges();
+      });
+      this.collectionViewer.viewChange.emit(this.initListRange);
+    }
   }
   ngOnChanges(changes: SimpleChanges): void {
     const v = changes.ds;

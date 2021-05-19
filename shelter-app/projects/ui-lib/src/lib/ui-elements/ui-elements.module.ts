@@ -69,7 +69,7 @@ export class UiElementsModule {
     customElements.define('lib-input-title', inputTitle);
     const card = createCustomElement(CardComponent, {injector});
     customElements.define('lib-card-element', card);
-    const tabGroup = createCustomElement(TabGroupComponent, {injector});
+    const tabGroup = createCustomElement(TabGroupComponent, {injector: replaceInjector});
     customElements.define('lib-tab-group-element', tabGroup);
     const accordion = createCustomElement(AccordionComponent, {injector: replaceInjector});
     customElements.define('lib-accordion-element', accordion);

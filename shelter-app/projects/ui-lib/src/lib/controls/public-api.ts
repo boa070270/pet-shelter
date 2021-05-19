@@ -35,7 +35,7 @@ export * from './card/card.component';
 export * from './card/card-actions.component';
 export * from './content-display/tab-group.component';
 export * from './content-display/accordion.component';
-export * from './switch-page-data.component';
+export * from './switch-page-data.directive';
 export * from './content-display/span.component';
 export * from './plugin.component';
 export * from './ui-for-of.directive';
