@@ -1,6 +1,6 @@
 import {Component, ElementRef, EventEmitter, OnInit, ViewChild} from '@angular/core';
 import {
-  AbstractDataSource,
+  AbstractDataSource, AccordionData,
   ArrayDataSource,
   DialogService, ExtendedData, SimpleDialogComponent,
   SwaggerArray,
@@ -34,12 +34,19 @@ import {Validators} from "@angular/forms";
 <!--      <lib-swagger-builder [swagger]="formSwagger"></lib-swagger-builder>-->
 <!--      <lib-swagger-form [swagger]="formSwagger"></lib-swagger-form>-->
 <!--      <button (click)="openDialog()"></button>-->
-      <lib-root-page></lib-root-page>
+<!--      <lib-root-page></lib-root-page>-->
+      <lib-accordion><lib-accordion-panel *ngFor="let data of d; index as i" [label]="data.label" [id]="i">
+        <span>{{data.data}}</span></lib-accordion-panel></lib-accordion>
     </div>
   `,
   styleUrls: ['./test-dynamic.component.sass']
 })
 export class TestDynamicComponent implements OnInit {
+  d: AccordionData[] = [
+    {label: 'Abc', data: 'ZXC'},
+    {label: 'qwe', data: 'fgh'},
+    {label: 'rty', data: 'vbn'}
+  ];
   textHtml: string;
   knownTexts = {
     a: '<span>Hello world!</span>',

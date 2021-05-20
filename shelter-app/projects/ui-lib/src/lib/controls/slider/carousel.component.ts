@@ -14,13 +14,14 @@ import {AbstractComponent} from '../abstract.component';
 import {SlideContainerDirective} from './slide-container.directive';
 import {ListRange} from '@angular/cdk/collections';
 import {Subscription} from 'rxjs';
+import {AbstractIteratorComponent, IteratorDirective} from "../abstract-iterator.component";
 
 
 @Component({
   selector: 'lib-carousel',
-  template: `<div class="slide-container" libSlideContainer>
-    <div libSlideElement *ngFor="let item of data" class="slide-element">
-      <ng-template [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{$implicit:item}"></ng-template>
+  template: `<div class="slide-container" libSlideContainer libIterator>
+    <div libSlideElement *ngFor="let item of data; index as i" class="slide-element">
+      <div switch-page-data [data]="item" [prefix]="prefix" [index]="i"></div>
     </div>
   </div>
   <button class="gm-chevron_left btn btn-left" (click)="slideContainer.prev()"></button>
@@ -28,38 +29,26 @@ import {Subscription} from 'rxjs';
   `,
   styleUrls: ['./carousel.component.scss']
 })
-export class CarouselComponent<T, U> extends AbstractComponent implements OnInit, OnDestroy {
+export class CarouselComponent<T, U> extends AbstractIteratorComponent<T, U> implements OnInit, OnDestroy {
   @Input() itemTemplate: TemplateRef<T>;
-  @Input() cdkDataSource: CdkDataSource<U, T>; // {{ds1}}
   @ViewChild(SlideContainerDirective, {static: true}) slideContainer: SlideContainerDirective;
-  private readonly collectionViewer;
-  data: T[] | ReadonlyArray<T> = null;
+  @ViewChild(IteratorDirective, {static: true}) iterDirective: IteratorDirective;
   start = 0;
   private cycle = 0;
-  private dataSubs: Subscription;
   private interval: Subscription;
   constructor(protected _view: ViewContainerRef,
               private intervalObserver: IntervalObservableService,
               protected changeDetector: ChangeDetectorRef) {
-    super(_view);
-    this.collectionViewer = {viewChange: new EventEmitter<ListRange>()};
+    super(_view, changeDetector);
     this.interval = this.intervalObserver.scheduler( () => this.updateData(), 10);
   }
   ngOnInit(): void {
-    const data = this.cdkDataSource.connect(this.collectionViewer);
-    this.dataSubs = data.subscribe(d => {
-      this.data = d;
-      this.changeDetector.detectChanges();
-    });
-    this.collectionViewer.viewChange.emit({start: this.start, end: this.start + 10});
+    this.iteratorDirective = this.iterDirective;
+    super.ngOnInit();
   }
   ngOnDestroy(): void {
-    super.ngOnDestroy();
     this.interval.unsubscribe();
-    if (this.dataSubs !== null) {
-      this.cdkDataSource.disconnect(this.collectionViewer);
-      this.dataSubs.unsubscribe();
-    }
+    super.ngOnDestroy();
     this.collectionViewer.viewChange.complete();
   }
 

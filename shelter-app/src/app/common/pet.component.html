@@ -3,7 +3,7 @@
     <table>
       <tr *ngFor="let item of petsData"><th>{{item.name}}</th><td>{{item.value}}</td></tr>
     </table>
-    <lib-carousel [datasource]="datasource" *ngIf="datasource" [itemTemplate]="tmplCarousel"
+    <lib-carousel [ds]="datasource" *ngIf="datasource" [itemTemplate]="tmplCarousel"
                     [showNumberItems]="2"></lib-carousel>
   </div>
 </div>

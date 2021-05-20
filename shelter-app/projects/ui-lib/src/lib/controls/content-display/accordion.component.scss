@@ -45,12 +45,13 @@ $border-color: #e0e0e0;
     display: inline-block;
     float: right;
     margin-right: 0.5em;
+    transform: rotate(180deg);
   }
 
   input[type=checkbox]:checked ~ &{
     border-bottom: 0;
     &:after{
-      transform: rotate(180deg);
+      transform: rotate(0);
     }
   }
 }

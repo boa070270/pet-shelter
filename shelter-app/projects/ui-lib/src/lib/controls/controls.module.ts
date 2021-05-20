@@ -49,11 +49,11 @@ import {
   CardImageDirective,
   CardSubtitleDirective,
   CardTitleDirective
-} from './card/card.component';
-import {CardActionsComponent} from './card/card-actions.component';
+} from './content-display/card.component';
+import {CardActionsComponent} from './content-display/card-actions.component';
 import {PluginComponent} from './plugin.component';
 import {TabDirective, TabGroupComponent} from './content-display/tab-group.component';
-import {AccordionComponent} from './content-display/accordion.component';
+import {AccordionComponent, AccordionDirective, AccordionPanelComponent} from './content-display/accordion.component';
 import {SwitchPageDataDirective} from './switch-page-data.directive';
 import {SpanComponent} from './content-display/span.component';
 import {UiForOfDirective} from './ui-for-of.directive';
@@ -106,6 +106,8 @@ import {AbstractIteratorComponent, IteratorDirective} from './abstract-iterator.
     UiForOfDirective,
     AbstractIteratorComponent,
     IteratorDirective,
+    AccordionDirective,
+    AccordionPanelComponent,
   ],
     imports: [
         CommonModule,
@@ -162,6 +164,8 @@ import {AbstractIteratorComponent, IteratorDirective} from './abstract-iterator.
     UiForOfDirective,
     AbstractIteratorComponent,
     IteratorDirective,
+    AccordionDirective,
+    AccordionPanelComponent,
   ]
 })
 export class ControlsModule {

@@ -13,7 +13,7 @@ import {
   SwaggerArrayComponent,
   SwaggerFormComponent,
   SwaggerNativeComponent, AppBarComponent, LinkComponent, CardComponent, CardContentDirective,
-  TabGroupComponent, AccordionComponent, SpanComponent
+  TabGroupComponent, AccordionComponent, SpanComponent, CarouselComponent
 } from '../controls';
 import { DynamicPageComponent } from './dynamic-page.component';
 import {createCustomElement} from '@angular/elements';
@@ -73,6 +73,8 @@ export class UiElementsModule {
     customElements.define('lib-tab-group-element', tabGroup);
     const accordion = createCustomElement(AccordionComponent, {injector: replaceInjector});
     customElements.define('lib-accordion-element', accordion);
+    const carousel = createCustomElement(CarouselComponent, {injector: replaceInjector});
+    customElements.define('lib-carousel-element', carousel);
     const span = createCustomElement(SpanComponent, {injector});
     customElements.define('ui-span', span);
 

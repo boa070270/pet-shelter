@@ -30,22 +30,24 @@ export class RootPageServiceImpl implements RootPageService {
       },
       // html: '<table-element swagger="{{swagger}}" data-source="{{dataSource}}"></table-element>'
       // html: '<lib-card-element><lib-card-content>ASd asd</lib-card-content></lib-card-element>'
-      html: `<lib-tab-group-element ds="{{ds1}}" label="{{name}}">
-                <lib-card-element><lib-card-content>
-                    <ui-span txt="{{ds1.position}}"></ui-span>
-                </lib-card-content></lib-card-element>
-             </lib-tab-group-element>`
-      // html: `<lib-accordion-element ds="{{ds1}}" label="{{name}}">
+      // html: `<lib-tab-group-element ds="{{ds1}}" label="{{name}}">
       //           <lib-card-element><lib-card-content>
-      //             <lib-card-element><lib-card-content>
       //               <ui-span txt="{{ds1.position}}"></ui-span>
-      //             </lib-card-content></lib-card-element>
-      //             <ui-span txt="{{ds1.weight}}"></ui-span>
-      //             <ui-span txt="{{ds1.symbol}}"></ui-span>
-      //             <ui-span txt="{{ds1.colA}}"></ui-span>
-      //             <ui-span txt="{{ds1.colB}}"></ui-span>
-      //             <ui-span txt="{{ds1.colC}}"></ui-span>
       //           </lib-card-content></lib-card-element>
+      //        </lib-tab-group-element>`
+      // html: `<lib-accordion-element ds="{{ds1}}" label="{{name}}">
+      html: `<lib-carousel-element ds="{{ds1}}">
+                <lib-card-element><lib-card-content>
+                  <lib-card-element><lib-card-content>
+                    <ui-span txt="{{ds1.position}}"></ui-span>
+                  </lib-card-content></lib-card-element>
+                  <ui-span txt="{{ds1.weight}}"></ui-span>
+                  <ui-span txt="{{ds1.symbol}}"></ui-span>
+                  <ui-span txt="{{ds1.colA}}"></ui-span>
+                  <ui-span txt="{{ds1.colB}}"></ui-span>
+                  <ui-span txt="{{ds1.colC}}"></ui-span>
+                </lib-card-content></lib-card-element>
+        </lib-carousel-element>`
       //         </lib-accordion-element>`
       // html: '<lib-accordion-element data="{{accData}}"></lib-accordion-element>'
     }
