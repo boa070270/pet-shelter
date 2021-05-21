@@ -34,10 +34,10 @@ import {Validators} from "@angular/forms";
 <!--      <lib-swagger-builder [swagger]="formSwagger"></lib-swagger-builder>-->
 <!--      <lib-swagger-form [swagger]="formSwagger"></lib-swagger-form>-->
 <!--      <button (click)="openDialog()"></button>-->
-<!--      <lib-root-page></lib-root-page>-->
+      <lib-root-page></lib-root-page>
 <!--      <lib-accordion><lib-accordion-panel *ngFor="let data of d; index as i" [label]="data.label" [id]="i">-->
 <!--        <span>{{data.data}}</span></lib-accordion-panel></lib-accordion>-->
-      <lib-tab-group [data]="d"></lib-tab-group>
+<!--      <lib-tab-group [data]="d"></lib-tab-group>-->
     </div>
   `,
   styleUrls: ['./test-dynamic.component.sass']

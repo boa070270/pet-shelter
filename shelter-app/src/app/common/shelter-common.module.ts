@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {PageComponent} from './page.component';
 import {PetComponent} from './pet.component';
 import {SafeHtmlPipe} from './safe-html.pipe';
-import {ControlsModule, DynamicHTMLModule, UiLibModule, } from 'ui-lib';
+import {ControlsModule, DynamicHTMLModule, } from 'ui-lib';
 import {CardPetComponent} from './card-pet.component';
 import {CardPageComponent} from './card-page.component';
 import {TabletPetComponent} from './tablet-pet.component';
@@ -41,7 +41,6 @@ import { VoteComponent } from './plugins/vote.component';
     ],
     imports: [
         CommonModule,
-        UiLibModule,
         DynamicHTMLModule,
         RouterModule,
         ControlsModule

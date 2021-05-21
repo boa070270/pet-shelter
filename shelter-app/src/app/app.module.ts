@@ -10,8 +10,7 @@ import {
   EXT_SYSTEM_LANG,
   LoggerModule,
   SharedModule,
-  UiElementsModule,
-  UiLibModule,
+  // UiElementsModule,
   UILoggerWriterToken,
   WysiwygModule
 } from 'ui-lib';
@@ -44,7 +43,6 @@ import {TestEditorComponent} from './test-editor.component';
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
-    UiLibModule,
     HttpClientModule,
     FormsModule,
     ScrollingModule,
@@ -52,7 +50,7 @@ import {TestEditorComponent} from './test-editor.component';
     ShelterCommonModule,
     SharedModule,
     ControlsModule,
-    UiElementsModule,
+    // UiElementsModule,
     LoggerModule,
     DialogServiceModule,
   ],

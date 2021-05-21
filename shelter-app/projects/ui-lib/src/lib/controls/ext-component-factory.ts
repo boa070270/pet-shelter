@@ -1,5 +1,5 @@
 import {ComponentFactory, ComponentFactoryResolver, Injectable, Injector, Type} from '@angular/core';
-import {AbstractIteratorComponent} from '../controls';
+import {AbstractIteratorComponent} from './abstract-iterator.component';
 
 @Injectable()
 export class ExtComponentFactory extends ComponentFactoryResolver {

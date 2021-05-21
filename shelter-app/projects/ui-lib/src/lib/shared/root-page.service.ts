@@ -38,7 +38,6 @@ export class RootPageServiceImpl implements RootPageService {
       // html: `<lib-accordion-element ds="{{ds1}}" label="{{name}}">
       html: `<lib-carousel-element ds="{{ds1}}">
                 <lib-card-element><lib-card-content>
-                  <lib-card-element><lib-card-content>
                     <ui-span txt="{{ds1.position}}"></ui-span>
                   </lib-card-content></lib-card-element>
                   <ui-span txt="{{ds1.weight}}"></ui-span>
@@ -47,8 +46,9 @@ export class RootPageServiceImpl implements RootPageService {
                   <ui-span txt="{{ds1.colB}}"></ui-span>
                   <ui-span txt="{{ds1.colC}}"></ui-span>
                 </lib-card-content></lib-card-element>
-        </lib-carousel-element>`
-      //         </lib-accordion-element>`
+             </lib-carousel-element>`
+
+      // </lib-accordion-element>`
       // html: '<lib-accordion-element data="{{accData}}"></lib-accordion-element>'
     }
   };

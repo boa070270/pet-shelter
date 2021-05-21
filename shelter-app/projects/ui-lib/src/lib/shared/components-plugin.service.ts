@@ -1,6 +1,12 @@
-import {Injectable, Type} from '@angular/core';
+import {Injectable, Injector, Type} from '@angular/core';
 import {SwaggerObject} from './swagger-object';
 import {TitleType} from './language';
+import {createCustomElement} from "@angular/elements";
+
+export interface CustomElementDescription {
+  selectorName: string;
+  injector: Injector;
+}
 
 export interface PluginDescription {
   selectorName?: string; // this field is set by system
@@ -13,8 +19,9 @@ export interface PluginDescription {
 }
 export interface ComponentPlugin {
   component: Type<any>;
-  schema: SwaggerObject; // describes form that will displayed in editor to collect need parameters
+  schema?: SwaggerObject; // describes form that will displayed in editor to collect need parameters
   description?: PluginDescription;
+  customElement?: CustomElementDescription;
 }
 @Injectable({
   providedIn: 'root'
@@ -24,8 +31,16 @@ export class ComponentsPluginService {
 
   constructor() { }
 
-  addPlugin(selectorName: string, plugin: ComponentPlugin): void {
-    this.plugins[selectorName] = plugin;
+  addPlugin(selectorNames: string[], plugin: ComponentPlugin): void {
+    selectorNames.forEach(selectorName => {
+      this.plugins[selectorName] = plugin;
+    });
+
+    if (plugin.customElement) {
+      const ce = plugin.customElement;
+      const component = createCustomElement(plugin.component, {injector: ce.injector});
+      customElements.define(ce.selectorName, component);
+    }
   }
 
   getPlugin(selectorName: string): ComponentPlugin {
