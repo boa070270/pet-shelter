@@ -23,30 +23,23 @@ export interface TabType {
   selector: 'lib-tab-group',
   template: `
     <div class="tab-group" libIterator>
-      <ng-container></ng-container>
       <div class="group-header" #buttons>
         <button *ngFor="let tab of data; index as i" (click)="changeTab(tab, i)"
                 [ngClass]="{'tab-chosen' : chosen === i}">{{(tab[label]) ? tab[label] : label}}</button>
       </div>
       <div *ngIf="tabContent.children.length === 0">{{tabData}}</div>
       <div class="group-content" #tabContent>
-<!--        <ng-content></ng-content>-->
+        <ng-content></ng-content>
       </div>
     </div>`,
-  styleUrls: ['./tab-group.component.scss'],
-  // providers: [
-  //   {provide: ROOT_PAGE_DATA, useClass: RootPageServiceImpl}
-  // ]
+  styleUrls: ['./tab-group.component.scss']
 })
 export class TabGroupComponent<T extends TabType> extends AbstractIteratorComponent<any, any> implements OnInit, AfterViewInit, OnChanges {
 
   @Input()
   data: T[] | ReadonlyArray<T>;
-  // set data(d: T[] | ReadonlyArray<T>) {
-  //   this._data = d;
-  // }
   @Input() label: string = 'label';
-  @ViewChild('tabContent') tabElements: ElementRef<HTMLDivElement>;
+  @ViewChild('tabContent', {static: true}) tabElements: ElementRef<HTMLDivElement>;
   @ViewChild(IteratorDirective, {static: true}) iterDirective: IteratorDirective;
   get tabsEl(): NodeListOf<HTMLElement> {
     return this.tabElements.nativeElement.querySelectorAll('lib-tab');
@@ -68,7 +61,7 @@ export class TabGroupComponent<T extends TabType> extends AbstractIteratorCompon
       this.setData();
       this.drawChildren();
     } else if (this.data) {
-      if (this.tabElements.nativeElement.children.length === 0) {
+      if (this.tabElements.nativeElement.children.length !== 0) {
         this.setData();
       } else {
         this.tabData = this.data[0].data;
@@ -105,11 +98,11 @@ export class TabGroupComponent<T extends TabType> extends AbstractIteratorCompon
 
   changeTab(tab: TabType, index: number): void {
     this.chosen = index;
-    if (this.data) {
+    if (tab.data) {
+      this.tabData = tab.data;
+    } else if (this.data) {
       this.setData();
       this.drawChildren();
-    } else if (tab.data) {
-      this.tabData = tab.data;
     } else {
       this.tabsEl.forEach(e => {
         e.hidden = e.attributes.getNamedItem('_id').value !== index + '';

@@ -1,5 +1,5 @@
 import {Injectable, NgZone, OnDestroy} from '@angular/core';
-import {VisibilityChangeService} from '../visibility-change.service';
+import {VisibilityChangeService} from './visibility-change.service';
 import {Observable, Subject, Subscription} from 'rxjs';
 
 @Injectable({

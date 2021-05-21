@@ -1,5 +1,5 @@
 import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
-import {DialogService} from './dialog-service';
+import {DialogService} from '../../dialog-service';
 import {ShowMediaValueComponent} from './show-media-value.component';
 
 export interface ShowMediaType {

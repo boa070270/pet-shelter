@@ -12,7 +12,7 @@ import {
   GeneratorFormComponent,
   SwaggerArrayComponent,
   SwaggerFormComponent,
-  SwaggerNativeComponent, AppBarComponent, LinkComponent, CardComponent, CardContentDirective,
+  SwaggerNativeComponent, AppBarComponent, LinkComponent, CardComponent,
   TabGroupComponent, AccordionComponent, SpanComponent, CarouselComponent
 } from '../controls';
 import { DynamicPageComponent } from './dynamic-page.component';

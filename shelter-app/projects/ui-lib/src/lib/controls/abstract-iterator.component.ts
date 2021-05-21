@@ -37,10 +37,8 @@ export class AbstractIteratorComponent<T, U> extends AbstractComponent implement
   protected get __mark__(): string { return MARK; }
   @Input() ds: CdkDataSource<U, T>;
   prefix: string;
+  @Input()
   data: T[] | ReadonlyArray<T>;
-  // get data(): T[] | ReadonlyArray<T> {
-  //   return this._data;
-  // }
   iteratorDirective: IteratorDirective;
   protected readonly collectionViewer;
   private dataSubs: Subscription;

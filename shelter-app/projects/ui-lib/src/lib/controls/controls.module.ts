@@ -58,6 +58,12 @@ import {SwitchPageDataDirective} from './switch-page-data.directive';
 import {SpanComponent} from './content-display/span.component';
 import {UiForOfDirective} from './ui-for-of.directive';
 import {AbstractIteratorComponent, IteratorDirective} from './abstract-iterator.component';
+import {ShowMediaValueComponent} from './media/show-media-value.component';
+import {ShowValueComponent} from './media/show-value.component';
+import {EndPageComponent} from './end-page.component';
+import {IsVisibleDirective} from './is-visible.directive';
+import {MasonryListComponent} from './content-display/masonry-list.component';
+import {AdvertComponent} from './content-display/advert.component';
 
 @NgModule({
   declarations: [
@@ -108,6 +114,12 @@ import {AbstractIteratorComponent, IteratorDirective} from './abstract-iterator.
     IteratorDirective,
     AccordionDirective,
     AccordionPanelComponent,
+    ShowMediaValueComponent,
+    ShowValueComponent,
+    EndPageComponent,
+    IsVisibleDirective,
+    MasonryListComponent,
+    AdvertComponent,
   ],
     imports: [
         CommonModule,
@@ -166,6 +178,12 @@ import {AbstractIteratorComponent, IteratorDirective} from './abstract-iterator.
     IteratorDirective,
     AccordionDirective,
     AccordionPanelComponent,
+    ShowMediaValueComponent,
+    ShowValueComponent,
+    EndPageComponent,
+    IsVisibleDirective,
+    MasonryListComponent,
+    AdvertComponent,
   ]
 })
 export class ControlsModule {

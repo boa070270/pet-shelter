@@ -1,6 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {TitleType} from "./shared";
-import {CardActions} from "./controls/content-display/card-actions.component";
+import {CardActions} from '../index';
 
 @Component({
   selector: 'lib-advert',

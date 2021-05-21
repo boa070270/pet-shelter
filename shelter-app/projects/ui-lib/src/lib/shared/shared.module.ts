@@ -5,16 +5,19 @@ import {BROWSER_STORAGE, ROOT_PAGE_DATA, SYSTEM_LANG_TOKEN} from './services-api
 import {SystemLangImpl} from './system-lang.service';
 import {BrowserStorageService} from './storage.service';
 import {RootPageServiceImpl} from './root-page.service';
+import {PlainHtmlPipe} from "./pipes/plain-html.pipe";
 
 @NgModule({
   declarations: [
     RootPageComponent,
+    PlainHtmlPipe,
   ],
   imports: [
     CommonModule
   ],
   exports: [
     RootPageComponent,
+    PlainHtmlPipe,
   ],
   providers: [
     {provide: SYSTEM_LANG_TOKEN, useClass: SystemLangImpl},
