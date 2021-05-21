@@ -196,52 +196,52 @@ export class ControlsModule {
       {provide: ComponentFactoryResolver, useValue: new ExtComponentFactory(injector)}
     ]});
 
-    componentsPlugin.addPlugin(['lib-boolean-control', 'boolean'], {component: BooleanControlComponent, schema: null,
-      customElement: {selectorName: 'lib-boolean-element', injector}});
+    componentsPlugin.addPlugin(['lib-boolean-control'], {component: BooleanControlComponent, schema: null,
+      customElement: {selectorName: 'ui-boolean', injector}});
     componentsPlugin.addPlugin(['lib-checkbox-control'],
       {
         component: CheckboxControlComponent,
         schema: new SwaggerObject([], {value: SwaggerNative.asString()}),
-        customElement: {selectorName: 'lib-checkbox-element', injector}
+        customElement: {selectorName: 'ui-checkbox', injector}
       });
     componentsPlugin.addPlugin(['checkbox'], {component: CheckboxControlComponent, schema: null});
-    componentsPlugin.addPlugin(['lib-input-control', 'input'], {component: InputControlComponent, schema: null,
-      customElement: {selectorName: 'lib-input-element', injector}});
-    componentsPlugin.addPlugin(['lib-list-builder', 'list-builder'], {component: ListBuilderComponent, schema: null});
-    componentsPlugin.addPlugin(['lib-list-select', 'list-select'], {component: ListSelectComponent, schema: null});
-    componentsPlugin.addPlugin(['lib-radio-control', 'radio'], {component: RadioControlComponent, schema: null,
-      customElement: {selectorName: 'lib-radio-element', injector}});
-    componentsPlugin.addPlugin(['lib-select-control', 'select'], {component: SelectControlComponent, schema: null,
-      customElement: {selectorName: 'lib-select-element', injector}});
-    componentsPlugin.addPlugin(['lib-title-type-control', 'title-type'], {component: TitleTypeControlComponent, schema: null,
-      customElement: {selectorName: 'lib-input-title', injector}});
+    componentsPlugin.addPlugin(['lib-input-control'], {component: InputControlComponent, schema: null,
+      customElement: {selectorName: 'ui-input', injector}});
+    componentsPlugin.addPlugin(['lib-list-builder'], {component: ListBuilderComponent, schema: null});
+    componentsPlugin.addPlugin(['lib-list-select'], {component: ListSelectComponent, schema: null});
+    componentsPlugin.addPlugin(['lib-radio-control'], {component: RadioControlComponent, schema: null,
+      customElement: {selectorName: 'ui-radio', injector}});
+    componentsPlugin.addPlugin(['lib-select-control'], {component: SelectControlComponent, schema: null,
+      customElement: {selectorName: 'ui-select', injector}});
+    componentsPlugin.addPlugin(['lib-title-type-control'], {component: TitleTypeControlComponent, schema: null,
+      customElement: {selectorName: 'ui-input', injector}});
     componentsPlugin.addPlugin(['lib-table'], {component: TableComponent, schema: null,
-      customElement: {selectorName: 'table-element', injector}});
+      customElement: {selectorName: 'ui-table', injector}});
     componentsPlugin.addPlugin(['lib-upload-files'], {component: UploadFilesComponent, schema: null});
-    componentsPlugin.addPlugin(['simple-dialog'], {component: SimpleDialogComponent, schema: null});
-    componentsPlugin.addPlugin(['snake-bar'], {component: SnakeBarComponent, schema: null});
-    componentsPlugin.addPlugin(['app-bar'], {component: AppBarComponent, schema: null,
+    componentsPlugin.addPlugin(['lib-simple-dialog'], {component: SimpleDialogComponent, schema: null});
+    componentsPlugin.addPlugin(['lib-snake-bar'], {component: SnakeBarComponent, schema: null});
+    componentsPlugin.addPlugin(['lib-app-bar'], {component: AppBarComponent, schema: null,
       customElement: {selectorName: 'app-bar', injector}});
-    componentsPlugin.addPlugin(['editable-list'], {component: EditableListComponent, schema: null});
+    componentsPlugin.addPlugin(['lib-editable-list'], {component: EditableListComponent, schema: null});
 
     componentsPlugin.addPlugin([], {component: SwaggerFormComponent,
-      customElement: {selectorName: 'lib-swagger-form-element', injector}});
+      customElement: {selectorName: 'ui-swagger-form', injector}});
     componentsPlugin.addPlugin([], {component: GeneratorFormComponent,
-      customElement: {selectorName: 'lib-generator-form-element', injector}});
+      customElement: {selectorName: 'ui-generator-form', injector}});
     componentsPlugin.addPlugin([], {component: SwaggerArrayComponent,
-      customElement: {selectorName: 'lib-swagger-array-element', injector}});
+      customElement: {selectorName: 'ui-swagger-array', injector}});
     componentsPlugin.addPlugin([], {component: SwaggerNativeComponent,
-      customElement: {selectorName: 'lib-swagger-native-element', injector}});
+      customElement: {selectorName: 'ui-swagger-native', injector}});
     componentsPlugin.addPlugin([], {component: LinkComponent,
-      customElement: {selectorName: 'lib-link', injector}});
+      customElement: {selectorName: 'ui-link', injector}});
     componentsPlugin.addPlugin([], {component: CardComponent,
-      customElement: {selectorName: 'lib-card-element', injector}});
+      customElement: {selectorName: 'ui-card', injector}});
     componentsPlugin.addPlugin([], {component: TabGroupComponent,
-      customElement: {selectorName: 'lib-tab-group-element', injector: replaceInjector}});
+      customElement: {selectorName: 'ui-tab-group', injector: replaceInjector}});
     componentsPlugin.addPlugin([], {component: AccordionComponent,
-      customElement: {selectorName: 'lib-accordion-element', injector: replaceInjector}});
+      customElement: {selectorName: 'ui-accordion', injector: replaceInjector}});
     componentsPlugin.addPlugin([], {component: CarouselComponent,
-      customElement: {selectorName: 'lib-carousel-element', injector: replaceInjector}});
+      customElement: {selectorName: 'ui-carousel', injector: replaceInjector}});
     componentsPlugin.addPlugin([], {component: SpanComponent,
       customElement: {selectorName: 'ui-span', injector}});
   }
