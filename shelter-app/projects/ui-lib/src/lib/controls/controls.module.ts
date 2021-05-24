@@ -214,7 +214,7 @@ export class ControlsModule {
     componentsPlugin.addPlugin(['lib-select-control'], {component: SelectControlComponent, schema: null,
       customElement: {selectorName: 'ui-select', injector}});
     componentsPlugin.addPlugin(['lib-title-type-control'], {component: TitleTypeControlComponent, schema: null,
-      customElement: {selectorName: 'ui-input', injector}});
+      customElement: {selectorName: 'ui-title-type', injector}});
     componentsPlugin.addPlugin(['lib-table'], {component: TableComponent, schema: null,
       customElement: {selectorName: 'ui-table', injector}});
     componentsPlugin.addPlugin(['lib-upload-files'], {component: UploadFilesComponent, schema: null});
