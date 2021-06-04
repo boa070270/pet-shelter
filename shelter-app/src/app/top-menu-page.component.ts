@@ -272,8 +272,8 @@ export class TopMenuPageComponent implements OnInit {
     extData.swagger = new SwaggerObject(
       ['login', 'password'],
       {
-        login: SwaggerNative.asString('input', null, swaggerUI([{lang: 'en', title: 'Login'}, {lang: 'uk', title: 'Логін'}])),
-        password: SwaggerNative.asString('input', {format: 'password'}, swaggerUI([{lang: 'en', title: 'Password'}, {lang: 'uk', title: 'Пароль'}])),
+        login: SwaggerNative.asString('lib-input-control', null, swaggerUI([{lang: 'en', title: 'Login'}, {lang: 'uk', title: 'Логін'}])),
+        password: SwaggerNative.asString('lib-input-control', {format: 'password'}, swaggerUI([{lang: 'en', title: 'Password'}, {lang: 'uk', title: 'Пароль'}])),
       },
     null,
       ['login', 'password']);

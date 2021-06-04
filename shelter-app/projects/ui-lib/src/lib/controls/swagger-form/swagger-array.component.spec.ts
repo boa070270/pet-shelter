@@ -35,7 +35,7 @@ describe('TableControlComponent', () => {
       component.swagger = new SwaggerArray(SwaggerNative.asString());
       fixture.detectChanges();
       expect(component.controlType).toBe('native');
-      expect(component.items.constrictions.control).toBe('input');
+      expect(component.items.constrictions.control).toBe('lib-input-control');
       expect((component.items as SwaggerNative).type).toBe('string');
     });
 

@@ -11,6 +11,7 @@ import {PageTableComponent} from './page-table.component';
 import {UserTableComponent} from './user-table.component';
 import { AdminComponent } from './admin.component';
 import {AuthGuard} from '../auth.guard';
+import {DsComponent} from "./ds.component";
 
 const routes: Routes = [
   {path: 'lang-table', component: LangTableComponent, canActivate: [AuthGuard]},
@@ -21,6 +22,7 @@ const routes: Routes = [
   {path: 'banners-table', component: BannersTableComponent, canActivate: [AuthGuard]},
   {path: 'page-table', component: PageTableComponent, canActivate: [AuthGuard]},
   {path: 'user-table', component: UserTableComponent, canActivate: [AuthGuard]},
+  {path: 'ds', component: DsComponent, canActivate: [AuthGuard]},
   { path: '', component: AdminComponent }
   ];
 

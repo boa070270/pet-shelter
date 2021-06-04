@@ -165,9 +165,9 @@ export abstract class SwaggerNative extends SwaggerSchema {
       this._constrain.control = controlType;
     } else {
       if (this.constrictions.enum) {
-        this._constrain.control = this.constrictions.enum.length < 4 ? 'radio' : 'select';
+        this._constrain.control = this.constrictions.enum.length < 4 ? 'lib-radio' : 'lib-select';
       } else {
-        this._constrain.control = 'input';
+        this._constrain.control = 'lib-input-control';
       }
     }
   }

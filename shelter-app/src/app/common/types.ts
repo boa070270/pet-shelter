@@ -247,6 +247,7 @@ export const AdminMenu: MenusAndTitlesType = {
     {path: 'banners-table', component: 'BannersTableComponent', role: 'admin', parentId: 'admin', position: 0},
     {path: 'page-table', component: 'PageTableComponent', role: 'admin,writer', parentId: 'admin', position: 0},
     {path: 'user-table', component: 'UserTableComponent', role: 'admin', parentId: 'admin', position: 0},
+    {path: 'ds', component: 'DsComponent', role: 'admin', parentId: 'admin', position: 0},
   ],
   titles: [
     {id: 'lang-table', lang: 'en', title: 'Settings Language'},

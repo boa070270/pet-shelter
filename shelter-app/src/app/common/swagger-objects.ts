@@ -17,7 +17,7 @@ export const SwaggerLanguageType = new SwaggerObject(
   ['lang', 'displayName', 'rate'],
   {
     lang: SwaggerNative.asString(
-      'input',
+      'lib-input-control',
       {minLength: 2, maxLength: 6, immutable: true},
       swaggerUI(
         I18N_LANG.lang_caption,
@@ -27,7 +27,7 @@ export const SwaggerLanguageType = new SwaggerObject(
       )
     ),
     displayName: SwaggerNative.asString(
-      'input',
+      'lib-input-control',
       {minLength: 3, maxLength: 16},
       swaggerUI(
         I18N_LANG.displayName_caption,
@@ -37,7 +37,7 @@ export const SwaggerLanguageType = new SwaggerObject(
       )
     ),
     rate: SwaggerNative.asInteger(
-      'input',
+      'lib-input-control',
       {minimum: 0, maximum: 99},
       swaggerUI(
         I18N_LANG.rate_caption,

@@ -190,7 +190,8 @@ import {ExtComponentFactory} from "./ext-component-factory";
 export class ControlsModule {
   constructor(componentsPlugin: ComponentsPluginService, @Optional() @SkipSelf() parentModule: ControlsModule, injector: Injector) {
     if (parentModule) {
-      throw new Error('ControlsModule is already loaded');
+      // throw new Error('ControlsModule is already loaded');
+      return;
     }
     const replaceInjector = Injector.create({parent: injector, providers: [
       {provide: ComponentFactoryResolver, useValue: new ExtComponentFactory(injector)}
@@ -204,7 +205,7 @@ export class ControlsModule {
         schema: new SwaggerObject([], {value: SwaggerNative.asString()}),
         customElement: {selectorName: 'ui-checkbox', injector}
       });
-    componentsPlugin.addPlugin(['checkbox'], {component: CheckboxControlComponent, schema: null});
+    componentsPlugin.addPlugin(['lib-checkbox'], {component: CheckboxControlComponent, schema: null});
     componentsPlugin.addPlugin(['lib-input-control'], {component: InputControlComponent, schema: null,
       customElement: {selectorName: 'ui-input', injector}});
     componentsPlugin.addPlugin(['lib-list-builder'], {component: ListBuilderComponent, schema: null});

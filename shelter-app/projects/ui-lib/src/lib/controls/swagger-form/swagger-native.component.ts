@@ -102,7 +102,7 @@ export class SwaggerNativeComponent extends BaseSwaggerComponent implements OnIn
           componentName = this.constrictions.enum.length < 4 ? 'radio' : 'select';
         }
         if (swagger.type === 'string' || swagger.type === 'number' || swagger.type === 'integer') {
-          componentName = 'input';
+          componentName = 'lib-input-control';
         }
       }
       const component = this.componentsPlugin.getPlugin(componentName);

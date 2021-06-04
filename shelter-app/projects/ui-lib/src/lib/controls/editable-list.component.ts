@@ -60,7 +60,7 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
     if (this._swagger) {
       return this._swagger;
     }
-    return SwaggerNative.asString('input', null,
+    return SwaggerNative.asString('lib-input-control', null,
       swaggerUI([{lang: 'en', title: 'Value'}, {lang: 'uk', title: 'Значення елементу'}]));
   }
   @Input()
