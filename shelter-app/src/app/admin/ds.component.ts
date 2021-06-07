@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import {FieldTypeUI, SwaggerFieldType} from '../common';
 import {AbstractDataSource} from 'ui-lib';
-import {DsDatasource, DsType} from './ds.service';
-import {DataSources} from "../datasources";
-import {SwaggerArray, SwaggerNative, SwaggerObject} from "../../../projects/ui-lib/src/lib/shared";
+import {DsType} from './ds.service';
+import {DataSources} from '../datasources';
+import {SwaggerArray, SwaggerNative, SwaggerObject} from '../../../projects/ui-lib/src/lib/shared';
 
 @Component({
   selector: 'app-ds',
@@ -15,21 +15,22 @@ import {SwaggerArray, SwaggerNative, SwaggerObject} from "../../../projects/ui-l
 export class DsComponent {
   dataSource: AbstractDataSource<DsType>;
   swagger = new SwaggerObject(
-    ['ds', 'fields'],
+    ['ds', 'description', 'fields'],
     {
-      ds: SwaggerNative.asString(),
+      ds: SwaggerNative.asString(undefined, {maxLength: 16, minLength: 1}),
+      description: SwaggerNative.asString(),
       fields: new SwaggerArray(new SwaggerObject(
         ['field', 'pk', 'type'],
         {
           field: SwaggerNative.asString(
             undefined,
-            {minLength: 1, maxLength: 10}),
+            {minLength: 1, maxLength: 16}),
           pk: SwaggerNative.asBoolean(),
           type: SwaggerNative.asString(
-            undefined,
-            { enum: [ 'number', 'string', 'date']})
-        }), {control: 'lib-editable-list'})
-    }
+            'lib-select-control',
+            {enum: ['number', 'string', 'date']})
+        }, undefined, ['field', 'type']), {control: 'lib-editable-list'})
+    }, undefined, ['ds']
   );
 
   constructor(datasources: DataSources) {

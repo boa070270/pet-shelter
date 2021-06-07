@@ -102,7 +102,7 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
             itemType: SwaggerNative.asString(null, {enum: ['SwaggerNative', 'SwaggerObject']}),
             nativeType: SwaggerNative.asString(null,
               {enum: ['string', 'number', 'integer', 'boolean']}),
-            objectLink: SwaggerNative.asString('select', {enum: this.objectLink.array}),
+            objectLink: SwaggerNative.asString('lib-select-control', {enum: this.objectLink.array}),
 
             constriction: new SwaggerObject(
               ['isConstriction', 'control', 'validators', 'asyncValidator', 'isArrayConstrictions',
@@ -135,7 +135,7 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
                 enumDescriptions: new SwaggerObject(
                   ['enumDescriptionsType', 'keyDescriptions', 'titleTypeDescriptions'],
                   {
-                    enumDescriptionsType: SwaggerNative.asString('select',
+                    enumDescriptionsType: SwaggerNative.asString('lib-select-control',
                       {enum: ['key-value', 'TitleType']}),
                     keyDescriptions: new SwaggerArray(new SwaggerObject(
                       ['key', 'value'],
@@ -164,7 +164,7 @@ export class SwaggerBuilderComponent extends BaseComponent implements OnInit, On
                 enumTooltips: new SwaggerObject(
                   ['enumTooltipsType', 'stringArray', 'titleTypeArray'],
                   {
-                    enumTooltipsType: SwaggerNative.asString('select',
+                    enumTooltipsType: SwaggerNative.asString('lib-select-control',
                       {enum: ['string', 'TitleType']}),
                     stringArray: new SwaggerArray(SwaggerNative.asString()),
                     titleTypeArray: new SwaggerArray(new SwaggerObject(
@@ -429,7 +429,7 @@ function stringOrArrayTitle(property: string): SwaggerObject {
   const str = property + 'String';
   const tt = property + 'TitleType';
   const properties: {[key: string]: any} = {};
-  properties[property] = SwaggerNative.asString('select', {enum: ['string', 'TitleType']});
+  properties[property] = SwaggerNative.asString('lib-select-control', {enum: ['string', 'TitleType']});
   properties[str] = SwaggerNative.asString();
   properties[tt] = new SwaggerArray(new SwaggerObject(
     ['id', 'lang', 'title'],

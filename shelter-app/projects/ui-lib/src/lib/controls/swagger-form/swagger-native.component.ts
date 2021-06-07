@@ -99,7 +99,7 @@ export class SwaggerNativeComponent extends BaseSwaggerComponent implements OnIn
       let componentName = swagger.controlType;
       if (!componentName) { // TODO componentName is defined always
         if (this.constrictions.enum) {
-          componentName = this.constrictions.enum.length < 4 ? 'radio' : 'select';
+          componentName = this.constrictions.enum.length < 4 ? 'lib-radio-control' : 'lib-select-control';
         }
         if (swagger.type === 'string' || swagger.type === 'number' || swagger.type === 'integer') {
           componentName = 'lib-input-control';

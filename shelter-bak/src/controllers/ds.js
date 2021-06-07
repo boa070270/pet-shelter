@@ -54,7 +54,7 @@ module.exports = {
         try {
             const ds = req.swagger.params.ds.value;
             log.debug('controller addDs', ds);
-            const id = await dsDb.addDs(ds.name, ds.description, ds.fields);
+            const id = await dsDb.addDs(ds.ds, ds.description, ds.fields);
             writeResponse(res, {id}, req);
         } catch (err) {
             log.error(err);

@@ -611,7 +611,7 @@ export class BasicService implements ObtainSystemLanguage, OnDestroy {
   }
   getDsFields(name): Observable<HttpResponse<Response<DsType>>> {
     this.logger.debug('getDsFields');
-    return this.http.get<HttpResponse<Response<DsType>>>(API_URL + `/ds-fields?name=${name}`, this.httpOptions(true)).pipe(
+    return this.http.get<HttpResponse<Response<DsType>>>(API_URL + `/ds-fields/${name}`, this.httpOptions(true)).pipe(
       tap(r => this.setClientId(r.headers.get('x-client-id')))
     );
   }
@@ -629,7 +629,7 @@ export class BasicService implements ObtainSystemLanguage, OnDestroy {
   }
   deleteDs(name): Observable<HttpResponse<IdResponse>> {
     this.logger.debug('deleteDs');
-    return this.http.get<HttpResponse<IdResponse>>(API_URL + `/ds?name=${name}`, this.httpOptions(true)).pipe(
+    return this.http.delete<HttpResponse<IdResponse>>(API_URL + `/ds/${name}`, this.httpOptions(true)).pipe(
       tap(r => this.setClientId(r.headers.get('x-client-id')))
     );
   }

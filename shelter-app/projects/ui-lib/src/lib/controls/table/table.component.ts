@@ -238,7 +238,7 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
   tableSettings(): void {
     const extDate = ExtendedData.create({columns: this.displayedColumns}, false,
       new SwaggerObject(['columns'],
-        { columns: SwaggerNative.asString('list-builder', {enum: Object.keys(this.swagger.properties)})}), // TODO!!!
+        { columns: SwaggerNative.asString('lib-list-builder', {enum: Object.keys(this.swagger.properties)})}), // TODO!!!
       'save_cancel', '');
     const dialogRef = this.dialogService.infoExtDialog(extDate, true);
     dialogRef.afterClosed().subscribe(v => {

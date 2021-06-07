@@ -38,14 +38,14 @@ class Waste {
           result.ui.disabled = true;
         }
         if (!native.constrictions.enum) {
-          result.ui.control = native.constrictions.enum.length <= 4 ? 'radio' : 'select';
+          result.ui.control = native.constrictions.enum.length <= 4 ? 'lib-radio-control' : 'lib-select-control';
           result.ui.options = native.constrictions.enum;
         }
         result.ui.controlDefault = native.constrictions.default || null;
       }
       if (!result.ui.control) {
         if (native.type === 'boolean') {
-          result.ui.control = 'boolean';
+          result.ui.control = 'lib-boolean-control';
           result.ui.disabled = true;
         } else if (native.type === 'string') {
           const constriction = native.constrictions as StringConstrictions;

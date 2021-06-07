@@ -1820,7 +1820,7 @@ paths:
                     description: Internal server error
                     schema:
                         $ref: '#/definitions/StatusType'
-        post:
+        put:
             summary: add ds
             operationId: addDs
             tags:
@@ -2506,7 +2506,7 @@ definitions:
     DsType:
         type: object
         properties:
-            name:
+            ds:
                 type: string
             description:
                 type: object

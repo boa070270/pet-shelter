@@ -324,7 +324,7 @@ export class SwaggerObject extends SwaggerSchema {
 
 export class SwaggerNativeBoolean extends SwaggerNative {
   constructor(controlType?: string, constraints?: NativeConstrictions, ui?: SwaggerUI) {
-    super(controlType || 'boolean', constraints, ui);
+    super(controlType || 'lib-boolean-control', constraints, ui);
     this._type = 'boolean';
   }
   // assume that false < true
