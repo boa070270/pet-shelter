@@ -1938,6 +1938,131 @@ paths:
                     description: Internal server error
                     schema:
                         $ref: '#/definitions/StatusType'
+    /ds-data:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
+        x-swagger-router-controller: ds
+        put:
+            summary: add ds data
+            operationId: addDsData
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: body
+                    name: ds
+                    description: ds info with fields
+                    schema:
+                        $ref: '#/definitions/DsData'
+            responses:
+                200:
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        post:
+            summary: update ds data
+            operationId: updateDsData
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: body
+                    name: ds
+                    description: ds info with fields
+                    schema:
+                        $ref: '#/definitions/DsDataUpd'
+            responses:
+                200:
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        delete:
+            summary: delete ds
+            operationId: deleteDsData
+            tags:
+                - maintain
+            security:
+                - BasicAuth: [ ]
+                - ApiKeyAuth: [ ]
+                - OAuth2: [ admin, writer ]
+            produces:
+                - application/json
+            parameters:
+                - in: body
+                  name: ds
+                  required: true
+                  description: ds filter
+                  schema:
+                      $ref: '#/definitions/DsDataFilter'
+            responses:
+                200:
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /ds-data/{ds}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
+        x-swagger-router-controller: ds
+        get:
+            summary: Get ds data
+            operationId: getDsData
+            tags:
+                - maintain
+            produces:
+                - application/json
+            parameters:
+                - in: path
+                  name: ds
+                  required: true
+                  type: string
+                  description: 'returns ds data'
+            responses:
+                200:
+                    description: ds data
+                    schema:
+                        $ref: '#/definitions/DsDataResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
 
 definitions:
     StatusType:
@@ -2560,3 +2685,34 @@ definitions:
                     $ref: '#/definitions/DsFields'
             status:
                 $ref: '#/definitions/StatusType'
+    DsData:
+        type: object
+        properties:
+            ds:
+                type: string
+            data:
+                type: object
+    DsDataUpd:
+        type: object
+        properties:
+            ds:
+                $ref: '#/definitions/DsData'
+            old:
+                $ref: '#/definitions/DsDataFilter'
+    DsDataFilter:
+        type: object
+    DsDataResponse:
+        type: object
+        properties:
+            data:
+                type: object
+                properties:
+                    ds:
+                        type: string
+                    data:
+                        type: array
+                        items:
+                            type: object
+            status:
+                $ref: '#/definitions/StatusType'
+

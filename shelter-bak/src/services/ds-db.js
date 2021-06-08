@@ -70,9 +70,9 @@ class DsDb {
         return {vals, array};
     }
     /**
-     * delete language
-     * lang
-     * "foobar"
+     * delete ds
+     * name
+     * "ds1"
      */
     async deleteDs(name) {
         let result;
@@ -84,6 +84,68 @@ class DsDb {
             throw new HttpCodeError(404, `Ds [${name}] not found`);
         }
         return name;
+    }
+
+    async getDsData(ds) {
+        let data;
+        let fields;
+        log.debug('getDsData %o', ds);
+        data = await pgPool.query('select data from ds_data where ds = $1', [ds]);
+        fields = await pgPool.query('select field, type from ds_fld where ds = $1', [ds]);
+        return {ds, fields: pgPool.clearNull(fields), data: pgPool.clearNull(data.rows)};
+    }
+
+    async addDsData(ds) {
+        log.debug('addDsData %o', ds);
+        await this.checkData(ds);
+        let id = await pgPool.query('insert into ds_data(ds, data) VALUES ($1, $2) returning ctid', [ds.ds, ds.data]);
+        return id.rows;
+    }
+
+    async checkData(ds) {
+        let fields = (await this.getFields(ds.ds)).fields;
+        if (!fields || fields.length === 0) {
+            throw new Error(`No fields found in ds ${ds.ds}`);
+        }
+        for (const field of fields) {
+            if (typeof ds.data[field.field] !== field.type) {
+                throw new Error(`Data field ${field.field} has type ${typeof ds.data[field.field]} but expected to be ${field.type}`);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param ds
+     * @param old = {id: no pk, field_name: field_value for pk}
+     */
+    async updateDsData(ds, old) {
+        let condition;
+        log.debug('updateDsData %o, %o', ds, old);
+        await this.checkData(ds);
+        if (old.id) {
+            condition = {sql: 'ctid = $2', val: old.id};
+        } else {
+            condition = {sql: 'data @> $2', val: JSON.stringify(old)};
+        }
+        let id = await pgPool.query(`update ds_data set data = $1 where ${condition.sql} returning ctid`, [ds.data, condition.val]);
+        return id.rows;
+    }
+
+    /**
+     *
+     * @param old = {id: no pk, field_name: field_value for pk}
+     */
+    async deleteDsData(old) {
+        let condition;
+        log.debug('deleteDsData %o', old);
+        if (old.id) {
+            condition = {sql: 'ctid = $1', val: old.id};
+        } else {
+            condition = {sql: 'data @> $1', val: JSON.stringify(old)};
+        }
+        let id = await pgPool.query(`delete from ds_data where ${condition.sql} returning CTID`, [condition.val]);
+        return id.rows;
     }
 }
 

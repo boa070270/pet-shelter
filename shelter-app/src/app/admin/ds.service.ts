@@ -54,7 +54,7 @@ export class DsService extends DataService<DsType>{
     }));
   }
   updateData(row: DsType): Observable<DataExpectedResult<DsType>> {
-    return undefined;
+    return this.insertData(row);
   }
   removeNull(obj): any {
     const replacer = (key, value) =>
