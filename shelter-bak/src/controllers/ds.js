@@ -24,7 +24,7 @@ module.exports = {
     async getFields(req, res) {
         try {
             const ds = req.swagger.params.name.value;
-            log.debug('controller getFields', ds);
+            log.debug('controller getFields %o', ds);
             const result = await dsDb.getFields(ds);
             writeResponse(res, result, req);
         } catch (err) {
@@ -53,7 +53,7 @@ module.exports = {
     async addDs(req, res) {
         try {
             const ds = req.swagger.params.ds.value;
-            log.debug('controller addDs', ds);
+            log.debug('controller addDs %o', ds);
             const id = await dsDb.addDs(ds.ds, ds.description, ds.fields);
             writeResponse(res, {id}, req);
         } catch (err) {
@@ -67,7 +67,7 @@ module.exports = {
      */
     async deleteDs(req, res) {
         try {
-            log.debug('controller deleteField', req.swagger.params.name.value);
+            log.debug('controller deleteField %o', req.swagger.params.name.value);
             const id = await dsDb.deleteDs(req.swagger.params.name.value);
             writeResponse(res, {id}, req);
         } catch (err) {
@@ -82,7 +82,7 @@ module.exports = {
     async getDsData(req, res) {
         try {
             const ds = req.swagger.params.ds.value;
-            log.debug('controller getDsData', ds);
+            log.debug('controller getDsData %o', ds);
             const result = await dsDb.getDsData(ds);
             writeResponse(res, result, req);
         } catch (err) {
@@ -97,7 +97,7 @@ module.exports = {
     async addDsData(req, res) {
         try {
             const ds = req.swagger.params.ds.value;
-            log.debug('controller addDsData', ds);
+            log.debug('controller addDsData %o', ds);
             const id = await dsDb.addDsData(ds);
             writeResponse(res, {id}, req);
         } catch (err) {
@@ -112,8 +112,8 @@ module.exports = {
     async updateDsData(req, res) {
         try {
             const ds = req.swagger.params.ds.value;
-            log.debug('controller addDs', ds.ds, ds.old);
-            const id = await dsDb.updateDsData(ds.ds, ds.old);
+            log.debug('controller updateDsData %o, %o', ds.ds, ds.filter);
+            const id = await dsDb.updateDsData(ds.ds, ds.filter);
             writeResponse(res, {id}, req);
         } catch (err) {
             log.error(err);
@@ -127,8 +127,9 @@ module.exports = {
     async deleteDsData(req, res) {
         try {
             const ds = req.swagger.params.ds.value;
-            log.debug('controller deleteField', ds);
-            const id = await dsDb.deleteDsData(ds);
+            const data = req.swagger.params.data.value;
+            log.debug('controller deleteField %o, %o', ds, data);
+            const id = await dsDb.deleteDsData(ds, data);
             writeResponse(res, {id}, req);
         } catch (err) {
             log.error(err);

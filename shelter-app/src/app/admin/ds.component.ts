@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import {FieldTypeUI, SwaggerFieldType} from '../common';
-import {AbstractDataSource} from 'ui-lib';
+import {AbstractDataSource, SwaggerArray, SwaggerNative, SwaggerObject} from 'ui-lib';
 import {DsType} from './ds.service';
 import {DataSources} from '../datasources';
-import {SwaggerArray, SwaggerNative, SwaggerObject} from '../../../projects/ui-lib/src/lib/shared';
 
 @Component({
   selector: 'app-ds',

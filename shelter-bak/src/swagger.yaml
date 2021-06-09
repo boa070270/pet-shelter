@@ -2002,37 +2002,6 @@ paths:
                     description: Internal server error
                     schema:
                         $ref: '#/definitions/StatusType'
-        delete:
-            summary: delete ds
-            operationId: deleteDsData
-            tags:
-                - maintain
-            security:
-                - BasicAuth: [ ]
-                - ApiKeyAuth: [ ]
-                - OAuth2: [ admin, writer ]
-            produces:
-                - application/json
-            parameters:
-                - in: body
-                  name: ds
-                  required: true
-                  description: ds filter
-                  schema:
-                      $ref: '#/definitions/DsDataFilter'
-            responses:
-                200:
-                    description: Resulted id
-                    schema:
-                        $ref: '#/definitions/IdResponse'
-                400:
-                    description: Bad request
-                    schema:
-                        $ref: '#/definitions/StatusType'
-                500:
-                    description: Internal server error
-                    schema:
-                        $ref: '#/definitions/StatusType'
     /ds-data/{ds}:
         parameters:
             - $ref: '#/parameters/X-Client-ID'
@@ -2049,12 +2018,48 @@ paths:
                   name: ds
                   required: true
                   type: string
-                  description: 'returns ds data'
+                  description: 'ds name'
             responses:
                 200:
                     description: ds data
                     schema:
                         $ref: '#/definitions/DsDataResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        post:
+            summary: delete ds
+            operationId: deleteDsData
+            tags:
+                - maintain
+            security:
+                - BasicAuth: [ ]
+                - ApiKeyAuth: [ ]
+                - OAuth2: [ admin, writer ]
+            produces:
+                - application/json
+            parameters:
+                - in: path
+                  name: ds
+                  required: true
+                  type: string
+                  description: 'ds name'
+                - in: body
+                  name: filter
+                  required: true
+                  description: filter
+                  schema:
+                      $ref: '#/definitions/DsDataFilter'
+            responses:
+                200:
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
                 400:
                     description: Bad request
                     schema:
@@ -2697,7 +2702,7 @@ definitions:
         properties:
             ds:
                 $ref: '#/definitions/DsData'
-            old:
+            filter:
                 $ref: '#/definitions/DsDataFilter'
     DsDataFilter:
         type: object

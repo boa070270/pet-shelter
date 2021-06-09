@@ -13,7 +13,7 @@ import {ListRange} from '@angular/cdk/collections';
 import {map} from 'rxjs/operators';
 import {Injectable, OnDestroy} from '@angular/core';
 import {BannerType, CarouselType, FieldTypeUI, FileType, MenuTypeUI, PageType, PetType, UserType} from './common/types';
-import {DsService, DsType} from "./admin/ds.service";
+import {DsDataService, DsDataType, DsService, DsType} from "./admin/ds.service";
 
 class LanguageDataService extends DataService<LanguageType> {
   constructor(private basicService: BasicService) {

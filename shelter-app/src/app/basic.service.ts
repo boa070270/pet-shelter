@@ -33,7 +33,7 @@ import {
   UserType,
 } from './common';
 import {AuthorizationService} from './authorization.service';
-import {DsType} from "./admin/ds.service";
+import {DsDataType, DsType} from "./admin/ds.service";
 
 const API_URL = '/api/v1';
 
@@ -630,6 +630,30 @@ export class BasicService implements ObtainSystemLanguage, OnDestroy {
   deleteDs(name): Observable<HttpResponse<IdResponse>> {
     this.logger.debug('deleteDs');
     return this.http.delete<HttpResponse<IdResponse>>(API_URL + `/ds/${name}`, this.httpOptions(true)).pipe(
+      tap(r => this.setClientId(r.headers.get('x-client-id')))
+    );
+  }
+  deleteDsData(ds): Observable<HttpResponse<IdResponse>> {
+    this.logger.debug('deleteDsData');
+    return this.http.post<HttpResponse<IdResponse>>(API_URL + `/ds-data/${ds.ds}`, ds.data, this.httpOptions(true)).pipe(
+      tap(r => this.setClientId(r.headers.get('x-client-id')))
+    );
+  }
+  addDsData(ds): Observable<HttpResponse<IdResponse>> {
+    this.logger.debug('addDsData');
+    return this.http.put<HttpResponse<IdResponse>>(API_URL + '/ds-data', ds , this.httpOptions(true)).pipe(
+      tap(r => this.setClientId(r.headers.get('x-client-id')))
+    );
+  }
+  getDsData(ds): Observable<HttpResponse<Response<DsType>>> {
+    this.logger.debug('getDsFields');
+    return this.http.get<HttpResponse<Response<DsType>>>(API_URL + `/ds-data/${ds}`, this.httpOptions(true)).pipe(
+      tap(r => this.setClientId(r.headers.get('x-client-id')))
+    );
+  }
+  updateDsData(ds): Observable<HttpResponse<IdResponse>> {
+    this.logger.debug('updateDsFields');
+    return this.http.post<HttpResponse<IdResponse>>(API_URL + `/ds-data`, ds, this.httpOptions(true)).pipe(
       tap(r => this.setClientId(r.headers.get('x-client-id')))
     );
   }

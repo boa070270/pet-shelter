@@ -88,11 +88,12 @@ class DsDb {
 
     async getDsData(ds) {
         let data;
-        let fields;
         log.debug('getDsData %o', ds);
-        data = await pgPool.query('select data from ds_data where ds = $1', [ds]);
-        fields = await pgPool.query('select field, type from ds_fld where ds = $1', [ds]);
-        return {ds, fields: pgPool.clearNull(fields), data: pgPool.clearNull(data.rows)};
+        data = await pgPool.query('select ctid, data from ds_data where ds = $1', [ds]);
+        data.rows.forEach(r => {
+            return {ctid: r.ctid, ...r.data};
+        });
+        return {ds, data: pgPool.clearNull(data.rows)};
     }
 
     async addDsData(ds) {
@@ -108,7 +109,7 @@ class DsDb {
             throw new Error(`No fields found in ds ${ds.ds}`);
         }
         for (const field of fields) {
-            if (typeof ds.data[field.field] !== field.type) {
+            if (ds.data[field.field] && typeof ds.data[field.field] !== field.type) {
                 throw new Error(`Data field ${field.field} has type ${typeof ds.data[field.field]} but expected to be ${field.type}`);
             }
         }
@@ -124,27 +125,23 @@ class DsDb {
         log.debug('updateDsData %o, %o', ds, old);
         await this.checkData(ds);
         if (old.id) {
-            condition = {sql: 'ctid = $2', val: old.id};
+            condition = {sql: 'ctid = $3', val: old.id};
         } else {
-            condition = {sql: 'data @> $2', val: JSON.stringify(old)};
+            condition = {sql: 'data @> $3', val: JSON.stringify(old)};
         }
-        let id = await pgPool.query(`update ds_data set data = $1 where ${condition.sql} returning ctid`, [ds.data, condition.val]);
+        let id = await pgPool.query(`update ds_data set data = $1 where ds = $2 and ${condition.sql} returning ctid`, [ds.data, ds.ds, condition.val]);
         return id.rows;
     }
 
-    /**
-     *
-     * @param old = {id: no pk, field_name: field_value for pk}
-     */
-    async deleteDsData(old) {
+    async deleteDsData(ds, old) {
         let condition;
-        log.debug('deleteDsData %o', old);
+        log.debug('deleteDsData %o, %o', ds, old);
         if (old.id) {
-            condition = {sql: 'ctid = $1', val: old.id};
+            condition = {sql: 'ctid = $2', val: old.id};
         } else {
-            condition = {sql: 'data @> $1', val: JSON.stringify(old)};
+            condition = {sql: 'data @> $2', val: old};
         }
-        let id = await pgPool.query(`delete from ds_data where ${condition.sql} returning CTID`, [condition.val]);
+        let id = await pgPool.query(`delete from ds_data where ds = $1 and ${condition.sql} returning CTID`, [ds, condition.val]);
         return id.rows;
     }
 }
