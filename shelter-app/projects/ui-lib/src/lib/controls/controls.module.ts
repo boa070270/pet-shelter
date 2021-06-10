@@ -187,7 +187,8 @@ import {ExtComponentFactory} from './ext-component-factory';
 export class ControlsModule {
   constructor(componentsPlugin: ComponentsPluginService, @Optional() @SkipSelf() parentModule: ControlsModule, injector: Injector) {
     if (parentModule) {
-      throw new Error('ControlsModule is already loaded');
+      // throw new Error('ControlsModule is already loaded');
+      return;
     }
     const replaceInjector = Injector.create({parent: injector, providers: [
       {provide: ComponentFactoryResolver, useValue: new ExtComponentFactory(injector)}
@@ -210,7 +211,7 @@ export class ControlsModule {
     componentsPlugin.addPlugin(['lib-select-control'], {component: SelectControlComponent, schema: null,
       description: {tag: 'ui-select'}}, injector);
     componentsPlugin.addPlugin(['lib-title-type-control'], {component: TitleTypeControlComponent, schema: null,
-      description: {tag: 'ui-input'}}, injector);
+      description: {tag: 'ui-title'}}, injector);
     componentsPlugin.addPlugin(['lib-table'], {component: TableComponent, schema: null,
       description: {tag: 'ui-table'}}, injector);
     componentsPlugin.addPlugin(['lib-upload-files'], {component: UploadFilesComponent, schema: null});

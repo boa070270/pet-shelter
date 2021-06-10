@@ -574,3 +574,23 @@ CREATE TABLE IF NOT EXISTS public.browsers
     created timestamptz default now(),
     updated timestamptz
 );
+CREATE TABLE IF NOT EXISTS public.ds
+(
+    name varchar(16) not null primary key,
+    description jsonb
+);
+
+CREATE TABLE IF NOT EXISTS public.ds_fld
+(
+    ds VARCHAR(16) REFERENCES ds(name),
+    field VARCHAR(16),
+    pk BOOLEAN,
+    type VARCHAR(10),
+    PRIMARY KEY (ds, field)
+);
+CREATE TABLE IF NOT EXISTS public.ds_data
+(
+    ds VARCHAR(16) NOT NULL REFERENCES ds(name),
+    data jsonb
+);
+create index if not exists ds_data_idx on public.ds_data (ds);

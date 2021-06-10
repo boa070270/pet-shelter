@@ -13,6 +13,7 @@ import {ListRange} from '@angular/cdk/collections';
 import {map} from 'rxjs/operators';
 import {Injectable, OnDestroy} from '@angular/core';
 import {BannerType, CarouselType, FieldTypeUI, FileType, MenuTypeUI, PageType, PetType, UserType} from './common/types';
+import {DsDataService, DsDataType, DsService, DsType} from "./admin/ds.service";
 
 class LanguageDataService extends DataService<LanguageType> {
   constructor(private basicService: BasicService) {
@@ -319,6 +320,7 @@ export class DataSources implements OnDestroy {
   readonly Pages: AbstractDataSource<PageType>;
   readonly Users: AbstractDataSource<UserType>;
   readonly Carousel: AbstractDataSource<CarouselType>;
+  readonly Ds: AbstractDataSource<DsType>;
   constructor(basicService: BasicService) {
     this.Language = new MainDataSource(new LanguageDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
     this.Menu = new MainDataSource(new MenuDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
@@ -329,6 +331,7 @@ export class DataSources implements OnDestroy {
     this.Pages = new MainDataSource(new PageDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
     this.Users = new MainDataSource(new UserDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
     this.Carousel = new MainDataSource(new CarouselDataService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
+    this.Ds = new MainDataSource(new DsService(basicService), 20, 100, ALL_EQUAL, ALL_EQUAL);
   }
   ngOnDestroy(): void {
     this.Language.destroy();
@@ -339,5 +342,6 @@ export class DataSources implements OnDestroy {
     this.Banners.destroy();
     this.Pages.destroy();
     this.Carousel.destroy();
+    this.Ds.destroy();
   }
 }

@@ -2,13 +2,13 @@
 <div class="work-space">
   <div class="work-table" libSlideContainer>
     <div class="work-table" libSlideElement>
-      <div class="editor-editable" [contentEditable]="true" #editor _design="0" cdkDropList
+      <main class="editor-editable" [contentEditable]="true" #editor _design="0" cdkDropList
            (keydown)="onKeyDown($event)" (click)="onClick($event)"
            (focus)="focusin($event)" (focusout)="focusout($event)"
            (dragstart)="dragStart($event)" (dragend)="dragEnd($event)" (dragover)="dragOver($event)" (drop)="drop($event)" (dragexit)="dragExit($event)"
            (drag)="drag($event)" (dragenter)="dragEnter($event)" (dragleave)="dragLeave($event)"
       >
-      </div>
+      </main>
     </div>
     <div class="work-table" libSlideElement>
       <textarea class="editor-editable" [(ngModel)]="source" (keydown)="sourceKeyDown($event)"></textarea>

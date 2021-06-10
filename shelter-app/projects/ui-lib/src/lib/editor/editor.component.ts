@@ -3,13 +3,13 @@ import {SlideContainerDirective} from '../controls';
 import {CmdEditorToolbox, EditorToolbarComponent} from './editor-toolbar.component';
 import {Subscription} from 'rxjs';
 import {
-  beforePosition,
   ComponentsPluginService,
+  HtmlRules,
   HtmlWrapper,
-  isDescendant,
   LibNode,
   NodeWrapper,
-  Position,
+  SimpleParser,
+  SNode,
   SNodeIterator,
   SPosition,
   SRange,
@@ -18,8 +18,6 @@ import {
 // import {AddModification} from './add-modification';
 import {CdkDragDrop, CdkDragEnter, CdkDragExit, CdkDragSortEvent, CdkDropList} from '@angular/cdk/drag-drop';
 import {DOCUMENT} from '@angular/common';
-import {SimpleParser, SNode} from './html-validator';
-import {HtmlRules} from '../shared/html-rules';
 import {DialogService} from '../dialog-service';
 
 // tslint:disable:max-line-length
@@ -48,7 +46,7 @@ interface StoragePosition { designId: string; offset: number; txtOffset?: number
 })
 export class EditorComponent implements OnInit, OnDestroy {
   position = 0;
-  private parser: SimpleParser;
+  private parser = new SimpleParser('', DESIGNER_ATTR_NAME);
   private replaceChar = false;
   set source(s: string) {
     this.parser = new SimpleParser(s, DESIGNER_ATTR_NAME);
@@ -292,7 +290,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     let update = commonAncestor;
     let split = null;
     if (this.range.commonAncestor.typeNode === Node.TEXT_NODE) {
-      if (this.isInTag(commonAncestor, tag)) {
+      if (NodeWrapper.isDescOf(commonAncestor, tag)) {
         split = SNode.splitBranch(tag, commonAncestor, this.range.end.offset, this.parser.root, this.parser.source, commonAncestor, true, (a) => this.copyAttr(a));
         if (split.crossed) {
           update = split.topNode;
@@ -320,8 +318,8 @@ export class EditorComponent implements OnInit, OnDestroy {
       if (e.typeNode === Node.ELEMENT_NODE) {
         e = e.children[this.range.end.offset];
       }
-      const invert = w.nodeName === tag || this.isInTag(w, tag);
-      if (invert && (e.nodeName === tag || this.isInTag(e, tag))) {
+      const invert = w.nodeName === tag || NodeWrapper.isDescOf(w, tag);
+      if (invert && (e.nodeName === tag || NodeWrapper.isDescOf(e, tag))) {
         split = SNode.splitBranch(tag, w, this.range.start.offset, this.parser.root, this.parser.source, commonAncestor, true, (a) => this.copyAttr(a));
         if (split.crossed) {
           update = split.topNode;
@@ -339,14 +337,14 @@ export class EditorComponent implements OnInit, OnDestroy {
             (k as SNode).extractChildren();
           }
         } else {
-          if (k.typeNode === Node.TEXT_NODE && !this.isInTag(k as SNode, tag)) {
+          if (k.typeNode === Node.TEXT_NODE && !NodeWrapper.isDescOf(k, tag)) {
             (k as SNode).wrapThis(SNode.elementNode(tag, this.copyAttr(attr)));
           }
         }
       }, () => null, this.parser.root);
     }
     const n = this.toHtmlWrapper(update);
-    (n.original as HTMLElement).innerHTML = this.toSNode(update).getText(this.parser.source);
+    (n.original as HTMLElement).innerHTML = this.toSNode(update).newSource(this.parser.source);
     this.collapse('start');
   }
   private sectioning(tag: string, attr?: {[key: string]: string}, invert = false): void {
@@ -373,7 +371,7 @@ export class EditorComponent implements OnInit, OnDestroy {
         }
       }
       const n = this.toHtmlWrapper(wrap);
-      (n.original as HTMLElement).innerHTML = this.toSNode(wrap).getText(this.parser.source);
+      (n.original as HTMLElement).innerHTML = this.toSNode(wrap).newSource(this.parser.source);
       this.collapse('start');
     }
   }
@@ -401,7 +399,7 @@ export class EditorComponent implements OnInit, OnDestroy {
         }
       }
       const n = this.toHtmlWrapper(wrap);
-      (n.original as HTMLElement).innerHTML = this.toSNode(wrap).getText(this.parser.source);
+      (n.original as HTMLElement).innerHTML = this.toSNode(wrap).newSource(this.parser.source);
       this.collapse('start');
     }
   }
@@ -429,7 +427,7 @@ export class EditorComponent implements OnInit, OnDestroy {
         }
       }
       const n = this.toHtmlWrapper(wrap);
-      (n.original as HTMLElement).innerHTML = this.toSNode(wrap).getText(this.parser.source);
+      (n.original as HTMLElement).innerHTML = this.toSNode(wrap).newSource(this.parser.source);
       this.collapse('start');
     }
   }
@@ -451,7 +449,7 @@ export class EditorComponent implements OnInit, OnDestroy {
       this.range.start.offset += 1;
     }
     const n = this.toHtmlWrapper(parent);
-    (n.original as HTMLElement).innerHTML = this.toSNode(parent).getText(this.parser.source);
+    (n.original as HTMLElement).innerHTML = this.toSNode(parent).newSource(this.parser.source);
     this.collapse('start');
   }
   private nextMark(): string { return '' + this.designIndex++; }
@@ -528,7 +526,7 @@ export class EditorComponent implements OnInit, OnDestroy {
       let child;
       if (work.typeNode !== Node.TEXT_NODE) {
         const cnt = HtmlRules.contentOfNode(work);
-        if (!cnt || !(cnt[1].cnt.includes('Flow') || cnt[1].cnt.includes('Phrasing'))) {
+        if (!cnt || !(cnt.cnt.includes('Flow') || cnt.cnt.includes('Phrasing'))) {
           // TODO say that there cannot be text
           return;
         }
@@ -549,24 +547,24 @@ export class EditorComponent implements OnInit, OnDestroy {
       }
     }
     const n = this.toHtmlWrapper(parent);
-    (n.original as HTMLElement).innerHTML = this.toSNode(parent).getText(this.parser.source);
+    (n.original as HTMLElement).innerHTML = this.toSNode(parent).newSource(this.parser.source);
     this.collapse('start');
   }
   private collapse(where: 'commonAncestor' | 'start' | 'end'): void {
     if (this.range) {
-      let n;
+      let w: SPosition;
       switch (where) {
         case 'commonAncestor':
-          n = findPalpable(new HtmlWrapper(this.editor), this.toHtmlWrapper(this.range.commonAncestor).original, 0);
+          w = this.findPalpable(this.toHtmlWrapper(this.range.commonAncestor).original, 0);
           break;
         case 'start':
-          n = findPalpable(new HtmlWrapper(this.editor), this.toHtmlWrapper(this.range.start.n).original, this.range.start.offset);
+          w = this.findPalpable(this.toHtmlWrapper(this.range.start.n).original, this.range.start.offset);
           break;
         case 'end':
-          n = findPalpable(new HtmlWrapper(this.editor), this.toHtmlWrapper(this.range.end.n).original, this.range.end.offset);
+          w = this.findPalpable(this.toHtmlWrapper(this.range.end.n).original, this.range.end.offset);
           break;
       }
-      window.getSelection().collapse(this.toHtmlWrapper(n.parent).original, n.index);
+      window.getSelection().collapse(this.toHtmlWrapper(w.n).original, w.offset);
     }
   }
   private checkAndMarkElements(): boolean {
@@ -668,25 +666,14 @@ export class EditorComponent implements OnInit, OnDestroy {
     console.log('focusout', event);
     this.storeRange();
   }
-  private isInTag(n: SNode, tag: string): boolean {
-    if (n.typeNode === Node.TEXT_NODE) {
-      n = n.parent;
-    }
-    while (n.parent) {
-      if (n.nodeName === tag) {
-        return true;
-      }
-      n = n.parent;
-    }
-  }
   private startPosition(): void {
     const root = new HtmlWrapper(this.editor);
     if (root.numChildren === 0) {
       window.getSelection().collapse(this.editor, 0);
     }
-    const p = findPalpable(root, this.editor, 0);
-    if (p) {
-      window.getSelection().collapse(this.toHtmlWrapper(p.parent).original, p.index);
+    const sp = this.findPalpable(this.editor, 0);
+    if (sp) {
+      window.getSelection().collapse(this.toHtmlWrapper(sp.n).original, sp.offset);
     }
     window.getSelection().collapse(this.editor, this.editor.childNodes.length);
   }
@@ -706,7 +693,7 @@ export class EditorComponent implements OnInit, OnDestroy {
   }
   private toSNode(w: NodeWrapper): SNode {
     if (w instanceof HtmlWrapper) {
-      const a = LibNode.getAttribute(w.original, DESIGNER_ATTR_NAME);
+      const a = w.attribute(DESIGNER_ATTR_NAME);
       if (a) {
         const sn = this.parser.findSNode(DESIGNER_ATTR_NAME, a);
         if (w.typeNode === Node.TEXT_NODE) {
@@ -740,14 +727,13 @@ export class EditorComponent implements OnInit, OnDestroy {
   private validateRange(range: Range): SRange {
     if (this.focusNode && this.isAncestor(range.commonAncestorContainer)) {
       let ca = range.commonAncestorContainer;
-      while (!!LibNode.getAttribute(range.commonAncestorContainer, DESIGNER_ATTR_NAME)) {
+      while (!LibNode.getAttribute(range.commonAncestorContainer, DESIGNER_ATTR_NAME)) {
         ca = ca.parentElement;
       }
-      const root = new HtmlWrapper(this.editor);
-      const st = findPalpable(root, range.startContainer, range.startOffset);
-      const en = findPalpable(root, range.endContainer, range.endOffset, true);
+      const st = this.findPalpable(range.startContainer, range.startOffset);
+      const en = this.findPalpable(range.endContainer, range.endOffset, true);
       if (ca && st && en) {
-        return new SRange(new HtmlWrapper(ca), st.thisPosition(), en.thisPosition(), range.collapsed);
+        return new SRange(this.toSNode(new HtmlWrapper(ca)), st, en, range.collapsed);
       }
     }
     return null;
@@ -776,6 +762,26 @@ export class EditorComponent implements OnInit, OnDestroy {
   private nextUp(p: SPosition, stepText = true): SPosition {
     return SPosition.findPosition(new HtmlWrapper(this.editor), p, editorNode(stepText), false);
   }
+  private findPalpable(container: Node, offset: number, revert = false): SPosition {
+    function sp(w: SNode): SPosition {
+      const cnt = HtmlRules.contentOfNode(p);
+      if (cnt && (cnt.cnt.includes('Flow') || cnt.cnt.includes('Phrasing'))) {
+        return new SPosition(w, 0);
+      }
+      return new SPosition(w.parent, w.index);
+    }
+    const p = new HtmlWrapper(LibNode.nodeOfPoints(container, offset));
+    if (p.attribute(DESIGNER_ATTR_NAME) && HtmlRules.isPalpable(p)) {
+      return sp(this.toSNode(p));
+    }
+    const iter = new SNodeIterator(this.parser.root, this.toSNode(p), revert);
+    for (const n of iter) {
+      if (n.attribute(DESIGNER_ATTR_NAME) && HtmlRules.isPalpable(n)) {
+        return sp(this.toSNode(n));
+      }
+    }
+    return null;
+  }
 }
 function editorNode(stepText: boolean): (p: SPosition) => SPosition {
   return (c) => {
@@ -785,16 +791,4 @@ function editorNode(stepText: boolean): (p: SPosition) => SPosition {
     }
   };
 }
-function findPalpable(root: NodeWrapper, container: Node, offset: number, revert = false): NodeWrapper {
-  const p = LibNode.nodeOfPoints(container, offset);
-  if (LibNode.getAttribute(p, DESIGNER_ATTR_NAME)) {
-    return new HtmlWrapper(p);
-  }
-  const iter = new SNodeIterator(root, new HtmlWrapper(p), revert);
-  for (const n of iter) {
-    if (n.attribute(DESIGNER_ATTR_NAME) && HtmlRules.isPalpable(n)) {
-      return n;
-    }
-  }
-  return null;
-}
+

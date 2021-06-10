@@ -1,27 +1,33 @@
-import {HtmlElementContent, HtmlRules} from './html-rules';
-import {SNode} from '../editor';
-
 export abstract class NodeWrapper {
-  readonly errors = [];
-  readonly warnings = [];
   abstract nodeName: string;
   abstract typeNode: number;
+  abstract index: number;
+  abstract numChildren: number;
   abstract parent: NodeWrapper;
   abstract firstChild: NodeWrapper;
   abstract lastChild: NodeWrapper;
   abstract next: NodeWrapper;
   abstract prev: NodeWrapper;
-  abstract index: number;
-  abstract numChildren: number;
   // 0, undefined, null - without change, -1 - deleted, 1 - modified, 2 - new, 3 - attr modified
   abstract state: number;
+  readonly errors = [];
+  readonly warnings = [];
+  static isDescOf(n: NodeWrapper, parent: string): boolean {
+    while (n.nodeName !== 'body') {
+      if (n.nodeName === parent) {
+        return true;
+      }
+      n = n.parent;
+    }
+    return false;
+  }
   abstract attribute(name: string): string;
   abstract equal(n: NodeWrapper): boolean;
   abstract addChild(n: NodeWrapper): void;
   child(inx: number): NodeWrapper {
     let w = this.firstChild;
     if (inx < 0 && inx >= this.numChildren) { return null; }
-    for (let i = 0; i <= inx && w !== null; w = w.next, ++i) {}
+    for (let i = 1; i <= inx && w !== null; w = w.next, ++i) {}
     return w;
   }
   findChild(p: (n: NodeWrapper) => boolean): NodeWrapper {
@@ -53,8 +59,7 @@ export abstract class NodeWrapper {
     if (n) { return n; }
     n = this.parent;
     while (n) {
-      n = n.next;
-      if (n) { return n; }
+      if (n.next) { return n.next; }
       n = n.parent;
     }
     return null;
@@ -69,32 +74,7 @@ export abstract class NodeWrapper {
     if (n) { return n.thisPosition(); }
     return null;
   }
-  validate(correct = true): void {
-    if (this.typeNode === Node.ELEMENT_NODE) {
-      const content = HtmlRules.contentOfNode(this);
-      if (!content) {
-        if (this.numChildren !== 0) {
-          this.errors.push(`Element ${this.nodeName} cannot have children`);
-        }
-      } else {
-        if (content.elem) {
-          this.everyChild((c) => {
-            if (!content.elem.includes(c.nodeName)) {
-              this.errors.push(`Element ${this.nodeName} cannot have ${c.nodeName} as child`);
-            }
-          });
-        }
-        if (content.cnt.includes('Flow') || content.cnt.includes('Phrasing')) {
-          if (correct && (this instanceof SNode) && this.lastChild) {
-            this.addChild(SNode.textNode(''));
-          }
-          if (!this.lastChild){
-            this.warnings.push(`Element ${this.nodeName} required child element`);
-          }
-        }
-      }
-    }
-  }
+  abstract validate(correct?: boolean): void;
 }
 export function isDescendant(p: NodeWrapper, c: NodeWrapper): boolean {
   while (c !== null) {
@@ -149,6 +129,9 @@ export class HtmlWrapper extends NodeWrapper {
   }
   addChild(n: NodeWrapper): void {
     // nothing
+  }
+
+  validate(correct?: boolean): void {
   }
 }
 

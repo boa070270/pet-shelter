@@ -105,7 +105,7 @@ export class SwaggerArrayComponent extends BaseSwaggerComponent implements OnIni
           componentName = 'lib-table';
         }
         if (this.items instanceof SwaggerNative) {
-          componentName = 'editable-list';
+          componentName = 'lib-editable-list';
         }
       }
       const component = this.componentsPlugin.getPlugin(componentName);

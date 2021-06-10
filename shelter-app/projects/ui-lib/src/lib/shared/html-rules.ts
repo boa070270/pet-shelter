@@ -1,7 +1,3 @@
-// tslint:disable:max-line-length
-
-import {NodeWrapper, treeWalker} from './html-helper';
-
 /**
  * This type is used as array of 2 items, where first item describe the Parent category,
  * second describe which element can be children
@@ -10,8 +6,13 @@ import {NodeWrapper, treeWalker} from './html-helper';
  * so any element whose content model contains the "phrasing" category could be a parent of an 'a' element.
  * Since the "Flow" category includes all the "Phrasing" elements, that means the 'th' element could be 'a' parent to an a element.
  */
+import {NodeWrapper, treeWalker} from './html-helper';
+
+// tslint:disable:max-line-length
 export type HtmlElementContent = {cnt?: ContentType[], elem?: string[]};
-export type ContentType = 'Metadata' | 'Flow' | 'Sectioning' | 'Heading' | 'Phrasing' | 'Embedded' | 'Interactive' | 'SectioningRoot' | 'Palpable' | 'Script' | 'None' | 'Transparent';
+export type ContentType = 'Metadata' | 'Flow' | 'Sectioning' | 'Heading' | 'Phrasing' | 'Embedded' | 'Interactive' | 'SectioningRoot'
+  | 'Palpable' | 'Script' | 'None' | 'Transparent' | 'Grouping' | 'FormElements' | 'ListedElements' | 'SubmittableElements' | 'ResettableElements'
+  | 'AutocapitalizeInheritingElements' | 'LabelableElements' | 'Foreign' | 'EscapableRawTexElements' | 'VoidElements';
 /**
  * If this child can be added
  * p: parent element
@@ -158,30 +159,6 @@ function findInArray(e: NodeWrapper, where: Array<string | Tag>): string | Tag {
     return v === tag;
   });
 }
-function belongContent(cnt: ContentType, n: NodeWrapper): any {
-  switch (cnt) {
-    case 'Embedded':
-      return findInArray(n, CONTENTS.Embedded);
-    case 'Flow':
-      return findInArray(n, CONTENTS.Flow);
-    case 'None':
-      return findInArray(n, CONTENTS.None);
-    case 'Heading':
-      return findInArray(n, CONTENTS.Heading);
-    case 'Interactive':
-      return findInArray(n, CONTENTS.Interactive);
-    case 'Metadata':
-      return findInArray(n, CONTENTS.Metadata);
-    case 'Palpable':
-      return findInArray(n, CONTENTS.Palpable);
-    case 'Phrasing':
-      return findInArray(n, CONTENTS.Phrasing);
-    case 'Script':
-      return findInArray(n, CONTENTS.ScripElements);
-    case 'Sectioning':
-      return findInArray(n, CONTENTS.Sectioning);
-  }
-}
 const AMBIGUOUS_AMPERSAND = '&\w*;'; // TODO: it is not accurate
 const DEF_CUSTOM_CONTENTS: HtmlElementContent[] = [{cnt: ['Flow']}, {cnt: ['Flow']}];
 const CONTENTS = {
@@ -190,7 +167,7 @@ const CONTENTS = {
     'link', 'meta', 'noscript', 'script', 'style', 'template', 'title'],
   Flow: ['a', 'abbr', 'address',
     // (if it is a descendant of a 'map' element)
-    {name: 'area', contentRestriction: e => HtmlRules.isDescOf(e, 'map') },
+    {name: 'area', contentRestriction: e => NodeWrapper.isDescOf(e, 'map') },
     'article', 'aside', 'audio', 'b', 'bdi', 'bdo', 'blockquote', 'br',
     'button', 'canvas', 'cite', 'code', 'data', 'datalist', 'del', 'details', 'dfn', 'dialog', 'div', 'dl', 'em', 'embed', 'fieldset',
     'figure', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'i', 'iframe', 'img', 'input', 'ins', 'kbd', 'label',
@@ -208,7 +185,7 @@ const CONTENTS = {
   Phrasing: [ // can place to phrasing content is expected where
     'a', 'abbr',
     // (if it is a descendant of a 'map')
-    {name: 'area', contentRestriction: e => HtmlRules.isDescOf(e, 'map'), childRestriction: NO_CHILDREN},
+    {name: 'area', contentRestriction: e => NodeWrapper.isDescOf(e, 'map'), childRestriction: NO_CHILDREN},
     'audio', 'b', 'bdi', 'bdo',
     {name: 'br', childRestriction: NO_CHILDREN },
     'button', 'canvas', 'cite', 'code', 'data', 'datalist', 'del', 'dfn', 'em', 'embed', 'i', 'iframe', 'img', 'input', 'ins', 'kbd', 'label',
@@ -315,7 +292,7 @@ const CONTENTS = {
     {name: 'param', childRestriction: NO_CHILDREN},
     {name: 'track', childRestriction: NO_CHILDREN},
     {name: 'caption', childRestriction: (e) => !!findInArray(e, CONTENTS.Flow)
-        && !HtmlRules.isDescOf(e, 'table') && e.nodeName !== 'table'},
+        && !NodeWrapper.isDescOf(e, 'table') && e.nodeName !== 'table'},
     {name: 'colgroup', childRestriction: (e) => !!e.attribute('span') && (e.nodeName === 'col' || e.nodeName === 'template')},
     {name: 'col', childRestriction: NO_CHILDREN},
     {name: 'tbody', childRestriction: (e) => e.nodeName === 'tr'},
@@ -392,18 +369,6 @@ export class HtmlRules {
     });
     return err;
   }
-  static isChildOf(n: NodeWrapper, parent: string): boolean {
-    return n.nodeName === parent;
-  }
-  static isDescOf(n: NodeWrapper, parent: string): boolean {
-    while (n.nodeName !== 'body') {
-      if (n.nodeName === parent) {
-        return true;
-      }
-      n = n.parent;
-    }
-    return false;
-  }
   static contentOfNode(n: NodeWrapper): HtmlElementContent {
     if (n) {
       const e = ELEMENTS[n.nodeName];
@@ -416,6 +381,54 @@ export class HtmlRules {
       }
     }
     return null;
+  }
+  static isContent(cnt: ContentType, n: NodeWrapper): any {
+    switch (cnt) {
+      case 'Embedded':
+        return findInArray(n, CONTENTS.Embedded);
+      case 'Flow':
+        return findInArray(n, CONTENTS.Flow);
+      case 'None':
+        return findInArray(n, CONTENTS.None);
+      case 'Heading':
+        return findInArray(n, CONTENTS.Heading);
+      case 'Interactive':
+        return findInArray(n, CONTENTS.Interactive);
+      case 'Metadata':
+        return findInArray(n, CONTENTS.Metadata);
+      case 'Palpable':
+        return findInArray(n, CONTENTS.Palpable);
+      case 'Phrasing':
+        return findInArray(n, CONTENTS.Phrasing);
+      case 'Script':
+        return findInArray(n, CONTENTS.ScripElements);
+      case 'Sectioning':
+        return findInArray(n, CONTENTS.Sectioning);
+      case 'SectioningRoot':
+        return findInArray(n, CONTENTS.SectioningRoot);
+      case 'Grouping':
+        return findInArray(n, CONTENTS.Grouping);
+      case 'FormElements':
+        return findInArray(n, CONTENTS.FormElements);
+      case 'ListedElements':
+        return findInArray(n, CONTENTS.ListedElements);
+      case 'SubmittableElements':
+        return findInArray(n, CONTENTS.SubmittableElements);
+      case 'ResettableElements':
+        return findInArray(n, CONTENTS.ResettableElements);
+      case 'AutocapitalizeInheritingElements':
+        return findInArray(n, CONTENTS.AutocapitalizeInheritingElements);
+      case 'LabelableElements':
+        return findInArray(n, CONTENTS.LabelableElements);
+      case 'Transparent':
+        return findInArray(n, CONTENTS.Transparent);
+      case 'Foreign':
+        return findInArray(n, CONTENTS.Foreign);
+      case 'EscapableRawTexElements':
+        return findInArray(n, CONTENTS.EscapableRawTexElements);
+      case 'VoidElements':
+        return findInArray(n, CONTENTS.VoidElements);
+    }
   }
 }
 

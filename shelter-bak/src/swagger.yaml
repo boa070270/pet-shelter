@@ -1794,6 +1794,280 @@ paths:
                     description: Empty
                     schema:
                         $ref: '#/definitions/IdResponse'
+    /ds:
+        x-swagger-router-controller: ds
+        get:
+            summary: Get all ds
+            operationId: getDs
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            responses:
+                200:
+                    description: ds available
+                    schema:
+                        $ref: '#/definitions/DsResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        put:
+            summary: add ds
+            operationId: addDs
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: body
+                    name: ds
+                    description: ds info with fields
+                    schema:
+                        $ref: '#/definitions/DsType'
+            responses:
+                200:
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /ds/{name}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
+        x-swagger-router-controller: ds
+        delete:
+            summary: delete ds
+            operationId: deleteDs
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: path
+                    name: name
+                    required: true
+                    type: string
+                    description: ds name
+            responses:
+                200:
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /ds-fields:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
+        x-swagger-router-controller: ds
+        get:
+            summary: Get field
+            operationId: getAllFields
+            tags:
+                - maintain
+            produces:
+                - application/json
+            responses:
+                200:
+                    description: field
+                    schema:
+                        $ref: '#/definitions/DsAllFieldResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /ds-fields/{name}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
+        x-swagger-router-controller: ds
+        get:
+            summary: Get field
+            operationId: getFields
+            tags:
+                - maintain
+            produces:
+                - application/json
+            parameters:
+                - in: path
+                  name: name
+                  required: true
+                  type: string
+                  description: 'returns field'
+            responses:
+                200:
+                    description: field
+                    schema:
+                        $ref: '#/definitions/DsFieldResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /ds-data:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
+        x-swagger-router-controller: ds
+        put:
+            summary: add ds data
+            operationId: addDsData
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: body
+                    name: ds
+                    description: ds info with fields
+                    schema:
+                        $ref: '#/definitions/DsData'
+            responses:
+                200:
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        post:
+            summary: update ds data
+            operationId: updateDsData
+            tags:
+                - maintain
+            security:
+                - BasicAuth: []
+                - ApiKeyAuth: []
+                - OAuth2: [admin, writer]
+            produces:
+                - application/json
+            parameters:
+                -   in: body
+                    name: ds
+                    description: ds info with fields
+                    schema:
+                        $ref: '#/definitions/DsDataUpd'
+            responses:
+                200:
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+    /ds-data/{ds}:
+        parameters:
+            - $ref: '#/parameters/X-Client-ID'
+        x-swagger-router-controller: ds
+        get:
+            summary: Get ds data
+            operationId: getDsData
+            tags:
+                - maintain
+            produces:
+                - application/json
+            parameters:
+                - in: path
+                  name: ds
+                  required: true
+                  type: string
+                  description: 'ds name'
+            responses:
+                200:
+                    description: ds data
+                    schema:
+                        $ref: '#/definitions/DsDataResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
+        post:
+            summary: delete ds
+            operationId: deleteDsData
+            tags:
+                - maintain
+            security:
+                - BasicAuth: [ ]
+                - ApiKeyAuth: [ ]
+                - OAuth2: [ admin, writer ]
+            produces:
+                - application/json
+            parameters:
+                - in: path
+                  name: ds
+                  required: true
+                  type: string
+                  description: 'ds name'
+                - in: body
+                  name: filter
+                  required: true
+                  description: filter
+                  schema:
+                      $ref: '#/definitions/DsDataFilter'
+            responses:
+                200:
+                    description: Resulted id
+                    schema:
+                        $ref: '#/definitions/IdResponse'
+                400:
+                    description: Bad request
+                    schema:
+                        $ref: '#/definitions/StatusType'
+                500:
+                    description: Internal server error
+                    schema:
+                        $ref: '#/definitions/StatusType'
 
 definitions:
     StatusType:
@@ -2359,3 +2633,91 @@ definitions:
                 type: string
             message:
                 type: string
+    DsType:
+        type: object
+        properties:
+            ds:
+                type: string
+            description:
+                type: object
+            fields:
+                type: array
+                items:
+                    $ref: '#/definitions/DsFieldType'
+    DsFields:
+        type: object
+        properties:
+            ds:
+                type: string
+            fields:
+                type: array
+                items:
+                    $ref: '#/definitions/DsFieldType'
+    DsFieldType:
+        type: object
+        properties:
+            field:
+                type: string
+            pk:
+                type: boolean
+            type:
+                type: string
+                enum:
+                    - string
+                    - number
+                    - date
+    DsResponse:
+        type: object
+        properties:
+            data:
+                $ref: '#/definitions/DsType'
+            status:
+                $ref: '#/definitions/StatusType'
+    DsFieldResponse:
+        type: object
+        properties:
+            data:
+                $ref: '#/definitions/DsFields'
+            status:
+                $ref: '#/definitions/StatusType'
+
+    DsAllFieldResponse:
+        type: object
+        properties:
+            data:
+                type: array
+                items:
+                    $ref: '#/definitions/DsFields'
+            status:
+                $ref: '#/definitions/StatusType'
+    DsData:
+        type: object
+        properties:
+            ds:
+                type: string
+            data:
+                type: object
+    DsDataUpd:
+        type: object
+        properties:
+            ds:
+                $ref: '#/definitions/DsData'
+            filter:
+                $ref: '#/definitions/DsDataFilter'
+    DsDataFilter:
+        type: object
+    DsDataResponse:
+        type: object
+        properties:
+            data:
+                type: object
+                properties:
+                    ds:
+                        type: string
+                    data:
+                        type: array
+                        items:
+                            type: object
+            status:
+                $ref: '#/definitions/StatusType'
+

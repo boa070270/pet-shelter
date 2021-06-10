@@ -1,0 +1,332 @@
+# Overall
+
+    @startuml
+    object DsComponent {
+    get ds, fields
+    ..
+    filters
+    --
+    add ds + fields
+    --
+    remove ds + fields
+    }
+    object DsDataComponent {
+    get ds, fields, data
+    ..
+    filters
+    --
+    add/edit data
+    --
+    remove data
+    }
+    object some_component {
+    get ds
+    ..
+    filters
+    ..
+    filters on data by field name, value
+    ..
+    filters on data by field type
+    }
+    @enduml
+
+# DsComponent (add ds, fields)
+
+    @startuml
+    actor User
+    participant "DsComponent" as A
+    participant "DsService" as B
+    participant "DsController" as C
+    participant "DsDb" as D
+    database "ds" as E
+
+    User -> A: fill ds data
+    User -> A: press "save"
+    activate A
+
+    A -> B: {name.., fields: [..]}
+    activate B
+
+    B -> C: HTTP: put {name.., fields: [..]}
+    activate C
+
+    C -> D: {name.., fields: [..]}
+    activate D
+
+    D -> E: INSERT INTO ds(name..) VALUES(ds.name..)
+    E --> D: No errors
+    D -> E: INSERT INTO ds_fld(ds, field, type) VALUES($1,$2,$3), ($1, $4, $5)...
+    E --> D: No errors
+    D --> C: Done
+    deactivate D
+
+    C -> B: HTTP 201
+    deactivate C
+
+    B --> A: Done
+    deactivate B
+
+    A --> User: 'Saved'
+    deactivate A
+    @enduml
+
+# DsComponent (get ds)
+
+    @startuml
+    actor User
+    participant "DsComponent" as A
+    participant "DsService" as B
+    participant "DsController" as C
+    participant "DsDb" as D
+    database "ds" as E
+
+    User --> A: open page
+    activate A
+
+    A --> B: getDs()
+    activate B
+
+    B --> C: HTTP: get /ds
+    activate C
+
+    C --> D: get
+    activate D
+
+    D -> E: SELECT * FROM ds
+    E -> D: rows = ['ds1', ..]
+    D -> C: ['ds1', ..]
+    deactivate D
+
+    C -> B: HTTP 200, ['ds1', ..]
+    deactivate C
+
+    B -> A: ['ds1', ..]
+    deactivate B
+
+    A -> User: <select> [ds..] ?
+    deactivate A
+
+    User -> A: selects 'ds1'
+    activate A
+
+    A --> B: getFields()
+    activate B
+
+    B --> C: HTTP: get /ds?name='ds1'
+    activate C
+
+    C --> D: get(name)
+    activate D
+
+    D -> E: SELECT * FROM ds_fld WHERE ds=$1
+    E -> D: rows = [{ds, field, type}..]
+    D -> C: {ds, fields: [{field,type}..]}
+    deactivate D
+
+    C -> B: HTTP 200, {..}
+    deactivate C
+
+    B -> A: {..}
+    deactivate B
+
+    A -> User: table of fields
+    deactivate A
+    @enduml
+
+# DsComponent ("update" ds)
+
+    @startuml
+    actor User
+    participant "DsComponent" as A
+    participant "DsService" as B
+    participant "DsController" as C
+    participant "DsDb" as D
+    database "ds" as E
+
+    User -> A: edits fields
+    activate A
+    User -> A: new ds name etc.
+
+    A -> B: {name.., fields: [..]}
+    activate B
+
+    B -> C: HTTP: put {name.., fields: [..]}
+    activate C
+
+    C -> D: {name.., fields: [..]}
+    activate D
+
+    D -> E: INSERT INTO ds(name..) VALUES(ds.name..)
+    E --> D: No errors
+    D -> E: INSERT INTO ds_fld(ds, field, type) VALUES($1,$2,$3), ($1, $4, $5)...
+    E --> D: No errors
+    D --> C: Done
+    deactivate D
+
+    C -> B: HTTP 201
+    deactivate C
+
+    B --> A: Done
+    deactivate B
+
+    A --> User: 'Saved'
+    deactivate A
+    @enduml
+
+# DsComponent (remove ds)
+
+    @startuml
+    actor User
+    participant "DsComponent" as A
+    participant "DsService" as B
+    participant "DsController" as C
+    participant "DsDb" as D
+    database "ds" as E
+
+    User --> A: open page
+    activate A
+
+    A --> B: getDs()
+    activate B
+
+    B --> C: HTTP: get /ds
+    activate C
+
+    C --> D: get
+    activate D
+
+    D -> E: SELECT * FROM ds
+    E -> D: rows = ['ds1', ..]
+    D -> C: ['ds1', ..]
+    deactivate D
+
+    C -> B: HTTP 200, ['ds1', ..]
+    deactivate C
+
+    B -> A: ['ds1', ..]
+    deactivate B
+
+    A -> User: <select> [ds..] ?
+    deactivate A
+
+    User -> A: selects 'ds1'
+    User -> A: press 'delete ds'
+    activate A
+
+    A -> B: 'ds1'
+    activate B
+
+    B -> C: HTTP: delete /ds?name='ds1'
+    activate C
+
+    C -> D: 'ds1'
+    activate D
+
+    D -> E: DELETE FROM ds_data WHERE ds = $1
+    E --> D: No errors
+    D -> E: DELETE FROM ds_fld WHERE ds = $1
+    E --> D: No errors
+    D -> E: DELETE FROM ds WHERE name = $1
+    E --> D: No errors
+    D --> C: Done
+    deactivate D
+
+    C -> B: HTTP 200
+    deactivate C
+
+    B --> A: Done
+    deactivate B
+
+    A --> User: 'Removed'
+    deactivate A
+    @enduml
+
+# DsDataComponent (add/update data)
+
+    @startuml
+    actor User
+    participant "DsDataComponent" as A
+    participant "DsService" as B
+    participant "DsController" as C
+    participant "DsDb" as D
+    database "ds" as E
+
+    User --> A: open page
+    activate A
+
+    A --> B: getFields()
+    activate B
+
+    B --> C: HTTP: get /ds?name='ds1'
+    activate C
+
+    C --> D: get(name)
+    activate D
+
+    D -> E: SELECT * FROM ds_fld WHERE ds=$1
+    E -> D: rows = [{ds, field, type}..]
+    D -> C: {ds, fields: [{field,type}..]}
+    deactivate D
+
+    C -> B: HTTP 200, {..}
+    deactivate C
+
+    B -> A: {..}
+    deactivate B
+
+    A -> User: swagger w or w/o data
+    deactivate A
+
+    User -> A: selects 'ds1'
+    activate A
+
+    A --> B: getFields()
+    activate B
+
+    B --> C: HTTP: get /data?name='ds1'
+    activate C
+
+    C --> D: get(name)
+    activate D
+
+    D -> E: SELECT * FROM ds_data WHERE ds=$1
+    E -> D: {ds, data} ?
+    D -> C: {ds, data}
+    deactivate D
+
+    C -> B: HTTP 200, {..}
+    deactivate C
+
+    B -> A: {..}
+    deactivate B
+
+    A -> User: data
+    deactivate A
+
+    User -> A: edit/add data
+    activate A
+
+    A -> B: updData({ds, data})
+    activate B
+
+    B --> C: HTTP: post /data ({ds, data})
+    activate C
+
+    C --> D: updData({ds, data})
+    activate D
+
+    D -> D: checkData(fields, data)
+    D -> E: UPSERT INTO ds_data(ds, data)
+    E --> D: no errors
+    D --> C: no errors
+    deactivate D
+
+    C -> B: HTTP 200/201
+    deactivate C
+
+    B --> A: Done
+    deactivate B
+
+    A -> User: 'saved'
+    deactivate A
+    @enduml

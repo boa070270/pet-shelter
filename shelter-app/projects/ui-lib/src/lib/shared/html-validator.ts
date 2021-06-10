@@ -1,9 +1,10 @@
-import {HtmlRules} from '../shared/html-rules';
-import {NodeWrapper, SPosition, treeWalker} from '../shared';
 
 // tslint:disable:max-line-length
-export interface SRange { start: number; end: number; }
-const EMPTY_S_RANGE: SRange = {start: 0, end: 0};
+import {NodeWrapper, SPosition, treeWalker} from './html-helper';
+import {HtmlRules} from './html-rules';
+
+export interface StartEnd { start: number; end: number; }
+const EMPTY_S_RANGE: StartEnd = {start: 0, end: 0};
 function chkAttribute(n: string, attr?: {[key: string]: string}): any {
   if (attr) {
     const f = Object.keys(attr).find((k) => k.toLowerCase() === n.toLowerCase());
@@ -31,7 +32,7 @@ export class SNode extends NodeWrapper {
     return this.children ? this.children[0] || null : null;
   }
   get lastChild(): SNode {
-    return this.children ? this.children[this.children.length] || null : null;
+    return this.children ? this.children[this.children.length - 1] || null : null;
   }
   get index(): number {
     return this.parent ? this.parent.children.indexOf(this) : -1;
@@ -39,7 +40,7 @@ export class SNode extends NodeWrapper {
   get numChildren(): number {
     return this.children ? this.children.length : 0;
   }
-  constructor(inRange: SRange, outRange: SRange, typeNode: number, nodeName: string, text?: string) {
+  constructor(inRange: StartEnd, outRange: StartEnd, typeNode: number, nodeName: string, text?: string) {
     super();
     this.inRange = inRange;
     this.outRange = outRange;
@@ -51,8 +52,8 @@ export class SNode extends NodeWrapper {
     this._txt = text;
   }
   // start and end include tag whole
-  inRange: SRange;
-  outRange: SRange;
+  inRange: StartEnd;
+  outRange: StartEnd;
   typeNode: number;
   nodeName: string;
   children: SNode[] = null;
@@ -61,18 +62,18 @@ export class SNode extends NodeWrapper {
   // 0, undefined, null - without change, -1 - deleted, 1 - modified, 2 - new, 3 - attr modified
   state: number;
   private _txt: string;
-  static textNode(text: string, inRange?: SRange, outRange?: SRange): SNode { // the state was set during add
+  static textNode(text: string, inRange?: StartEnd, outRange?: StartEnd): SNode { // the state was set during add
     return new SNode(inRange || EMPTY_S_RANGE, outRange || EMPTY_S_RANGE, Node.TEXT_NODE, '#text', htmlDecode(text));
   }
-  static elementNode(nodeName: string, attr?: any, inRange?: SRange, outRange?: SRange): SNode { // the state was set during add
+  static elementNode(nodeName: string, attr?: any, inRange?: StartEnd, outRange?: StartEnd): SNode { // the state was set during add
     const n = new SNode(inRange || EMPTY_S_RANGE, outRange || EMPTY_S_RANGE, Node.ELEMENT_NODE, nodeName);
     n.attr = attr || {};
     return n;
   }
-  static commentNode(text: string, inRange: SRange, outRange: SRange): SNode {
+  static commentNode(text: string, inRange: StartEnd, outRange: StartEnd): SNode {
     return new SNode(inRange, outRange, Node.COMMENT_NODE, '#comment', text);
   }
-  static cdataNode(text: string, inRange: SRange, outRange: SRange): SNode {
+  static cdataNode(text: string, inRange: StartEnd, outRange: StartEnd): SNode {
     return new SNode(inRange, outRange, Node.CDATA_SECTION_NODE, '#cdata-section', text);
   }
   /**
@@ -235,6 +236,32 @@ export class SNode extends NodeWrapper {
     n.parent = this;
     this.children.push(n);
   }
+  validate(correct = true): void {
+    if (this.typeNode === Node.ELEMENT_NODE) {
+      const content = HtmlRules.contentOfNode(this);
+      if (!content) {
+        if (this.numChildren !== 0) {
+          this.errors.push(`Element ${this.nodeName} cannot have children`);
+        }
+      } else {
+        if (content.elem) {
+          this.everyChild((c) => {
+            if (!content.elem.includes(c.nodeName)) {
+              this.errors.push(`Element ${this.nodeName} cannot have ${c.nodeName} as child`);
+            }
+          });
+        }
+        if (content.cnt.includes('Flow') || content.cnt.includes('Phrasing')) {
+          if (correct && (this instanceof SNode) && (!this.lastChild || this.lastChild.typeNode !== Node.TEXT_NODE)) {
+            this.addChild(SNode.textNode(''));
+          }
+          if (!this.lastChild || this.lastChild.typeNode !== Node.TEXT_NODE){
+            this.warnings.push(`Element ${this.nodeName} required child element`);
+          }
+        }
+      }
+    }
+  }
   newChild(n: SNode, inx: number): SNode {
     if (this.children) {
       n.parent = this;
@@ -333,7 +360,7 @@ export class SimpleParser {
   constructor(source: string, mark: string, private baseMark = '0') {
     this.source = source;
     this.mark = mark;
-    this.root = parse(source, mark, this.errors);
+    this.root = parse(source, mark, this.errors, baseMark);
   }
   static rgStartTag(t: string): RegExp {
     return new RegExp(`<${t}[^>]*>`, 'gi');
@@ -379,9 +406,10 @@ export class SimpleParser {
     return HtmlRules.validateSource(this.root);
   }
 }
-function parse(source: string, mark: string, errors: ParseError[]): SNode {
+function parse(source: string, mark: string, errors: ParseError[], baseMark: string): SNode {
   const deep: SNode[] = [];
-  const _root = new SNode({start: 0, end: source.length}, {start: 0, end: source.length}, Node.ELEMENT_NODE, 'main', this.baseMark);
+  const mainAttr = {}; mainAttr[mark] = baseMark;
+  const _root = SNode.elementNode('main', mainAttr, {start: 0, end: source.length}, {start: 0, end: source.length});
   let root = _root;
   let pos = 0;
   function isNode(i: number): boolean {
@@ -510,5 +538,6 @@ function parse(source: string, mark: string, errors: ParseError[]): SNode {
       text();
     }
   }
+  _root.validate();
   return _root;
 }

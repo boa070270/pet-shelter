@@ -27,10 +27,10 @@ import {PositionStrategy} from '@angular/cdk/overlay/position/position-strategy'
 })
 export class DialogService implements OnDestroy {
   private get simpleDialogComponent(): Type<any> {
-    return this.componentsPlugin.getPlugin('simple-dialog').component;
+    return this.componentsPlugin.getPlugin('lib-simple-dialog').component;
   }
   private get snakeBarComponent(): Type<any> {
-    return this.componentsPlugin.getPlugin('snake-bar').component;
+    return this.componentsPlugin.getPlugin('lib-snake-bar').component;
   }
 
   _afterAllClosedBase = new Subject<void>();
