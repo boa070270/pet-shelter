@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AbstractIteratorComponent } from './abstract-iterator.component';
 
 describe('AbstractIteratorComponent', () => {
-  let component: AbstractIteratorComponent;
-  let fixture: ComponentFixture<AbstractIteratorComponent>;
+  let component: AbstractIteratorComponent<any, any>;
+  let fixture: ComponentFixture<AbstractIteratorComponent<any, any>>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

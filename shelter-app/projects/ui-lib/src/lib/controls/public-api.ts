@@ -40,7 +40,6 @@ export * from './content-display/advert.component';
 export * from './content-display/masonry-list.component';
 export * from './switch-page-data.directive';
 export * from './plugin.component';
-export * from './ui-for-of.directive';
 export * from './media/show-media-value.component';
 export * from './media/show-value.component';
 export * from './is-visible.directive';

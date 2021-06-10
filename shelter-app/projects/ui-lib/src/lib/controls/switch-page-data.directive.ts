@@ -1,7 +1,7 @@
 import {Component, Directive, ElementRef, Host, Inject, Input, OnInit, Self, SkipSelf} from '@angular/core';
 import {ROOT_PAGE_DATA, RootPageService, RootPageServiceImpl} from '../shared';
 import {IteratorDirective} from './abstract-iterator.component';
-import {deepCloneNode} from "../editor/clone-node";
+import {deepCloneNode} from '../editor/clone-node';
 
 @Directive({
   selector: '[switch-page-data]',

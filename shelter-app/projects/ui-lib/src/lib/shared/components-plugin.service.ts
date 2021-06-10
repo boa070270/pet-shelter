@@ -1,12 +1,8 @@
 import {Injectable, Injector, Type} from '@angular/core';
 import {SwaggerObject} from './swagger-object';
 import {TitleType} from './language';
-import {createCustomElement} from "@angular/elements";
-
-export interface CustomElementDescription {
-  selectorName: string;
-  injector: Injector;
-}
+import {createCustomElement} from '@angular/elements';
+import {HtmlElementContent, HtmlRules} from './html-rules';
 
 export interface PluginDescription {
   selectorName?: string; // this field is set by system
@@ -15,13 +11,12 @@ export interface PluginDescription {
   description?: string | TitleType[]; // to show on plugin panel
   tag?: string; // if this is present this tag would be published by ui-element module
   attr?: {[key: string]: string}; // the default attributes that will be added to on drag preview and in editor
-  isPhrasing?: boolean; // true - this tag can be placed in <p>, <pre>, <h1-n> tags
+  elementContent?: HtmlElementContent[]; // if absent or empty, this element belong Flow content and can have children from Flow content
 }
 export interface ComponentPlugin {
   component: Type<any>;
   schema?: SwaggerObject; // describes form that will displayed in editor to collect need parameters
   description?: PluginDescription;
-  customElement?: CustomElementDescription;
 }
 @Injectable({
   providedIn: 'root'
@@ -31,15 +26,16 @@ export class ComponentsPluginService {
 
   constructor() { }
 
-  addPlugin(selectorNames: string[], plugin: ComponentPlugin): void {
+  addPlugin(selectorNames: string[], plugin: ComponentPlugin, injector?: Injector): void {
     selectorNames.forEach(selectorName => {
       this.plugins[selectorName] = plugin;
     });
 
-    if (plugin.customElement) {
-      const ce = plugin.customElement;
-      const component = createCustomElement(plugin.component, {injector: ce.injector});
-      customElements.define(ce.selectorName, component);
+    if (plugin.description && plugin.description.tag && injector) {
+      const ce = plugin.description;
+      const component = createCustomElement(plugin.component, {injector});
+      customElements.define(ce.tag, component);
+      HtmlRules.elements[ce.tag.toLowerCase()] = ce.elementContent || HtmlRules.defCustomContent;
     }
   }
 
@@ -47,14 +43,21 @@ export class ComponentsPluginService {
     return this.plugins[selectorName];
   }
   listPlugins(): Array<PluginDescription> {
-    return Object.keys(this.plugins).map(k => {
-      const desc = this.plugins[k].description || {};
-      return {
-        icon: desc.icon || 'gm-device_unknown',
-        caption: desc.caption || k,
-        selectorName: k,
-        description: desc.description || k
-      };
-    });
+    const res: Array<PluginDescription> = [];
+    for (const [k, v] of Object.entries(this.plugins)) {
+      if (v.description) {
+        const d = v.description;
+        res.push({
+          selectorName: k,
+          description: d.description,
+          caption: d.caption,
+          icon: d.icon,
+          attr: d.attr,
+          tag: d.tag,
+          elementContent: d.elementContent
+        });
+      }
+    }
+    return res;
   }
 }
