@@ -19,9 +19,9 @@ export interface DsFieldType {
 }
 
 export enum DsFldTypeEnum {
-  string,
-  number,
-  date
+  string = 'string',
+  number = 'number',
+  date = 'date'
 }
 
 @Injectable({

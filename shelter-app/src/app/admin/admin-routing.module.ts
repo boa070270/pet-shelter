@@ -12,6 +12,7 @@ import {UserTableComponent} from './user-table.component';
 import { AdminComponent } from './admin.component';
 import {AuthGuard} from '../auth.guard';
 import {DsComponent} from "./ds.component";
+import {DsDataComponent} from "./ds-data.component";
 
 const routes: Routes = [
   {path: 'lang-table', component: LangTableComponent, canActivate: [AuthGuard]},
@@ -23,6 +24,7 @@ const routes: Routes = [
   {path: 'page-table', component: PageTableComponent, canActivate: [AuthGuard]},
   {path: 'user-table', component: UserTableComponent, canActivate: [AuthGuard]},
   {path: 'ds', component: DsComponent, canActivate: [AuthGuard]},
+  {path: 'ds-data', component: DsDataComponent, canActivate: [AuthGuard]},
   { path: '', component: AdminComponent }
   ];
 

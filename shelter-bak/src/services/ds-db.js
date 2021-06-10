@@ -90,10 +90,10 @@ class DsDb {
         let data;
         log.debug('getDsData %o', ds);
         data = await pgPool.query('select ctid, data from ds_data where ds = $1', [ds]);
-        data.rows.forEach(r => {
+        data = data.rows.map(r => {
             return {ctid: r.ctid, ...r.data};
         });
-        return {ds, data: pgPool.clearNull(data.rows)};
+        return {ds, data: pgPool.clearNull(data)};
     }
 
     async addDsData(ds) {
@@ -104,6 +104,9 @@ class DsDb {
     }
 
     async checkData(ds) {
+        if (Object.keys(ds.data).length === 0) {
+            throw new Error(`Data is empty ${ds.data}`);
+        }
         let fields = (await this.getFields(ds.ds)).fields;
         if (!fields || fields.length === 0) {
             throw new Error(`No fields found in ds ${ds.ds}`);
