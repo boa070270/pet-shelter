@@ -87,6 +87,7 @@ export function isDescendant(p: NodeWrapper, c: NodeWrapper): boolean {
   }
   return false;
 }
+
 export class HtmlWrapper extends NodeWrapper {
   readonly state = 0;
   constructor(private n: Node) {
@@ -117,8 +118,15 @@ export class HtmlWrapper extends NodeWrapper {
     return this.n.previousSibling ? new HtmlWrapper(this.n.previousSibling) : null;
   }
   get index(): number {
-    let n = 0; for (; this.n.parentNode.childNodes[n] !== this.n && this.n.parentNode.childNodes[n]; ++n){}
-    return this.n.parentNode.childNodes[n] ? n : -1;
+    let i = 0; let f = this.n.parentNode.firstChild;
+    while (f !== null) {
+      if (f === this.n) {
+        return i;
+      }
+      i++;
+      f = f.nextSibling;
+    }
+    return -1;
   }
   attribute(name: string): string {
     return this.n.nodeType === Node.ELEMENT_NODE ? (this.n as HTMLElement).getAttribute(name) : null;
@@ -155,11 +163,6 @@ export class SPosition {
       }
     }
     return null;
-  }
-  static collapseTo(sp: SPosition): void {
-    if (sp) {
-      window.getSelection().collapse((sp.n as HtmlWrapper).original, sp.offset);
-    }
   }
   prevPosition(root: NodeWrapper): SPosition {
     if (this.n === root && this.offset === 0) {

@@ -4,8 +4,7 @@ import {CmdEditorToolbox, EditorToolbarComponent} from './editor-toolbar.compone
 import {Subscription} from 'rxjs';
 import {
   ComponentsPluginService,
-  HtmlRules,
-  HtmlWrapper,
+  HtmlRules, HtmlWrapper,
   LibNode,
   NodeWrapper,
   SimpleParser,
@@ -50,7 +49,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     this.parser = new SimpleParser(s, DESIGNER_ATTR_NAME);
   }
   get source(): string {
-    return this.parser ? this.parser.source : '';
+    return this.parser ? this.parser.root.newSource(this.parser.source) : '';
   }
   designIndex = 1;
   editor: HTMLDivElement;
@@ -409,24 +408,23 @@ export class EditorComponent implements OnInit, OnDestroy {
     }
   }
   private void(tag: string, attr?: {[key: string]: string}): void {
-    const parent = this.range.commonAncestor;
     if (!this.range.collapsed) {
       this.deleteRange();
     }
     const w = this.toSNode(this.range.start.n);
+    let sp: SPosition;
+    let n: NodeWrapper;
     if (w.typeNode === Node.TEXT_NODE) {
       const text = w.getText(this.parser.source);
       w.setText(text.substring(0, this.range.start.offset));
-      w.parent.newChild(SNode.elementNode(tag, this.copyAttr(attr)), w.index + 1);
+      n = w.parent.newChild(SNode.elementNode(tag, this.copyAttr(attr)), w.index + 1);
       w.parent.newChild(SNode.textNode(text.substring(this.range.start.offset)), w.index + 2);
-      this.range.start.n = this.range.start.n.parent;
-      this.range.start.offset += 2;
     } else {
-      w.newChild(SNode.elementNode(tag, this.copyAttr(attr)), this.range.start.offset);
-      this.range.start.offset += 1;
+      n = w.newChild(SNode.elementNode(tag, this.copyAttr(attr)), this.range.start.offset);
     }
-    this.update(this.toSNode(parent));
-    this.collapse('start');
+    this.update(this.toSNode(n.parent));
+    sp = new SPosition(n.parent, n.index + 1);
+    this.collapse(null, sp);
   }
   private update(w: SNode): void {
     let n: HTMLElement;
@@ -509,7 +507,7 @@ export class EditorComponent implements OnInit, OnDestroy {
       parent = parent.parent;
     } else {
       const work = this.toSNode(this.range.start.n);
-      let offset = work.typeNode === Node.TEXT_NODE ? this.range.start.offset : undefined;
+      let offset = work.typeNode === Node.TEXT_NODE ? this.range.start.offset : 0;
       let child;
       if (work.typeNode !== Node.TEXT_NODE) {
         const cnt = HtmlRules.contentOfNode(work);
@@ -520,6 +518,7 @@ export class EditorComponent implements OnInit, OnDestroy {
         child = work.child(this.range.start.offset);
         if (child && child.typeNode !== Node.TEXT_NODE && work.child(this.range.start.offset - 1) && work.child(this.range.start.offset - 1).typeNode === Node.TEXT_NODE) {
           child = work.child(this.range.start.offset - 1);
+          offset = child.getText(this.parser.source).length;
         }
       } else {
         child = work;
@@ -567,8 +566,8 @@ export class EditorComponent implements OnInit, OnDestroy {
       let n: HTMLElement;
       if (sp.n.typeNode === Node.TEXT_NODE) {
         n = this.findDesignElement(sp.n.parent.attribute(DESIGNER_ATTR_NAME));
-        if (n.childNodes.item(sp.offset)) {
-          window.getSelection().collapse(n.childNodes.item(sp.offset), sp.offset);
+        if (n.childNodes.item(sp.n.index)) {
+          window.getSelection().collapse(n.childNodes.item(sp.n.index), sp.offset);
         } else {
           if (n.hasChildNodes()) {
             window.getSelection().collapse(n, n.childNodes.length);
@@ -732,7 +731,7 @@ export class EditorComponent implements OnInit, OnDestroy {
       if (a) {
         const sn = this.parser.findSNode(DESIGNER_ATTR_NAME, a);
         if (w.typeNode === Node.TEXT_NODE) {
-          return sn.children[LibNode.orderOfChild((w.parent as HtmlWrapper).original, w.original)];
+          return sn.children[w.index];
         }
         return sn;
       }
@@ -773,36 +772,31 @@ export class EditorComponent implements OnInit, OnDestroy {
     if (n.nodeType === Node.TEXT_NODE && offset < n.textContent.length) {
       window.getSelection().collapse(n, offset + 1);
     }
-    SPosition.collapseTo(this.nextDown(new SPosition(new HtmlWrapper(n), offset), stepText));
+    this.collapse(null, this.nextDown(new SPosition(new HtmlWrapper(n), offset), stepText));
   }
   private movePrev(n: Node, offset: number, stepText = true): void {
     if (n.nodeType === Node.TEXT_NODE && offset > 0) {
       window.getSelection().collapse(n, offset - 1);
     }
-    SPosition.collapseTo(this.nextUp(new SPosition(new HtmlWrapper(n), offset), stepText));
+    this.collapse(null, this.nextUp(new SPosition(new HtmlWrapper(n), offset), stepText));
   }
   private nextDown(p: SPosition, stepText = true): SPosition {
-    return SPosition.findPosition(new HtmlWrapper(this.editor), p, editorNode(stepText), true);
+    const root = p.n instanceof SNode ? this.parser.root : new HtmlWrapper(this.editor);
+    return SPosition.findPosition(root, p, editorNode(stepText), true);
   }
   private nextUp(p: SPosition, stepText = true): SPosition {
-    return SPosition.findPosition(new HtmlWrapper(this.editor), p, editorNode(stepText), false);
+    const root = p.n instanceof SNode ? this.parser.root : new HtmlWrapper(this.editor);
+    return SPosition.findPosition(root, p, editorNode(stepText), false);
   }
   private findPalpable(container: Node, offset: number, revert = false): SPosition {
-    function sp(w: SNode): SPosition {
-      const cnt = HtmlRules.contentOfNode(p);
-      if (cnt && (cnt.cnt.includes('Flow') || cnt.cnt.includes('Phrasing'))) {
-        return new SPosition(w, 0);
-      }
-      return new SPosition(w.parent, w.index);
-    }
-    const p = this.toSNode(new HtmlWrapper(LibNode.nodeOfPoints(container, offset)));
+    const p = this.toSNode(new HtmlWrapper(container));
     if (p && HtmlRules.isPalpable(p)) {
-      return p.typeNode === Node.TEXT_NODE ? new SPosition(p, offset) : sp(p);
+      return new SPosition(p, offset);
     }
-    const iter = new SNodeIterator(this.parser.root, this.toSNode(p), revert);
+    const iter = new SNodeIterator(this.parser.root, p, revert);
     for (const n of iter) {
       if (HtmlRules.isPalpable(n)) {
-        return n.typeNode === Node.TEXT_NODE ? new SPosition(n, 0) : sp(this.toSNode(n));
+        return n.typeNode === Node.TEXT_NODE ? new SPosition(n, 0) : new SPosition(n.parent, n.index);
       }
     }
     return null;
