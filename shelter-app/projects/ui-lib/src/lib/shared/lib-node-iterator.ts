@@ -9,22 +9,6 @@ export class LibRange {
   static fromRange(range: Range): LibRange {
     return new LibRange({n: range.startContainer, offset: range.startOffset}, {n: range.endContainer, offset: range.endOffset});
   }
-  static validate(range: Range, criteria: (p: Position) => boolean): Range {
-    const r = LibRange.fromRange(range);
-    while (!criteria(r.start) && !LibPosition.equal(r.start, r.end)) {
-      r.start = LibPosition.asLibPosition(r.start).nextNode();
-    }
-    while (!criteria(r.end) && !LibPosition.equal(r.start, r.end)) {
-      r.end = LibPosition.asLibPosition(r.end).nextNode();
-    }
-    if (LibPosition.equal(r.start, r.end) && !criteria(r.start)) {
-      return null;
-    }
-    const rn = range.cloneRange();
-    rn.setStart(r.start.n, r.start.offset);
-    rn.setEnd(r.end.n, r.end.offset);
-    return rn;
-  }
 }
 export class LibPosition implements Position {
   readonly isImpl = true;
@@ -132,7 +116,7 @@ export class LibPosition implements Position {
     }
     return n.parentNode ? LibNode.nodePosition(n.parentNode) : null;
   }
-  nextNode(checkContainer = true): LibPosition {
+  nextNode(root: Node): LibPosition {
     let n = this.toNode();
     if (n.firstChild) {
       return LibNode.nodePosition(n.firstChild);
@@ -142,6 +126,7 @@ export class LibPosition implements Position {
     }
     n = n.parentNode;
     while (n) {
+      if (n === root) { break; }
       if (n.nextSibling) {
         return LibNode.nodePosition(n.nextSibling);
       }
@@ -196,10 +181,10 @@ export class LibNodeIterator implements Iterable<LibPosition>, Iterator<LibPosit
     if (this.revert) {
       this.current = this.current.prevNode();
     } else {
-      this.current = this.current.nextNode();
+      this.current = this.current.nextNode(this.root);
     }
     this.done = this.isDone();
-    return {done: false, value: this.current};
+    return {done: this.done, value: this.current};
   }
   [Symbol.iterator](): Iterator<LibPosition> {
     return this;

@@ -45,7 +45,7 @@ export class ListSelectComponent extends SelectControlComponent implements OnIni
       super.writeValue(coerceArray(obj));
     }
   }
-  registerOnChange(fn: (_: any) => {}): void {
+  registerOnChange(fn: (_: any) => void): void {
     super.registerOnChange(fn);
   }
   registerOnTouched(fn: any): void {

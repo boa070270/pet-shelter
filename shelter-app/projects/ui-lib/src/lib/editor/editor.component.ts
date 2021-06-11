@@ -37,8 +37,6 @@ const PROCESS_NAVIGATION_KEYS = [
 ];
 const DESIGNER_ATTR_NAME = '_design';
 
-interface StoragePosition { designId: string; offset: number; txtOffset?: number; }
-
 @Component({
   selector: 'lib-editor',
   templateUrl: './editor.component.html',
@@ -243,29 +241,10 @@ export class EditorComponent implements OnInit, OnDestroy {
       this.toolbar.updateToolbar(res);
     }
   }
-  // private newModification(range: Range): AddModification {
-  //   const r = range.cloneRange();
-  //   let p = LibPosition.normalizePoint(r.startContainer, r.startOffset);
-  //   r.setStart(p.n, p.offset);
-  //   p = LibPosition.normalizePoint(r.endContainer, r.endOffset);
-  //   r.setEnd(p.n, p.offset);
-  //   return new AddModification(this.editor, this.parser, r, DESIGNER_ATTR_NAME, () => this.designIndex++,
-  //     (rg: Range, st: number, en: number, s: string) => this.update(rg, st, en, s));
-  // }
-  private newPosition(n: Node, offset: number): void {
-    if (n.nodeType === Node.TEXT_NODE && offset > n.textContent.length) {
-      offset = n.textContent.length;
-    }
-    if (n.nodeType === Node.ELEMENT_NODE && offset > n.childNodes.length) {
-      offset = n.childNodes.length;
-    }
-    window.getSelection().collapse(n, offset);
-    this.storeRange();
-  }
   private deleteRange(): void {
     if (this.range) {
-      const start = this.toSNode(this.range.start.positionToNode(this.parser.root));
-      const end = this.toSNode(this.range.end.positionToNode(this.parser.root));
+      const start = this.toSNode(this.range.start.positionToNode());
+      const end = this.toSNode(this.range.end.positionToNode());
       const iter = new SNodeIterator(this.parser.root, start);
       if (start.typeNode === Node.TEXT_NODE) {
         start.setText(start.getText(this.parser.source).substring(0, this.range.start.offset));
@@ -283,6 +262,8 @@ export class EditorComponent implements OnInit, OnDestroy {
           break;
         }
       }
+      this.update(this.toSNode(this.range.commonAncestor));
+      this.collapse('start');
     }
   }
   private phrasing(tag: string, attr?: {[key: string]: string}): void {
@@ -343,8 +324,7 @@ export class EditorComponent implements OnInit, OnDestroy {
         }
       }, () => null, this.parser.root);
     }
-    const n = this.toHtmlWrapper(update);
-    (n.original as HTMLElement).innerHTML = this.toSNode(update).newSource(this.parser.source);
+    this.update(update);
     this.collapse('start');
   }
   private sectioning(tag: string, attr?: {[key: string]: string}, invert = false): void {
@@ -370,8 +350,7 @@ export class EditorComponent implements OnInit, OnDestroy {
           return;
         }
       }
-      const n = this.toHtmlWrapper(wrap);
-      (n.original as HTMLElement).innerHTML = this.toSNode(wrap).newSource(this.parser.source);
+      this.update(wrap);
       this.collapse('start');
     }
   }
@@ -398,8 +377,7 @@ export class EditorComponent implements OnInit, OnDestroy {
           return;
         }
       }
-      const n = this.toHtmlWrapper(wrap);
-      (n.original as HTMLElement).innerHTML = this.toSNode(wrap).newSource(this.parser.source);
+      this.update(wrap);
       this.collapse('start');
     }
   }
@@ -426,8 +404,7 @@ export class EditorComponent implements OnInit, OnDestroy {
           return;
         }
       }
-      const n = this.toHtmlWrapper(wrap);
-      (n.original as HTMLElement).innerHTML = this.toSNode(wrap).newSource(this.parser.source);
+      this.update(wrap);
       this.collapse('start');
     }
   }
@@ -448,9 +425,17 @@ export class EditorComponent implements OnInit, OnDestroy {
       w.newChild(SNode.elementNode(tag, this.copyAttr(attr)), this.range.start.offset);
       this.range.start.offset += 1;
     }
-    const n = this.toHtmlWrapper(parent);
-    (n.original as HTMLElement).innerHTML = this.toSNode(parent).newSource(this.parser.source);
+    this.update(this.toSNode(parent));
     this.collapse('start');
+  }
+  private update(w: SNode): void {
+    let n: HTMLElement;
+    if (w.typeNode === Node.TEXT_NODE) {
+      n = this.findDesignElement(w.parent.attribute(DESIGNER_ATTR_NAME));
+    } else {
+      n = this.findDesignElement(w.attribute(DESIGNER_ATTR_NAME));
+    }
+    n.innerHTML = this.toSNode(w).newSource(this.parser.source);
   }
   private nextMark(): string { return '' + this.designIndex++; }
   private findWithParentCntFlow(w: NodeWrapper): SNode {
@@ -515,14 +500,16 @@ export class EditorComponent implements OnInit, OnDestroy {
   }
   private simpleChar(key: string): void {
     let parent = this.range.commonAncestor;
+    let sp: SPosition;
     if (parent.typeNode === Node.TEXT_NODE) {
       // don't need validation
       const work = this.toSNode(parent);
       work.setText(work.getText(this.parser.source).substring(0, this.range.start.offset) + key + work.getText(this.parser.source).substring(this.range.end.offset));
+      sp = new SPosition(work, this.range.start.offset + key.length);
       parent = parent.parent;
     } else {
       const work = this.toSNode(this.range.start.n);
-      const offset = work.typeNode === Node.TEXT_NODE ? this.range.start.offset : undefined;
+      let offset = work.typeNode === Node.TEXT_NODE ? this.range.start.offset : undefined;
       let child;
       if (work.typeNode !== Node.TEXT_NODE) {
         const cnt = HtmlRules.contentOfNode(work);
@@ -542,30 +529,75 @@ export class EditorComponent implements OnInit, OnDestroy {
       }
       if (child && child.typeNode === Node.TEXT_NODE) {
         child.setText(child.getText(this.parser.source).substring(0, offset) + key);
+        offset += key.length;
       } else {
-        work.newChild(SNode.textNode(key), this.range.start.offset);
+        child = work.newChild(SNode.textNode(key), this.range.start.offset);
+        offset = key.length;
       }
+      sp = new SPosition(child, offset);
     }
-    const n = this.toHtmlWrapper(parent);
-    (n.original as HTMLElement).innerHTML = this.toSNode(parent).newSource(this.parser.source);
-    this.collapse('start');
+    this.update(this.toSNode(parent));
+    this.collapse(null, sp);
   }
-  private collapse(where: 'commonAncestor' | 'start' | 'end'): void {
-    if (this.range) {
+  private toNode(s: SNode): HTMLElement {
+    if (s.typeNode === Node.TEXT_NODE) {
+      return this.findDesignElement(s.parent.attribute(DESIGNER_ATTR_NAME));
+    } else {
+      return this.findDesignElement(s.attribute(DESIGNER_ATTR_NAME));
+    }
+  }
+  private toPosition(sp: SPosition): {n: Node, offset: number} {
+    const n = this.toNode(this.toSNode(sp.n));
+    if (sp.n.typeNode === Node.TEXT_NODE) {
+      if (n.childNodes.item(sp.n.index)) {
+        return {n: n.childNodes.item(sp.n.index), offset: sp.offset};
+      } else {
+        if (n.hasChildNodes()) {
+          return {n, offset: n.childNodes.length};
+        } else {
+          return {n, offset: 0};
+        }
+      }
+    } else {
+      return {n, offset: sp.offset};
+    }
+  }
+  private collapse(where: 'commonAncestor' | 'start' | 'end', sp?: SPosition): void {
+    if (sp) {
+      let n: HTMLElement;
+      if (sp.n.typeNode === Node.TEXT_NODE) {
+        n = this.findDesignElement(sp.n.parent.attribute(DESIGNER_ATTR_NAME));
+        if (n.childNodes.item(sp.offset)) {
+          window.getSelection().collapse(n.childNodes.item(sp.offset), sp.offset);
+        } else {
+          if (n.hasChildNodes()) {
+            window.getSelection().collapse(n, n.childNodes.length);
+          } else {
+            window.getSelection().collapse(n, 0);
+          }
+        }
+      } else {
+        n = this.findDesignElement(sp.n.attribute(DESIGNER_ATTR_NAME));
+        window.getSelection().collapse(n, sp.offset);
+      }
+    } else if (this.range) {
       let w: SPosition;
       switch (where) {
         case 'commonAncestor':
-          w = this.findPalpable(this.toHtmlWrapper(this.range.commonAncestor).original, 0);
+          w = this.findPalpable(this.toNode(this.toSNode(this.range.commonAncestor)), 0);
+          this.collapse(null, w);
           break;
         case 'start':
-          w = this.findPalpable(this.toHtmlWrapper(this.range.start.n).original, this.range.start.offset);
+          const p = this.toPosition(this.range.start);
+          this.collapse(null, this.findPalpable(p.n, p.offset));
           break;
         case 'end':
-          w = this.findPalpable(this.toHtmlWrapper(this.range.end.n).original, this.range.end.offset);
+          const p2 = this.toPosition(this.range.start);
+          this.collapse(null, this.findPalpable(p2.n, p2.offset));
           break;
       }
-      window.getSelection().collapse(this.toHtmlWrapper(w.n).original, w.offset);
     }
+    this.storeRange();
   }
   private checkAndMarkElements(): boolean {
     let result = false;
@@ -673,7 +705,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     }
     const sp = this.findPalpable(this.editor, 0);
     if (sp) {
-      window.getSelection().collapse(this.toHtmlWrapper(sp.n).original, sp.offset);
+      this.collapse(null, sp);
     }
     window.getSelection().collapse(this.editor, this.editor.childNodes.length);
   }
@@ -681,7 +713,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     if (window.getSelection().rangeCount === 1) {
       this.lastRange = window.getSelection().getRangeAt(0);
       this.focusNode = window.getSelection().focusNode;
-      this.range = this.validateRange(window.getSelection().getRangeAt(0));
+      this.range = this.validateRange(this.lastRange);
     } else {
       this.clearRange();
     }
@@ -693,7 +725,10 @@ export class EditorComponent implements OnInit, OnDestroy {
   }
   private toSNode(w: NodeWrapper): SNode {
     if (w instanceof HtmlWrapper) {
-      const a = w.attribute(DESIGNER_ATTR_NAME);
+      let a = w.attribute(DESIGNER_ATTR_NAME);
+      if (w.typeNode === Node.TEXT_NODE) {
+        a = w.parent.attribute(DESIGNER_ATTR_NAME);
+      }
       if (a) {
         const sn = this.parser.findSNode(DESIGNER_ATTR_NAME, a);
         if (w.typeNode === Node.TEXT_NODE) {
@@ -703,16 +738,6 @@ export class EditorComponent implements OnInit, OnDestroy {
       }
     }
     return w as SNode;
-  }
-  private toHtmlWrapper(w: NodeWrapper): HtmlWrapper {
-    if (w instanceof SNode) {
-      if (w.typeNode === Node.TEXT_NODE) {
-        const n = this.findDesignElement(w.attribute(DESIGNER_ATTR_NAME));
-        return new HtmlWrapper(n.children.item(w.index));
-      }
-      return new HtmlWrapper(this.findDesignElement(w.attribute(DESIGNER_ATTR_NAME)));
-    }
-    return w as HtmlWrapper;
   }
   private restoreRange(): void {
     if (this.focusNode) {
@@ -770,14 +795,14 @@ export class EditorComponent implements OnInit, OnDestroy {
       }
       return new SPosition(w.parent, w.index);
     }
-    const p = new HtmlWrapper(LibNode.nodeOfPoints(container, offset));
-    if (p.attribute(DESIGNER_ATTR_NAME) && HtmlRules.isPalpable(p)) {
-      return sp(this.toSNode(p));
+    const p = this.toSNode(new HtmlWrapper(LibNode.nodeOfPoints(container, offset)));
+    if (p && HtmlRules.isPalpable(p)) {
+      return p.typeNode === Node.TEXT_NODE ? new SPosition(p, offset) : sp(p);
     }
     const iter = new SNodeIterator(this.parser.root, this.toSNode(p), revert);
     for (const n of iter) {
-      if (n.attribute(DESIGNER_ATTR_NAME) && HtmlRules.isPalpable(n)) {
-        return sp(this.toSNode(n));
+      if (HtmlRules.isPalpable(n)) {
+        return n.typeNode === Node.TEXT_NODE ? new SPosition(n, 0) : sp(this.toSNode(n));
       }
     }
     return null;

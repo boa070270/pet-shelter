@@ -62,7 +62,7 @@ export class SelectControlComponent extends CheckboxControlComponent implements 
     super.setValue(key, value);
     this.selectElement.nativeElement.selectedIndex = this.options.indexOf(key);
   }
-  registerOnChange(fn: (_: any) => {}): void {
+  registerOnChange(fn: (_: any) => void): void {
     super.registerOnChange(fn);
   }
   registerOnTouched(fn: any): void {

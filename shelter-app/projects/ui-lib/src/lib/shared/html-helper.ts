@@ -52,13 +52,15 @@ export abstract class NodeWrapper {
   prevNode(): NodeWrapper {
     return this.prev || this.parent;
   }
-  nextNode(): NodeWrapper {
+
+  nextNode(root: NodeWrapper): NodeWrapper {
     let n = this.firstChild;
     if (n) { return n; }
     n = this.next;
     if (n) { return n; }
     n = this.parent;
     while (n) {
+      if (n === root || root.equal(n)) { break; }
       if (n.next) { return n.next; }
       n = n.parent;
     }
@@ -69,8 +71,8 @@ export abstract class NodeWrapper {
     if (n) { return n.thisPosition(); }
     return null;
   }
-  nextPosition(): SPosition { // we return only palpable node
-    const n = this.nextNode();
+  nextPosition(root: NodeWrapper): SPosition { // we return only palpable node
+    const n = this.nextNode(root);
     if (n) { return n.thisPosition(); }
     return null;
   }
@@ -163,7 +165,7 @@ export class SPosition {
     if (this.n === root && this.offset === 0) {
       return null;
     }
-    const n = this.positionToNode(root);
+    const n = this.positionToNode();
     if (n) {
       return n.prevPosition();
     }
@@ -173,24 +175,17 @@ export class SPosition {
     if (this.n === root && this.offset === root.numChildren) {
       return null;
     }
-    const n = this.positionToNode(root);
+    const n = this.positionToNode();
     if (n) {
-      return n.nextPosition();
+      return n.nextPosition(root);
     }
     throw new Error('There is null node'); // TODO
   }
-  positionToNode(root: NodeWrapper): NodeWrapper {
-    let node = null;
-    treeWalker(root, (n) => {
-      if (n === this.n) {
-        node = n;
-        return true;
-      }
-    });
-    if (node && node.typeNode === Node.ELEMENT_NODE) {
-      return node.child(this.offset);
+  positionToNode(): NodeWrapper {
+    if (this.n.typeNode === Node.ELEMENT_NODE) {
+      return this.n.child(this.offset);
     }
-    return node; // can be null
+    return this.n;
   }
 }
 export function beforePosition(sp: SPosition): (n: NodeWrapper) => boolean {
@@ -263,7 +258,7 @@ export class PositionIterator implements Iterable<SPosition>, Iterator<SPosition
       this.current = this.current.nextPosition(this.root);
     }
     this.done = this.isDone();
-    return {done: false, value: this.current};
+    return {done: this.done, value: this.current};
   }
   [Symbol.iterator](): Iterator<SPosition> {
     return this;
@@ -286,10 +281,10 @@ export class SNodeIterator implements Iterable<NodeWrapper>, Iterator<NodeWrappe
     if (this.revert) {
       this.current = this.current.prevNode();
     } else {
-      this.current = this.current.nextNode();
+      this.current = this.current.nextNode(this.root);
     }
     this.done = this.isDone();
-    return {done: false, value: this.current};
+    return {done: this.done, value: this.current};
   }
   [Symbol.iterator](): Iterator<NodeWrapper> {
     return this;
