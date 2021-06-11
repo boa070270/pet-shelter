@@ -13,7 +13,7 @@ import {ListRange} from '@angular/cdk/collections';
 import {map} from 'rxjs/operators';
 import {Injectable, OnDestroy} from '@angular/core';
 import {BannerType, CarouselType, FieldTypeUI, FileType, MenuTypeUI, PageType, PetType, UserType} from './common/types';
-import {DsDataService, DsDataType, DsService, DsType} from "./admin/ds.service";
+import {DsDataService, DsDataType, DsService, DsType, removeNull} from "./admin/ds.service";
 
 class LanguageDataService extends DataService<LanguageType> {
   constructor(private basicService: BasicService) {
@@ -27,7 +27,7 @@ class LanguageDataService extends DataService<LanguageType> {
     );
   }
   insertData(row: LanguageType): Observable<DataExpectedResult<LanguageType>> {
-    return this.basicService.upsertLanguage(row).pipe(
+    return this.basicService.upsertLanguage(removeNull(row)).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
       })
@@ -42,7 +42,7 @@ class LanguageDataService extends DataService<LanguageType> {
     );
   }
   updateData(row: LanguageType): Observable<DataExpectedResult<LanguageType>> {
-    return this.insertData(row);
+    return this.insertData(removeNull(row));
   }
 }
 class MenuDataService extends DataService<MenuTypeUI> {
@@ -60,7 +60,7 @@ class MenuDataService extends DataService<MenuTypeUI> {
     const title = row.title;
     const menu = Object.assign({}, row);
     delete menu.title;
-    return this.basicService.upsetMenu2(menu, title).pipe(
+    return this.basicService.upsetMenu2(removeNull(menu), removeNull(title)).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
       })
@@ -79,7 +79,7 @@ class MenuDataService extends DataService<MenuTypeUI> {
     );
   }
   updateData(row: MenuTypeUI): Observable<DataExpectedResult<MenuTypeUI>> {
-    return this.insertData(row);
+    return this.insertData(removeNull(row));
   }
 }
 class FieldDataService extends DataService<FieldTypeUI> {
@@ -114,7 +114,7 @@ class FieldDataService extends DataService<FieldTypeUI> {
     }));
   }
   updateData(row: FieldTypeUI): Observable<DataExpectedResult<FieldTypeUI>> {
-    return this.insertData(row);
+    return this.insertData(removeNull(row));
   }
 }
 class PetDataService extends DataService<PetType> {
@@ -129,7 +129,7 @@ class PetDataService extends DataService<PetType> {
     );
   }
   insertData(row: PetType): Observable<DataExpectedResult<PetType>> {
-    return this.basicService.addPet2(row).pipe(
+    return this.basicService.addPet2(removeNull(row)).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
       })
@@ -144,7 +144,7 @@ class PetDataService extends DataService<PetType> {
     );
   }
   updateData(row: PetType): Observable<DataExpectedResult<PetType>> {
-    return this.basicService.updatePet2(row).pipe(
+    return this.basicService.updatePet2(removeNull(row)).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
       })
@@ -189,7 +189,7 @@ class BannerDataService extends DataService<BannerType> {
     );
   }
   insertData(row: BannerType): Observable<DataExpectedResult<BannerType>> {
-    return this.basicService.addBanner2(row).pipe(
+    return this.basicService.addBanner2(removeNull(row)).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
       })
@@ -204,7 +204,7 @@ class BannerDataService extends DataService<BannerType> {
     );
   }
   updateData(row: BannerType): Observable<DataExpectedResult<BannerType>> {
-    return this.basicService.updateBanner2(row).pipe(
+    return this.basicService.updateBanner2(removeNull(row)).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
       })
@@ -223,7 +223,7 @@ class PageDataService extends DataService<PageType> {
     );
   }
   insertData(row: PageType): Observable<DataExpectedResult<PageType>> {
-    return this.basicService.addPage2(row).pipe(
+    return this.basicService.addPage2(removeNull(row)).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
       })
@@ -238,7 +238,7 @@ class PageDataService extends DataService<PageType> {
     );
   }
   updateData(row: PageType): Observable<DataExpectedResult<PageType>> {
-    return this.basicService.updatePage2(row).pipe(
+    return this.basicService.updatePage2(removeNull(row)).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
       })
@@ -257,7 +257,7 @@ class UserDataService extends DataService<UserType> {
     );
   }
   insertData(row: UserType): Observable<DataExpectedResult<UserType>> {
-    return this.basicService.addUser2(row).pipe(
+    return this.basicService.addUser2(removeNull(row)).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
       })
@@ -272,7 +272,7 @@ class UserDataService extends DataService<UserType> {
     );
   }
   updateData(row: UserType): Observable<DataExpectedResult<UserType>> {
-    return this.basicService.updateUser2(row).pipe(
+    return this.basicService.updateUser2(removeNull(row)).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
       })

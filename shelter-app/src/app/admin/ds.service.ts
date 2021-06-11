@@ -23,7 +23,11 @@ export enum DsFldTypeEnum {
   number = 'number',
   date = 'date'
 }
-
+export function removeNull(obj): any {
+  const replacer = (key, value) =>
+    String(value) === 'null' ? undefined : value;
+  return JSON.parse(JSON.stringify(obj, replacer));
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -41,7 +45,7 @@ export class DsService extends DataService<DsType>{
     );
   }
   insertData(row: DsType): Observable<DataExpectedResult<DsType>> {
-    return this.basicService.addDs(this.removeNull(row)).pipe(
+    return this.basicService.addDs(removeNull(row)).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
       })
@@ -56,11 +60,6 @@ export class DsService extends DataService<DsType>{
   }
   updateData(row: DsType): Observable<DataExpectedResult<DsType>> {
     return this.insertData(row);
-  }
-  removeNull(obj): any {
-    const replacer = (key, value) =>
-      String(value) === 'null' ? undefined : value;
-    return JSON.parse(JSON.stringify(obj, replacer));
   }
 }
 
@@ -95,7 +94,7 @@ export class DsDataService extends DataService<DsDataType>{
     );
   }
   insertData(row: DsDataType): Observable<DataExpectedResult<DsDataType>> {
-    return this.basicService.addDsData({ds: this.ds, data: this.removeNull(row)}).pipe(
+    return this.basicService.addDsData({ds: this.ds, data: removeNull(row)}).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
       })
@@ -110,7 +109,7 @@ export class DsDataService extends DataService<DsDataType>{
   }
   updateData(row: DsDataType): Observable<DataExpectedResult<DsDataType>> {
     const filter = this.dataFilter(row);
-    return this.basicService.updateDsData({ds: {ds: this.ds, data: this.removeNull(row)}, filter}).pipe(
+    return this.basicService.updateDsData({ds: {ds: this.ds, data: removeNull(row)}, filter}).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
       })
@@ -125,10 +124,5 @@ export class DsDataService extends DataService<DsDataType>{
       }
     });
     return filter;
-  }
-  removeNull(obj): any {
-    const replacer = (key, value) =>
-      String(value) === 'null' ? undefined : value;
-    return JSON.parse(JSON.stringify(obj, replacer));
   }
 }
