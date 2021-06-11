@@ -127,9 +127,9 @@ module.exports = {
     async deleteDsData(req, res) {
         try {
             const ds = req.swagger.params.ds.value;
-            const data = req.swagger.params.data.value;
-            log.debug('controller deleteField %o, %o', ds, data);
-            const id = await dsDb.deleteDsData(ds, data);
+            const filter = req.swagger.params.filter.value;
+            log.debug('controller deleteField %o, %o', ds, filter);
+            const id = await dsDb.deleteDsData(ds, filter);
             writeResponse(res, {id}, req);
         } catch (err) {
             log.error(err);
