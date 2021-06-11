@@ -17,3 +17,6 @@ export * from './lib-node-iterator';
 export * from './root-page.component';
 export * from './root-page.service';
 export * from './pipes/plain-html.pipe';
+export * from './html-helper';
+export * from './html-rules';
+export * from './html-validator';

@@ -2,11 +2,25 @@ import {Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angu
 import {SlideContainerDirective} from '../controls';
 import {CmdEditorToolbox, EditorToolbarComponent} from './editor-toolbar.component';
 import {Subscription} from 'rxjs';
-import {LibNode, LibNodeIterator, LibPosition, LibRange, Position} from '../shared';
-import {AddModification} from './add-modification';
+import {
+  ComponentsPluginService,
+  HtmlRules,
+  HtmlWrapper,
+  LibNode,
+  NodeWrapper,
+  SimpleParser,
+  SNode,
+  SNodeIterator,
+  SPosition,
+  SRange,
+  treeWalker
+} from '../shared';
+// import {AddModification} from './add-modification';
 import {CdkDragDrop, CdkDragEnter, CdkDragExit, CdkDragSortEvent, CdkDropList} from '@angular/cdk/drag-drop';
 import {DOCUMENT} from '@angular/common';
+import {DialogService} from '../dialog-service';
 
+// tslint:disable:max-line-length
 const KNOWN_KEYS = ['Enter', 'Tab',
   'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'End', 'Home', 'PageDown', 'PageUp',
   'Backspace', 'Delete', 'Insert',
@@ -23,8 +37,6 @@ const PROCESS_NAVIGATION_KEYS = [
 ];
 const DESIGNER_ATTR_NAME = '_design';
 
-interface StoragePosition { designId: string; offset: number; txtOffset?: number; }
-
 @Component({
   selector: 'lib-editor',
   templateUrl: './editor.component.html',
@@ -32,10 +44,21 @@ interface StoragePosition { designId: string; offset: number; txtOffset?: number
 })
 export class EditorComponent implements OnInit, OnDestroy {
   position = 0;
-  source = '';
+  private parser = new SimpleParser('', DESIGNER_ATTR_NAME);
+  private replaceChar = false;
+  set source(s: string) {
+    this.parser = new SimpleParser(s, DESIGNER_ATTR_NAME);
+  }
+  get source(): string {
+    return this.parser ? this.parser.source : '';
+  }
   designIndex = 1;
   editor: HTMLDivElement;
+  // @Deprecated
   lastRange: Range;
+  // @Deprecated
+  private focusNode: Node;
+  private range: SRange;
   // tslint:disable-next-line:variable-name
   _sourceModified = false;
   moveByText = true;
@@ -45,8 +68,7 @@ export class EditorComponent implements OnInit, OnDestroy {
   @ViewChild(EditorToolbarComponent, {static: true}) toolbar: EditorToolbarComponent;
   @ViewChild(SlideContainerDirective, {static: true}) slide: SlideContainerDirective;
   private subsTb: Subscription = null;
-  private focusNode: Node;
-  constructor(@Inject(DOCUMENT) private _document: Document) { }
+  constructor(@Inject(DOCUMENT) private _document: Document, private dialogService: DialogService, private pluginService: ComponentsPluginService) { }
   getCdkDropList: () => CdkDropList = () => this.dropList;
 
   ngOnInit(): void {
@@ -124,11 +146,21 @@ export class EditorComponent implements OnInit, OnDestroy {
     this.updateDesigner();
   }
   private toolbarTag(tag: string, attr?: {[key: string]: string}): void {
-    if (this.focusNode) {
-      const invert = !!this.isInTag(this.focusNode, tag.toLowerCase());
-      this.insertTag(this.lastRange, tag.toLowerCase(), attr, invert);
+    const r = HtmlRules.elements[tag][0];
+    if (r.cnt) {
+      const n = SNode.elementNode(tag, attr);
+      if (HtmlRules.isVoid(tag)) {
+        this.void(tag, attr);
+      } else if (HtmlRules.isPhrasing(n)) {
+        this.phrasing(tag, attr);
+      } else if (HtmlRules.isHeading(n)) {
+        this.heading(tag, attr);
+      } else if (HtmlRules.isSectioning(n)) {
+        this.sectioning(tag, attr);
+      } else if (HtmlRules.isSectionRoot(n)) {
+        this.sectioningRoot(tag, attr);
+      }
     }
-    this.storeRange();
   }
   private updateDesigner(): void {
     if (this._sourceModified || this.checkAndMarkElements()) {
@@ -141,8 +173,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     console.log(event);
     this.updateDesigner();
     this.storeRange();
-    this.lastRange = this.validateRange(this.lastRange);
-    if (!this.lastRange) {
+    if (!this.range) {
       this.clearRange();
     }
     this.updateToolbar();
@@ -152,8 +183,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     console.log('onKeyDown', {key: event.key, altKey: event.altKey, ctrlKey: event.ctrlKey, metaKey: event.metaKey});
     console.log('this.moveByText', this.moveByText);
     this.storeRange();
-    this.lastRange = this.validateRange(this.lastRange);
-    if (!this.lastRange) {
+    if (!this.range) {
       this.clearRange();
     }
 
@@ -167,7 +197,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     if (NAVIGATION_KEYS.includes(event.key) && !PROCESS_NAVIGATION_KEYS.includes(event.key)) {
       return;
     }
-    if (this.lastRange) {
+    if (this.range) {
       if (WHITESPACE_KEYS.includes(event.key)) {
         this.whitespace(event.key);
       } else if (EDITING_KEYS.includes(event.key)) {
@@ -189,23 +219,6 @@ export class EditorComponent implements OnInit, OnDestroy {
     }
     event.preventDefault();
   }
-  private update(range: Range, start: number, end: number, str: string): void {
-    const part = this.getModifiedPart(range);
-    this.source = this.source.substring(0, start) + str + this.source.substring(end);
-    const before = part.text;
-    part.text = part.text.substring(0, start - part.start) + str + part.text.substring(end - part.start);
-    this.rollback.push({
-      parent: LibNode.getAttribute(part.parent, DESIGNER_ATTR_NAME),
-      before,
-      after: part.text
-    });
-    this.clearRange();
-    if (part.parent.nodeType === Node.ELEMENT_NODE) {
-      (part.parent as HTMLElement).innerHTML = part.text;
-    } else {
-      part.parent.textContent = part.text;
-    }
-  }
   private updateToolbar(): void {
     if (this.focusNode) {
       const res: any = {};
@@ -217,10 +230,10 @@ export class EditorComponent implements OnInit, OnDestroy {
       res.fSize = cs.getPropertyValue('font-size');
       while (e !== this.editor) {
         const tag = e.tagName.toLowerCase();
-        if (LibNode.isBlockTag(tag)) {
-          res.block = tag;
-        }
-        if (LibNode.isPhrasingTag(tag)) {
+        // if (HtmlRules.isBlockTag(tag)) { TODO I don't remeber what it is
+        //   res.block = tag;
+        // }
+        if (HtmlRules.isPhrasing(SNode.elementNode(tag))) {
           res[tag + 'Tag'] = true;
         }
         e = e.parentElement;
@@ -228,102 +241,363 @@ export class EditorComponent implements OnInit, OnDestroy {
       this.toolbar.updateToolbar(res);
     }
   }
-  private newModification(range: Range): AddModification {
-    const r = range.cloneRange();
-    let p = LibPosition.normalizePoint(r.startContainer, r.startOffset);
-    r.setStart(p.n, p.offset);
-    p = LibPosition.normalizePoint(r.endContainer, r.endOffset);
-    r.setEnd(p.n, p.offset);
-    return new AddModification(this.editor, this.source, r, DESIGNER_ATTR_NAME, () => this.designIndex++,
-      (rg: Range, st: number, en: number, s: string) => this.update(rg, st, en, s));
-  }
-  private newPosition(n: Node, offset: number): void {
-    if (n.nodeType === Node.TEXT_NODE && offset > n.textContent.length) {
-      offset = n.textContent.length;
+  private deleteRange(): void {
+    if (this.range) {
+      const start = this.toSNode(this.range.start.positionToNode());
+      const end = this.toSNode(this.range.end.positionToNode());
+      const iter = new SNodeIterator(this.parser.root, start);
+      if (start.typeNode === Node.TEXT_NODE) {
+        start.setText(start.getText(this.parser.source).substring(0, this.range.start.offset));
+      } else {
+        start.delete();
+      }
+      for (const w of iter) {
+        const p = this.toSNode(w);
+        if (p.equal(end)) {
+          if (end.typeNode === Node.TEXT_NODE) {
+            end.setText(end.getText(this.parser.source).substring(this.range.end.offset));
+          } else {
+            end.delete();
+          }
+          break;
+        }
+      }
+      this.update(this.toSNode(this.range.commonAncestor));
+      this.collapse('start');
     }
-    if (n.nodeType === Node.ELEMENT_NODE && offset > n.childNodes.length) {
-      offset = n.childNodes.length;
-    }
-    window.getSelection().collapse(n, offset);
-    this.storeRange();
   }
-  private insert(range: Range, ch: string): void {
-    const mod = this.newModification(range);
-    const store = this.storePosition(range.startContainer, range.startOffset);
-    mod.insert(ch);
-    const p = this.restorePosition(store);
-    if (p.n.nodeType === Node.TEXT_NODE) {
-      this.newPosition(p.n, Math.min(p.n.textContent.length, p.offset + ch.length));
+  private phrasing(tag: string, attr?: {[key: string]: string}): void {
+    const commonAncestor = this.toSNode(this.range.commonAncestor);
+    let update = commonAncestor;
+    let split = null;
+    if (this.range.commonAncestor.typeNode === Node.TEXT_NODE) {
+      if (NodeWrapper.isDescOf(commonAncestor, tag)) {
+        split = SNode.splitBranch(tag, commonAncestor, this.range.end.offset, this.parser.root, this.parser.source, commonAncestor, true, (a) => this.copyAttr(a));
+        if (split.crossed) {
+          update = split.topNode;
+        }
+        SNode.splitBranch(tag, commonAncestor, this.range.start.offset, this.parser.root, this.parser.source, commonAncestor, true, (a) => this.copyAttr(a));
+      } else {
+        const text = commonAncestor.getText(this.parser.source);
+        commonAncestor.setText(text.substring(0, this.range.start.offset));
+        commonAncestor.parent.newChild(SNode.elementNode(tag, this.copyAttr(attr)).setText(text.substring(this.range.start.offset, this.range.end.offset)), commonAncestor.index + 1);
+        commonAncestor.parent.newChild(SNode.textNode(text.substring(this.range.end.offset)), commonAncestor.index + 2);
+      }
     } else {
-      this.newPosition(p.n, p.offset);
+      if (this.range.collapsed) {
+        console.error('WTF!!! Why the range is collapsed and doesn\'t place in text node');
+        return;
+      }
+      // collect info to make decision. Define invert only by start position
+      // I need to find the range that I need to modify. Then I'll clean that range from other element with the same tag
+      // So I split this tree on three branches
+      let w = this.toSNode(this.range.start.n);
+      if (w.typeNode === Node.ELEMENT_NODE) {
+        w = w.children[this.range.start.offset];
+      }
+      let e = this.toSNode(this.range.end.n);
+      if (e.typeNode === Node.ELEMENT_NODE) {
+        e = e.children[this.range.end.offset];
+      }
+      const invert = w.nodeName === tag || NodeWrapper.isDescOf(w, tag);
+      if (invert && (e.nodeName === tag || NodeWrapper.isDescOf(e, tag))) {
+        split = SNode.splitBranch(tag, w, this.range.start.offset, this.parser.root, this.parser.source, commonAncestor, true, (a) => this.copyAttr(a));
+        if (split.crossed) {
+          update = split.topNode;
+        }
+      }
+      if (invert) {
+        SNode.splitBranch(tag, w, this.range.start.offset, this.parser.root, this.parser.source, commonAncestor, false, (a) => this.copyAttr(a));
+      }
+      treeWalker(w, (k) => {
+        if (e.equal(k)) {
+          return true;
+        }
+        if (invert) {
+          if (k.nodeName === tag) {
+            (k as SNode).extractChildren();
+          }
+        } else {
+          if (k.typeNode === Node.TEXT_NODE && !NodeWrapper.isDescOf(k, tag)) {
+            (k as SNode).wrapThis(SNode.elementNode(tag, this.copyAttr(attr)));
+          }
+        }
+      }, () => null, this.parser.root);
+    }
+    this.update(update);
+    this.collapse('start');
+  }
+  private sectioning(tag: string, attr?: {[key: string]: string}, invert = false): void {
+    let wrap = this.findWithParentCntFlow(this.range.commonAncestor);
+    if (wrap) {
+      if (HtmlRules.isSectioning(wrap)) {
+        wrap.replace(tag, attr);
+      } else {
+        if (wrap.equal(this.range.commonAncestor)) {
+          wrap = wrap.wrapChildren(SNode.elementNode(tag, this.copyAttr(attr)), this.range.indexStart, this.range.indexEnd + 1);
+        } else {
+          wrap = wrap.wrapChildren(SNode.elementNode(tag, this.copyAttr(attr)));
+        }
+        let err: string = null;
+        treeWalker(wrap, (k) => {
+          if (k.nodeName === 'main') {
+            err = `The element ${k.nodeName} cannot we wrapping. Expected Phrasing content`;
+            return true;
+          }
+        });
+        if (err) {
+          console.log(err); // TODO Say about this
+          return;
+        }
+      }
+      this.update(wrap);
+      this.collapse('start');
     }
   }
-  private insertTag(range: Range, tag: string, attr?: {[key: string]: string}, invert = false, isPhrasing?: boolean): void {
-    const mod = this.newModification(range);
-    const isEmpty = LibNode.isEmptyTag(tag);
-    mod.insertTag(tag, attr, invert, isPhrasing);
-    const node = this.findDesignElement('' + (this.designIndex - 1)) as Node;
-    if (isEmpty) {
-      this.newPosition(node.parentNode, LibNode.orderOfChild(node.parentNode, node) + 1);
-    } else {
-      this.newPosition(node, 0);
+  private sectioningRoot(tag: string, attr?: {[key: string]: string}, invert = false): void {
+    let wrap = this.findWithParentCntFlow(this.range.commonAncestor);
+    if (wrap) {
+      if (HtmlRules.isSectionRoot(wrap)) {
+        wrap.replace(tag, attr);
+      } else {
+        if (wrap.equal(this.range.commonAncestor)) {
+          wrap = wrap.wrapChildren(SNode.elementNode(tag, this.copyAttr(attr)), this.range.indexStart, this.range.indexEnd + 1);
+        } else {
+          wrap = wrap.wrapChildren(SNode.elementNode(tag, this.copyAttr(attr)));
+        }
+        let err: string = null;
+        treeWalker(wrap, (k) => {
+          if (!HtmlRules.isSectioning(k)) {
+            err = `The element ${k.nodeName} cannot we wrapping. Expected Phrasing content`;
+            return true;
+          }
+        });
+        if (err) {
+          console.log(err); // TODO Say about this
+          return;
+        }
+      }
+      this.update(wrap);
+      this.collapse('start');
     }
+  }
+  private heading(tag: string, attr?: {[key: string]: string}): void {
+    let wrap = this.findWithParentCntFlow(this.range.commonAncestor);
+    if (wrap) {
+      if (HtmlRules.isHeading(wrap)) {
+        wrap.replace(tag, attr);
+      } else {
+        if (wrap.equal(this.range.commonAncestor)) {
+          wrap = wrap.wrapChildren(SNode.elementNode(tag, this.copyAttr(attr)), this.range.indexStart, this.range.indexEnd + 1);
+        } else {
+          wrap = wrap.wrapChildren(SNode.elementNode(tag, this.copyAttr(attr)));
+        }
+        let err: string = null;
+        treeWalker(wrap, (k) => {
+          if (!HtmlRules.isPhrasing(k)) {
+            err = `The element ${k.nodeName} cannot we wrapping. Expected Phrasing content`;
+            return true;
+          }
+        });
+        if (err) {
+          console.log(err); // TODO Say about this
+          return;
+        }
+      }
+      this.update(wrap);
+      this.collapse('start');
+    }
+  }
+  private void(tag: string, attr?: {[key: string]: string}): void {
+    const parent = this.range.commonAncestor;
+    if (!this.range.collapsed) {
+      this.deleteRange();
+    }
+    const w = this.toSNode(this.range.start.n);
+    if (w.typeNode === Node.TEXT_NODE) {
+      const text = w.getText(this.parser.source);
+      w.setText(text.substring(0, this.range.start.offset));
+      w.parent.newChild(SNode.elementNode(tag, this.copyAttr(attr)), w.index + 1);
+      w.parent.newChild(SNode.textNode(text.substring(this.range.start.offset)), w.index + 2);
+      this.range.start.n = this.range.start.n.parent;
+      this.range.start.offset += 2;
+    } else {
+      w.newChild(SNode.elementNode(tag, this.copyAttr(attr)), this.range.start.offset);
+      this.range.start.offset += 1;
+    }
+    this.update(this.toSNode(parent));
+    this.collapse('start');
+  }
+  private update(w: SNode): void {
+    let n: HTMLElement;
+    if (w.typeNode === Node.TEXT_NODE) {
+      n = this.findDesignElement(w.parent.attribute(DESIGNER_ATTR_NAME));
+    } else {
+      n = this.findDesignElement(w.attribute(DESIGNER_ATTR_NAME));
+    }
+    n.innerHTML = this.toSNode(w).newSource(this.parser.source);
+  }
+  private nextMark(): string { return '' + this.designIndex++; }
+  private findWithParentCntFlow(w: NodeWrapper): SNode {
+    if (w.parent) {
+      while (!HtmlRules.elements[w.parent.nodeName]
+      && !HtmlRules.elements[w.parent.nodeName][1]
+      && !HtmlRules.elements[w.parent.nodeName][1].cnt
+      && !HtmlRules.elements[w.parent.nodeName][1].cnt.includes('Flow')) {
+        if (w.parent.attribute(DESIGNER_ATTR_NAME) === '0') {
+          return this.toSNode(w);
+        }
+        w = w.parent;
+      }
+      return this.toSNode(w);
+    }
+  }
+  private copyAttr(attr?: {[key: string]: string}): {[key: string]: string} {
+    const res = Object.assign({}, attr || {});
+    res[DESIGNER_ATTR_NAME] = this.nextMark();
+    return res;
   }
   private insertPlugin(range: Range, tag: string, attr?: {[key: string]: string}, isPhrasing?: boolean): void {
-    const mod = this.newModification(range);
-    mod.insertPlugin(tag, attr); // TODO need to process isPhrasing
-    const node = this.findDesignElement('' + (this.designIndex - 1)) as Node;
-    this.newPosition(node, 0);
-  }
-  private delete(range: Range, after = true): void {
-    if (!range.collapsed) {
-      const mod = this.newModification(range);
-      const store = this.storePosition(range.startContainer, range.startOffset);
-      mod.delete();
-      const p = this.restorePosition(store);
-      this.newPosition(p.n, p.offset);
-    } else {
-      let startPos: Position;
-      let endPos: Position;
-      const from = {n: range.startContainer, offset: range.startOffset};
-      if (after) {
-        startPos = from;
-        endPos = this.nextDown(startPos);
-      } else {
-        endPos = from;
-        startPos = this.nextUp(endPos);
-      }
-      if (startPos && endPos) {
-        const r = document.createRange();
-        r.setStart(startPos.n, startPos.offset);
-        r.setEnd(endPos.n, endPos.offset);
-        this.delete(r);
-      }
-    }
+    // TODO need to process isPhrasing
   }
   private whitespace(key: string): void {
     switch (key) {
       case 'Enter':
-        this.insertTag(this.lastRange, 'br');
+        this.void('br');
         break;
       case 'Tab':
         break;
     }
   }
   private editingKey(key: string): void {
-    switch (key) {
-      case 'Backspace':
-        this.delete(this.lastRange, false);
-        break;
-      case 'Delete':
-        this.delete(this.lastRange);
-        break;
-      case 'Insert':
-        break;
+    if (this.range) {
+      switch (key) {
+        case 'Backspace':
+          if (this.range.collapsed) {
+            if (this.range.start.n.typeNode === Node.TEXT_NODE && this.range.start.offset > 0) {
+              this.range.start.offset -= 1;
+            } else {
+              this.range.start = this.nextUp(this.range.start, true);
+            }
+          }
+          this.deleteRange();
+          break;
+        case 'Delete':
+          if (this.range.collapsed) {
+            if (this.range.end.n.typeNode === Node.TEXT_NODE && this.range.end.offset < this.toSNode(this.range.end.n).getText(this.parser.source).length) {
+              this.range.end.offset += 1;
+            } else {
+              this.range.end = this.nextDown(this.range.end, true);
+            }
+          }
+          this.deleteRange();
+          break;
+        case 'Insert':
+          this.replaceChar = !this.replaceChar; // TODO process this parameter by changing this.range on one symbol
+          break;
+      }
     }
   }
   private simpleChar(key: string): void {
-    this.insert(this.lastRange, key);
+    let parent = this.range.commonAncestor;
+    let sp: SPosition;
+    if (parent.typeNode === Node.TEXT_NODE) {
+      // don't need validation
+      const work = this.toSNode(parent);
+      work.setText(work.getText(this.parser.source).substring(0, this.range.start.offset) + key + work.getText(this.parser.source).substring(this.range.end.offset));
+      sp = new SPosition(work, this.range.start.offset + key.length);
+      parent = parent.parent;
+    } else {
+      const work = this.toSNode(this.range.start.n);
+      let offset = work.typeNode === Node.TEXT_NODE ? this.range.start.offset : undefined;
+      let child;
+      if (work.typeNode !== Node.TEXT_NODE) {
+        const cnt = HtmlRules.contentOfNode(work);
+        if (!cnt || !(cnt.cnt.includes('Flow') || cnt.cnt.includes('Phrasing'))) {
+          // TODO say that there cannot be text
+          return;
+        }
+        child = work.child(this.range.start.offset);
+        if (child && child.typeNode !== Node.TEXT_NODE && work.child(this.range.start.offset - 1) && work.child(this.range.start.offset - 1).typeNode === Node.TEXT_NODE) {
+          child = work.child(this.range.start.offset - 1);
+        }
+      } else {
+        child = work;
+      }
+      if (!this.range.collapsed) {
+        this.deleteRange();
+      }
+      if (child && child.typeNode === Node.TEXT_NODE) {
+        child.setText(child.getText(this.parser.source).substring(0, offset) + key);
+        offset += key.length;
+      } else {
+        child = work.newChild(SNode.textNode(key), this.range.start.offset);
+        offset = key.length;
+      }
+      sp = new SPosition(child, offset);
+    }
+    this.update(this.toSNode(parent));
+    this.collapse(null, sp);
+  }
+  private toNode(s: SNode): HTMLElement {
+    if (s.typeNode === Node.TEXT_NODE) {
+      return this.findDesignElement(s.parent.attribute(DESIGNER_ATTR_NAME));
+    } else {
+      return this.findDesignElement(s.attribute(DESIGNER_ATTR_NAME));
+    }
+  }
+  private toPosition(sp: SPosition): {n: Node, offset: number} {
+    const n = this.toNode(this.toSNode(sp.n));
+    if (sp.n.typeNode === Node.TEXT_NODE) {
+      if (n.childNodes.item(sp.n.index)) {
+        return {n: n.childNodes.item(sp.n.index), offset: sp.offset};
+      } else {
+        if (n.hasChildNodes()) {
+          return {n, offset: n.childNodes.length};
+        } else {
+          return {n, offset: 0};
+        }
+      }
+    } else {
+      return {n, offset: sp.offset};
+    }
+  }
+  private collapse(where: 'commonAncestor' | 'start' | 'end', sp?: SPosition): void {
+    if (sp) {
+      let n: HTMLElement;
+      if (sp.n.typeNode === Node.TEXT_NODE) {
+        n = this.findDesignElement(sp.n.parent.attribute(DESIGNER_ATTR_NAME));
+        if (n.childNodes.item(sp.offset)) {
+          window.getSelection().collapse(n.childNodes.item(sp.offset), sp.offset);
+        } else {
+          if (n.hasChildNodes()) {
+            window.getSelection().collapse(n, n.childNodes.length);
+          } else {
+            window.getSelection().collapse(n, 0);
+          }
+        }
+      } else {
+        n = this.findDesignElement(sp.n.attribute(DESIGNER_ATTR_NAME));
+        window.getSelection().collapse(n, sp.offset);
+      }
+    } else if (this.range) {
+      let w: SPosition;
+      switch (where) {
+        case 'commonAncestor':
+          w = this.findPalpable(this.toNode(this.toSNode(this.range.commonAncestor)), 0);
+          this.collapse(null, w);
+          break;
+        case 'start':
+          const p = this.toPosition(this.range.start);
+          this.collapse(null, this.findPalpable(p.n, p.offset));
+          break;
+        case 'end':
+          const p2 = this.toPosition(this.range.start);
+          this.collapse(null, this.findPalpable(p2.n, p2.offset));
+          break;
+      }
+    }
+    this.storeRange();
   }
   private checkAndMarkElements(): boolean {
     let result = false;
@@ -354,47 +628,41 @@ export class EditorComponent implements OnInit, OnDestroy {
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(this.defineRange(e));
     this.storeRange();
-    this.lastRange = this.validateRange(this.lastRange);
-    if (!this.lastRange) {
+    if (!this.range) {
       this.clearRange();
     } else {
       e.preventDefault();
     }
   }
   defineRange(e: DragEvent): Range {
-    const x = e.clientX;
-    const y = e.clientY;
+    function shift(x: number, y: number, rect: DOMRect): number {
+      return Math.min(Math.abs(x - rect.right), Math.abs(x - rect.left))
+        + Math.min(Math.abs(y - rect.top), Math.abs(y - rect.bottom));
+    }
+    const cx = e.clientX;
+    const cy = e.clientY;
+    const n = e.target as Node;
     const r = this._document.createRange();
     r.selectNodeContents(e.target as Node);
-    return this.collapseRange(r, x, y);
-  }
-  collapseRange(r: Range, x: number, y: number): Range {
-    const rect = r.getBoundingClientRect();
-    console.log(rect, x, y);
-    if (x >= rect.right || y >= rect.bottom) {
-      r.collapse(false);
-    } else if (x <= rect.left || y <= rect.top) {
-      r.collapse();
-    } else {
-      const st = LibPosition.nextText({n: r.startContainer, offset: r.startOffset})
-        || LibPosition.asLibPosition({n: r.startContainer, offset: r.startOffset}).nextNode();
-      const en = LibPosition.prevText({n: r.endContainer, offset: r.endOffset})
-        || LibPosition.asLibPosition({n: r.startContainer, offset: r.startOffset}).prevNode();
-      if (st) {
-        r.setStart(st.n, st.offset);
-      } else {
-        r.collapse(false);
+    if (LibNode.getAttribute(n, DESIGNER_ATTR_NAME)) {
+      if (n.nodeType === Node.TEXT_NODE) {
+        let calc = Number.MAX_SAFE_INTEGER;
+        let offset = 0;
+        for (let i = 0; i < n.textContent.length; ++i) {
+          r.setStart(n, i);
+          r.setEnd(n, i);
+          const c = shift(cx, cy, r.getBoundingClientRect());
+          if (calc > c) {
+            calc = c;
+            offset = i;
+          }
+        }
+        r.setStart(n, offset); r.setEnd(n, offset);
         return r;
-      }
-      if (en) {
-        r.setEnd(en.n, en.offset);
       } else {
-        r.collapse();
-        return r;
+        console.log(`defineRange cx: ${cx}, cy: ${cy}`);
       }
-      r = this.collapseRange(r, x, y);
     }
-    return r;
   }
   drop(e: DragEvent): void {
     console.log('drop', e);
@@ -430,36 +698,14 @@ export class EditorComponent implements OnInit, OnDestroy {
     console.log('focusout', event);
     this.storeRange();
   }
-  private isAncestor(child: Node): boolean {
-    // tslint:disable-next-line:no-bitwise
-    return this.editor === child || (this.editor.compareDocumentPosition(child) & Node.DOCUMENT_POSITION_CONTAINED_BY) !== 0;
-  }
-  private isInTag(n: Node, tag: string): Node {
-    if (n.nodeType === Node.TEXT_NODE) {
-      n = n.parentNode;
-    }
-    while (n !== this.editor) {
-      if ((n as HTMLElement).tagName.toLowerCase() === tag) {
-        return n;
-      }
-      n = n.parentNode;
-    }
-  }
-  private belong(p: Position): boolean {
-    if (p) {
-      const n = LibPosition.asLibPosition(p).toNode() || p.n;
-      return n === this.editor || LibNode.getAttribute(n, DESIGNER_ATTR_NAME) !== null;
-    }
-  }
   private startPosition(): void {
-    for (let i = 0; i < this.editor.childNodes.length; ++i) {
-      if (this.editor.childNodes[i].nodeType === Node.TEXT_NODE) {
-        window.getSelection().collapse(this.editor.childNodes[i], 0);
-        return;
-      } else if (this.editor.childNodes[i].nodeType === Node.ELEMENT_NODE) {
-        window.getSelection().collapse(this.editor, i);
-        return;
-      }
+    const root = new HtmlWrapper(this.editor);
+    if (root.numChildren === 0) {
+      window.getSelection().collapse(this.editor, 0);
+    }
+    const sp = this.findPalpable(this.editor, 0);
+    if (sp) {
+      this.collapse(null, sp);
     }
     window.getSelection().collapse(this.editor, this.editor.childNodes.length);
   }
@@ -467,6 +713,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     if (window.getSelection().rangeCount === 1) {
       this.lastRange = window.getSelection().getRangeAt(0);
       this.focusNode = window.getSelection().focusNode;
+      this.range = this.validateRange(this.lastRange);
     } else {
       this.clearRange();
     }
@@ -474,6 +721,23 @@ export class EditorComponent implements OnInit, OnDestroy {
   private clearRange(): void {
     this.lastRange = null;
     this.focusNode = null;
+    this.range = null;
+  }
+  private toSNode(w: NodeWrapper): SNode {
+    if (w instanceof HtmlWrapper) {
+      let a = w.attribute(DESIGNER_ATTR_NAME);
+      if (w.typeNode === Node.TEXT_NODE) {
+        a = w.parent.attribute(DESIGNER_ATTR_NAME);
+      }
+      if (a) {
+        const sn = this.parser.findSNode(DESIGNER_ATTR_NAME, a);
+        if (w.typeNode === Node.TEXT_NODE) {
+          return sn.children[LibNode.orderOfChild((w.parent as HtmlWrapper).original, w.original)];
+        }
+        return sn;
+      }
+    }
+    return w as SNode;
   }
   private restoreRange(): void {
     if (this.focusNode) {
@@ -481,105 +745,75 @@ export class EditorComponent implements OnInit, OnDestroy {
         this.focusNode === this.lastRange.startContainer ? this.lastRange.startOffset : this.lastRange.endOffset);
     }
   }
-  private validateRange(range: Range): Range {
+  private isAncestor(child: Node): boolean {
+    // tslint:disable-next-line:no-bitwise
+    return this.editor === child || (this.editor.compareDocumentPosition(child) & Node.DOCUMENT_POSITION_CONTAINED_BY) !== 0;
+  }
+  private validateRange(range: Range): SRange {
     if (this.focusNode && this.isAncestor(range.commonAncestorContainer)) {
-      if (this.belong(LibPosition.fromNode(range.commonAncestorContainer)) && range.collapsed) {
-        return range;
+      let ca = range.commonAncestorContainer;
+      while (!LibNode.getAttribute(range.commonAncestorContainer, DESIGNER_ATTR_NAME)) {
+        ca = ca.parentElement;
       }
-      return LibRange.validate(range, (p) => this.belong(p));
+      const st = this.findPalpable(range.startContainer, range.startOffset);
+      const en = this.findPalpable(range.endContainer, range.endOffset, true);
+      if (ca && st && en) {
+        return new SRange(this.toSNode(new HtmlWrapper(ca)), st, en, range.collapsed);
+      }
     }
     return null;
   }
-  private getModifiedPart(range: Range): {parent: Node, text: string, start: number, end: number} {
-    const all = {parent: this.editor, text: this.source, start: 0, end: this.source.length};
-    if (range.commonAncestorContainer === this.editor) {
-      return all;
-    }
-    const mod = this.newModification(range);
-    return {parent: range.commonAncestorContainer, text: this.source.substring(mod.start, mod.end), start: mod.start, end: mod.end};
-  }
-  private findDesignElement(id: string): Element {
+  private findDesignElement(id: string): HTMLElement {
     if (id === '0') {
       return this.editor;
     }
     return this.editor.querySelector(`[${DESIGNER_ATTR_NAME}="${id}"]`);
   }
-  private storePosition(n: Node, offset: number): StoragePosition {
-    const result: any = {designId: LibNode.getAttribute(n, DESIGNER_ATTR_NAME), offset};
-    if (n.nodeType === Node.TEXT_NODE) {
-      result.txtOffset = offset;
-      result.offset = LibNode.orderOfChild(n.parentNode, n);
-    }
-    return result;
-  }
-  private restorePosition(store: StoragePosition): Position {
-    const p = {n: this.findDesignElement(store.designId) as Node, offset: store.offset};
-    if (p.n.childNodes[p.offset] && p.n.childNodes[p.offset].nodeType === Node.TEXT_NODE) {
-      p.n = p.n.childNodes[p.offset];
-      p.offset = store.txtOffset || 0;
-    }
-    return p;
-  }
   private moveNext(n: Node, offset: number, stepText = true): void {
-    const p = this.nextDown({n, offset}, stepText);
-    if (p) {
-      window.getSelection().collapse(p.n, p.offset);
+    if (n.nodeType === Node.TEXT_NODE && offset < n.textContent.length) {
+      window.getSelection().collapse(n, offset + 1);
     }
+    SPosition.collapseTo(this.nextDown(new SPosition(new HtmlWrapper(n), offset), stepText));
   }
   private movePrev(n: Node, offset: number, stepText = true): void {
-    const p = this.nextUp({n, offset}, stepText);
-    if (p) {
-      window.getSelection().collapse(p.n, p.offset);
+    if (n.nodeType === Node.TEXT_NODE && offset > 0) {
+      window.getSelection().collapse(n, offset - 1);
     }
+    SPosition.collapseTo(this.nextUp(new SPosition(new HtmlWrapper(n), offset), stepText));
   }
-  private findNode(p: Position, criteria: (p: Position) => Position, down: boolean): Position {
-    const iterator = new LibNodeIterator(this.editor, p, !down);
-    for (const next of iterator) {
-      const res = criteria(next);
-      if (res) {
-        return res;
+  private nextDown(p: SPosition, stepText = true): SPosition {
+    return SPosition.findPosition(new HtmlWrapper(this.editor), p, editorNode(stepText), true);
+  }
+  private nextUp(p: SPosition, stepText = true): SPosition {
+    return SPosition.findPosition(new HtmlWrapper(this.editor), p, editorNode(stepText), false);
+  }
+  private findPalpable(container: Node, offset: number, revert = false): SPosition {
+    function sp(w: SNode): SPosition {
+      const cnt = HtmlRules.contentOfNode(p);
+      if (cnt && (cnt.cnt.includes('Flow') || cnt.cnt.includes('Phrasing'))) {
+        return new SPosition(w, 0);
+      }
+      return new SPosition(w.parent, w.index);
+    }
+    const p = this.toSNode(new HtmlWrapper(LibNode.nodeOfPoints(container, offset)));
+    if (p && HtmlRules.isPalpable(p)) {
+      return p.typeNode === Node.TEXT_NODE ? new SPosition(p, offset) : sp(p);
+    }
+    const iter = new SNodeIterator(this.parser.root, this.toSNode(p), revert);
+    for (const n of iter) {
+      if (HtmlRules.isPalpable(n)) {
+        return n.typeNode === Node.TEXT_NODE ? new SPosition(n, 0) : sp(this.toSNode(n));
       }
     }
     return null;
   }
-  private criteriaTextNode(p: Position, down = true): Position {
-    const i = LibPosition.asLibPosition(p);
-    const n = i.toNode();
-    if (n && n.nodeType === Node.TEXT_NODE && this.belong(i)) {
-      console.log('criteriaTextNode', p.n, p.offset, true);
-      return {n, offset: down ? 0 : n.textContent.length};
-    }
-    console.log('criteriaTextNode', p.n, p.offset, false);
-  }
-  private criteriaAllNode(p: Position, down = true): Position {
-    const r = this.criteriaTextNode(p, down);
-    if (r) { return r; }
-    if (this.belong(p)) {
-      console.log('criteriaAllNode', p.n, p.offset, true);
-      return p;
-    }
-    console.log('criteriaAllNode', p.n, p.offset, false);
-  }
-  private nextDown(p: Position, stepText = true): Position {
-    const t = LibPosition.nextText(p);
-    if (t) {
-      return t;
-    }
-    if (stepText) {
-      return this.findNode(p, (c) => this.criteriaTextNode(c), true);
-    }
-    return this.findNode(p, (c) => this.criteriaAllNode(c), true);
-  }
-  private nextUp(p: Position, stepText = true): Position {
-    const t = LibPosition.prevText(p);
-    if (t) {
-      return t;
-    }
-    if (stepText) {
-      return this.findNode(p, (c) => this.criteriaTextNode(c, false), false);
-    }
-    return this.findNode(p, (c) => this.criteriaAllNode(c, false), false);
-  }
-
-
 }
+function editorNode(stepText: boolean): (p: SPosition) => SPosition {
+  return (c) => {
+    if (c && c.n.attribute(DESIGNER_ATTR_NAME)
+      && ((stepText && c.n.typeNode === Node.TEXT_NODE) || !stepText)) {
+      return c;
+    }
+  };
+}
+

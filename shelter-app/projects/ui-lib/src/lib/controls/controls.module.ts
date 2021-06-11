@@ -56,7 +56,6 @@ import {TabDirective, TabGroupComponent} from './content-display/tab-group.compo
 import {AccordionComponent, AccordionDirective, AccordionPanelComponent} from './content-display/accordion.component';
 import {SwitchPageDataDirective} from './switch-page-data.directive';
 import {SpanComponent} from './content-display/span.component';
-import {UiForOfDirective} from './ui-for-of.directive';
 import {AbstractIteratorComponent, IteratorDirective} from './abstract-iterator.component';
 import {ShowMediaValueComponent} from './media/show-media-value.component';
 import {ShowValueComponent} from './media/show-value.component';
@@ -64,7 +63,7 @@ import {EndPageComponent} from './end-page.component';
 import {IsVisibleDirective} from './is-visible.directive';
 import {MasonryListComponent} from './content-display/masonry-list.component';
 import {AdvertComponent} from './content-display/advert.component';
-import {ExtComponentFactory} from "./ext-component-factory";
+import {ExtComponentFactory} from './ext-component-factory';
 
 @NgModule({
   declarations: [
@@ -110,7 +109,6 @@ import {ExtComponentFactory} from "./ext-component-factory";
     AccordionComponent,
     SwitchPageDataDirective,
     SpanComponent,
-    UiForOfDirective,
     AbstractIteratorComponent,
     IteratorDirective,
     AccordionDirective,
@@ -174,7 +172,6 @@ import {ExtComponentFactory} from "./ext-component-factory";
     AccordionComponent,
     SwitchPageDataDirective,
     SpanComponent,
-    UiForOfDirective,
     AbstractIteratorComponent,
     IteratorDirective,
     AccordionDirective,
@@ -198,52 +195,51 @@ export class ControlsModule {
     ]});
 
     componentsPlugin.addPlugin(['lib-boolean-control'], {component: BooleanControlComponent, schema: null,
-      customElement: {selectorName: 'ui-boolean', injector}});
+      description: {tag: 'ui-boolean'}}, injector);
     componentsPlugin.addPlugin(['lib-checkbox-control'],
       {
         component: CheckboxControlComponent,
         schema: new SwaggerObject([], {value: SwaggerNative.asString()}),
-        customElement: {selectorName: 'ui-checkbox', injector}
-      });
-    componentsPlugin.addPlugin(['lib-checkbox'], {component: CheckboxControlComponent, schema: null});
+        description: {tag: 'ui-checkbox'}
+      }, injector);
     componentsPlugin.addPlugin(['lib-input-control'], {component: InputControlComponent, schema: null,
-      customElement: {selectorName: 'ui-input', injector}});
+      description: {tag: 'ui-input'}}, injector);
     componentsPlugin.addPlugin(['lib-list-builder'], {component: ListBuilderComponent, schema: null});
     componentsPlugin.addPlugin(['lib-list-select'], {component: ListSelectComponent, schema: null});
     componentsPlugin.addPlugin(['lib-radio-control'], {component: RadioControlComponent, schema: null,
-      customElement: {selectorName: 'ui-radio', injector}});
+      description: {tag: 'ui-radio'}}, injector);
     componentsPlugin.addPlugin(['lib-select-control'], {component: SelectControlComponent, schema: null,
-      customElement: {selectorName: 'ui-select', injector}});
+      description: {tag: 'ui-select'}}, injector);
     componentsPlugin.addPlugin(['lib-title-type-control'], {component: TitleTypeControlComponent, schema: null,
-      customElement: {selectorName: 'ui-title-type', injector}});
+      description: {tag: 'ui-title'}}, injector);
     componentsPlugin.addPlugin(['lib-table'], {component: TableComponent, schema: null,
-      customElement: {selectorName: 'ui-table', injector}});
+      description: {tag: 'ui-table'}}, injector);
     componentsPlugin.addPlugin(['lib-upload-files'], {component: UploadFilesComponent, schema: null});
     componentsPlugin.addPlugin(['lib-simple-dialog'], {component: SimpleDialogComponent, schema: null});
     componentsPlugin.addPlugin(['lib-snake-bar'], {component: SnakeBarComponent, schema: null});
     componentsPlugin.addPlugin(['lib-app-bar'], {component: AppBarComponent, schema: null,
-      customElement: {selectorName: 'app-bar', injector}});
+      description: {tag: 'app-bar'}}, injector);
     componentsPlugin.addPlugin(['lib-editable-list'], {component: EditableListComponent, schema: null});
 
     componentsPlugin.addPlugin([], {component: SwaggerFormComponent,
-      customElement: {selectorName: 'ui-swagger-form', injector}});
+      description: {tag: 'ui-swagger-form'}}, injector);
     componentsPlugin.addPlugin([], {component: GeneratorFormComponent,
-      customElement: {selectorName: 'ui-generator-form', injector}});
+      description: {tag: 'ui-generator-form'}}, injector);
     componentsPlugin.addPlugin([], {component: SwaggerArrayComponent,
-      customElement: {selectorName: 'ui-swagger-array', injector}});
+      description: {tag: 'ui-swagger-array'}}, injector);
     componentsPlugin.addPlugin([], {component: SwaggerNativeComponent,
-      customElement: {selectorName: 'ui-swagger-native', injector}});
+      description: {tag: 'ui-swagger-native'}}, injector);
     componentsPlugin.addPlugin([], {component: LinkComponent,
-      customElement: {selectorName: 'ui-link', injector}});
+      description: {tag: 'ui-link'}}, injector);
     componentsPlugin.addPlugin([], {component: CardComponent,
-      customElement: {selectorName: 'ui-card', injector}});
+      description: {tag: 'ui-card'}}, injector);
     componentsPlugin.addPlugin([], {component: TabGroupComponent,
-      customElement: {selectorName: 'ui-tab-group', injector: replaceInjector}});
+      description: {tag: 'ui-tab-group'}}, replaceInjector);
     componentsPlugin.addPlugin([], {component: AccordionComponent,
-      customElement: {selectorName: 'ui-accordion', injector: replaceInjector}});
+      description: {tag: 'ui-accordion'}}, replaceInjector);
     componentsPlugin.addPlugin([], {component: CarouselComponent,
-      customElement: {selectorName: 'ui-carousel', injector: replaceInjector}});
+      description: {tag: 'ui-carousel'}}, replaceInjector);
     componentsPlugin.addPlugin([], {component: SpanComponent,
-      customElement: {selectorName: 'ui-span', injector}});
+      description: {tag: 'ui-span'}}, injector);
   }
 }

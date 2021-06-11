@@ -1,5 +1,5 @@
 import {LibNode, LibNodeIterator, LibPosition} from '../shared';
-import {HtmlValidator} from './html-validator';
+import {SimpleParser} from './html-validator';
 
 const IS_BLOCK = {includes: (t) => LibNode.isBlockTag(t)};
 interface Modify {parent: HTMLElement; txt: string; start: number; end: number; }
@@ -10,14 +10,12 @@ export class AddModification {
   private readonly startPos: LibPosition;
   private readonly endPos: LibPosition;
   private readonly root: Node;
-  private readonly validator: HtmlValidator;
   private sortOut: { matchTag: HTMLElement[]; affectBoth: HTMLElement[]; affectStart: HTMLElement[]; affectEnd: HTMLElement[] };
-  constructor(private editor: HTMLElement, private source: string, private range: Range, private mark: string,
+  constructor(private editor: HTMLElement, private readonly parser: SimpleParser, private range: Range, private mark: string,
               private nextId: () => number,
               private update: (range: Range, start: number, end: number, str: string) => void) {
-    this.validator = new HtmlValidator(this.source, this.mark);
-    this.start = this.syncPosition(range.startContainer, range.startOffset);
-    this.end = this.syncPosition(range.endContainer, range.endOffset);
+    this.start = this.parser.syncPosition(range.startContainer, range.startOffset);
+    this.end = this.parser.syncPosition(range.endContainer, range.endOffset);
     this.startPos = new LibPosition(this.range.startContainer, this.range.startOffset);
     this.endPos = new LibPosition(this.range.endContainer, this.range.endOffset);
     this.root = this.range.commonAncestorContainer;
@@ -32,8 +30,8 @@ export class AddModification {
   }
   private static cleanTags(sb: string, tags: readonly string[]): string {
     for (const t of tags) {
-      const stag = HtmlValidator.rgStartTag(t);
-      const etag = HtmlValidator.rgEndTag(t);
+      const stag = SimpleParser.rgStartTag(t);
+      const etag = SimpleParser.rgEndTag(t);
       sb = sb.replace(stag, () => {
         return '';
       });
@@ -58,9 +56,6 @@ export class AddModification {
       after = this.copyTag(n, keepId) + after;
     }
     return after;
-  }
-  private syncPosition(n: Node, offset: number): number {
-    return this.validator.syncPosition(n, offset);
   }
   private renderAttr(attr: {[key: string]: string} = {}, keepId = true, id?: string): string {
     let s = '';
@@ -135,10 +130,10 @@ export class AddModification {
     const {m1, m2} = this.validator.mapNode(n);
     const start = m1.index;
     const end = m2.index + m2[0].length;
-    return {parent: n.parentElement, start, end, txt: this.startTag(tag, attr) + clean(this.source.substring(m1.index + m1[0].length, m2.index)) + '</' + tag + '>'};
+    return {parent: n.parentElement, start, end, txt: this.startTag(tag, attr) + clean(this.parser.source.substring(m1.index + m1[0].length, m2.index)) + '</' + tag + '>'};
   }
   private wrap(parent: HTMLElement, start: number, end: number, tag: string, attr?: {[key: string]: string}, clean: (s: string) => string = (s) => s): Modify {
-    return {parent, start, end, txt: this.startTag(tag, attr) + clean(this.source.substring(start, end)) + '</' + tag + '>'};
+    return {parent, start, end, txt: this.startTag(tag, attr) + clean(this.parser.source.substring(start, end)) + '</' + tag + '>'};
   }
   private wrapNode(n: HTMLElement, tag: string, attr?: {[key: string]: string}, clean: (s: string) => string = (s) => s): Modify {
     const {m1, m2} = this.validator.mapNode(n);
