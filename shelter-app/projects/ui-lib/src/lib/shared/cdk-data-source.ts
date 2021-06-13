@@ -181,7 +181,7 @@ export abstract class AbstractDataSource<T> {
   }
   insertRow<U>(ds: CdkDataSource<T, U>, row: U): Observable<DataExpectedResult<U>> {
     const r = ds.trOut([row]);
-    this.data.push(r[0]);
+    // this.data.push(r[0]); // TODO this adds same row to db on insert
     return this.insert(r[0]).pipe(
       tap(() => this.updateConsumers(ds)),
       map( d => {

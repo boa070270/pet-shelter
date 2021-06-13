@@ -32,6 +32,7 @@ export class DsDataComponent implements OnInit {
   ngOnInit(): void {
     this.select.registerOnChange(c => {
       this.onChoose(c);
+      return c;
     });
   }
   onChoose(ds): void {
@@ -65,10 +66,6 @@ export class DsDataComponent implements OnInit {
     this.display = orderCtrl;
     this.swagger = new SwaggerObject([...orderCtrl, 'ctid'], {ctid: SwaggerNative.asString(undefined, {readOnly: true}),
       ...properties}, undefined, required, undefined, {ctid: [{c: '!0', hide: ['ctid']}]});
-    this.dsDataService.obtainData().subscribe(d => {
-      console.log('ds Data dsDataService', d.data); // [{ctid, data}]
-      this.dataSource.setData(d.data);
-    });
   }
 }
 const ALL_EQUAL = () => true;
