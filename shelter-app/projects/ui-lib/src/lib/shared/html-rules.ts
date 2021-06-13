@@ -29,6 +29,23 @@ export interface Tag {
   childRestriction?: ChildRestriction;
   contentRestriction?: (e: NodeWrapper) => boolean;
 }
+/**
+ * childRestriction doesn't allow any children
+ */
+const NO_CHILDREN: ChildRestriction = () => false;
+
+function findInArray(e: NodeWrapper, where: Array<string | Tag>): string | Tag {
+  const tag = e.nodeName;
+  return where.find( v => {
+    if (typeof v === 'object') {
+      return v.name === tag && (v.contentRestriction ? v.contentRestriction(e) : true);
+    }
+    return v === tag;
+  });
+}
+const AMBIGUOUS_AMPERSAND = '&\w*;'; // TODO: it is not accurate
+const DEF_CUSTOM_CONTENTS: HtmlElementContent[] = [{cnt: ['Flow']}, {cnt: ['Flow']}];
+
 const ELEMENTS: {[key: string]: Array<HtmlElementContent>} = {
   a:	[{cnt: ['Phrasing']}, {cnt: ['Transparent']}],
   abbr:	[{cnt: ['Phrasing']}, {cnt: ['Phrasing']}],
@@ -143,24 +160,8 @@ const ELEMENTS: {[key: string]: Array<HtmlElementContent>} = {
   ul: [{cnt: ['Flow']}, {elem: ['li', 'script', 'template']}],
   var: [{cnt: ['Phrasing']}, {cnt: ['Phrasing']}],
   video: [{cnt: ['Phrasing']}, {elem: ['source', 'track'], cnt: ['Transparent']}],
-  wbr: [{cnt: ['Phrasing']}]
+  wbr: [{cnt: ['Phrasing']}],
 };
-/**
- * childRestriction doesn't allow any children
- */
-const NO_CHILDREN: ChildRestriction = () => false;
-
-function findInArray(e: NodeWrapper, where: Array<string | Tag>): string | Tag {
-  const tag = e.nodeName;
-  return where.find( v => {
-    if (typeof v === 'object') {
-      return v.name === tag && (v.contentRestriction ? v.contentRestriction(e) : true);
-    }
-    return v === tag;
-  });
-}
-const AMBIGUOUS_AMPERSAND = '&\w*;'; // TODO: it is not accurate
-const DEF_CUSTOM_CONTENTS: HtmlElementContent[] = [{cnt: ['Flow']}, {cnt: ['Flow']}];
 const CONTENTS = {
   Metadata: [
     {name:  'base', childRestriction: NO_CHILDREN },
@@ -197,6 +198,7 @@ const CONTENTS = {
     'meter', 'noscript', 'object', 'output', 'picture', 'progress', 'q', 'ruby', 's', 'samp', 'script', 'select', 'slot', 'small', 'span', 'strong', 'sub', 'sup',
     'svg', 'template', 'textarea', 'time', 'u', 'var', 'video',
     {name: 'wbr', childRestriction: NO_CHILDREN },
+    '#text'
   ],
   Embedded: ['audio', 'canvas', 'embed', 'iframe', 'img', 'math', 'object', 'picture', 'svg', 'video'],
   Interactive: [

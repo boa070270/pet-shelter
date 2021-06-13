@@ -1,3 +1,5 @@
+import {SNode} from './html-validator';
+
 export abstract class NodeWrapper {
   abstract nodeName: string;
   abstract typeNode: number;
@@ -24,19 +26,19 @@ export abstract class NodeWrapper {
   abstract attribute(name: string): string;
   abstract equal(n: NodeWrapper): boolean;
   abstract addChild(n: NodeWrapper): void;
-  child(inx: number): NodeWrapper {
-    let w = this.firstChild;
+  child<T extends NodeWrapper>(inx: number): T {
+    let w: T = this.firstChild as T;
     if (inx < 0 && inx >= this.numChildren) { return null; }
-    for (let i = 1; i <= inx && w !== null; w = w.next, ++i) {}
+    for (let i = 1; i <= inx && w !== null; w = w.next as T, ++i) {}
     return w;
   }
-  findChild(p: (n: NodeWrapper) => boolean): NodeWrapper {
-    let w = this.firstChild;
+  findChild<T extends NodeWrapper>(p: (n: NodeWrapper) => boolean): T {
+    let w = this.firstChild as T;
     while (w) {
       if (p(w)) {
         return w;
       }
-      w = w.next;
+      w = w.next as T;
     }
   }
   everyChild(p: (n: NodeWrapper) => void): void {
@@ -46,34 +48,21 @@ export abstract class NodeWrapper {
       c = c.next;
     }
   }
-  thisPosition(): SPosition {
-    return this.parent ? new SPosition(this.parent, this.index) : null;
-  }
   prevNode(): NodeWrapper {
     return this.prev || this.parent;
   }
 
-  nextNode(root: NodeWrapper): NodeWrapper {
-    let n = this.firstChild;
+  nextNode<T extends NodeWrapper>(root: NodeWrapper): T {
+    let n = this.firstChild as T;
     if (n) { return n; }
-    n = this.next;
+    n = this.next as T;
     if (n) { return n; }
-    n = this.parent;
+    n = this.parent as T;
     while (n) {
       if (n === root || root.equal(n)) { break; }
-      if (n.next) { return n.next; }
-      n = n.parent;
+      if (n.next) { return n.next as T; }
+      n = n.parent as T;
     }
-    return null;
-  }
-  prevPosition(): SPosition {
-    const n = this.prevNode();
-    if (n) { return n.thisPosition(); }
-    return null;
-  }
-  nextPosition(root: NodeWrapper): SPosition { // we return only palpable node
-    const n = this.nextNode(root);
-    if (n) { return n.thisPosition(); }
     return null;
   }
   abstract validate(correct?: boolean): void;
@@ -88,107 +77,32 @@ export function isDescendant(p: NodeWrapper, c: NodeWrapper): boolean {
   return false;
 }
 
-export class HtmlWrapper extends NodeWrapper {
-  readonly state = 0;
-  constructor(private n: Node) {
-    super();
-  }
-  get original(): Node {
-    return this.n;
-  }
-  get nodeName(): string {
-    return this.n.nodeName.toLowerCase();
-  }
-  get typeNode(): number {
-    return this.n.nodeType;
-  }
-  get parent(): NodeWrapper {
-    return this.n.parentNode ? new HtmlWrapper(this.n.parentNode) : null;
-  }
-  get firstChild(): NodeWrapper {
-    return this.n.firstChild ? new HtmlWrapper(this.n.firstChild) : null;
-  }
-  get lastChild(): NodeWrapper {
-    return this.n.lastChild ? new HtmlWrapper(this.n.lastChild) : null;
-  }
-  get next(): NodeWrapper {
-    return this.n.nextSibling ? new HtmlWrapper(this.n.nextSibling) : null;
-  }
-  get prev(): NodeWrapper {
-    return this.n.previousSibling ? new HtmlWrapper(this.n.previousSibling) : null;
-  }
-  get index(): number {
-    let i = 0; let f = this.n.parentNode.firstChild;
-    while (f !== null) {
-      if (f === this.n) {
-        return i;
-      }
-      i++;
-      f = f.nextSibling;
-    }
-    return -1;
-  }
-  attribute(name: string): string {
-    return this.n.nodeType === Node.ELEMENT_NODE ? (this.n as HTMLElement).getAttribute(name) : null;
-  }
-  get numChildren(): number {
-    return this.n.childNodes ? this.n.childNodes.length : 0;
-  }
-  equal(n: NodeWrapper): boolean {
-    return this.n === (n as HtmlWrapper).n;
-  }
-  addChild(n: NodeWrapper): void {
-    // nothing
-  }
-
-  validate(correct?: boolean): void {
-  }
-}
-
 export class SPosition {
+  get sNode(): SNode {
+    return SPosition.toSNode(this);
+  }
   /**
    * if n.typeNode === Node.ELEMENT_NODE offset point on child node (can be out of range)
    * else offset point on text position
    */
-  constructor(public n: NodeWrapper, public offset: number) {}
+  constructor(public n: SNode, public offset: number) {}
+  static toSNode(sp: SPosition): SNode {
+    return sp.n.typeNode === Node.ELEMENT_NODE ? sp.n.children[sp.offset] : sp.n;
+  }
   static equalPosition(p1: SPosition, p2: SPosition): boolean {
     return p1.n.equal(p2.n) && p1.offset === p2.offset;
   }
-  static findPosition(root: NodeWrapper, from: SPosition, criteria: (p: SPosition) => SPosition, down: boolean): SPosition {
-    const iterator = new PositionIterator(root, from, !down);
-    for (const next of iterator) {
-      const res = criteria(next);
-      if (res) {
-        return res;
+  static findPosition(root: SNode, from: SPosition, criteria: (p: SNode) => boolean, down: boolean): SPosition {
+    const iter = new SNodeIterator(root, SPosition.toSNode(from), !down);
+    for (const sn of iter) {
+      if (criteria(sn)) {
+        if (sn && sn.typeNode === Node.TEXT_NODE) {
+          return new SPosition(sn, down ? 0 : sn.getText().length);
+        }
+        return new SPosition(sn.parent, sn.index);
       }
     }
     return null;
-  }
-  prevPosition(root: NodeWrapper): SPosition {
-    if (this.n === root && this.offset === 0) {
-      return null;
-    }
-    const n = this.positionToNode();
-    if (n) {
-      return n.prevPosition();
-    }
-    throw new Error('There is null node'); // TODO
-  }
-  nextPosition(root: NodeWrapper): SPosition {
-    if (this.n === root && this.offset === root.numChildren) {
-      return null;
-    }
-    const n = this.positionToNode();
-    if (n) {
-      return n.nextPosition(root);
-    }
-    throw new Error('There is null node'); // TODO
-  }
-  positionToNode(): NodeWrapper {
-    if (this.n.typeNode === Node.ELEMENT_NODE) {
-      return this.n.child(this.offset);
-    }
-    return this.n;
   }
 }
 export function beforePosition(sp: SPosition): (n: NodeWrapper) => boolean {
@@ -205,7 +119,7 @@ export function beforePosition(sp: SPosition): (n: NodeWrapper) => boolean {
 export class SRange {
   indexStart: number;
   indexEnd: number;
-  constructor(public commonAncestor: NodeWrapper, public start: SPosition, public end: SPosition, public collapsed) {
+  constructor(public commonAncestor: SNode, public start: SPosition, public end: SPosition, public collapsed) {
     this.indexStart = start.n.equal(commonAncestor) ? start.offset : this.ancestorIndex(start.n);
     this.indexEnd = end.n.equal(commonAncestor) ? end.offset : this.ancestorIndex(end.n);
   }
@@ -217,14 +131,14 @@ export class SRange {
   }
 }
 // tslint:disable-next-line:max-line-length
-export function treeWalker(from: NodeWrapper, enter: (n: NodeWrapper) => any = () => null, exit: (s: NodeWrapper) => void = () => null, root?: NodeWrapper): void {
+export function treeWalker<T extends NodeWrapper>(from: T, enter: (n: T) => any = () => null, exit: (s: T) => void = () => null, root?: T): void {
   let r = from;
   start: while (r) {
     if (!! enter(r)) {
         break;
     }
     if (r.firstChild) {
-      r = r.firstChild;
+      r = r.firstChild as T;
       continue;
     }
     while (r) {
@@ -232,64 +146,37 @@ export function treeWalker(from: NodeWrapper, enter: (n: NodeWrapper) => any = (
       if (r === root || r.equal(root)) {
         r = null;
       } else if (r.next) {
-        r = r.next;
+        r = r.next as T;
         continue start;
       } else {
-        r = r.parent;
+        r = r.parent as T;
       }
     }
   }
 }
-export class PositionIterator implements Iterable<SPosition>, Iterator<SPosition>{
-  private current: SPosition;
+export class SNodeIterator<T extends NodeWrapper> implements Iterable<T>, Iterator<T>{
+  private current: T;
   private done: boolean;
-  constructor(private root: NodeWrapper, private from: SPosition, private revert = false) {
-    this.current = from;
-    this.done = this.isDone();
-  }
-  private isDone(): boolean {
-    return (this.revert && SPosition.equalPosition(new SPosition(this.root, 0), this.current))
-      || (!this.revert && SPosition.equalPosition(new SPosition(this.root, this.root.numChildren), this.current));
-  }
-  next(...args: [] | [undefined]): IteratorResult<SPosition> {
-    if (this.done) {
-      return {done: true, value: null};
-    }
-    if (this.revert) {
-      this.current = this.current.prevPosition(this.root);
-    } else {
-      this.current = this.current.nextPosition(this.root);
-    }
-    this.done = this.isDone();
-    return {done: this.done, value: this.current};
-  }
-  [Symbol.iterator](): Iterator<SPosition> {
-    return this;
-  }
-}
-export class SNodeIterator implements Iterable<NodeWrapper>, Iterator<NodeWrapper>{
-  private current: NodeWrapper;
-  private done: boolean;
-  constructor(private root: NodeWrapper, private from: NodeWrapper, private revert = false) {
+  constructor(private root: T, private from: T, private revert = false) {
     this.current = from;
     this.done = this.isDone();
   }
   private isDone(): boolean {
     return this.current === null || this.root.equal(this.current);
   }
-  next(...args: [] | [undefined]): IteratorResult<NodeWrapper> {
+  next(...args: [] | [undefined]): IteratorResult<T> {
     if (this.done) {
       return {done: true, value: null};
     }
     if (this.revert) {
-      this.current = this.current.prevNode();
+      this.current = this.current.prevNode() as T;
     } else {
-      this.current = this.current.nextNode(this.root);
+      this.current = this.current.nextNode(this.root) as T;
     }
     this.done = this.isDone();
     return {done: this.done, value: this.current};
   }
-  [Symbol.iterator](): Iterator<NodeWrapper> {
+  [Symbol.iterator](): Iterator<T> {
     return this;
   }
 }

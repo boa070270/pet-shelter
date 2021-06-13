@@ -1,6 +1,6 @@
 import {SwaggerObject} from './swagger-object';
-import {TitleType} from "./language";
-import {EventEmitter} from "@angular/core";
+import {TitleType} from './language';
+import {EventEmitter} from '@angular/core';
 
 export type ActionType = 'ok' | 'ok_cancel' | 'save_cancel' | 'yes_no';
 export class TitleBarData {

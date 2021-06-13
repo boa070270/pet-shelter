@@ -40,7 +40,7 @@ export class SNode extends NodeWrapper {
   get numChildren(): number {
     return this.children ? this.children.length : 0;
   }
-  constructor(inRange: StartEnd, outRange: StartEnd, typeNode: number, nodeName: string, text?: string) {
+  constructor(typeNode: number, nodeName: string, text?: string, public inRange?: StartEnd, public outRange?: StartEnd, public isRoot = false) {
     super();
     this.inRange = inRange;
     this.outRange = outRange;
@@ -51,9 +51,6 @@ export class SNode extends NodeWrapper {
     }
     this._txt = text;
   }
-  // start and end include tag whole
-  inRange: StartEnd;
-  outRange: StartEnd;
   typeNode: number;
   nodeName: string;
   children: SNode[] = null;
@@ -63,18 +60,18 @@ export class SNode extends NodeWrapper {
   state: number;
   private _txt: string;
   static textNode(text: string, inRange?: StartEnd, outRange?: StartEnd): SNode { // the state was set during add
-    return new SNode(inRange || EMPTY_S_RANGE, outRange || EMPTY_S_RANGE, Node.TEXT_NODE, '#text', htmlDecode(text));
+    return new SNode(Node.TEXT_NODE, '#text', htmlDecode(text), inRange || EMPTY_S_RANGE, outRange || EMPTY_S_RANGE);
   }
-  static elementNode(nodeName: string, attr?: any, inRange?: StartEnd, outRange?: StartEnd): SNode { // the state was set during add
-    const n = new SNode(inRange || EMPTY_S_RANGE, outRange || EMPTY_S_RANGE, Node.ELEMENT_NODE, nodeName);
+  static elementNode(nodeName: string, attr?: any, inRange?: StartEnd, outRange?: StartEnd, asRoot = false): SNode { // the state was set during add
+    const n = new SNode(Node.ELEMENT_NODE, nodeName, null, inRange || EMPTY_S_RANGE, outRange || EMPTY_S_RANGE, asRoot);
     n.attr = attr || {};
     return n;
   }
-  static commentNode(text: string, inRange: StartEnd, outRange: StartEnd): SNode {
-    return new SNode(inRange, outRange, Node.COMMENT_NODE, '#comment', text);
+  static commentNode(text: string, inRange?: StartEnd, outRange?: StartEnd): SNode {
+    return new SNode(Node.COMMENT_NODE, '#comment', text, inRange, outRange);
   }
-  static cdataNode(text: string, inRange: StartEnd, outRange: StartEnd): SNode {
-    return new SNode(inRange, outRange, Node.CDATA_SECTION_NODE, '#cdata-section', text);
+  static cdataNode(text: string, inRange?: StartEnd, outRange?: StartEnd): SNode {
+    return new SNode(Node.CDATA_SECTION_NODE, '#cdata-section', text, inRange, outRange);
   }
   /**
    * define node for this position. If position point to null, return value depends on r.
@@ -95,7 +92,7 @@ export class SNode extends NodeWrapper {
     }
     return n;
   }
-  static splitBranch(nodeName: string, from: SNode, offset: number, root: SNode, source: string, crossNode: SNode, copyTop: boolean,
+  static splitBranch(nodeName: string, from: SNode, offset: number, root: SNode, crossNode: SNode, copyTop: boolean,
                      copyAttr: (attr: {[key: string]: string}) => {[key: string]: string}): {crossed: boolean, topNode: SNode, children: SNode[], newChildren: SNode[], text: string} {
     let text = '';
     let textNode = null;
@@ -105,7 +102,7 @@ export class SNode extends NodeWrapper {
     if (from.typeNode === Node.ELEMENT_NODE) {
       from = from.children[offset];
     } else {
-      text = from.getText(source);
+      text = from.getText();
       textNode = from;
       from.setText(text.substring(0, offset));
     }
@@ -152,9 +149,20 @@ export class SNode extends NodeWrapper {
   equal(n: NodeWrapper): boolean {
     return this === n;
   }
-  setParent(n: SNode): SNode {
-    n.parent = n;
-    return n;
+  clone(): SNode {
+    switch (this.typeNode) {
+      case Node.TEXT_NODE:
+        return SNode.textNode(this._txt);
+      case Node.COMMENT_NODE:
+        return SNode.commentNode(this._txt);
+      case Node.CDATA_SECTION_NODE:
+        return SNode.cdataNode(this._txt);
+      case Node.ELEMENT_NODE: {
+        const n = SNode.elementNode(this.nodeName, this.attr, null, null, this.isRoot);
+        this.children.forEach(c => n.addChild(c.clone()));
+        return n;
+      }
+    }
   }
   private renderAttr(): string {
     let s = '';
@@ -193,27 +201,14 @@ export class SNode extends NodeWrapper {
     }
     return '';
   }
-  newSource(source: string): string {
-    if (!this.state) {
-      return source.substring(this.outRange.start, this.outRange.end);
-    }
+  source(onlyBody = false): string {
     if (this.state < 0) {
       return '';
     }
     if (this.typeNode === Node.ELEMENT_NODE) {
-      if (this.state === 1) { // modified
-        let s =  source.substring(this.outRange.start, this.inRange.start);
-        this.children.forEach( c => s += c.newSource(source));
-        return s + source.substring(this.inRange.end, this.outRange.end);
-      }
-      if (this.state === 2) {
-        let s = this.startTag();
-        this.children.forEach( c => s += c.newSource(source));
-        return s + this.endTag();
-      }
-      if (this.state === 3) {
-        return this.startTag() + source.substring(this.inRange.start, this.outRange.end) + this.endTag();
-      }
+        let s = this.isRoot || onlyBody ? '' : this.startTag();
+        this.children.forEach( c => s += c.source());
+        return s + (this.isRoot || onlyBody ? '' : this.endTag());
     } else {
       return this.startTag() + this._txt ? this._txt : '' + this.endTag();
     }
@@ -232,9 +227,10 @@ export class SNode extends NodeWrapper {
       this.parent.modified();
     }
   }
-  addChild(n: SNode): void {
+  addChild(n: SNode): SNode {
     n.parent = this;
     this.children.push(n);
+    return n;
   }
   validate(correct = true): void {
     if (this.typeNode === Node.ELEMENT_NODE) {
@@ -281,20 +277,22 @@ export class SNode extends NodeWrapper {
     this.modified();
     return this;
   }
-  wrapThis(n: SNode): void {
+  wrapThis(n: SNode): SNode {
     if (this.parent === null) {
       throw new Error('Prohibited to wrap parent');
     }
+    this.modified();
     this.parent.children[this.index] = n;
+    n.parent = this.parent;
     n.addChild(this);
     n.state = 2;
-    this.parent.modified();
+    return n;
   }
   wrapChildren(n: SNode, from = 0, to?: number): SNode {
-    for (let i = from; i < to || this.numChildren; ++i) { n.addChild( this.children.splice(i, 1)[0]); }
+    while (this.firstChild) { n.addChild( this.children.splice(0, 1)[0]); }
     this.addChild(n);
     n.state = 2;
-    this.parent.modified();
+    this.modified();
     return n;
   }
   extractChildren(): void {
@@ -327,10 +325,9 @@ export class SNode extends NodeWrapper {
     }
     return this;
   }
-  getText(source: string): string {
+  getText(): string {
     if (this.typeNode !== Node.ELEMENT_NODE) {
-      const s = this._txt ? this._txt : source.substring(this.inRange.start, this.inRange.end);
-      return htmlDecode(s);
+      return this._txt;
     }
   }
 }
@@ -355,29 +352,50 @@ const END_COMMENT = '-->';
 export class SimpleParser {
   root: SNode;
   errors: ParseError[] = [];
-  source: string;
+  get source(): string {
+    return this.root.source();
+  }
   mark: string;
+  private _tmpRoot: SNode = null;
   constructor(source: string, mark: string, private baseMark = '0') {
-    this.source = source;
     this.mark = mark;
     this.root = parse(source, mark, this.errors, baseMark);
   }
   static rgStartTag(t: string): RegExp {
     return new RegExp(`<${t}[^>]*>`, 'gi');
   }
-  static rgEndTag(t: string): RegExp {
-    return new RegExp(`</${t}[^>]*>`, 'gi');
+  static validate(root: SNode): Error {
+    return HtmlRules.validateSource(root);
   }
-  clone(): SimpleParser {
-    return new SimpleParser(this.source, this.mark, this.baseMark);
+  cloneRoot(): SNode {
+    if (!this._tmpRoot) {
+      this._tmpRoot = this.root.clone();
+    }
+    return this._tmpRoot;
   }
-  findMark(a: string): RegExpExecArray {
-    const regexp = new RegExp(`<([a-zA-Z][^<>]*\\s${this.mark}="${a}"[^<>]*)>`, 'gs');
-    return regexp.exec(this.source);
+  isEditing(): boolean {
+    return !!this._tmpRoot;
   }
-  findSNode(markAttr: string, mark: string): SNode {
+  mapToClone(node: SNode, root?: SNode): SNode {
+    if (node.typeNode === Node.ELEMENT_NODE) {
+      return this.findSNode(this.mark, node.attribute(this.mark), root || this.cloneRoot());
+    } else {
+      const p = this.findSNode(this.mark, node.parent.attribute(this.mark), root || this.cloneRoot());
+      return p ? p.children[node.index] : null;
+    }
+  }
+  commit(): void {
+    if (this._tmpRoot) {
+      this.root = parse(this._tmpRoot.source(), this.mark, this.errors, this.baseMark);
+      this._tmpRoot = null;
+    }
+  }
+  rollback(): void {
+    this._tmpRoot = null;
+  }
+  findSNode(markAttr: string, mark: string, from?: SNode): SNode {
     let r: SNode;
-    treeWalker(this.root, (n) => {
+    treeWalker(from || this._tmpRoot || this.root, (n) => {
       if (n.attribute(markAttr) === mark) {
         r = n as SNode;
         return true;
@@ -385,31 +403,31 @@ export class SimpleParser {
     });
     return r;
   }
-  textPosition(sn: SNode, offset: number): number {
-    return sn.inRange.start + offset + this.unicode(sn.inRange.start, sn.inRange.start + offset);
+  nextDown(p: SPosition, stepText = true): SPosition {
+    return SPosition.findPosition(this._tmpRoot || this.root, p, editorNode(stepText), true);
   }
-  private unicode(start: number, end: number): number {
-    const regexp = /&#(\d{2,4}|x[0-9a-zA-Z]{2,4});/g;
-    regexp.lastIndex = start;
-    let count = 0;
-    do {
-      const res = regexp.exec(this.source);
-      if (res === null || res.index >= end) {
-        break;
-      }
-      count += (res[1].length + 2);
-      end -= (res.index + 1);
-    } while (true);
-    return count;
+  nextUp(p: SPosition, stepText = true): SPosition {
+    return SPosition.findPosition(this._tmpRoot || this.root, p, editorNode(stepText), false);
   }
-  validate(): Error {
-    return HtmlRules.validateSource(this.root);
+
+  parse(s: string): void {
+    this.root = parse(s, this.mark, this.errors, this.baseMark);
+    this._tmpRoot = null;
+  }
+}
+function editorNode(stepText: boolean): (p: SNode) => boolean {
+  if (stepText) {
+    return (c) => {
+      return c && c.typeNode === Node.TEXT_NODE;
+    };
+  } else {
+    return (c) => !!c;
   }
 }
 function parse(source: string, mark: string, errors: ParseError[], baseMark: string): SNode {
   const deep: SNode[] = [];
   const mainAttr = {}; mainAttr[mark] = baseMark;
-  const _root = SNode.elementNode('main', mainAttr, {start: 0, end: source.length}, {start: 0, end: source.length});
+  const _root = SNode.elementNode('main', mainAttr, {start: 0, end: source.length}, {start: 0, end: source.length}, true);
   let root = _root;
   let pos = 0;
   function isNode(i: number): boolean {
@@ -465,21 +483,16 @@ function parse(source: string, mark: string, errors: ParseError[], baseMark: str
         errors.push({index: start, reason: 'Incorrect start tag format'});
         return;
       }
-      pos += res[0].length; let m; const attr = {};
+      pos += res[0].length; const nodeName = res[1]; const attr = {};
       const voidTag = HtmlRules.isVoid(res[1]) || res[3].endsWith('/');
       if (res[3]) {
-        r = new RegExp(mark + '="(\\d+)"');
-        res = r.exec(res[3]);
-        if (res) {
-          m = res[1];
-        }
         r = new RegExp('\\s(\\w*)="(\\w+)"');
         // tslint:disable-next-line:no-conditional-assignment
         while (res = r.exec(res[3])) {
           attr[res[1]] = res[2];
         }
       }
-      const n = SNode.elementNode(res[1], attr, {start: pos, end: pos}, {start, end: pos});
+      const n = SNode.elementNode(nodeName, attr, {start: pos, end: pos}, {start, end: pos});
       root.addChild(n);
       if (!voidTag) { // check if the tag closed
         root = n;
@@ -522,8 +535,8 @@ function parse(source: string, mark: string, errors: ParseError[], baseMark: str
         break;
       }
     }
-    const range = {start, end};
-    root.addChild(SNode.textNode(source.substring(start, end), range, range));
+    const range = {start, end: pos};
+    root.addChild(SNode.textNode(source.substring(start, pos), range, range));
   }
   while (pos < source.length) {
     if (source[pos] === '<' && isNode(pos)) {
