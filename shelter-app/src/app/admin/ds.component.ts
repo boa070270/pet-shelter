@@ -17,7 +17,9 @@ export class DsComponent {
     ['ds', 'description', 'fields'],
     {
       ds: SwaggerNative.asString(undefined, {maxLength: 16, minLength: 1}),
-      description: SwaggerNative.asString(),
+      description: new SwaggerObject(['description'], {
+        description: SwaggerNative.asString()
+      }),
       fields: new SwaggerArray(new SwaggerObject(
         ['field', 'pk', 'type'],
         {
@@ -27,7 +29,7 @@ export class DsComponent {
           pk: SwaggerNative.asBoolean(),
           type: SwaggerNative.asString(
             'lib-select-control',
-            {enum: ['number', 'string', 'date']})
+            {enum: ['', 'number', 'string', 'date'], minLength: 1})
         }, undefined, ['field', 'type']), {control: 'lib-editable-list'})
     }, undefined, ['ds']
   );

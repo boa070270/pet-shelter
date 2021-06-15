@@ -113,7 +113,9 @@ class DsDb {
         }
         for (const field of fields) {
             if (ds.data[field.field] && typeof ds.data[field.field] !== field.type) {
-                throw new Error(`Data field ${field.field} has type ${typeof ds.data[field.field]} but expected to be ${field.type}`);
+                if (field.type !== 'date' && typeof ds.data[field.field] !== 'string') {
+                    throw new Error(`Data field ${field.field} has type ${typeof ds.data[field.field]} but expected to be ${field.type}`);
+                }
             }
         }
     }
