@@ -128,7 +128,7 @@ module.exports = {
         try {
             const ds = req.swagger.params.ds.value;
             const filter = req.swagger.params.filter.value;
-            log.debug('controller deleteField %o, %o', ds, filter);
+            log.debug('controller deleteDsData %o, %o', ds, filter);
             const id = await dsDb.deleteDsData(ds, filter);
             writeResponse(res, {id}, req);
         } catch (err) {

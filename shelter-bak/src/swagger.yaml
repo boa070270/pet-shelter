@@ -2033,7 +2033,7 @@ paths:
                     schema:
                         $ref: '#/definitions/StatusType'
         post:
-            summary: delete ds
+            summary: delete ds data
             operationId: deleteDsData
             tags:
                 - maintain

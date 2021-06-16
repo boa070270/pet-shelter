@@ -635,7 +635,7 @@ export class BasicService implements ObtainSystemLanguage, OnDestroy {
   }
   deleteDsData(ds): Observable<HttpResponse<IdResponse>> {
     this.logger.debug('deleteDsData');
-    return this.http.post<HttpResponse<IdResponse>>(API_URL + `/ds-data/${ds.ds}`, ds.data, this.httpOptions(true)).pipe(
+    return this.http.post<HttpResponse<IdResponse>>(API_URL + `/ds-data/${ds.ds}`, ds.filter, this.httpOptions(true)).pipe(
       tap(r => this.setClientId(r.headers.get('x-client-id')))
     );
   }

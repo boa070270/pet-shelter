@@ -81,12 +81,6 @@ export class DsDataService extends DataService<DsDataType>{
   // {ds: 'ds1, id: ctid, pkfield: val}
   deleteData(row: DsDataType): Observable<DataExpectedResult<DsDataType>> {
     const filter = this.dataFilter(row);
-    this.fields.forEach(f => {
-      if (f.pk) {
-        filter.id = undefined;
-        filter[f.field] = row[f.field];
-      }
-    });
     return this.basicService.deleteDsData({ds: this.ds, filter}).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
