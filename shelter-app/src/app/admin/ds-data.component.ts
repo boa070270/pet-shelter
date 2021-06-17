@@ -1,13 +1,12 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {DsDataService, DsDataType, DsFldTypeEnum, DsService, DsType} from "./ds.service";
-import {AbstractDataSource, MainDataSource, SwaggerArray, SwaggerNative, SwaggerObject, SelectControlComponent} from 'ui-lib';
-import {DataSources} from "../datasources";
+import {AbstractDataSource, MainDataSource, SwaggerNative, SwaggerObject, SelectControlComponent, TableComponent} from 'ui-lib';
 
 @Component({
   selector: 'app-ds-data',
   template: `
     <lib-select-control [options]="dsNames"></lib-select-control>
-  <lib-table *ngIf="selected" [dataSource]="dataSource" [swagger]="swagger" [defaultDisplay]="display"></lib-table>
+  <lib-table *ngIf="swagger" [dataSource]="dataSource" [swagger]="swagger" [defaultDisplay]="display" #table></lib-table>
 `,
   styleUrls: ['./ds-data.component.sass']
 })
@@ -17,7 +16,7 @@ export class DsDataComponent implements OnInit {
   dataSource: AbstractDataSource<DsDataType>;
   swagger: SwaggerObject;
   @ViewChild(SelectControlComponent, {static: true}) select: SelectControlComponent;
-  selected = false;
+  @ViewChild('table') table: TableComponent;
   display = [];
 
   constructor(protected dsService: DsService, protected dsDataService: DsDataService) {
@@ -39,7 +38,6 @@ export class DsDataComponent implements OnInit {
     if (!ds) {
       return;
     }
-    this.selected = true;
     const fields = this.ds.find(d => d.ds === ds).fields;
     this.dsDataService.ds = ds;
     this.dsDataService.fields = fields;
@@ -66,6 +64,12 @@ export class DsDataComponent implements OnInit {
     this.display = orderCtrl;
     this.swagger = new SwaggerObject([...orderCtrl, 'ctid'], {ctid: SwaggerNative.asString(undefined, {readOnly: true}),
       ...properties}, undefined, required, undefined, {ctid: [{c: '!0', hide: ['ctid']}]});
+    if (this.table) { // update manually, because table can't do it
+      this.table.defaultDisplay = orderCtrl;
+      this.table.swagger = this.swagger;
+      this.table.ngOnInit();
+      this.table.refresh();
+    }
   }
 }
 const ALL_EQUAL = () => true;
