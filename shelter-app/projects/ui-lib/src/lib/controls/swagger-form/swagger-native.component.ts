@@ -86,8 +86,8 @@ export class SwaggerNativeComponent extends BaseSwaggerComponent implements OnIn
    * @private
    */
   private isReadOnly(): void {
-    if (!this.disabled) {
-      if (this.constrictions.readOnly || (this.constrictions.immutable && this.isValueEmpty(this.constrictions.default))) {
+    if (!this.disabled) { // if value is empty - it shouldn't be disabled, because then you cant make it nonempty
+      if (this.constrictions.readOnly || (this.constrictions.immutable && !this.isValueEmpty(this.constrictions.default))) {
         this.formControl.disable();
       }
     }

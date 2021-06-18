@@ -41,10 +41,10 @@ class PetsDb {
         await pgPool.query('DELETE FROM field_titles WHERE name = $1', [field.name]);
         log.debug('3. INSERT INTO field_titles');
         if(titles) {
-            for (const {id, lang, title} of titles) {
+            for (const {lang, title} of titles.titles) {
                 await pgPool.query(`INSERT INTO field_titles(name, lang, title)
                                              VALUES ($1, $2, $3)`,
-                [id, lang, title]);
+                [field.name, lang, title]);
             }
         }
         return field.name;

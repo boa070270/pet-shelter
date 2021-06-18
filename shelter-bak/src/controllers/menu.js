@@ -25,7 +25,7 @@ module.exports = {
         try {
             const menu = req.swagger.params.menu.value;
             log.debug('controller upsetMenu', menu);
-            const id = await menuDb.upsetMenu(menu.menu,menu.titles);
+            const id = await menuDb.upsetMenu(menu.menu, menu.titles);
             writeResponse(res, {id}, req);
         } catch (err) {
             log.error(err);

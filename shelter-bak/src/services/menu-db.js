@@ -19,12 +19,13 @@ class MenuDb {
      * upset menu
      * menu
      * {"titles":[{"id":"about","lang":"en","title":"About us"},{"id":"about","lang":"en","title":"About us"}]}
+     * changed to {id: "about", "titles":{"lang":"en","title":"About us"},{"lang":"en","title":"About us"}]}
      */
     async upsetMenu(menu, titles = []) {
         log.debug('upsetMenu with query "with data as (select cast(:menu.path as varchar) as id, cast(:menu.position as integer) as position, cast(:menu.parentId as varchar) as parent_id, cast(:menu.component as varchar) as component, cast(:menu.role as varchar) as role ), upd as ( update menu m set position = d.position, parent_id = d.parent_id, component = d.component, role = d.role from data d where m.id = d.id returning m.id ), ins as ( insert into menu (id, position, parent_id, component, role) select id, position, parent_id, component, role from data where not exists (select * from upd) ) update updates set last_updated = now() where entity_id = \'Menu\'"');
         await pgPool.query('with data as (select cast($1 as varchar) as id, cast($2 as integer) as position, cast($3 as varchar) as parent_id, cast($4 as varchar) as component, cast($5 as varchar) as role ), upd as ( update menu m set position = d.position, parent_id = d.parent_id, component = d.component, role = d.role from data d where m.id = d.id returning m.id ), ins as ( insert into menu (id, position, parent_id, component, role) select id, position, parent_id, component, role from data where not exists (select * from upd) ) update updates set last_updated = now() where entity_id = \'Menu\'', [menu.path, menu.position, menu.parentId, menu.component, menu.role]);
         log.debug('upsetMenu with query "with data as (select cast(:titles.id as varchar) as id, cast(:titles.lang as varchar) as lang, cast(:titles.title as varchar) as title ), upd as ( update menu_titles m set id = d.id, lang = d.lang, title = d.title from data d where m.id = d.id and m.lang = d.lang returning m.id, m.lang ), ins as ( insert into menu_titles(id, lang, title) select id, lang, title from data where not exists(select * from upd) ) update updates set last_updated = now() where entity_id = \'Menu\'"');
-        for(const title of titles) {
+        for(const title of titles.titles) { // id = menu.path, so id is not needed here
             await pgPool.query(
                 `with data as (
                             select cast($1 as varchar) as id,
@@ -40,7 +41,7 @@ class MenuDb {
                         )
                          update updates
                          set last_updated = now()
-                         where entity_id = 'Menu'`, [title.id, title.lang, title.title]);
+                         where entity_id = 'Menu'`, [menu.path, title.lang, title.title]);
         }
         return menu.path;
     }

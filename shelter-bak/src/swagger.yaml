@@ -236,9 +236,8 @@ paths:
                             menu:
                                 $ref: '#/definitions/MenuType'
                             titles:
-                                type: array
-                                items:
-                                    $ref: '#/definitions/TitleType'
+                                type: object
+                                $ref: '#/definitions/TitleType'
             responses:
                 200:
                     x-payload: 'data.id'
@@ -405,9 +404,8 @@ paths:
                             field:
                                 $ref: '#/definitions/FieldType'
                             titles:
-                                type: array
-                                items:
-                                    $ref: '#/definitions/TitleType'
+                                type: object
+                                $ref: '#/definitions/TitleType'
             responses:
                 200:
                     x-payload: 'data.id'
@@ -2143,18 +2141,22 @@ definitions:
         type: object
         required:
             - id
-            - lang
-            - title
+            - titles
         properties:
             id:
                 type: string
                 example: about
-            lang:
-                type: string
-                example: en
-            title:
-                type: string
-                example: 'About us'
+            titles:
+                type: array
+                items:
+                    type: object
+                    properties:
+                        lang:
+                            type: string
+                            example: en
+                        title:
+                            type: string
+                            example: 'About us'
     MenuResponse:
         type: object
         properties:
@@ -2167,9 +2169,8 @@ definitions:
                     menu:
                         $ref: '#/definitions/MenuType'
                     titles:
-                        type: array
-                        items:
-                            $ref: '#/definitions/TitleType'
+                        type: object
+                        $ref: '#/definitions/TitleType'
             status:
                 $ref: '#/definitions/StatusType'
     MenusResponse:
@@ -2186,9 +2187,8 @@ definitions:
                         items:
                             $ref: '#/definitions/MenuType'
                     titles:
-                        type: array
-                        items:
-                            $ref: '#/definitions/TitleType'
+                        type: object
+                        $ref: '#/definitions/TitleType'
             status:
                 $ref: '#/definitions/StatusType'
     FieldType:
@@ -2232,9 +2232,8 @@ definitions:
                         items:
                             $ref: '#/definitions/FieldType'
                     titles:
-                        type: array
-                        items:
-                            $ref: '#/definitions/TitleType'
+                        type: object
+                        $ref: '#/definitions/TitleType'
             status:
                 $ref: '#/definitions/StatusType'
     PageType:

@@ -26,7 +26,11 @@ export enum DsFldTypeEnum {
 export function removeNull(obj): any {
   const replacer = (key, value) =>
     String(value) === 'null' ? undefined : value;
-  return JSON.parse(JSON.stringify(obj, replacer));
+  const str = JSON.stringify(obj, replacer);
+  if (!str) {
+    return undefined;
+  }
+  return JSON.parse(str);
 }
 @Injectable({
   providedIn: 'root'

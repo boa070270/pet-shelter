@@ -57,9 +57,9 @@ class MenuDataService extends DataService<MenuTypeUI> {
     );
   }
   insertData(row: MenuTypeUI): Observable<DataExpectedResult<MenuTypeUI>> {
-    const title = row.title;
-    const menu = Object.assign({}, row);
-    delete menu.title;
+    const title = {id: row.path, titles: row.title}; // in: title: [{lang, title}, {lang, title} ..]
+    const menu = Object.assign({}, row); // out: { id, titles: [{lang, title}, {lang, title} ..] }
+    delete menu.title; // id should be same for every title
     return this.basicService.upsetMenu2(removeNull(menu), removeNull(title)).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
@@ -72,7 +72,7 @@ class MenuDataService extends DataService<MenuTypeUI> {
         const {menus, titles} = r.body.data;
         const data = menus.map( m => {
           const {path, component, role, position, parentId} = m;
-          return {path, component, role, position, parentId, title: titles.filter( t => t.id = path)};
+          return {path, component, role, position, parentId, title: titles.filter( t => t.id === path)};
         });
         return {responseTime: new Date(r.headers.get('Date')), data, totalFiltered: data.length, totalAll: data.length};
       })
@@ -94,10 +94,10 @@ class FieldDataService extends DataService<FieldTypeUI> {
     );
   }
   insertData(row: FieldTypeUI): Observable<DataExpectedResult<FieldTypeUI>> {
-    const titles = row.title;
+    const titles = {id: row.name, titles: row.title};
     const field = Object.assign({}, row);
     delete field.title;
-    return this.basicService.addField2({field, titles}).pipe(
+    return this.basicService.addField2({field: removeNull(field), titles: removeNull(titles)}).pipe(
       map(r => {
         return {responseTime: new Date(r.headers.get('Date')), data: [], totalFiltered: -1, totalAll: -1};
       })
@@ -108,7 +108,7 @@ class FieldDataService extends DataService<FieldTypeUI> {
       const {fields, titles} = r.body.data;
       const data = fields.map( f => {
         const {name, type, subtype, enumValues, order} = f;
-        return {name, type, subtype, enumValues, order, title: titles.filter( t => t.id = name)};
+        return {name, type, subtype, enumValues, order, title: titles.filter( t => t.id === name)};
       });
       return {responseTime: new Date(r.headers.get('Date')), data, totalFiltered: data.length, totalAll: data.length};
     }));

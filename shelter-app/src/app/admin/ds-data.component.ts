@@ -16,7 +16,7 @@ export class DsDataComponent implements OnInit {
   dataSource: AbstractDataSource<DsDataType>;
   swagger: SwaggerObject;
   @ViewChild(SelectControlComponent, {static: true}) select: SelectControlComponent;
-  @ViewChild('table') table: TableComponent;
+  @ViewChild('table') table: TableComponent<any, any>;
   display = [];
 
   constructor(protected dsService: DsService, protected dsDataService: DsDataService) {
