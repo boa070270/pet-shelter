@@ -413,7 +413,7 @@ export const SwaggerBannerType = new SwaggerObject(
   {
     id: SwaggerNative.asString(
       undefined,
-      {immutable: true},
+      {readOnly: true},
       swaggerUI()),
     score: SwaggerNative.asInteger(
       undefined,
