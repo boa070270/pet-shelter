@@ -135,7 +135,7 @@ const I18N_FIELD = {
   enumValues_placeholder: [{lang: 'en', title: 'one,two'}, {lang: 'uk', title: 'one,two'}],
 };
 export const SwaggerFieldType = new SwaggerObject(
-  [ 'name', 'type', 'subtype', 'order', 'enumValues'],
+  [ 'name', 'type', 'subtype', 'order', 'enumValues', 'title'],
   {
     name: SwaggerNative.asString(
       undefined,
