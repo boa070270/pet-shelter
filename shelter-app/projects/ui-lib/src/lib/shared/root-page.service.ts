@@ -36,17 +36,16 @@ export class RootPageServiceImpl implements RootPageService {
       //           </lib-card-content></lib-card-element>
       //        </lib-tab-group-element>`
       // html: `<lib-accordion-element ds="{{ds1}}" label="{{name}}">
-      html: `<lib-carousel-element ds="{{ds1}}">
-                <lib-card-element><lib-card-content>
+      html: `<ui-carousel ds="{{ds1}}">
+                <ui-card><lib-card-content>
                     <ui-span txt="{{ds1.position}}"></ui-span>
-                  </lib-card-content></lib-card-element>
-                  <ui-span txt="{{ds1.weight}}"></ui-span>
-                  <ui-span txt="{{ds1.symbol}}"></ui-span>
-                  <ui-span txt="{{ds1.colA}}"></ui-span>
-                  <ui-span txt="{{ds1.colB}}"></ui-span>
-                  <ui-span txt="{{ds1.colC}}"></ui-span>
-                </lib-card-content></lib-card-element>
-             </lib-carousel-element>`
+                  </lib-card-content></ui-card>
+                <ui-span txt="{{ds1.weight}}"></ui-span>
+                <ui-span txt="{{ds1.symbol}}"></ui-span>
+                <ui-span txt="{{ds1.colA}}"></ui-span>
+                <ui-span txt="{{ds1.colB}}"></ui-span>
+                <ui-span txt="{{ds1.colC}}"></ui-span>
+             </ui-carousel>`
 
       // </lib-accordion-element>`
       // html: '<lib-accordion-element data="{{accData}}"></lib-accordion-element>'

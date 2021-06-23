@@ -238,7 +238,7 @@ export const SwaggerPageType = new SwaggerObject(
       swaggerUI()),
     ref: new SwaggerArray(
       SwaggerReferenceType,
-      {},
+      {control: 'lib-editable-list'},
       swaggerUI()),
 
   },
@@ -615,7 +615,7 @@ export const SwaggerUserType = new SwaggerObject(
       swaggerUI()),
     created: SwaggerNative.asString(
       undefined,
-      {},
+      { readOnly: true },
       swaggerUI()),
     enabled: SwaggerNative.asBoolean(
       undefined,
@@ -624,7 +624,7 @@ export const SwaggerUserType = new SwaggerObject(
 
   },
   swaggerUI(),
-  [ 'login', 'authType', ]);
+  [ 'login', 'authType', 'password']);
 export const UsersResponse = new SwaggerObject(
   [ 'data', 'status', ],
   {
