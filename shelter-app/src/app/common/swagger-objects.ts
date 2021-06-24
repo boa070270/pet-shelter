@@ -166,25 +166,32 @@ export const SwaggerFieldType = new SwaggerObject(
   {type: [{c: '=enum', show: ['enumValues']}, {c: '!enum', hide: ['enumValues']}]}
 
 );
+const I18N_REF = {
+  ref_caption: [{lang: 'en', title: 'File id'}, {lang: 'ua', title: 'File id'}],
+  // ref_description: [{lang: 'en', title: 'File id'}, {lang: 'ua', title: 'File id'}],
+  target_description: [{lang: 'en', title: 'The URL that was used as href in anchor tag'}, {lang: 'ua', title: 'the URL that was used as href in anchor tag'}],
+  mimeType_description: [{lang: 'en', title: 'Type of resource'}, {lang: 'ua', title: 'descriptions of resource'}],
+  tooltip_description: [{lang: 'en', title: 'Descriptions of resource'}, {lang: 'ua', title: 'descriptions of resource'}]
+};
 export const SwaggerReferenceType = new SwaggerObject(
   [ 'refId', 'targetUrl', 'mimeType', 'tooltip', ],
   {
     refId: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI(null, [ { lang: 'en', title: 'file id', }, ])),
+      swaggerUI(I18N_REF.ref_caption)),
     targetUrl: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI(null, [ { lang: 'en', title: 'the URL that was used as href in anchor tag', }, ])),
+      swaggerUI(I18N_REF.ref_caption, I18N_REF.target_description)),
     mimeType: SwaggerNative.asString(
       undefined,
-      {},
-      swaggerUI()),
+      {readOnly: true},
+      swaggerUI(null, I18N_REF.mimeType_description)),
     tooltip: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI(null, [ { lang: 'en', title: 'descriptions of resource', }, ])),
+      swaggerUI(null, I18N_REF.tooltip_description)),
 
   },
   swaggerUI(null, [ { lang: 'en', title: 'expose file as reference', }, ]),
