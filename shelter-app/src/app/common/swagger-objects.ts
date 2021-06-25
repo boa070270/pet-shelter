@@ -169,8 +169,10 @@ export const SwaggerFieldType = new SwaggerObject(
 const I18N_REF = {
   ref_caption: [{lang: 'en', title: 'File id'}, {lang: 'ua', title: 'File id'}],
   // ref_description: [{lang: 'en', title: 'File id'}, {lang: 'ua', title: 'File id'}],
+  target_caption: [{lang: 'en', title: 'Target URL'}, {lang: 'ua', title: 'Target URL'}],
   target_description: [{lang: 'en', title: 'The URL that was used as href in anchor tag'}, {lang: 'ua', title: 'the URL that was used as href in anchor tag'}],
   mimeType_description: [{lang: 'en', title: 'Type of resource'}, {lang: 'ua', title: 'descriptions of resource'}],
+  tooltip_caption: [{lang: 'en', title: 'Tooltip'}, {lang: 'ua', title: 'tooltip'}],
   tooltip_description: [{lang: 'en', title: 'Descriptions of resource'}, {lang: 'ua', title: 'descriptions of resource'}]
 };
 export const SwaggerReferenceType = new SwaggerObject(
@@ -183,7 +185,7 @@ export const SwaggerReferenceType = new SwaggerObject(
     targetUrl: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI(I18N_REF.ref_caption, I18N_REF.target_description)),
+      swaggerUI(I18N_REF.target_caption, I18N_REF.target_description)),
     mimeType: SwaggerNative.asString(
       undefined,
       {readOnly: true},
@@ -191,58 +193,82 @@ export const SwaggerReferenceType = new SwaggerObject(
     tooltip: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI(null, I18N_REF.tooltip_description)),
+      swaggerUI(I18N_REF.tooltip_caption, I18N_REF.tooltip_description)),
 
   },
   swaggerUI(null, [ { lang: 'en', title: 'expose file as reference', }, ]),
   [ 'refId', ]);
+const I18N_PAGE = {
+  id_description: [{lang: 'en', title: 'Page id'}, {lang: 'ua', title: 'ІД сторінки'}],
+  lang_caption: [{lang: 'en', title: 'Language'}, {lang: 'ua', title: 'Мова'}],
+  lang_description: [{lang: 'en', title: 'Page locale'}, {lang: 'ua', title: 'Локаль сторінки'}],
+  title_caption: [{lang: 'en', title: 'Title'}, {lang: 'ua', title: 'Заголовок'}],
+  title_description: [{lang: 'en', title: 'page\'s title'}, {lang: 'ua', title: 'Заголовок сторінки'}],
+  summary_caption: [{lang: 'en', title: 'Summary'}, {lang: 'ua', title: 'Зміст'}],
+  summary_description: [{lang: 'en', title: 'A summary of this page'}, {lang: 'ua', title: 'Короткий зміст сторінки'}],
+  body_caption: [{lang: 'en', title: 'Body'}, {lang: 'ua', title: 'Головна частина'}],
+  body_description: [{lang: 'en', title: 'Page\'s body'}, {lang: 'ua', title: 'Головна частина сторінки'}],
+  score_caption: [{lang: 'en', title: 'Score'}, {lang: 'ua', title: 'Оцінка'}],
+  score_description: [{lang: 'en', title: 'Can be use as position/order'}, {lang: 'ua', title: 'Використовується для позиції/порядку'}],
+  draft_caption: [{lang: 'en', title: 'Draft'}, {lang: 'ua', title: 'Чернетка'}],
+  draft_description: [{lang: 'en', title: 'Mark page as a draft'}, {lang: 'ua', title: 'Позначити сторінку як чернетку'}],
+  tags_caption: [{lang: 'en', title: 'Tags'}, {lang: 'ua', title: 'Теги'}],
+  tags_description: [{lang: 'en', title: 'Set of tags separated by comma defines what menu will expose this page'},
+    {lang: 'ua', title: 'Набір тегів, розділених комою, визначає які меню виставлятимуть цю сторінку'}],
+  restriction_caption: [{lang: 'en', title: 'Restriction'}, {lang: 'ua', title: 'Обмеження'}],
+  restriction_description: [{lang: 'en', title: 'You can restrict the access to this page'},
+    {lang: 'ua', title: 'Обмежити доступ до цієї сторінки'}],
+  menuId_caption: [{lang: 'en', title: 'Menu id'}, {lang: 'ua', title: 'Меню'}],
+  menuId_description: [{lang: 'en', title: 'Bind a page to menu'}, {lang: 'ua', title: 'Зв\'язати сторінку з меню'}],
+  created_description: [{lang: 'en', title: 'Date of creation'}, {lang: 'ua', title: 'Дата створення'}],
+};
 export const SwaggerPageType = new SwaggerObject(
   [ 'id', 'lang', 'title', 'summary', 'body', 'score', 'draft', 'tags', 'restriction', 'menuId', 'created', 'ref', ],
   {
     id: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI()),
+      swaggerUI(null, I18N_PAGE.id_description)),
     lang: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI(null, [ { lang: 'en', title: 'page locale', }, ])),
+      swaggerUI(I18N_PAGE.lang_caption, I18N_PAGE.lang_description)),
     title: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI(null, [ { lang: 'en', title: 'page\'s title', }, ])),
+      swaggerUI(I18N_PAGE.title_caption, I18N_PAGE.title_description)),
     summary: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI(null, [ { lang: 'en', title: 'a summary of this page', }, ])),
+      swaggerUI(I18N_PAGE.summary_caption, I18N_PAGE.summary_description)),
     body: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI(null, [ { lang: 'en', title: 'page\'s body', }, ])),
+      swaggerUI(null, )),
     score: SwaggerNative.asInteger(
       undefined,
       {},
-      swaggerUI(null, [ { lang: 'en', title: 'can be use as position/order', }, ])),
+      swaggerUI(I18N_PAGE.score_caption, I18N_PAGE.score_description)),
     draft: SwaggerNative.asBoolean(
       undefined,
       {},
-      swaggerUI(null, [ { lang: 'en', title: 'mark page as a draft', }, ])),
+      swaggerUI(I18N_PAGE.draft_caption, I18N_PAGE.draft_description)),
     tags: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI(null, [ { lang: 'en', title: 'set of tags separated by comma defines what menu will expose this page', }, ])),
+      swaggerUI(I18N_PAGE.tags_caption, I18N_PAGE.tags_description)),
     restriction: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI(null, [ { lang: 'en', title: 'you can restrict the access to this page', }, ])),
+      swaggerUI(null, )),
     menuId: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI(null, [ { lang: 'en', title: 'bind a page to menu', }, ])),
+      swaggerUI(I18N_PAGE.menuId_caption, I18N_PAGE.menuId_description)),
     created: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI()),
+      swaggerUI(null, I18N_PAGE.created_description)),
     ref: new SwaggerArray(
       SwaggerReferenceType,
       {control: 'lib-editable-list'},
@@ -272,41 +298,52 @@ export const SwaggerPagesResponse = new SwaggerObject(
   },
   swaggerUI(),
   null);
+const I18N_FILE = {
+  id_description: [{lang: 'en', title: 'File id'}, {lang: 'ua', title: 'ІД файлу'}],
+  originalName_description: [{lang: 'en', title: 'Original name'}, {lang: 'ua', title: 'Початкове ім\'я файлу'}],
+  encoding_description: [{lang: 'en', title: 'Encoding'}, {lang: 'ua', title: 'Енкодінг файлу'}],
+  mimeType_description: [{lang: 'en', title: 'MIME type'}, {lang: 'ua', title: 'MIME тип файлу'}],
+  size_description: [{lang: 'en', title: 'Size'}, {lang: 'ua', title: 'Розмір файлу'}],
+  created_description: [{lang: 'en', title: 'Created'}, {lang: 'ua', title: 'Дата створення'}],
+  comment_caption: [{lang: 'en', title: 'Comment'}, {lang: 'ua', title: 'Коментар'}],
+  comment_description: [{lang: 'en', title: 'File commentary'}, {lang: 'ua', title: 'Коментар до файлу'}],
+  numberOfReferences_description: [{lang: 'en', title: 'Number of references'}, {lang: 'ua', title: 'Кількість посилань на файл'}],
+};
 export const SwaggerFileType = new SwaggerObject(
   [ 'id', 'originalName', 'encoding', 'mimeType', 'size', 'created', 'comment', 'numberOfReferences', ],
   {
     id: SwaggerNative.asString(
       undefined,
-      {},
-      swaggerUI()),
+      {readOnly: true},
+      swaggerUI(null, I18N_FILE.id_description)),
     originalName: SwaggerNative.asString(
       undefined,
-      {},
-      swaggerUI()),
+      {readOnly: true},
+      swaggerUI(null, I18N_FILE.originalName_description)),
     encoding: SwaggerNative.asString(
       undefined,
-      {},
-      swaggerUI()),
+      {readOnly: true},
+      swaggerUI(null, I18N_FILE.encoding_description)),
     mimeType: SwaggerNative.asString(
       undefined,
-      {},
-      swaggerUI()),
+      {readOnly: true},
+      swaggerUI(null, I18N_FILE.mimeType_description)),
     size: SwaggerNative.asString(
       undefined,
-      {},
-      swaggerUI()),
+      {readOnly: true},
+      swaggerUI(null, I18N_FILE.size_description)),
     created: SwaggerNative.asString(
       undefined,
-      {},
-      swaggerUI()),
+      {readOnly: true},
+      swaggerUI(null, I18N_FILE.created_description)),
     comment: SwaggerNative.asString(
       undefined,
       {},
-      swaggerUI()),
+      swaggerUI(I18N_FILE.comment_caption, I18N_FILE.comment_description)),
     numberOfReferences: SwaggerNative.asNumber(
       undefined,
-      {},
-      swaggerUI()),
+      {readOnly: true},
+      swaggerUI(null, I18N_FILE.numberOfReferences_description)),
 
   },
   swaggerUI(),
