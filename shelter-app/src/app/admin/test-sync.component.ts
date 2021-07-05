@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {DEF_TEMPLATE} from 'ui-lib';
 
 @Component({
   selector: 'app-test-sync',
@@ -6,4 +7,5 @@ import {Component} from '@angular/core';
   styleUrls: ['./test-sync.component.scss']
 })
 export class TestSyncComponent {
+  src: any = DEF_TEMPLATE;
 }

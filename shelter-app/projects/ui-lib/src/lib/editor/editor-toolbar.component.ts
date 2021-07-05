@@ -1,8 +1,37 @@
+// tslint:disable:max-line-length
 import {ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, Output, ViewContainerRef} from '@angular/core';
 import {AbstractComponent} from '../controls';
 import {DialogService} from '../dialog-service';
 import {PluginsPanelComponent} from './plugins-panel.component';
 import {CdkDropList} from '@angular/cdk/drag-drop';
+import {SwaggerNative, SwaggerObject, swaggerUI, TitleType} from '../shared';
+
+const HREF_ATTRIBUTE = new SwaggerObject(['href'], {href: SwaggerNative.asString('lib-input-control', null,
+    swaggerUI([{lang: 'en', title: 'Link'}, {lang: 'uk', title: 'Посилання'}]))});
+const TITLE_ATTRIBUTE = new SwaggerObject(['title'], {title: SwaggerNative.asString('lib-input-control', null,
+    swaggerUI([{lang: 'en', title: 'Description for the abbreviation'}, {lang: 'uk', title: 'Опис для абревіатури'}]))});
+const ID_ATTRIBUTE = new SwaggerObject(['id'], {id: SwaggerNative.asString('lib-input-control', null,
+    swaggerUI([{lang: 'en', title: 'ID'}]))});
+const CITE_ATTRIBUTE = new SwaggerObject(['cite'], {cite: SwaggerNative.asString('lib-input-control', null,
+    swaggerUI([{lang: 'en', title: 'URL that designates a source document or message'}, {lang: 'uk', title: 'URL на первинний документ'}]))});
+const VALUE_ATTRIBUTE = new SwaggerObject(['value'], {value: SwaggerNative.asString('lib-input-control', null,
+    swaggerUI([{lang: 'en', title: 'Value'}, {lang: 'uk', title: 'Значення'}]))});
+const DATETIME_ATTRIBUTE = new SwaggerObject(['datetime'], {datetime: SwaggerNative.asString('lib-input-control', null,
+    swaggerUI([{lang: 'en', title: 'Value'}, {lang: 'uk', title: 'Значення'}]))});
+export interface SpecialElementSpec { name: string; attr: SwaggerObject; description: TitleType[]; }
+export class SpecialElements {
+  static elements: Array< SpecialElementSpec > = [
+    {name: 'a', attr: HREF_ATTRIBUTE, description: [{lang: 'en', title: 'The Anchor element'}]},
+    {name: 'abbr', attr: TITLE_ATTRIBUTE, description: [{lang: 'en', title: 'The Abbreviation element'}]},
+    {name: 'data', attr: VALUE_ATTRIBUTE, description: [{lang: 'en', title: 'The machine-readable value'}]},
+    {name: 'dfn', attr: ID_ATTRIBUTE, description: [{lang: 'en', title: 'The Definition element'}]},
+    {name: 'q', attr: CITE_ATTRIBUTE, description: [{lang: 'en', title: 'The Inline Quotation element'}]},
+    {name: 'time', attr: VALUE_ATTRIBUTE, description: [{lang: 'en', title: 'The machine-readable time'}]}
+  ];
+  static findElement(name: string): SpecialElementSpec {
+    return this.elements.find(e => e.name === name);
+  }
+}
 
 export interface CmdEditorToolbox {
   cmd: string;
@@ -124,26 +153,6 @@ export class EditorToolbarComponent extends AbstractComponent implements OnDestr
 
   showHelp(): void {
     this.emitter.emit({cmd: 'showHelp'});
-  }
-
-  removeRow(): void {
-    this.emitter.emit({cmd: 'tblRemoveRow'});
-  }
-
-  removeColumn(): void {
-    this.emitter.emit({cmd: 'tblRemoveColumn'});
-  }
-
-  insertRow(after?: boolean): void {
-    this.emitter.emit({cmd: 'tblInsRow', opt: {after}});
-  }
-
-  insertColumn(after?: boolean): void {
-    this.emitter.emit({cmd: 'tblInsColumn', opt: {after}});
-  }
-
-  tblBorder(style: string, value: string): void {
-    this.emitter.emit({cmd: 'tblBorder', opt: {style, value}});
   }
 
   switchMove(): void {

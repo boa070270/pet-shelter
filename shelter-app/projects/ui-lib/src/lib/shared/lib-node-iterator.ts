@@ -108,4 +108,7 @@ export class HtmlWrapper extends NodeWrapper {
   private wrapperOrNull(n: Node): NodeWrapper {
     return n ? new HtmlWrapper(n) : null;
   }
+  getText(): string {
+    return this.node.textContent;
+  }
 }

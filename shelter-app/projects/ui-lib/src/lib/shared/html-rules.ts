@@ -12,7 +12,8 @@ import {NodeWrapper, treeWalker} from './html-helper';
 export type HtmlElementContent = {cnt?: ContentType[], elem?: string[]};
 export type ContentType = 'Metadata' | 'Flow' | 'Sectioning' | 'Heading' | 'Phrasing' | 'Embedded' | 'Interactive' | 'SectioningRoot'
   | 'Palpable' | 'Script' | 'None' | 'Transparent' | 'Grouping' | 'FormElements' | 'ListedElements' | 'SubmittableElements' | 'ResettableElements'
-  | 'AutocapitalizeInheritingElements' | 'LabelableElements' | 'Foreign' | 'EscapableRawTexElements' | 'VoidElements';
+  | 'AutocapitalizeInheritingElements' | 'LabelableElements' | 'Foreign' | 'EscapableRawTexElements' | 'VoidElements' | 'PhrasingFormat'
+  | 'PhrasingWithAttribute';
 /**
  * If this child can be added
  * p: parent element
@@ -182,7 +183,7 @@ const CONTENTS = {
     'svg', 'table', 'template', 'textarea', 'time', 'u', 'ul', 'var', 'video', 'wbr',
   ],
   Sectioning: ['article', 'aside', 'nav', 'section'],
-  Heading: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hgroup'],
+  Heading: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'/*, 'hgroup'*/],
   Phrasing: [ // can place to phrasing content is expected where
     'a', 'abbr',
     // (if it is a descendant of a 'map')
@@ -199,6 +200,12 @@ const CONTENTS = {
     'svg', 'template', 'textarea', 'time', 'u', 'var', 'video',
     {name: 'wbr', childRestriction: NO_CHILDREN },
     '#text'
+  ],
+  PhrasingWithAttribute: [
+    'a', 'abbr', 'data', 'dfn', 'q', 'time'
+  ],
+  PhrasingFormat: [
+    'b', 'bdi', 'bdo', 'cite', 'code', 'del', 'em', 'i', 'ins', 'kbd', 'mark', 's', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'u', 'var'
   ],
   Embedded: ['audio', 'canvas', 'embed', 'iframe', 'img', 'math', 'object', 'picture', 'svg', 'video'],
   Interactive: [
@@ -384,6 +391,10 @@ export class HtmlRules {
     }
     return null;
   }
+  static enableTxt(n: NodeWrapper): boolean {
+    const cnt = HtmlRules.contentOfNode(n);
+    return cnt && cnt.cnt && (cnt.cnt.includes('Flow') || cnt.cnt.includes('Phrasing'));
+  }
   static isContent(cnt: ContentType, n: NodeWrapper): any {
     switch (cnt) {
       case 'Embedded':
@@ -430,7 +441,19 @@ export class HtmlRules {
         return findInArray(n, CONTENTS.EscapableRawTexElements);
       case 'VoidElements':
         return findInArray(n, CONTENTS.VoidElements);
+      case 'PhrasingFormat':
+        return findInArray(n, CONTENTS.PhrasingFormat);
+      case 'PhrasingWithAttribute':
+        return findInArray(n, CONTENTS.PhrasingWithAttribute);
     }
+  }
+  static isElementContent(cnt: ContentType, n: NodeWrapper): boolean {
+    const name = n.nodeName;
+    return ELEMENTS[name] && ELEMENTS[name][1] && ELEMENTS[name][1].cnt && ELEMENTS[name][1].cnt.includes(cnt);
+  }
+  static isElementParentContent(cnt: ContentType, n: NodeWrapper): boolean {
+    const name = n.nodeName;
+    return ELEMENTS[name] && ELEMENTS[name][0] && ELEMENTS[name][0].cnt && ELEMENTS[name][0].cnt.includes(cnt);
   }
 }
 

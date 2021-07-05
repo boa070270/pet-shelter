@@ -2,14 +2,14 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
-  Inject,
+  Inject, Input,
   OnDestroy,
   OnInit,
   SecurityContext,
   ViewChild
 } from '@angular/core';
 import {SlideContainerDirective} from '../controls';
-import {CmdEditorToolbox, EditorToolbarComponent} from './editor-toolbar.component';
+import {CmdEditorToolbox, EditorToolbarComponent, SpecialElements} from './editor-toolbar.component';
 import {fromEvent, Observable, Subscription} from 'rxjs';
 import {
   ComponentsPluginService,
@@ -25,7 +25,7 @@ import {
   SPosition,
   SRange,
   SwaggerNative,
-  SwaggerObject,
+  SwaggerObject, swaggerUI, SYSTEM_LANG_TOKEN, SystemLang, TitleType,
   treeWalker
 } from '../shared';
 // import {AddModification} from './add-modification';
@@ -34,6 +34,7 @@ import {DOCUMENT} from '@angular/common';
 import {DialogService} from '../dialog-service';
 import {map} from 'rxjs/operators';
 import {DomSanitizer} from '@angular/platform-browser';
+import {DEF_TEMPLATE} from './editor-store';
 
 // tslint:disable:max-line-length
 const KNOWN_KEYS = ['Enter', 'Tab',
@@ -51,6 +52,9 @@ const PROCESS_NAVIGATION_KEYS = [
   'ArrowLeft', 'ArrowRight'
 ];
 const DESIGNER_ATTR_NAME = '_design';
+const VIEW_DESIGNER = 0;
+const VIEW_SOURCE = 1;
+const VIEW_HELP = 2;
 interface PasteData {
   type: string; // mime type
   data: any;
@@ -61,16 +65,25 @@ interface PasteData {
   styleUrls: ['./editor.component.scss']
 })
 export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
+  private _source = DEF_TEMPLATE;
+  private _initParser = false;
+  @Input()
   set source(s: string) {
-    this.parser.parse(this.checkAndMarkElements(s));
+    this._source = s;
+    if (this._initParser) {
+      this.parser.parse(this._source);
+    }
   }
   get source(): string {
     return this.parser ? this.parser.source : '';
   }
-  constructor(@Inject(DOCUMENT) private _document: Document, private dialogService: DialogService, private pluginService: ComponentsPluginService,
-              private sanitizer: DomSanitizer) { }
+  set showSlide(n: number) {
+    this._slide = n;
+    this.slide.to(this._slide);
+  }
+  private _slide = 0;
   position = 0;
-  private readonly parser = new SimpleParser('', DESIGNER_ATTR_NAME);
+  private parser = new SimpleParser(DESIGNER_ATTR_NAME);
   private replaceChar = false;
   designIndex = 1;
   editor: HTMLDivElement;
@@ -88,19 +101,16 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(EditorToolbarComponent, {static: true}) toolbar: EditorToolbarComponent;
   @ViewChild(SlideContainerDirective, {static: true}) slide: SlideContainerDirective;
   private subsTb: Subscription = null;
+  constructor(@Inject(DOCUMENT) private _document: Document,
+              private dialogService: DialogService,
+              private pluginService: ComponentsPluginService,
+              private sanitizer: DomSanitizer,
+              @Inject(SYSTEM_LANG_TOKEN) private systemLang: SystemLang) { }
   protected static findWithParentCntFlow(w: SNode): SNode {
-    if (w.parent) {
-      while (!HtmlRules.elements[w.parent.nodeName]
-      && !HtmlRules.elements[w.parent.nodeName][1]
-      && !HtmlRules.elements[w.parent.nodeName][1].cnt
-      && !HtmlRules.elements[w.parent.nodeName][1].cnt.includes('Flow')) {
-        if (w.parent.attribute(DESIGNER_ATTR_NAME) === '0') {
-          return w;
-        }
-        w = w.parent;
-      }
-      return w;
+    while (w.parent && !HtmlRules.isElementParentContent('Flow', w.parent)) {
+      w = w.parent;
     }
+    return w;
   }
   protected static sNodeId(sn: SNode): string {
     return sn.typeNode === Node.ELEMENT_NODE ? sn.attribute(DESIGNER_ATTR_NAME) : sn.parent.attribute(DESIGNER_ATTR_NAME);
@@ -109,6 +119,9 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.editor = this.editorRef.nativeElement;
+    this.parser.editor = this.editor;
+    this._initParser = true;
+    this.parser.parse(this._source);
     this.subsTb = this.toolbar.emitter.subscribe((e) => {
       try {
         this.onToolbar(e);
@@ -129,6 +142,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dropList.sorted.subscribe((e: CdkDragSortEvent<any>) => {
       // console.log('editor:sorted', e);
     });
+    this.showDesigner();
   }
   ngOnDestroy(): void {
     if (this.subsTb !== null) {
@@ -145,13 +159,41 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       console.log(d);
       this.processPasteData(d);
     });
+    this.showDesigner();
   }
-
+  private setSource(s: string): void {
+    if (this.parser.isEditing()) {
+      const ref = this.dialogService.infoMsgDialog('You are in the editing process. Do you want to cancel it and set a new source?', true, 'yes_no');
+      ref.afterClosed().subscribe((d) => {
+        if (d) {
+          this.parser.rollback();
+          this.newSource(s);
+        }
+      });
+    }
+    this.newSource(s);
+  }
+  private newSource(s: string): void {
+    this.parser.cloneRoot();
+    this.parser.parse(s);
+    if (this.parser.errors.length > 0) {
+      const ref = this.dialogService.infoMsgDialog(`There are errors: ${this.parser.errors}. \nDo you like to apply this source?`, true, 'yes_no');
+      ref.afterClosed().subscribe( (d) => {
+        if (d) {
+          this.parser.commit();
+        } else {
+          this.parser.rollback();
+        }
+      });
+    } else {
+      this.parser.commit();
+    }
+  }
   private onToolbar(e: CmdEditorToolbox): void {
     console.log('onToolbar', e);
     switch (e.cmd) {
       case 'tag':
-        this.toolbarTag(e.opt.tag, e.opt.attr);
+        this.addElement(e.opt.tag, e.opt.attr);
         break;
       case 'toList':
         break;
@@ -159,28 +201,16 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         break;
       case 'clearFormat':
         break;
-      case 'insTable':
-        break;
       case 'insPlugin':
         break;
       case 'showDesigner':
         this.showDesigner();
         break;
       case 'showSource':
-        this.slide.to(1);
+        this.showSlide = VIEW_SOURCE;
         break;
       case 'showHelp':
-        this.slide.to(2);
-        break;
-      case 'tblRemoveRow':
-        break;
-      case 'tblRemoveColumn':
-        break;
-      case 'tblInsRow':
-        break;
-      case 'tblInsColumn':
-        break;
-      case 'tblBorder':
+        this.showSlide = VIEW_HELP;
         break;
       case 'switchMove':
         this.moveByText = e.opt.moveByText;
@@ -188,32 +218,103 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
   showDesigner(): void {
-    this.slide.to(0);
-    this.editor.focus();
-    this.updateDesigner();
+    this.showSlide = VIEW_DESIGNER;
+    this.parser.restorePosition();
+  }
+  private addElement(tag: string, attr: {[key: string]: string}): void {
+    const se = SpecialElements.findElement(tag);
+    if (se) {
+      const extData = ExtendedData.create({}, false, se.attr, 'save_cancel',
+        this.systemLang.getTitle(se.description), 'dm_ask', 'info-color');
+      const dRef = this.dialogService.infoExtDialog(extData);
+      dRef.afterClosed().subscribe(d => {
+        const at = Object.assign({}, attr, d);
+        // wrap text in only one element or only one grouping element
+        this.parser.addElement(tag, at);
+      });
+    } else {
+      this.parser.addElement(tag, attr);
+    }
+  }
+  private hasTheSameParent(tagName: string, from: Node): boolean {
+    while (from !== this.editor) {
+      if (from.nodeName.toLowerCase() === tagName) {
+        return true;
+      }
+      from = from.parentNode;
+    }
   }
   private toolbarTag(tag: string, attr?: {[key: string]: string}): void {
+    /*
     if (this.range) {
       const insertParentModel = HtmlRules.elements[tag][0];
       const insertModel = HtmlRules.elements[tag][1];
       const focus = this.focusNode === 'start' ? this.range.start.sNode : this.range.end.sNode;
+      const sn = SNode.elementNode(tag, attr);
+      if (!insertParentModel) {
+        this.dialogService.snakeError(`Unknown element: "${tag}"`);
+        return;
+      }
+      if (!insertParentModel.cnt) {
+        // TODO specific elements
+        this.dialogService.snakeInfo(`Doesn't support this element: "${tag}"`);
+        return;
+      } else if (insertParentModel.cnt.includes('Flow')) {
+        // const at = Object.assign({}, attr);
+        // only parent that has content 'Flow'
+        // const top = EditorComponent.findWithParentCntFlow(focus);
+        // if a new element has empty content, insert it in this position
+        // this.parser.insFlowEmpty(sn, at);
+        // if new element is heading and top is heading - nothing, there will auto-heading and only one per section is allowed. If section has heading, user cannot select heading from list
+        if (HtmlRules.isContent('Heading', sn)) {
+
+        }
+        // if range collapsed or in the same "top" node, ignore this range (we process only elements text range or range into one child node to the Flow content isn't interested here)
+        // what parent elements can be here:
+        // address, article, aside, blockquote, caption, dd, details, dialog, div, dt, fieldset, figcaption, figure, footer, header, li, section, td, th
+        // what element needs FLow
+        // address, article, aside, blockquote, details, dialog, div, dl, fieldset, figcaption, figure, footer, form, header, hr, menu, nav, ol, p, prem section, table, ul
+        // this element is grouping as:
+        // address, aside, blockquote, details, dialog, div, dl, fieldset, figcaption, figure, footer, form, header, hr, menu, nav, ol, p, prem section, table, ul
+      } else if (insertParentModel.cnt.includes('Phrasing')) {
+        // any element can be parent
+        if (HtmlRules.isContent('PhrasingFormat', sn)) {
+          const revert = this.hasTheSameParent(sn.nodeName, this.toNode(focus));
+          const at = Object.assign({}, attr);
+          this.parser.wrapText(sn, at, revert);
+        } else {
+          if (this.hasTheSameParent(sn.nodeName, this.toNode(focus))) {
+            this.dialogService.snakeError(`There is already present this element: "${tag}"`);
+            return;
+          }
+          const de = SpecialElements.findElement(sn.nodeName);
+          if (de) {
+            const extData = ExtendedData.create({}, false, de.attr, 'save_cancel',
+              this.systemLang.getTitle(de.description), 'dm_ask', 'info-color');
+            const dRef = this.dialogService.infoExtDialog(extData);
+            dRef.afterClosed().subscribe(d => {
+              const at = Object.assign({}, attr, d);
+              // wrap text in only one element or only one grouping element
+              this.parser.wrapTextOnce(sn, at);
+            });
+          }
+        }
+      }
       const focusParentModel = focus.parent ? HtmlRules.elements[focus.parent.nodeName][1] : HtmlRules.elements[focus.nodeName][1];
       const focusModel = focus.typeNode === Node.ELEMENT_NODE ? HtmlRules.elements[focus.nodeName][1] : null;
-      const n = SNode.elementNode(tag, attr);
       if (insertModel.cnt) {
-        if (HtmlRules.isVoid(tag)) {
-          this.void(tag, attr);
-        } else if (HtmlRules.isPhrasing(n)) {
+        if (HtmlRules.isPhrasing(sn)) {
           this.phrasing(tag, attr);
-        } else if (HtmlRules.isHeading(n)) {
+        } else if (HtmlRules.isHeading(sn)) {
           this.heading(tag, attr);
-        } else if (HtmlRules.isSectioning(n)) {
+        } else if (HtmlRules.isSectioning(sn)) {
           this.sectioning(tag, attr);
-        } else if (HtmlRules.isSectionRoot(n)) {
+        } else if (HtmlRules.isSectionRoot(sn)) {
           this.sectioningRoot(tag, attr);
         }
       }
     }
+     */
   }
   private updateDesigner(): void {
     if (this._sourceModified) {
@@ -224,25 +325,30 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   onClick(event: MouseEvent): void {
     console.log(event);
-    this.updateDesigner();
-    this.storeRange();
-    if (!this.range) {
-      this.clearRange();
+    if (this._slide !== VIEW_DESIGNER) {
+      return;
     }
+    this.parser.initFromSelection(window.getSelection());
+    // this.updateDesigner();
+    // this.storeRange();
+    // if (!this.range) {
+    //   this.clearRange();
+    // }
     this.updateToolbar();
     console.log('onClick: lastRange=', this.lastRange);
   }
   onKeyDown(event: KeyboardEvent): void {
     console.log('onKeyDown', {target: event.target, key: event.key, altKey: event.altKey, ctrlKey: event.ctrlKey, metaKey: event.metaKey});
     console.log('this.moveByText', this.moveByText);
-    this.storeRange();
-    if (!this.range) {
-      this.clearRange();
-    }
-
-    if (event.ctrlKey || event.metaKey || (event.altKey && !PROCESS_NAVIGATION_KEYS.includes(event.key))) {
+    if (this._slide !== VIEW_DESIGNER) {
       return;
     }
+    this.parser.initFromSelection(window.getSelection());
+    // this.storeRange();
+    // if (!this.range) {
+    //   this.clearRange();
+    // }
+
     if (event.key.length > 1 && !KNOWN_KEYS.includes(event.key)) {
       // console.error('onKeyPress input not editable symbol', event.key);
       return;
@@ -250,26 +356,24 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     if (NAVIGATION_KEYS.includes(event.key) && !PROCESS_NAVIGATION_KEYS.includes(event.key)) {
       return;
     }
-    if (this.range) {
-      if (WHITESPACE_KEYS.includes(event.key)) {
-        this.whitespace(event.key);
-      } else if (EDITING_KEYS.includes(event.key)) {
-        this.editingKey(event.key);
-      } else if (PROCESS_NAVIGATION_KEYS.includes(event.key)) {
-        switch (event.key) {
-          case 'ArrowLeft':
-            this.movePrev(window.getSelection().focusNode, window.getSelection().focusOffset, this.moveByText);
-            break;
-          case 'ArrowRight':
-            this.moveNext(window.getSelection().focusNode, window.getSelection().focusOffset, this.moveByText);
-            break;
-        }
-      } else {
-        this.simpleChar(event.key);
+    if (WHITESPACE_KEYS.includes(event.key)) {
+      this.whitespace(event.key, event.ctrlKey, event.altKey, event.shiftKey);
+    } else if (EDITING_KEYS.includes(event.key)) {
+      this.editingKey(event.key);
+    } else if (PROCESS_NAVIGATION_KEYS.includes(event.key)) {
+      switch (event.key) {
+        case 'ArrowLeft':
+          this.parser.movePrev(this.moveByText);
+          break;
+        case 'ArrowRight':
+          this.parser.moveNext(this.moveByText);
+          break;
       }
-      this.storeRange();
-      this.updateToolbar();
+    } else if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+      this.parser.insString(event.key);
     }
+    // this.storeRange();
+    this.updateToolbar();
     event.preventDefault();
   }
   sourceKeyDown(event: KeyboardEvent): void {
@@ -365,54 +469,79 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
   private processPasteData(pd: PasteData): void {
-      if (pd.type === 'text/plain') {
-        this.simpleChar(pd.data);
+      if (pd.type === 'text/plain') { // TODO process files info and plugins
+        this.parser.insString(pd.data);
       } else if (pd.type === 'text/html') {
-        if (this.range) {
-          this.startEditing();
-          try {
-            let sn = this.focusNode === 'start' ? this.range.start.sNode : this.range.end.sNode;
-            if (sn.typeNode === Node.TEXT_NODE) {
-              sn = sn.parent;
-            }
-            const p = new SimpleParser(this.sanitizer.sanitize(SecurityContext.HTML, pd.data), DESIGNER_ATTR_NAME);
-            console.log(p.errors);
-            const n = p.root.wrapChildren(SNode.elementNode('div', this.copyAttr({})));
-            sn.newChild(n, sn.index);
-            this.update(sn.attribute(DESIGNER_ATTR_NAME));
-            this.collapse(null, new SPosition(n.parent, n.index));
-          } catch (e) {
-            console.log(e);
-            this.cancelEditing();
-          }
-        }
+        this.parser.insHTML(this.sanitizer.sanitize(SecurityContext.HTML, pd.data));
+        // if (this.range) {
+        //   this.startEditing();
+        //   try {
+        //     let sn = this.focusNode === 'start' ? this.range.start.sNode : this.range.end.sNode;
+        //     if (sn.typeNode === Node.TEXT_NODE) {
+        //       sn = sn.parent;
+        //     }
+        //     const p = new SimpleParser(this.sanitizer.sanitize(SecurityContext.HTML, pd.data), DESIGNER_ATTR_NAME);
+        //     console.log(p.errors);
+        //     const n = p.root.wrapChildren(SNode.elementNode('div', this.copyAttr({})));
+        //     sn.newChild(n, sn.index);
+        //     this.update(sn.attribute(DESIGNER_ATTR_NAME));
+        //     this.collapse(null, new SPosition(n.parent, n.index));
+        //   } catch (e) {
+        //     console.log(e);
+        //     this.cancelEditing();
+        //   }
+        // }
       }
   }
   dragStart(e: DragEvent): void {
+    if (this._slide !== VIEW_DESIGNER) {
+      return;
+    }
     console.log('dragStart', e);
   }
   dragEnd(e: DragEvent): void {
+    if (this._slide !== VIEW_DESIGNER) {
+      return;
+    }
     console.log('dragEnd', e);
   }
   dragExit(e: Event): void {
+    if (this._slide !== VIEW_DESIGNER) {
+      return;
+    }
     console.log('dragExit', e);
   }
   drag(e: DragEvent): void {
+    if (this._slide !== VIEW_DESIGNER) {
+      return;
+    }
     console.log('drag', e);
   }
   dragEnter(e: DragEvent): void {
+    if (this._slide !== VIEW_DESIGNER) {
+      return;
+    }
     console.log('dragEnter', e);
   }
   dragLeave(e: DragEvent): void {
+    if (this._slide !== VIEW_DESIGNER) {
+      return;
+    }
     console.log('dragLeave', e);
   }
   focusin(event: FocusEvent): void {
+    if (this._slide !== VIEW_DESIGNER) {
+      return;
+    }
     console.log('focusin', event);
-    this.restoreRange();
+    this.parser.restorePosition();
   }
   focusout(event: FocusEvent): void {
+    if (this._slide !== VIEW_DESIGNER) {
+      return;
+    }
     console.log('focusout', event);
-    this.storeRange();
+    // this.storeRange();
   }
   private updateToolbar(): void {
     if (this.focusNode) {
@@ -425,7 +554,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       res.fSize = cs.getPropertyValue('font-size');
       while (e !== this.editor) {
         const tag = e.nodeName.toLowerCase();
-        if (HtmlRules.isPhrasing(SNode.elementNode(tag))) {
+        if (HtmlRules.isContent('PhrasingFormat', SNode.elementNode(tag))) {
           res[tag + 'Tag'] = true;
         }
         e = e.parentElement;
@@ -440,14 +569,14 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
   private startPosition(): void {
-    if (!this.editor.hasChildNodes()) {
-      window.getSelection().collapse(this.editor, 0);
-    }
-    const rp = this.findPalpable(this.editor, 0);
-    if (rp) {
-      this.collapse(null, this.toSPosition(rp));
-    }
-    window.getSelection().collapse(this.editor, this.editor.childNodes.length);
+    // if (!this.editor.hasChildNodes()) {
+    //   window.getSelection().collapse(this.editor, 0);
+    // }
+    // const rp = this.findPalpable(this.editor, 0);
+    // if (rp) {
+    //   this.collapse(null, this.toSPosition(rp));
+    // }
+    // window.getSelection().collapse(this.editor, this.editor.childNodes.length);
   }
   private storeRange(): void {
     if (window.getSelection().rangeCount === 1) {
@@ -466,7 +595,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           while (!LibNode.getAttribute(range.commonAncestorContainer, DESIGNER_ATTR_NAME)) {
             ca = ca.parentElement;
           }
-          this.range = new SRange(this.toSNode(ca), new SPosition(this.toSNode(st.n), st.offset), new SPosition(this.toSNode(en.n), en.offset), range.collapsed);
+          // this.range = new SRange(this.toSNode(ca), new SPosition(this.toSNode(st.n), st.offset), new SPosition(this.toSNode(en.n), en.offset), range.collapsed);
           return;
         }
       }
@@ -480,33 +609,34 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
   private startEditing(): void {
-    if (this.range) {
-      if (!this.parser.isEditing()) {
-        this.range.commonAncestor = this.parser.mapToClone(this.range.commonAncestor);
-        this.range.start.n = this.parser.mapToClone(this.range.start.n);
-        this.range.end.n = this.parser.mapToClone(this.range.end.n);
-      }
-    }
+    // if (this.range) {
+    //   if (!this.parser.isEditing()) {
+    //     this.range.commonAncestor = this.parser.mapToClone(this.range.commonAncestor);
+    //     this.range.start.n = this.parser.mapToClone(this.range.start.n);
+    //     this.range.end.n = this.parser.mapToClone(this.range.end.n);
+    //   }
+    // }
   }
   private cancelEditing(): void {
-    this.parser.rollback();
-    this.clearRange();
+    // this.parser.rollback();
+    // this.clearRange();
   }
   private update(mark: string): void {
-    this.parser.commit();
-    const w = this.parser.findSNode(DESIGNER_ATTR_NAME, mark);
-    let n: HTMLElement;
-    if (w.typeNode === Node.TEXT_NODE) {
-      n = this.findDesignElement(w.parent.attribute(DESIGNER_ATTR_NAME));
-    } else {
-      n = this.findDesignElement(w.attribute(DESIGNER_ATTR_NAME));
-    }
-    n.innerHTML = w.source(true);
-    this.range.commonAncestor = this.parser.mapToClone(this.range.commonAncestor, this.parser.root);
-    this.range.start.n = this.parser.mapToClone(this.range.start.n, this.parser.root);
-    this.range.end.n = this.parser.mapToClone(this.range.end.n, this.parser.root);
+    // this.parser.commit();
+    // const w = this.parser.findSNode(DESIGNER_ATTR_NAME, mark);
+    // let n: HTMLElement;
+    // if (w.typeNode === Node.TEXT_NODE) {
+    //   n = this.findDesignElement(w.parent.attribute(DESIGNER_ATTR_NAME));
+    // } else {
+    //   n = this.findDesignElement(w.attribute(DESIGNER_ATTR_NAME));
+    // }
+    // n.innerHTML = w.source(true);
+    // this.range.commonAncestor = this.parser.mapToClone(this.range.commonAncestor, this.parser.root);
+    // this.range.start.n = this.parser.mapToClone(this.range.start.n, this.parser.root);
+    // this.range.end.n = this.parser.mapToClone(this.range.end.n, this.parser.root);
   }
   private collapse(where: 'commonAncestor' | 'start' | 'end', sp?: SPosition): void {
+    /*
     if (sp) {
       let n: HTMLElement;
       if (sp.n.typeNode === Node.TEXT_NODE) {
@@ -542,6 +672,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.collapse(null, this.toSPosition(w));
     }
     this.storeRange();
+     */
   }
   private deleteRange(inTransaction = false): void {
     if (this.range) {
@@ -572,7 +703,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           } else {
             // en.delete(); we are positioned before
           }
-          const from: SNode = sn.nextNode(this.parser.cloneRoot());
+          const from: SNode = sn.nextNode() as SNode;
           if (from) {
             treeWalker<SNode>(from, (n) => n === en, (n) => n.delete(), this.parser.cloneRoot());
           }
@@ -673,7 +804,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           wrap = wrap.wrapChildren(SNode.elementNode(tag, this.copyAttr(attr)));
         }
         let err: string = null;
-        treeWalker(wrap.nextNode(wrap), (k) => {
+        treeWalker(wrap.nextNode(), (k) => {
           if (k.nodeName === 'main') {
             err = `The element ${k.nodeName} cannot we wrapping. Expected Phrasing content`;
             return true;
@@ -708,7 +839,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
             wrap = wrap.wrapChildren(SNode.elementNode(tag, this.copyAttr(attr)));
           }
           let err: string = null;
-          treeWalker(wrap.nextNode(wrap), (k) => {
+          treeWalker(wrap.nextNode(), (k) => {
             if (k.nodeName === 'main') {
               err = `The element ${k.nodeName} cannot we wrapping. Expected Phrasing content`;
               return true;
@@ -743,7 +874,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           wrap = wrap.wrapChildren(SNode.elementNode(tag, this.copyAttr(attr)));
         }
         let err: string = null;
-        treeWalker(wrap.nextNode(wrap), (k) => {
+        treeWalker(wrap.nextNode(), (k) => {
           if (!HtmlRules.isSectioning(k)) {
             err = `The element ${k.nodeName} cannot we wrapping. Expected Phrasing content`;
             return true;
@@ -782,7 +913,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           wrap = wrap.wrapChildren(SNode.elementNode(tag, this.copyAttr(attr)));
         }
         let err: string = null;
-        treeWalker(wrap.nextNode(wrap), (k) => {
+        treeWalker(wrap.nextNode(), (k) => {
           if (!HtmlRules.isPhrasing(k)) {
             err = `The element ${k.nodeName} cannot we wrapping. Expected Phrasing content`;
             return true;
@@ -803,77 +934,110 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.cancelEditing();
     }
   }
-  private void(tag: string, attr?: {[key: string]: string}): void {
-    try {
-      this.startEditing();
-      this.deleteRange(true);
-      const w = this.range.start.sNode;
-      let sp: SPosition;
-      let n: SNode;
-      if (w.typeNode === Node.TEXT_NODE) {
-        const text = w.getText();
-        if (this.range.start.offset < text.length) {
-          w.setText(text.substring(0, this.range.start.offset));
-          n = w.parent.newChild(SNode.elementNode(tag, this.copyAttr(attr)), w.index + 1);
-          w.parent.newChild(SNode.textNode(text.substring(this.range.start.offset)), w.index + 2);
-        } else {
-          n = w.parent.newChild(SNode.elementNode(tag, this.copyAttr(attr)), w.index + 1);
-        }
+  private splitText(w: SNode, start: number, tag: string, attr: {[key: string]: string} = {}): SNode[] {
+    const n: SNode[] = [];
+    if (w.typeNode === Node.TEXT_NODE) {
+      const text = w.getText();
+      if (start < text.length) {
+        w.setText(text.substring(0, start));
+        n.push(w.parent.newChild(SNode.elementNode(tag, this.copyAttr(attr)), w.index + 1));
+        n.push(w.parent.newChild(SNode.textNode(text.substring(start)), w.index + 2));
       } else {
-        n = w.newChild(SNode.elementNode(tag, this.copyAttr(attr)), this.range.start.offset);
+        n.push(w.parent.newChild(SNode.elementNode(tag, this.copyAttr(attr)), w.index + 1));
       }
-      n.parent.validate();
-      this.update(EditorComponent.sNodeId(n.parent));
-      sp = new SPosition(n.parent, n.index + 1);
-      this.collapse(null, sp);
-    } catch (e) {
-      console.log(e);
-      this.cancelEditing();
     }
+    return n;
   }
-  private simpleChar(key: string): void {
-    try {
-      this.startEditing();
-      let parent = this.range.commonAncestor;
-      let sp: SPosition;
-      if (parent.typeNode === Node.TEXT_NODE) {
-        // don't need validation
-        const work = parent;
-        work.setText(work.getText().substring(0, this.range.start.offset) + key + work.getText().substring(this.range.end.offset));
-        sp = new SPosition(work, this.range.start.offset + key.length);
-        parent = parent.parent;
+  private wrapText(w: SNode, start: number, end: number, tag: string, attr: {[key: string]: string} = {}): SNode {
+    let n: SNode;
+    if (w.typeNode === Node.TEXT_NODE) {
+      const text = w.getText();
+      if (start < text.length) {
+        w.setText(text.substring(0, this.range.start.offset));
+        n = w.parent.newChild(SNode.elementNode(tag, this.copyAttr(attr)), w.index + 1);
+        w.parent.newChild(SNode.textNode(text.substring(this.range.start.offset)), w.index + 2);
       } else {
-        const work = this.range.start.n;
-        let offset = work.typeNode === Node.TEXT_NODE ? this.range.start.offset : 0;
-        let child;
-        if (work.typeNode !== Node.TEXT_NODE) {
-          const cnt = HtmlRules.contentOfNode(work);
-          if (!cnt || !(cnt.cnt.includes('Flow') || cnt.cnt.includes('Phrasing'))) {
-            // TODO say that there cannot be text
-            this.cancelEditing();
-            return;
-          }
-          child = work.child(this.range.start.offset);
-        } else {
-          child = work;
-        }
-        this.deleteRange(true);
-        if (child && child.typeNode === Node.TEXT_NODE) {
-          child.setText(child.getText().substring(0, offset) + key);
-          offset += key.length;
-        } else {
-          child = work.newChild(SNode.textNode(key), this.range.start.offset);
-          offset = key.length;
-        }
-        sp = new SPosition(child, offset);
+        n = w.parent.newChild(SNode.elementNode(tag, this.copyAttr(attr)), w.index + 1);
       }
-      this.update(EditorComponent.sNodeId(parent));
-      this.collapse(null, sp);
-    } catch (e) {
-      console.log(e);
-      this.cancelEditing();
     }
+    return n;
   }
+  // private brWbr(ctrlKey: boolean, altKey: boolean, shiftKey: boolean): void {
+  //   try {
+  //     this.startEditing();
+  //     this.deleteRange(true);
+  //     const w = this.range.start.sNode;
+  //     let sp: SPosition;
+  //     let n: SNode;
+  //     const tag = altKey ? 'wbr' : 'br';
+  //     if (w.typeNode === Node.TEXT_NODE) {
+  //       const text = w.getText();
+  //       if (tag === 'wbr' && text.length === 0) {
+  //         this.cancelEditing();
+  //         return;
+  //       }
+  //       if (this.range.start.offset < text.length) {
+  //         w.setText(text.substring(0, this.range.start.offset));
+  //         n = w.parent.newChild(SNode.elementNode(tag, this.copyAttr({})), w.index + 1);
+  //         w.parent.newChild(SNode.textNode(text.substring(this.range.start.offset)), w.index + 2);
+  //       } else {
+  //         n = w.parent.newChild(SNode.elementNode(tag, this.copyAttr({})), w.index + 1);
+  //       }
+  //     } else if (tag === 'br') {// I don't see any sense to insert wbr between another element
+  //       n = w.newChild(SNode.elementNode(tag, this.copyAttr({})), this.range.start.offset);
+  //     }
+  //     n.parent.validate();
+  //     this.update(EditorComponent.sNodeId(n.parent));
+  //     sp = (altKey || !ctrlKey) ? new SPosition(n.parent, n.index + 1) : new SPosition(n.parent, n.index);
+  //     this.collapse(null, sp);
+  //   } catch (e) {
+  //     console.log(e);
+  //     this.cancelEditing();
+  //   }
+  // }
+  // private simpleChar(key: string): void {
+  //   try {
+  //     this.startEditing();
+  //     let parent = this.range.commonAncestor;
+  //     let sp: SPosition;
+  //     if (parent.typeNode === Node.TEXT_NODE) {
+  //       // don't need validation
+  //       const work = parent;
+  //       work.setText(work.getText().substring(0, this.range.start.offset) + key + work.getText().substring(this.range.end.offset));
+  //       sp = new SPosition(work, this.range.start.offset + key.length);
+  //       parent = parent.parent;
+  //     } else {
+  //       const work = this.range.start.n;
+  //       let offset = work.typeNode === Node.TEXT_NODE ? this.range.start.offset : 0;
+  //       let child;
+  //       if (work.typeNode !== Node.TEXT_NODE) {
+  //         const cnt = HtmlRules.contentOfNode(work);
+  //         if (!cnt || !(cnt.cnt.includes('Flow') || cnt.cnt.includes('Phrasing'))) {
+  //           // TODO say that there cannot be text
+  //           this.cancelEditing();
+  //           return;
+  //         }
+  //         child = work.child(this.range.start.offset);
+  //       } else {
+  //         child = work;
+  //       }
+  //       this.deleteRange(true);
+  //       if (child && child.typeNode === Node.TEXT_NODE) {
+  //         child.setText(child.getText().substring(0, offset) + key);
+  //         offset += key.length;
+  //       } else {
+  //         child = work.newChild(SNode.textNode(key), this.range.start.offset);
+  //         offset = key.length;
+  //       }
+  //       sp = new SPosition(child, offset);
+  //     }
+  //     this.update(EditorComponent.sNodeId(parent));
+  //     this.collapse(null, sp);
+  //   } catch (e) {
+  //     console.log(e);
+  //     this.cancelEditing();
+  //   }
+  // }
   private nextMark(): string { return '' + this.designIndex++; }
   private copyAttr(attr?: {[key: string]: string}): {[key: string]: string} {
     const res = Object.assign({}, attr || {});
@@ -889,51 +1053,32 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.cancelEditing();
     }
   }
-  private whitespace(key: string): void {
+  private whitespace(key: string, ctrlKey: boolean, altKey: boolean, shiftKey: boolean): void {
     switch (key) {
       case 'Enter':
-        this.void('br');
+        this.parser.br(shiftKey, ctrlKey, altKey);
         break;
       case 'Tab':
+        if (shiftKey) {
+          this.parser.shiftRight();
+        } else {
+          this.parser.shiftLeft();
+        }
         break;
     }
   }
   private editingKey(key: string): void {
-    if (this.lastRange) {
-      if (!this.lastRange.collapsed) {
-        this.deleteRange();
-      } else {
-        switch (key) {
-          case 'Backspace':
-            if (this.range.start.n.typeNode === Node.TEXT_NODE && this.range.start.offset > 0) {
-              this.range.start.offset -= 1;
-            } else {
-              const sp = this.parser.nextUp(this.range.start, true);
-              if (sp) {
-                this.range.start = sp;
-              } else if (!this.range.start.n.isRoot) {
-                this.range.start = new SPosition(this.range.start.n.parent, this.range.start.n.index);
-              }
-            }
-            this.deleteRange();
-            break;
-          case 'Delete':
-            if (this.range.end.n.typeNode === Node.TEXT_NODE && this.range.end.offset < this.range.end.n.getText().length) {
-              this.range.end.offset += 1;
-            } else {
-              const sp = this.parser.nextDown(this.range.end, true);
-              if (sp) {
-                this.range.end = sp;
-              }
-            }
-            this.deleteRange();
-            break;
-          case 'Insert':
-            this.replaceChar = !this.replaceChar; // TODO process this parameter by changing this.range on one symbol
-            break;
-        }
+      switch (key) {
+        case 'Backspace':
+          this.parser.backspace();
+          break;
+        case 'Delete':
+          this.parser.delete();
+          break;
+        case 'Insert':
+          this.replaceChar = !this.replaceChar; // TODO process this parameter by changing this.range on one symbol
+          break;
       }
-    }
   }
   private toNode(s: SNode): HTMLElement {
     if (s.typeNode === Node.TEXT_NODE) {
@@ -982,7 +1127,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   private toSNode(w: Node): SNode {
     const a = LibNode.getAttribute(w, DESIGNER_ATTR_NAME);
     if (a) {
-      const sn = this.parser.findSNode(DESIGNER_ATTR_NAME, a);
+      const sn = this.parser.findSNode(DESIGNER_ATTR_NAME);
       if (w.nodeType === Node.TEXT_NODE) {
         return sn.child(LibNode.orderOfChild(w.parentNode, w));
       }
@@ -998,20 +1143,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       return this.editor;
     }
     return this.editor.querySelector(`[${DESIGNER_ATTR_NAME}="${id}"]`);
-  }
-  private moveNext(n: Node, offset: number, stepText = true): void {
-    if (n.nodeType === Node.TEXT_NODE && offset < n.textContent.length) {
-      window.getSelection().collapse(n, offset + 1);
-      return;
-    }
-    this.collapse(null, this.parser.nextDown(new SPosition(this.toSNode(n), offset), stepText));
-  }
-  private movePrev(n: Node, offset: number, stepText = true): void {
-    if (n.nodeType === Node.TEXT_NODE && offset > 0) {
-      window.getSelection().collapse(n, offset - 1);
-      return;
-    }
-    this.collapse(null, this.parser.nextUp(new SPosition(this.toSNode(n), offset), stepText));
   }
   private findPalpable(container: Node, offset: number, revert = false): RangePosition {
     const w = new HtmlWrapper(container);

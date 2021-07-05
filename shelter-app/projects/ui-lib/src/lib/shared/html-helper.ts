@@ -1,6 +1,12 @@
-import {SNode} from './html-validator';
+// tslint:disable:max-line-length
 
 export abstract class NodeWrapper {
+  get errors(): string[] {
+    return this._errors;
+  }
+  get warnings(): string[] {
+    return this._warnings;
+  }
   abstract nodeName: string;
   abstract typeNode: number;
   abstract index: number;
@@ -11,9 +17,9 @@ export abstract class NodeWrapper {
   abstract next: NodeWrapper;
   abstract prev: NodeWrapper;
   // 0, undefined, null - without change, -1 - deleted, 1 - modified, 2 - new, 3 - attr modified
-  abstract state: number;
-  readonly errors = [];
-  readonly warnings = [];
+  protected abstract state: number;
+  private readonly _errors = [];
+  private readonly _warnings = [];
   static isDescOf(n: NodeWrapper, parent: string): boolean {
     while (n.nodeName !== 'body') {
       if (n.nodeName === parent) {
@@ -23,9 +29,27 @@ export abstract class NodeWrapper {
     }
     return false;
   }
+  setError(s: string): void {
+    this._errors.push(s);
+  }
+  setWarning(s: string): void {
+    this._warnings.push(s);
+  }
   abstract attribute(name: string): string;
   abstract equal(n: NodeWrapper): boolean;
   abstract addChild(n: NodeWrapper): void;
+  abstract getText(): string;
+  containAttributes(attr?: {[key: string]: string}): boolean {
+    let res = true;
+    if (attr) {
+      Object.keys(attr).forEach(k => {
+        if (attr[k] !== this.attribute(k)) {
+          res = false;
+        }
+      });
+    }
+    return res;
+  }
   child<T extends NodeWrapper>(inx: number): T {
     let w: T = this.firstChild as T;
     if (inx < 0 && inx >= this.numChildren) { return null; }
@@ -49,23 +73,53 @@ export abstract class NodeWrapper {
     }
   }
   prevNode(): NodeWrapper {
-    return this.prev || this.parent;
+    let prev: NodeWrapper = null;
+    const from = this;
+    treeWalkerR(from, undefined, (w) => {
+      if (w !== from && !(w.typeNode === Node.TEXT_NODE && (w.index === w.parent.numChildren - 1) && !w.getText())) {
+        prev = w;
+        return true;
+      }
+    });
+    return prev;
   }
-
-  nextNode<T extends NodeWrapper>(root: NodeWrapper): T {
-    let n = this.firstChild as T;
-    if (n) { return n; }
-    n = this.next as T;
-    if (n) { return n; }
-    n = this.parent as T;
-    while (n) {
-      if (n === root || root.equal(n)) { break; }
-      if (n.next) { return n.next as T; }
-      n = n.parent as T;
+  nextNode(): NodeWrapper {
+    const from: NodeWrapper = this;
+    let next: NodeWrapper = null;
+    treeWalker<NodeWrapper>(from, (w) => {
+      if (w !== from) {
+        next = w;
+        return true;
+      }
+    });
+    return next;
+  }
+  hasParent<T extends NodeWrapper>(nodeNames: Array<string | {nodeName: string, attr: {[key: string]: string}}>): T {
+    let p = this.parent;
+    while (p) {
+      if (nodeNames.find(v => {
+        if (typeof v === 'string') {
+          return v === p.nodeName;
+        }
+        return v.nodeName === p.nodeName && p.containAttributes(v.attr);
+      })) {
+        return p as T;
+      }
+      p = p.parent;
     }
     return null;
   }
+  ancestorIndex(ancestor: NodeWrapper): number {
+    let w: NodeWrapper = this;
+    while (w.parent && !ancestor.equal(w.parent)) {
+      w = w.parent;
+    }
+    return w ? w.index : -1;
+  }
   abstract validate(correct?: boolean): void;
+  toString(): string {
+    return `${this.nodeName}, parent:${this.parent ? this.parent.nodeName : 'null'}, index:${this.index}`;
+  }
 }
 export function isDescendant(p: NodeWrapper, c: NodeWrapper): boolean {
   while (c !== null) {
@@ -77,60 +131,30 @@ export function isDescendant(p: NodeWrapper, c: NodeWrapper): boolean {
   return false;
 }
 
-export class SPosition {
-  get sNode(): SNode {
-    return SPosition.toSNode(this);
-  }
-  /**
-   * if n.typeNode === Node.ELEMENT_NODE offset point on child node (can be out of range)
-   * else offset point on text position
-   */
-  constructor(public n: SNode, public offset: number) {}
-  static toSNode(sp: SPosition): SNode {
-    return sp.n.typeNode === Node.ELEMENT_NODE ? sp.n.children[sp.offset] : sp.n;
-  }
-  static equalPosition(p1: SPosition, p2: SPosition): boolean {
-    return p1.n.equal(p2.n) && p1.offset === p2.offset;
-  }
-  static findPosition(root: SNode, from: SPosition, criteria: (p: SNode) => boolean, down: boolean): SPosition {
-    const iter = new SNodeIterator(root, SPosition.toSNode(from), !down);
-    for (const sn of iter) {
-      if (criteria(sn)) {
-        if (sn && sn.typeNode === Node.TEXT_NODE) {
-          return new SPosition(sn, down ? 0 : sn.getText().length);
-        }
-        return new SPosition(sn.parent, sn.index);
+export function treeWalkerR<T extends NodeWrapper>(from: T, enter: (n: T) => void = () => null, exit: (s: T) => any = () => null, root?: T): void {
+  let r = from;
+  while (r) {
+    if (exit(r)) {
+      return;
+    }
+    if (!r.prev) {
+      if (r === root || r.equal(root)) {
+        return null;
       }
+      r = r.parent as T;
+      continue;
     }
-    return null;
-  }
-}
-export function beforePosition(sp: SPosition): (n: NodeWrapper) => boolean {
-  if (sp.n.typeNode === Node.ELEMENT_NODE && sp.offset > 0) {
-    return (n) => {
-      return ! (n.parent === sp.n && n.index === sp.offset - 1);
-    };
-  } else {
-    return (n) => {
-      return ! (n.parent === sp.n);
-    };
-  }
-}
-export class SRange {
-  indexStart: number;
-  indexEnd: number;
-  constructor(public commonAncestor: SNode, public start: SPosition, public end: SPosition, public collapsed) {
-    this.indexStart = start.n.equal(commonAncestor) ? start.offset : this.ancestorIndex(start.n);
-    this.indexEnd = end.n.equal(commonAncestor) ? end.offset : this.ancestorIndex(end.n);
-  }
-  private ancestorIndex(n: NodeWrapper): number {
-    while (!this.commonAncestor.equal(n.parent) && n.parent) {
-      n = n.parent;
+    r = r.prev as T;
+    enter(r);
+    while (r) {
+      if (!r.lastChild) {
+        break;
+      }
+      r = r.lastChild as T;
+      enter(r);
     }
-    return n.index;
   }
 }
-// tslint:disable-next-line:max-line-length
 export function treeWalker<T extends NodeWrapper>(from: T, enter: (n: T) => any = () => null, exit: (s: T) => void = () => null, root?: T): void {
   let r = from;
   start: while (r) {
@@ -158,7 +182,7 @@ export class SNodeIterator<T extends NodeWrapper> implements Iterable<T>, Iterat
   private current: T;
   private done: boolean;
   constructor(private root: T, private from: T, private revert = false) {
-    this.current = from;
+    this.current = from || null;
     this.done = this.isDone();
   }
   private isDone(): boolean {
@@ -171,7 +195,7 @@ export class SNodeIterator<T extends NodeWrapper> implements Iterable<T>, Iterat
     if (this.revert) {
       this.current = this.current.prevNode() as T;
     } else {
-      this.current = this.current.nextNode(this.root) as T;
+      this.current = this.current.nextNode() as T;
     }
     this.done = this.isDone();
     return {done: this.done, value: this.current};

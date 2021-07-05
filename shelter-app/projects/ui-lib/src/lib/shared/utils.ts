@@ -1,4 +1,3 @@
-import {ComponentFactoryResolver, Injector, Type} from '@angular/core';
 /**
  * choiceFormat - return formatted string. The principle is like java.text.ChoiceFormat
  * Rules:
@@ -154,83 +153,8 @@ export function camelToDashCase(input: string): string {
 }
 
 /**
- * Create a `CustomEvent` (even on browsers where `CustomEvent` is not a constructor).
- */
-export function createCustomEvent(doc: Document, name: string, detail: any): CustomEvent {
-  const bubbles = false;
-  const cancelable = false;
-
-  // On IE11, `CustomEvent` is not a constructor.
-  if (typeof CustomEvent !== 'function') {
-    const event = doc.createEvent('CustomEvent');
-    event.initCustomEvent(name, bubbles, cancelable, detail);
-    return event;
-  }
-
-  return new CustomEvent(name, {bubbles, cancelable, detail});
-}
-
-/**
- * Check whether the input is an `Element`.
- */
-export function isElement(node: Node|null): node is Element {
-  return !!node && node.nodeType === Node.ELEMENT_NODE;
-}
-
-/**
- * Check whether the input is a function.
- */
-export function isFunction(value: any): value is Function {
-  return typeof value === 'function';
-}
-
-/**
  * Convert a kebab-cased string to camelCased.
  */
 export function kebabToCamelCase(input: string): string {
   return input.replace(/-([a-z\d])/g, (_, char) => char.toUpperCase());
-}
-
-let _matches: (this: any, selector: string) => boolean;
-
-/**
- * Check whether an `Element` matches a CSS selector.
- * NOTE: this is duplicated from @angular/upgrade, and can
- * be consolidated in the future
- */
-export function matchesSelector(el: any, selector: string): boolean {
-  if (!_matches) {
-    const elProto = Element.prototype as any;
-    _matches = elProto.matches || elProto.matchesSelector || elProto.mozMatchesSelector ||
-      elProto.msMatchesSelector || elProto.oMatchesSelector || elProto.webkitMatchesSelector;
-  }
-  return el.nodeType === Node.ELEMENT_NODE ? _matches.call(el, selector) : false;
-}
-
-/**
- * Test two values for strict equality, accounting for the fact that `NaN !== NaN`.
- */
-export function strictEquals(value1: any, value2: any): boolean {
-  return value1 === value2 || (value1 !== value1 && value2 !== value2);
-}
-
-/** Gets a map of default set of attributes to observe and the properties they affect. */
-export function getDefaultAttributeToPropertyInputs(inputs: {propName: string, templateName: string}[]): {[key: string]: string} {
-  const attributeToPropertyInputs: {[key: string]: string} = {};
-  inputs.forEach(({propName, templateName}) => {
-    attributeToPropertyInputs[camelToDashCase(templateName)] = propName;
-  });
-
-  return attributeToPropertyInputs;
-}
-
-/**
- * Gets a component's set of inputs. Uses the injector to get the component factory where the inputs
- * are defined.
- */
-export function getComponentInputs(
-  component: Type<any>, injector: Injector): {propName: string, templateName: string}[] {
-  const componentFactoryResolver: ComponentFactoryResolver = injector.get(ComponentFactoryResolver);
-  const componentFactory = componentFactoryResolver.resolveComponentFactory(component);
-  return componentFactory.inputs;
 }
