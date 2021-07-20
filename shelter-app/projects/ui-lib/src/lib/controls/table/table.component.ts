@@ -16,7 +16,7 @@ import {
 import {DialogRef, DialogService} from '../../dialog-service';
 import {
   AbstractDataSource,
-  ArrayDataSource,
+  ArrayDataSource, Attributes,
   CdkDataSource,
   choiceFormat,
   coerceToSwaggerNative,
@@ -132,7 +132,7 @@ export class TableComponent<U, T> extends BaseComponent implements OnInit, OnDes
   @ViewChild(CdkTable, {static: true}) cdkTable: CdkTable<any>;
   @ViewChild('inputSearch', {static: true}) inputSearch: ElementRef<HTMLInputElement>;
   @ViewChild('dlg') dlgTemplate: TemplateRef<any>;
-  pDisplayedNames: {[column: string]: string};
+  pDisplayedNames: Attributes;
   get selectedRows(): any[] {
     return (this.cdkDataSource || {}).selectedRows || [];
   }

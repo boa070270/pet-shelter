@@ -4,7 +4,7 @@ import {AbstractComponent} from '../controls';
 import {DialogService} from '../dialog-service';
 import {PluginsPanelComponent} from './plugins-panel.component';
 import {CdkDropList} from '@angular/cdk/drag-drop';
-import {SwaggerNative, SwaggerObject, swaggerUI, TitleType} from '../shared';
+import {Attributes, SwaggerNative, SwaggerObject, swaggerUI, TitleType} from '../shared';
 
 const HREF_ATTRIBUTE = new SwaggerObject(['href'], {href: SwaggerNative.asString('lib-input-control', null,
     swaggerUI([{lang: 'en', title: 'Link'}, {lang: 'uk', title: 'Посилання'}]))});
@@ -60,9 +60,6 @@ export class EditorToolbarComponent extends AbstractComponent implements OnDestr
   iTag: boolean;
   fSize: string;
   alignPressed: number;
-  tableControlsHidden: boolean;
-  borderStyle: string;
-  tblBorderWidth: string;
   moveByText = true;
   @Input() fCdkDropList: () => CdkDropList;
   private pluginEmitter: EventEmitter<string>;
@@ -119,7 +116,7 @@ export class EditorToolbarComponent extends AbstractComponent implements OnDestr
       return true;
     }
   }
-  tag(tag: string, attr?: string[] | {[key: string]: string}): void { // was without 'string |' and was causing error
+  tag(tag: string, attr?: string[] | Attributes): void { // was without 'string |' and was causing error
     this.emitter.emit({cmd: 'tag', opt: {tag, attr}});
   }
 

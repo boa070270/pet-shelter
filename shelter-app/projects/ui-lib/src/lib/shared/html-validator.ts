@@ -1,12 +1,12 @@
-
 // tslint:disable:max-line-length
-import {NodeWrapper, SNodeIterator, treeWalker, treeWalkerR} from './html-helper';
-import {HtmlRules} from './html-rules';
+// tslint:disable:variable-name
+import {Attributes, FilterNode, NodeWrapper, SNodeIterator, treeWalker, treeWalkerR} from './html-helper';
+import {HtmlElementContent, HtmlRules} from './html-rules';
 import {LibNode} from './lib-node-iterator';
 
 export interface StartEnd { start: number; end: number; }
 const EMPTY_S_RANGE: StartEnd = {start: 0, end: 0};
-function chkAttribute(n: string, attr?: {[key: string]: string}): any {
+function chkAttribute(n: string, attr?: Attributes): any {
   if (attr) {
     const f = Object.keys(attr).find((k) => k.toLowerCase() === n.toLowerCase());
     if (f) {
@@ -14,6 +14,11 @@ function chkAttribute(n: string, attr?: {[key: string]: string}): any {
     }
   }
   return null;
+}
+export abstract class DesignElement {
+  abstract pCnt: HtmlElementContent;
+  abstract cnt: HtmlElementContent;
+  abstract transform(sn: SNode, cp: (a: Attributes) => Attributes): SNode;
 }
 export abstract class SNode extends NodeWrapper {
   get next(): SNode {
@@ -40,6 +45,9 @@ export abstract class SNode extends NodeWrapper {
   get numChildren(): number {
     return 0;
   }
+  get numRealChildren(): number {
+    return 0;
+  }
   protected constructor(typeNode: number, nodeName: string, text?: string, public inRange?: StartEnd, public outRange?: StartEnd, public isRoot = false) {
     super();
     this.inRange = inRange;
@@ -51,7 +59,7 @@ export abstract class SNode extends NodeWrapper {
   typeNode: number;
   nodeName: string;
   children: SNode[] = null;
-  attr?: {[key: string]: string};
+  attr?: Attributes;
   parent: SNode = null;
   // 0 - without change, -1 - deleted, 1 - modified (or new)
   state = 0;
@@ -70,125 +78,13 @@ export abstract class SNode extends NodeWrapper {
   static cdataNode(text: string, inRange?: StartEnd, outRange?: StartEnd): SNode {
     return new SNodeCData(text, inRange, outRange);
   }
-  /**
-   * define node for this position. If position point to null, return value depends on r.
-   * r < 0 - return node before, r > 0 return node after, 0 - null
-   * @param sp SPosition
-   * @param r number
-   */
-  static inPosition(sp: SPosition, r?: number): SNode {
-    const n = sp.n as SNode;
-    if (n.typeNode === Node.ELEMENT_NODE && n.children) {
-      if (n.children[sp.offset] === null && !r) {
-        if (r > 0) {
-          return n.next;
-        }
-        return sp.offset === 0 ? n : n.children[sp.offset - 1];
-      }
-      return n.children[sp.offset];
-    }
-    return n;
-  }
-  static splitBranch(nodeName: string, from: SNode, offset: number, root: SNode, crossNode: SNode, copyTop: boolean,
-                     copyAttr: (attr: {[key: string]: string}) => {[key: string]: string}): {crossed: boolean, topNode: SNode, children: SNode[], newChildren: SNode[], text: string} {
-    let text = '';
-    let textNode = null;
-    const children: SNode[] = [];
-    const newChildren: SNode[] = [];
-    let crossed = false;
-    if (from.typeNode === Node.ELEMENT_NODE) {
-      from = from.children[offset];
-    } else {
-      text = from.getText();
-      textNode = from;
-      from.setText(text.substring(0, offset));
-    }
-    let topNode = from.parent;
-    while (topNode.nodeName !== nodeName) {
-      children.unshift(topNode);
-      if (topNode.equal(crossNode)) {
-        crossed = true;
-      }
-      topNode = topNode.parent;
-    }
-    let last = topNode.parent;
-    if (copyTop) {
-      children.unshift(topNode);
-    }
-    let m = null;
-    for (const c of children) {
-      const t = last.newChild(SNode.elementNode(c.nodeName, copyAttr(c.attr)), Number.MAX_VALUE);
-      newChildren.push(t);
-      m = c.next;
-      while (m) {
-        last.newChild(m, Number.MAX_VALUE);
-        m = m.next;
-      }
-      last = t;
-    }
-    m = from.next;
-    if (m) {
-      newChildren.push(m);
-    }
-    while (m) {
-      last.newChild(m, Number.MAX_VALUE);
-      m = m.next;
-    }
-    if (textNode) {
-      newChildren.push(last.newChild(SNode.textNode(text.substring(offset)), 0));
-    }
-    return {topNode, crossed, children, text, newChildren};
-  }
-
-  static splitTextByNode(sp: SPosition, sn: SNode, wrap = true): {newNode: SNode, txtNode: SNode} {
-    if (sp.n.typeNode === Node.TEXT_NODE) {
-      const txt = sp.n.getText();
-      sp.n.setText(txt.substring(0, sp.offset));
-      const newNode = sp.n.parent.newChild(sn, sp.n.index + 1);
-      let txtNode;
-      if (wrap && HtmlRules.elements[sn.nodeName][1] && HtmlRules.elements[sn.nodeName][1].cnt) {
-        txtNode = newNode.newChild(SNode.textNode(txt.substring(sp.offset)), 0);
-      } else {
-        newNode.validate();
-        txtNode = sp.n.parent.newChild(SNode.textNode(txt.substring(sp.offset)), newNode.index + 1);
-      }
-      return {newNode, txtNode};
-    }
-    return null;
-  }
-  static splitText(sp: SPosition, nodeName: string, attr: {[key: string]: string}, wrap = true): {newNode: SNode, txtNode: SNode} {
-    return SNode.splitTextByNode(sp, SNode.elementNode(nodeName, attr), wrap);
-  }
-  static validates(nodes: SNode[]): void {
-    for (const n of nodes) {
-      n.validate();
-    }
-  }
-  static splitStatic(sp: SPosition, cp: (attr: {[key: string]: string}) => {[key: string]: string}): SPosition {
-    if (sp.n.parent) { // splitting only if there is parent
-      if (sp.n.typeNode === Node.ELEMENT_NODE) {
-        const nn = SNode.elementNode(sp.n.nodeName, cp(sp.n.attr));
-        sp.n.parent.newChild(nn, sp.n.index + 1);
-        let ixn = 0;
-        for (let i = sp.offset; i < sp.n.parent.numChildren; ++i) {
-          sp.n.children[i].move(nn, ixn++);
-        }
-        SNode.validates([sp.n, nn, nn.parent]);
-        return new SPosition(nn.parent, nn.index);
-      } else if (sp.n.typeNode === Node.TEXT_NODE && sp.n.parent.parent) {
-        const nn = this.splitText(sp, sp.n.parent.nodeName, cp(sp.n.parent.attr));
-        return new SPosition(nn.newNode, nn.newNode.index);
-      }
-    }
-    return null;
-  }
   attribute(name: string): string {
     return null;
   }
   equal(n: NodeWrapper): boolean {
     return this === n;
   }
-  abstract clone(cp?: (attr: {[key: string]: string}) => {[key: string]: string}): SNode;
+  abstract clone(cp?: (attr: Attributes) => Attributes): SNode;
   abstract source(onlyBody?: boolean): string;
   modified(): void {
     if (!this.state) {
@@ -212,7 +108,29 @@ export abstract class SNode extends NodeWrapper {
   replace(nodeName: string, attr?: any): SNode {
     return this;
   }
-  abstract insert(sn: SNode, cp: (a: {[key: string]: string}) => {[key: string]: string}, from: number, to?: number): {sn: SNode, wrapped: SNode[], after: SNode};
+  insert(sn: SNode, cp: (a: Attributes) => Attributes, from: number, to?: number): {sn: SNode, after: SNode} {
+    return {sn: this, after: null};
+  }
+
+  /**
+   * split node to two or three nodes.
+   * For text node, cdata and comment nodes we split text than we call node splitting
+   * @param cp - copy attributes
+   * @param from - from position position in text
+   * @param to - to position in text
+   * @param sn - is splitting by this determined node or by copy of parent node (default)
+   */
+  split(cp: (a: Attributes) => Attributes, from: number, to?: number, sn?: SNode): {sn: SNode, after: SNode} {
+    const text = this.getText();
+    this.setText(text.substring(0, from));
+    this.parent.children.splice(this.index + 1, 0, SNode.textNode(text.substring(from, to)));
+    from = this.index + 1;
+    if (to < text.length) {
+      this.parent.children.splice(this.index + 2, 0, SNode.textNode(text.substring(to)));
+      to = this.index + 2;
+    }
+    return this.parent.split(cp, from, to, sn);
+  }
   wrapThis(n: SNode): SNode {
     if (this.parent === null) {
       throw new Error('Prohibited to wrap parent');
@@ -229,27 +147,27 @@ export abstract class SNode extends NodeWrapper {
     this.parent.modified();
     return n;
   }
-  wrapChildren(n: SNode, from = 0, to?: number): SNode {
-    return n;
-  }
-  extractChildren(): void {}
   unwrapChildren(): SNode { return null; }
-  pullChildren(cp: (attr: {[key: string]: string}) => {[key: string]: string}, from: number, to: number): void {}
   move(np: SNode, inx: number): SNode {
-    this.parent.modified();
-    this.parent.children.splice(this.index, 1);
+    const p = this.parent;
+    p.children.splice(this.index, 1);
+    if (p.numChildren > 0) {
+      p.modified();
+    } else {
+      p.delete();
+    }
     this.modified();
     return np.newChild(this, inx);
   }
   moveChildren(dest: SNode, from: number, to?: number, destInx = 0): SNode[] {
-    const m = [];
+    let m = [];
+    to = to || this.numChildren;
     if (this.children) {
-      const tn = this.children[to || this.numChildren - 1];
-      const fn = this.children[from];
-      while (tn.prev !== fn) {
-        m.unshift(tn.prev.move(dest, destInx));
+      this.modified();
+      m = this.children.splice(from, to - from);
+      for (const c of m) {
+        dest.newChild(c, destInx++);
       }
-      m.unshift(fn.move(dest, destInx));
     }
     return m;
   }
@@ -274,29 +192,24 @@ export class SNodeText extends SNode {
   source(onlyBody?: boolean): string {
     return this._txt;
   }
-  insert(sn: SNode, cp: (a: {[key: string]: string}) => {[key: string]: string}, from: number, to?: number): {sn: SNode, wrapped: SNode[], after: SNode} {
-    const text = this.getText();
-    const wrapped = []; let after: SNode = null;
-    if (!to || to > text.length) {
-      to = text.length;
+  insert(sn: SNode, cp: (a: Attributes) => Attributes, from: number, to?: number): {sn: SNode, after: SNode} {
+    let after = null;
+    const txt = this.getText();
+    if (sn.typeNode === Node.TEXT_NODE) {
+      throw new Error('Insert only element node');
     }
-    if (from <= to) {
-      if (sn.typeNode === Node.TEXT_NODE) {
-        this.setText(text.substring(0, from) + sn.getText() + text.substring(to));
-        sn = this;
-      } else {
-        this.setText(text.substring(0, from));
-        this.parent.newChild(sn, this.index + 1);
-        if (from < to && HtmlRules.enableTxt(sn)) {
-          wrapped.push(sn.addChild(SNode.textNode(text.substring(from, to))));
-        }
-        if (to < text.length) {
-          after = this.parent.newChild(SNode.textNode(text.substring(to)), sn.index + 1);
-        }
-        sn.validate();
-      }
+    if (from === 0) {
+      this.parent.newChild(sn, this.index);
+      this.setText('');
+    } else {
+      this.parent.newChild(sn, this.index + 1);
+      this.setText(txt.substring(0, from));
     }
-    return {sn, wrapped, after};
+    sn.addChild(SNode.textNode(txt.substring(from, to)));
+    if (to < txt.length) {
+      after = this.parent.newChild(SNode.textNode(txt.substring(to)), sn.index + 1);
+    }
+    return {sn, after};
   }
 }
 export class SNodeComment extends SNode {
@@ -309,9 +222,6 @@ export class SNodeComment extends SNode {
   source(onlyBody?: boolean): string {
     return START_COMMENT + this._txt + END_COMMENT;
   }
-  insert(sn: SNode, cp: (a: {[key: string]: string}) => {[key: string]: string}, from: number, to?: number): {sn: SNode, wrapped: SNode[], after: SNode} {
-    return {sn, wrapped: [], after: null};
-  }
 }
 export class SNodeCData extends SNode {
   constructor(text: string, inRange?: StartEnd, outRange?: StartEnd) {
@@ -322,9 +232,6 @@ export class SNodeCData extends SNode {
   }
   source(onlyBody?: boolean): string {
     return START_CDATA + this._txt + END_CDATA;
-  }
-  insert(sn: SNode, cp: (a: {[key: string]: string}) => {[key: string]: string}, from: number, to?: number): {sn: SNode, wrapped: SNode[], after: SNode} {
-    return {sn, wrapped: [], after: null};
   }
 }
 export class SNodeElement extends SNode {
@@ -337,6 +244,16 @@ export class SNodeElement extends SNode {
   get numChildren(): number {
     return this.children.length;
   }
+  get numRealChildren(): number {
+    let n = 0;
+    for (const c of this.children) {
+      if (c.state === -1 || (c.next === null && c.typeNode === Node.TEXT_NODE && c.getText().length === 0)) {
+        continue;
+      }
+      n++;
+    }
+    return n;
+  }
   constructor(nodeName: string, public inRange?: StartEnd, public outRange?: StartEnd, public isRoot = false) {
     super(Node.ELEMENT_NODE, nodeName, null, inRange, outRange, isRoot);
     this.children = [];
@@ -344,7 +261,7 @@ export class SNodeElement extends SNode {
   attribute(name: string): string {
     return chkAttribute(name, this.attr);
   }
-  clone(cp?: (attr: {[key: string]: string}) => {[key: string]: string}): SNode {
+  clone(cp?: (attr: Attributes) => Attributes): SNode {
     if (!cp) { cp =  (attr) => Object.assign({}, attr); }
     const n = SNode.elementNode(this.nodeName, cp(this.attr), null, null, this.isRoot);
     this.children.forEach(c => n.addChild(c.clone(cp)));
@@ -384,6 +301,7 @@ export class SNodeElement extends SNode {
     return n;
   }
   validate(correct = true): void {
+    this.clearError();
     const content = HtmlRules.contentOfNode(this);
     if (!content) {
       if (this.numChildren !== 0) {
@@ -433,62 +351,70 @@ export class SNodeElement extends SNode {
     this.modified();
     return this;
   }
-  wrapChildren(n: SNode, from = 0, to?: number): SNode {
-    while (this.firstChild) { n.addChild( this.children.splice(0, 1)[0]); }
-    this.addChild(n);
-    this.modified();
-    n.modified();
-    return n;
-  }
   unwrapChildren(): SNode {
     let s = null;
+    this.delete();
+    const ixn = this.index;
     while (this.lastChild) {
-      s = this.lastChild.move(this.parent, this.index);
+      s = this.lastChild.move(this.parent, ixn);
     }
     return s;
   }
-  pullChildren(cp: (attr: {[key: string]: string}) => {[key: string]: string}, from: number, to: number): void {
-    if (from === 0) {
-      for (let i = 0; i < Math.min(this.children.length, to); ++i) {
-        this.children[i].move(this.parent, this.index);
-      }
-    } else if (to === this.children.length) {
-      for (let i = this.children.length - 1; i >= from; i--) {
-        this.children[i].move(this.parent, this.index + 1);
-      }
-    } else {
-      this.parent.newChild(SNode.elementNode(this.nodeName, cp(this.attr)), this.index + 1);
-      for (let i = to - 1; i >= from; i--) {
-        this.children[i].move(this.parent, this.index + 1);
-      }
+  insert(sn: SNode, cp: (a: Attributes) => Attributes, from: number, to?: number): {sn: SNode, after: SNode} {
+    to = Math.min(this.numChildren, to || Number.MAX_VALUE);
+    const ixn = sn.numChildren;
+    for (let i = from; i < to; ++i) {
+      const ch = this.children.splice(from, 1);
+      sn.newChild(ch[0], ixn);
     }
+    this.newChild(sn, from);
+    return {sn, after: sn.next};
+    // return this.split(cp, from, to, sn);
   }
-  extractChildren(): void {
-    this.unwrapChildren();
-  }
-
   /**
-   * There we split this node with sn, and children before from leave in this node, children from to moving to sn
-   * @param sn - node that is inserted
-   * @param cp - copy attribute
-   * @param from - position
-   * @param to - position
+   * split node to two or three nodes.
+   * this: ElementNode, from: 1, to: 2
+   * <splitted m1><a><b><c></splitted> => <splitted m1><a></splitted><splitted m2><b></splitted><splitted m3><c></splitted> {sn: m2, after: m3}
+   * this: ElementNode, from: 0, to: 2
+   * <splitted m1><a><b><c></splitted> => <splitted m1><a><b></splitted><splitted m2><c></splitted> {sn: m1, after: m2}
+   * @param cp - copy attributes
+   * @param from - from child (or text) position
+   * @param to - to child (or text) position
+   * @param sn - is splitting by this determined node or by copy of parent node (default)
    */
-  insert(sn: SNode, cp: (a: {[key: string]: string}) => {[key: string]: string}, from: number, to?: number): {sn: SNode, wrapped: SNode[], after: SNode} {
-    let wrapped = []; let after: SNode = null;
-    if (!to || to > this.children.length) { to = this.children.length; }
-    if (to < this.numChildren) {
-      after = this.parent.newChild(SNode.elementNode(this.nodeName, cp(this.attr)), this.index);
-      this.moveChildren(after, to);
+  split(cp: (a: Attributes) => Attributes, from: number, to?: number, sn?: SNode): {sn: SNode, after: SNode} {
+    let after = null;
+    if (!to || to > this.numChildren) { to = this.numChildren; }
+    from = Math.max(0, from);
+    sn = sn || (from !== 0 ? SNode.elementNode(this.nodeName, cp(this.attr)) : this);
+    if (sn.typeNode === Node.TEXT_NODE) {
+      throw new Error('Expected element node');
+    } else {
+      if (sn !== this) {
+        const cnt = HtmlRules.contentOfNode(sn);
+        if (from === 0 && cnt) { // TODO make a function that can validate this position, not only a void element
+          this.nodeName = sn.nodeName;
+          this.attr = Object.assign({}, this.attr, sn.attr);
+          this.modified();
+          sn = this;
+        } else {
+          this.parent.newChild(sn, this.index + 1);
+          if (cnt) { // TODO make a function that can validate this position, not only a void element
+            this.moveChildren(sn, from, to, 0);
+          }
+        }
+      }
+      if (to - from < this.numRealChildren) {
+        after = this.parent.newChild(SNode.elementNode(this.nodeName, cp(this.attr)), sn.index + 1);
+        this.moveChildren(after, to - from);
+        after.validate();
+      }
+      sn.validate();
+      if (sn !== this) {
+        this.validate();
+      }
     }
-    this.parent.newChild(sn, from);
-    if (from < to) {
-      wrapped = this.moveChildren(sn, from, to, 0);
-    }
-    sn.validate();
-    after.validate();
-    this.validate();
-    return {sn, wrapped, after};
+    return {sn, after};
   }
   chnAttr(n: string, v: string): SNode {
     this.attr[n] = v;
@@ -536,7 +462,11 @@ export class SimpleParser {
   private _tmpRange: SRange = null;
   errors: ParseError[] = [];
   get source(): string {
-    return this.root ? this.root.source() : '';
+    if (!this.root) {
+      return '';
+    }
+    const r = new RegExp('\\s' + this.mark + '="[^"]"', 'g');
+    return this.root.source().replace(r, '');
   }
   get currentRoot(): SNode {
     return this._tmpRoot || this.root;
@@ -544,12 +474,19 @@ export class SimpleParser {
   get currentRange(): SRange {
     return this._tmpRange || this.range;
   }
-  constructor(mark: string, private markIndex = 0) {
-    this.mark = mark;
+  constructor(mark_: string, private markIndex = 0) {
+    this.mark = mark_;
     this.baseMark = '' + markIndex;
   }
   static validate(root: SNode): Error {
     return HtmlRules.validateSource(root);
+  }
+  validateNewChild(p: SNode, offset: number, newNode: SNode): string[] {
+    const c = p.clone();
+    const n = c.newChild(newNode, offset);
+    c.validate();
+    n.validate();
+    return c.errors.concat(n.errors);
   }
   cloneRoot(): SNode {
     if (!this._tmpRoot && this.root) {
@@ -585,14 +522,17 @@ export class SimpleParser {
         this.root = parse(this._tmpRoot.source(), this.mark, this.errors, this.baseMark);
         topModified = this.mapToClone(topModified, this.root);
         const n = this.toNode(topModified);
-        (n as HTMLElement).innerHTML = topModified.source(true);
-        console.log('commit range: ' + this._tmpRange);
+        if (n) {
+          (n as HTMLElement).innerHTML = topModified.source(true);
+        } else {
+          this.editor.innerHTML = this.root.source();
+        }
         this.range = new SRange(
           new SPosition(this.mapToClone(this._tmpRange.anchor.n, this.root), this._tmpRange.anchor.offset),
           new SPosition(this.mapToClone(this._tmpRange.focus.n, this.root), this._tmpRange.focus.offset));
-        this._tmpRoot = null;
-        this._tmpRange = null;
       }
+      this._tmpRoot = null;
+      this._tmpRange = null;
     }
   }
   rollback(): void {
@@ -653,7 +593,6 @@ export class SimpleParser {
     } else {
       this.range = null;
     }
-    console.log('initFromSelection: ' + this.range);
   }
   restorePosition(): void {
     if (this.range) {
@@ -667,7 +606,6 @@ export class SimpleParser {
     }
   }
   collapse(sp: SPosition): void {
-    console.log('collapse: ' + sp);
     window.getSelection().removeAllRanges();
     const n = this.toNode(sp.n);
     if (n) {
@@ -683,14 +621,13 @@ export class SimpleParser {
   }
   selectAll(): void {
     const range = document.createRange();
-    range.selectNode(this.editor);
+    range.selectNodeContents(this.editor);
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(range);
     this.range = new SRange(new SPosition(this.root, 0), new SPosition(this.root, this.root.numChildren - 1));
   }
   moveNext(stepText = true): void {
     const next = this.nextDown(this.currentRange.focus, stepText);
-    console.log('moveNext:' + next);
     if (next) {
       this.currentRange.focus = next;
       this.collapse(this.currentRange.focus);
@@ -698,7 +635,6 @@ export class SimpleParser {
   }
   movePrev(stepText = true): void {
     const next = this.nextUp(this.currentRange.focus, stepText);
-    console.log('movePrev:' + next);
     if (next) {
       this.currentRange.focus = next;
       this.collapse(this.currentRange.focus);
@@ -711,7 +647,6 @@ export class SimpleParser {
     return SPosition.findPosition(this.currentRoot, p, editorNode(stepText), true);
   }
   private nextUp(p: SPosition, stepText = true): SPosition {
-    console.log('nextUp: ' + p);
     if (stepText && p.n.typeNode === Node.TEXT_NODE && p.n.getText() && p.offset > 0 && p.n.state >= 0) {
       return new SPosition(p.n, Math.min(p.offset - 1, p.n.getText().length));
     }
@@ -739,7 +674,7 @@ export class SimpleParser {
   }
   // Editor
   private nextMark(): string { return '' + ++this.markIndex; }
-  private copyAttr(attr?: {[key: string]: string}): {[key: string]: string} {
+  private copyAttr(attr?: Attributes): Attributes {
     const res = Object.assign({}, attr || {});
     res[this.mark] = this.nextMark();
     return res;
@@ -825,113 +760,107 @@ export class SimpleParser {
   private deleteRange(): void {
     this.wrapEditing(() => {
       if (!this.currentRange.collapsed) {
-        const start = this.currentRange.start;
-        const end = this.currentRange.end;
-        if (start.n.equal(end.n)) {
-          if (start.n.typeNode !== Node.ELEMENT_NODE) {
-            const sn = start.sNode;
-            sn.setText(sn.getText().substring(0, start.offset) + sn.getText().substring(end.offset));
-          } else {
-            for (let i = start.offset; i < end.offset; ++i) {
-              start.n.children[i].delete();
-            }
-          }
+        if (this.currentRange.commonAncestor.typeNode === Node.TEXT_NODE) {
+          const text = this.currentRange.commonAncestor.getText();
+          this.currentRange.commonAncestor.setText(text.substring(0, this.currentRange.start.offset) + text.substring(this.currentRange.end.offset));
           this.currentRange.focus = this.currentRange.start;
         } else {
-          let sp1 = end;
-          while (sp1.n !== this.currentRange.commonAncestor) {
-            sp1 = SNode.splitStatic(sp1, (a) => this.copyAttr(a));
+          const sn = this.extractRange(this.currentRange);
+          sn.delete();
+          const sp = this.nextDown(new SPosition(sn.parent, sn.index + 1));
+          if (sp) {
+            this.currentRange.focus = sp;
+          } else {
+            this.currentRange.focus = new SPosition(sn, sn.index + 1);
           }
-          let sp0 = start;
-          while (sp0.n !== this.currentRange.commonAncestor) {
-            sp0 = SNode.splitStatic(sp0, (a) => this.copyAttr(a));
-          }
-          for (let i = sp0.offset; i < sp1.offset; ++i) {
-            sp0.n.children[i].delete();
-          }
-          this.currentRange.focus = sp1;
         }
+        this.currentRange.collapse();
       }
-      this.currentRange.collapse('focus');
-      }
-    );
+    });
   }
-  private extractRange(range: SRange): SNode {
+  extractRange(range: SRange): SNode {
     if (range.collapsed) {
       if (range.start.sNode.typeNode === Node.TEXT_NODE) {
         return SNode.textNode('');
       } else {
         return range.start.sNode;
       }
-    } else if (range.commonAncestor.typeNode === Node.TEXT_NODE) {
-       return range.commonAncestor.insert(SNode.elementNode('span'), a => this.copyAttr(a), range.start.offset, range.end.offset).sn;
-    } else if (range.anchor.n === range.focus.n) {
-      return range.commonAncestor.insert(SNode.elementNode('div'), a => this.copyAttr(a), range.start.offset, range.end.offset).sn;
+    } else if (range.commonAncestor.typeNode === Node.TEXT_NODE || range.anchor.n === range.focus.n) {
+       return range.commonAncestor.split(a => this.copyAttr(a), range.start.offset, range.end.offset).sn;
     }
-    const startNode = range.start.sNode;
-    const endNode = range.end.sNode;
-    const div = SNode.elementNode('div');
-    let start: SNode; let end: SNode;
-    if (startNode.typeNode === Node.TEXT_NODE) {
-      start = startNode.insert(SNode.elementNode('span'), a => this.copyAttr(a), range.start.offset).sn;
+    let start = range.start;
+    while (start.n !== range.commonAncestor) {
+      const r = start.n.split(a => this.copyAttr(a), start.offset);
+      start = new SPosition(r.sn.parent, r.sn.index);
     }
-    while (start.parent !== range.commonAncestor) {
-      start = start.insert(SNode.elementNode(start.nodeName, this.copyAttr(start.attr)), a => this.copyAttr(a), start.index).sn;
+    let end = range.end;
+    while (end.n !== range.commonAncestor) {
+      const r = end.n.split(a => this.copyAttr(a), 0, end.offset);
+      end = new SPosition(r.sn.parent, r.sn.index + 1);
     }
-    if (endNode.typeNode === Node.TEXT_NODE) {
-      end = endNode.insert(SNode.elementNode('span'), a => this.copyAttr(a), 0, range.end.offset).sn;
+    return range.commonAncestor.split(a => this.copyAttr(a), start.offset, end.offset).sn;
+  }
+  private hasHeading(sn: SNode): boolean {
+    let res = false;
+    if (HtmlRules.isElementContent('Flow', sn)) {
+      let c = sn.firstChild;
+      while (c && !res) {
+        if (HtmlRules.isHeading(c)) {
+          res = true;
+        }
+        c = c.next;
+      }
     }
-    while (end.parent !== range.commonAncestor) {
-      end = endNode.insert(SNode.elementNode(end.nodeName, this.copyAttr(end.attr)), a => this.copyAttr(a), 0, end.index + 1).sn;
-    }
-    return range.commonAncestor.insert(SNode.elementNode('div'), a => this.copyAttr(a), start.index, end.index + 1).sn;
+    return res;
   }
   private validateHeading(): void {
-    const heads: SNode[] = [];
-    treeWalker(this.currentRoot, n => {
-      if (HtmlRules.isHeading(n)) {
-        heads.push(n);
+    let level = 1;
+    treeWalker(this.currentRoot, w => {
+      if (HtmlRules.isContent('Sectioning', w)) {
+        level++;
+      }
+      if (HtmlRules.isContent('Heading', w)) {
+        if (w.nodeName !== 'h' + Math.min(level, 6)) {
+          w.replace('h' + Math.min(level, 6));
+        }
+      }
+    }, w => {
+      if (HtmlRules.isContent('Sectioning', w)) {
+        level--;
       }
     });
-    for (const h of heads) {
-      let t = h; let i = 0;
-      while (t) {
-        t = t.hasParent(HtmlRules.contents.Heading);
-        i++;
-      }
-      h.replace(HtmlRules.contents.Heading[Math.min(i, HtmlRules.contents.Heading.length)]);
-    }
   }
   shiftLeft(): void {
     this.wrapEditing(() => {
       const w = this.range.focus.sNode;
       // there can be position in <section>, or <article>, or in <li>
-      const li: SNode = w.hasParent(['li', 'section', 'article']);
+      const filter = new FilterNode(['li', 'section', 'article']);
+      const li: SNode = w.hasParent(filter);
       if (li && li.nodeName === 'li') {
-        const oum = ['ol', 'ul', 'menu'];
+        const oum = new FilterNode(['ol', 'ul', 'menu']);
         // check if there is parent list
         const tList = li.parent;
-        if (tList || !oum.includes(tList.nodeName)) {
+        if (!tList || !oum.allowed(tList)) {
           throw new Error('Invalid html. Element <li> must have parent <ol>|<ul>|<menu>');
         }
         const pList: SNode = tList.hasParent(oum);
         if (pList) {
           li.move(pList, li.ancestorIndex(pList) + 1);
+          if (li.prev && li.prev.numRealChildren === 0) {
+            li.prev.delete();
+          }
           this.currentRange.focus = new SPosition(li.parent, li.index);
           this.currentRange.collapse();
         }
       } else if (li) {
         if (this.currentRange.collapsed) {
-          const inx = li.index;
-          while (li.children.length > 0) {
-            const ch = li.children.pop();
+          for (const ch of li.children) {
             if (HtmlRules.isHeading(ch)) {
               ch.replace('p');
             }
-            ch.move(li.parent, inx);
           }
-          this.currentRange.focus = new SPosition(li.parent, inx);
-          li.delete();
+          const f = li.unwrapChildren();
+          this.currentRange.focus = new SPosition(f.parent, f.index);
           this.currentRange.collapse();
         } else {
           throw new Error('This operation is not supported');
@@ -944,19 +873,15 @@ export class SimpleParser {
     this.wrapEditing(() => {
       const w = this.currentRange.focus.sNode;
       // there can be position in <section>, or <article>, or in <li>
-      const li: SNode = w.hasParent(['li', 'section', 'article']);
+      const filter = new FilterNode(['li', 'section', 'article']);
+      const li: SNode = w.hasParent(filter);
       if (li && li.nodeName === 'li') {
-        const oum = ['ol', 'ul', 'menu'];
+        const oum = new FilterNode(['ol', 'ul', 'menu']);
         const tList = li.parent;
-        if (tList || !oum.includes(tList.nodeName)) {
+        if (tList || !oum.allowed(tList)) {
           throw new Error('Invalid html. Element <li> must have parent <ol>|<ul>|<menu>');
         }
-        let l;
-        if (tList.nodeName === 'ol') {
-          l = SNode.elementNode('ol', this.copyAttr({}));
-        } else {
-          l = SNode.elementNode('ul', this.copyAttr({}));
-        }
+        const l = SNode.elementNode(tList.nodeName, this.copyAttr(tList.attr));
         tList.newChild(l, li.index);
         li.move(l, 0);
         this.currentRange.focus = new SPosition(li.parent, li.index);
@@ -973,40 +898,25 @@ export class SimpleParser {
   br(wbr: boolean, newParagraph: boolean, newSection: boolean): void {
     this.wrapEditing(() => {
       this.deleteRange();
-      const w = this.currentRange.focus.sNode;
-      if (w.typeNode === Node.TEXT_NODE) {
-        if (wbr) {
-          const nn = SNode.splitText(this.currentRange.focus, 'wbr', this.copyAttr({}), false);
-          this.currentRange.focus = new SPosition(nn.txtNode, 0);
-          this.currentRange.collapse('focus');
-        } else {
-          let nn;
-          if (HtmlRules.isHeading(w.parent) || newParagraph) {
-            nn = SNode.splitText(this.currentRange.focus, 'p', this.copyAttr({}));
-            nn.newNode.move(w.parent.parent, w.parent.index + 1);
-          } else if (newSection) {
-            nn = SNode.splitText(this.currentRange.focus, 'section', this.copyAttr({}));
-            nn.newNode.move(w.parent.parent, w.parent.index + 1);
-          } else {
-            nn = SNode.splitText(this.currentRange.focus, 'br', this.copyAttr({}));
-          }
-          this.currentRange.focus = new SPosition(nn.txtNode, 0);
-          this.currentRange.collapse();
-        }
-      } else if (!wbr) {
-        let newElement;
-        if (newParagraph || newSection) {
-          newElement = w.parent.newChild(SNode.elementNode(newParagraph ? 'p' : 'section', this.copyAttr({})), w.index + 1);
-          this.currentRange.focus = new SPosition(newElement, 0);
-        } else {
-          newElement = w.parent.newChild(SNode.elementNode('br', this.copyAttr({})), w.index + 1);
-          this.currentRange.focus = new SPosition(newElement.parent, newElement.index + 1);
-        }
-        this.currentRange.collapse();
+      const focus = this.currentRange.focus;
+      let nodeName = 'br';
+      if (wbr && focus.n.typeNode === Node.TEXT_NODE) {
+        nodeName = 'wbr';
+      } else if (HtmlRules.isHeading(focus.n.parent) || newParagraph) {
+        nodeName = 'p';
+      } else if (newSection) {
+        nodeName = 'section';
       }
+      const r = focus.n.split((a) => this.copyAttr(a), focus.offset, undefined, SNode.elementNode(nodeName, this.copyAttr()));
+      if (r.sn.numChildren > 0) {
+        this.currentRange.focus = new SPosition(r.sn, 0);
+      } else {
+        this.currentRange.focus = new SPosition(r.after, 0);
+      }
+      this.currentRange.collapse();
     });
   }
-  addElement(nodeName: string, attr: {[key: string]: string}): void {
+  addElement(nodeName: string, attr: Attributes): void {
     this.wrapEditing(() => {
       const insertParentModel = HtmlRules.elements[nodeName][0];
       const insertModel = HtmlRules.elements[nodeName][1];
@@ -1020,146 +930,142 @@ export class SimpleParser {
         throw new Error(`Doesn't support this element: "${nodeName}"`);
       } else if (insertParentModel.cnt.includes('Flow')) {
         // only parent that has content 'Flow'
-        const top = findWithParentCntFlow(this.currentRange.focus);
+        const top = HtmlRules.isElementContent('Flow', this.currentRange.commonAncestor)
+          || HtmlRules.isElementContent('Flow', this.currentRange.commonAncestor.parent) ?
+          this.currentRange.commonAncestor : findWithParentCntFlow(this.currentRange.focus);
         // if a new element has empty content, insert it in this position
         if (!insertModel) {
-          top.parent.newChild(sn, top.index + 1);
+          const insPos = (top === this.currentRange.commonAncestor) ?
+            new SPosition(this.currentRange.commonAncestor, this.currentRange.indexStart) :
+            new SPosition(top.parent, top.index);
+          this.deleteRange();
+          insPos.n.newChild(sn, insPos.offset);
+          this.currentRange.focus = this.nextDown(insPos);
+          this.currentRange.collapse();
         } else if (HtmlRules.isContent('Heading', sn)) {
           // if new element is heading and top is heading - nothing, there will auto-heading and only one per section is allowed. If section has heading, user cannot select heading from list
+          if (!this.hasHeading(top.parent)) {
+            const f = top.parent.newChild(SNode.elementNode('h1', this.copyAttr(attr)), 0);
+            if (focus.typeNode === Node.TEXT_NODE) {
+              focus.move(f, 0);
+            }
+            f.validate();
+            this.currentRange.focus = new SPosition(f.firstChild, 0);
+            this.currentRange.collapse();
+            this.validateHeading();
+          }
         } else {
-          // if range collapsed or in the same "top" node, ignore this range (we process only elements text range or range into one child node to the Flow content isn't interested here)
+          // if range collapsed or in the same "top" node, ignore this range (we process only elements, text range or range in one child node to the Flow content isn't interested here)
           // what parent elements can be here:
           // address, article, aside, blockquote, caption, dd, details, dialog, div, dt, fieldset, figcaption, figure, footer, header, li, section, td, th
           // what element needs FLow
           // address, article, aside, blockquote, details, dialog, div, dl, fieldset, figcaption, figure, footer, form, header, hr, menu, nav, ol, p, prem section, table, ul
           // this element is grouping as:
           // address, aside, blockquote, details, dialog, div, dl, fieldset, figcaption, figure, footer, form, header, hr, menu, nav, ol, p, prem section, table, ul
-
+          if (this.currentRange.isCoverFully(top)) {
+            if (top.parent) {
+              top.replace(nodeName, this.copyAttr(attr));
+            } else {
+              sn.children = top.children;
+              top.children = [];
+              top.newChild(sn, 0);
+            }
+          } else {
+            if (this.currentRange.commonAncestor === this.currentRoot) {
+              this.currentRoot.insert(sn, a => this.copyAttr(a), this.currentRange.indexStart, this.currentRange.indexEnd);
+            } else {
+              const div = this.extractRange(this.currentRange);
+              div.replace(nodeName, this.copyAttr(attr));
+            }
+          }
         }
       } else if (insertParentModel.cnt.includes('Phrasing')) {
         // any element can be parent
+        const filter = new FilterNode([{nodeName, attr}]);
         if (HtmlRules.isContent('PhrasingFormat', sn)) {
-          if (focus.hasParent([{nodeName, attr}])) {
-            this.revert(nodeName, this.currentRange, attr);
+          if (focus.hasParent(filter)) {
+            this.unwrapPhrasingFormat(nodeName, attr);
           } else {
-            this.format(nodeName, this.currentRange, attr);
+            this.wrapPhrasingFormat(nodeName, attr);
           }
         } else {
-          if (focus.hasParent([{nodeName, attr}])) {
+          if (focus.hasParent(filter)) {
             throw new Error(`There is already present this element: "${nodeName}"`);
           }
-          this.format(nodeName, this.currentRange, attr);
+          this.wrapPhrasingFormat(nodeName, attr);
         }
       }
     });
   }
-  private format(nodeName: string, range: SRange, attr?: {[key: string]: string}): void {
+  wrapPhrasingFormat(nodeName: string, attr?: Attributes): void {
     this.wrapEditing(() => {
-      if (range.collapsed) {
-        const focus = range.focus.sNode;
-        const p: SNodeElement = focus.hasParent([{nodeName, attr}]);
-        if (!p) {
-          let f;
-          if (focus.typeNode === Node.TEXT_NODE && !range.equal(SRange.fromNode(focus))) {
-            f = focus.insert(SNode.elementNode(nodeName, this.copyAttr(attr)), a => this.copyAttr(a), range.start.offset, range.end.offset).sn;
-          } else {
-            f = focus.wrapThis(SNode.elementNode(nodeName, this.copyAttr(attr)));
-          }
-          range.focus = new SPosition(f.parent, f.index);
-        }
+      const range = this.currentRange;
+      if (range.start.n === range.end.n) {
+        const r = range.commonAncestor.insert(SNode.elementNode(nodeName, this.copyAttr(attr)), (a) => this.copyAttr(a), range.start.offset, range.end.offset);
+        this.currentRange.focus = new SPosition(r.sn.firstChild, 0);
+        this.currentRange.collapse();
       } else {
-        const startNode = range.start.sNode;
-        const endNode = range.end.sNode;
-        if (startNode === endNode) {
-          const {sn} = startNode.insert(SNode.elementNode(nodeName, this.copyAttr(attr)), a => this.copyAttr(a), range.start.offset, range.end.offset);
-          range.focus = new SPosition(sn, sn.index);
-          range.collapse();
-        } else {
-          const en: SNode = endNode.hasParent([{nodeName, attr}]);
-          const st: SNode = startNode.hasParent([{nodeName, attr}]);
-          if (!st) {
-            if (range.start.offset === 0) {
-              startNode.wrapThis(SNode.elementNode(nodeName, this.copyAttr(attr)));
+        const s = range.start.n.insert(SNode.elementNode(nodeName, this.copyAttr(attr)), (a) => this.copyAttr(a), range.start.offset);
+        const e = range.end.n.insert(SNode.elementNode(nodeName, this.copyAttr(attr)), (a) => this.copyAttr(a), 0, range.end.offset);
+        const filter = new FilterNode([{nodeName, attr}]);
+        treeWalker(s.sn, (n) => n === e.sn, (n) => {
+          if (HtmlRules.isContent('Phrasing', n)) {
+            if (n.hasParent(filter)) {
+              if (filter.allowed(n)) {
+                n.unwrapChildren();
+              }
             } else {
-              startNode.insert(SNode.elementNode(nodeName, this.copyAttr(attr)), a => this.copyAttr(a), range.start.offset);
+              if (!filter.allowed(n)) {
+                n.wrapThis(SNode.elementNode(nodeName, this.copyAttr(attr)));
+              }
             }
           }
-          if (!en) {
-            if (range.end.offset === SRange.fromNode(endNode).end.offset) {
-              endNode.wrapThis(SNode.elementNode(nodeName, this.copyAttr(attr)));
-            } else {
-              endNode.insert(SNode.elementNode(nodeName, this.copyAttr(attr)), a => this.copyAttr(a), 0, range.end.offset);
-            }
-          }
-          treeWalker(startNode, n => {
-            if (n === endNode) {
-              return true;
-            }
-            if (n !== startNode && n.typeNode === Node.TEXT_NODE && !n.hasParent([{nodeName, attr}])) {
-              n.wrapThis(SNode.elementNode(nodeName, this.copyAttr(attr)));
-            }
-          });
-        }
+        });
+        this.currentRange.focus = new SPosition(e.sn.firstChild, 0);
+        this.currentRange.collapse();
       }
     });
   }
-  private revert(nodeName: string, range: SRange, attr?: {[key: string]: string}): void {
+  unwrapPhrasingFormat(nodeName: string, attr?: Attributes): void {
     this.wrapEditing(() => {
-      if (range.collapsed) {
-        const focus = range.focus.sNode;
-        const p: SNodeElement = focus.hasParent([{nodeName, attr}]);
-        if (p) {
-          const f = p.unwrapChildren();
-          p.delete();
-          if (f) {
-            range.focus = new SPosition(f.parent, f.index);
-            range.collapse();
-          }
+      const range = this.currentRange;
+      if (range.start.n === range.end.n) {
+        const r = range.commonAncestor.split((a) => this.copyAttr(a), range.start.offset, range.end.offset);
+        const l = r.sn.unwrapChildren();
+        if (l) {
+          this.currentRange.focus = new SPosition(l, l.index);
         }
+        this.currentRange.collapse();
       } else {
-        const en: SNode = range.end.sNode.hasParent([{nodeName, attr}]);
-        const st: SNode = range.start.sNode.hasParent([{nodeName, attr}]);
-        if (en === st) {
-          const chk = SRange.fromNode(st);
-          if (range.equal(chk)) {
-            const f = st.unwrapChildren();
-            st.delete();
-            if (f) {
-              range.focus = new SPosition(f.parent, f.index);
-              range.collapse();
-            }
-          } else {
-            const {sn} = st.insert(SNode.elementNode('div'), a => this.copyAttr(a), this.currentRange.start.offset, this.currentRange.end.offset);
-            st.pullChildren((a) => this.copyAttr(a), sn.index, sn.index + 1);
-            const f = sn.unwrapChildren();
-            sn.delete();
-            if (f) {
-              range.focus = new SPosition(f.parent, f.index);
-              range.collapse();
-            }
+        let from = this.currentRange.start.sNode;
+        let to = this.currentRange.end.sNode;
+        const filter = new FilterNode([{nodeName, attr}]);
+        if (range.start.sNode.hasParent(filter)) {
+          let start = this.range.start;
+          while (!filter.allowed(start.sNode)) {
+            const r = start.n.split((a) => this.copyAttr(a), start.offset);
+            start = new SPosition(r.sn.parent, r.sn.index);
           }
-        } else {
-          let r;
-          if (st) {
-            r = SRange.fromNode(st);
-            r.start.offset = range.start.sNode.ancestorIndex(st);
-            this.revert(nodeName, r, attr);
-          }
-          if (en) {
-            r = SRange.fromNode(en);
-            r.end.offset = range.end.sNode.ancestorIndex(en);
-            this.revert(nodeName, r, attr);
-          }
-          treeWalker(st, (n) => {
-            if (n === en) {
-              return true;
-            }
-            if (n.nodeName === nodeName) {
-              n.unwrapChildren();
-              n.delete();
-            }
-          });
+          from = start.sNode.unwrapChildren() || from;
         }
+        if (range.end.sNode.hasParent(filter)) {
+          let end = this.range.end;
+          while (!filter.allowed(end.sNode)) {
+            const r = end.n.split(a => this.copyAttr(a), 0, end.offset);
+            end = new SPosition(r.sn.parent, r.sn.index);
+          }
+          to = end.sNode.unwrapChildren() || to;
+        }
+        treeWalker(from, (n) => {
+          if (n === to) {
+            return true;
+          }
+          if (n.nodeName === nodeName && n.containAttributes(attr)) {
+            n.unwrapChildren();
+          }
+        });
+        this.currentRange.focus = new SPosition(to.parent, to.index);
+        this.currentRange.collapse();
       }
     });
   }
@@ -1167,17 +1073,15 @@ export class SimpleParser {
     this.wrapEditing(() => {
       const en = this.currentRange.end.sNode;
       const sn = this.currentRange.start.sNode;
-      const exit = this.range.collapsed ?
-        (w: SNode) => !HtmlRules.isElementParentContent('Phrasing', w) :
-        (w: SNode) => w === sn;
-      treeWalkerR(en, w => {
-        if (HtmlRules.isContent('PhrasingFormat', w) && w.numChildren === 0) {
-          w.delete();
+      treeWalker(sn, w => w === en, w => {
+        if (HtmlRules.isContent('PhrasingFormat', w)) {
+          if (w.numChildren === 0) {
+            w.delete();
+          } else {
+            w.unwrapChildren();
+          }
         }
-        if (HtmlRules.isContent('PhrasingFormat', w.parent)) {
-          w.move(w.parent.parent, w.parent.index + 1);
-        }
-      }, exit);
+      });
       this.currentRange.focus = new SPosition(en.parent, en.index);
       this.currentRange.collapse();
     });
@@ -1206,9 +1110,7 @@ export class SPosition {
   static findPosition(root: SNode, from: SPosition, criteria: (p: SNode) => boolean, down: boolean): SPosition {
     const iter = new SNodeIterator(root, SPosition.toSNode(from), !down);
     for (const sn of iter) {
-      console.log('next findPosition: ' + sn);
       if (criteria(sn)) {
-        console.log('exit findPosition: ' + sn);
         if (sn && sn.typeNode === Node.TEXT_NODE && sn.getText()) {
           return new SPosition(sn, down ? 0 : sn.getText().length);
         }
@@ -1261,7 +1163,6 @@ export class SRange {
     return this._focus;
   }
   set focus(sp: SPosition) {
-    console.log('focus:' + sp);
     this._focus = sp;
     this.fCommonAncestor(this.anchor, sp);
   }
@@ -1323,6 +1224,14 @@ export class SRange {
       }
     }
   }
+  isCoverFully(sn: SNode): boolean {
+    if (sn.typeNode === Node.TEXT_NODE) {
+      return sn === this.commonAncestor;
+    }
+    const st = this.start.sNode;
+    const en = this.end.sNode;
+    return st.ancestorIndex(sn) === 0 && en.ancestorIndex(sn) === sn.numChildren - 1;
+  }
   collapse(to: 'anchor' | 'focus' = 'focus'): void {
     if (to === 'anchor') {
       this._focus = this.anchor;
@@ -1333,6 +1242,9 @@ export class SRange {
   }
   equal(r: SRange): boolean {
     return this.start.equal(r.start);
+  }
+  selectNodes(filter: FilterNode, group: FilterNode): SNode[][] {
+    return null;
   }
   toString(): string {
     return 'anchor:' + this.anchor + ', focus:' + this._focus;

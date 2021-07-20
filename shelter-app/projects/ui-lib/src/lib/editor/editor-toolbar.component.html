@@ -1,79 +1,77 @@
 <div class="editor-toolbar-parent">
   <div class="editor-toolbar">
-    <label>
-      <span>Style</span>
-    <select [(ngModel)]="block" class="gm-style" (change)="tag(block)">
-      <option value="p"><span style="float: left;">Paragraph</span></option>
-      <option value="pre"><span style="font-family: monospace; float: left;">Pre</span></option>
-      <option value="h1"><span style="font-size: 2em; float: left;">Header 1</span></option>
-      <option value="h2"><span style="font-size: 1.5em; float: left;">Header 2</span></option>
-      <option value="h3"><span style="font-size: 1.17em; float: left;">Header 3</span></option>
-      <option value="h4"><span style="float: left;">Header 4</span></option>
-      <option value="h5"><span style="font-size: 0.83em; float: left;">Header 5</span></option>
-      <option value="h6"><span style="font-size: 0.67em; float: left;">Header 6</span></option>
-      <option value="blockquote">Blockquote</option>
-    </select>
-    </label>
-    <div class="editor-multiple-buttons">
-      <button class="gm-format_bold" [ngClass]="{'editor-button-active': bTag}" (click)="tag('b')" title="Bold">
-      </button>
-      <button class="gm-format_underline" [ngClass]="{'editor-button-active': uTag}" (click)="tag('u')" title="Underline">
-      </button>
-      <button class="gm-format_italic" [ngClass]="{'editor-button-active': iTag}" (click)="tag('i')" title="Italic">
-      </button>
-    </div>
-    <label>
-      <span>Font size</span>
-      <select [(ngModel)]="fSize" (change)="tag('span', {'font-size': fSize})">
-        <option value="smaller"><span style="font-size: smaller; float: left;">Smaller</span></option>
-        <option value="small"><span style="font-size: small; float: left;">Small</span></option>
-        <option value="medium"><span style="font-size: medium; float: left;">Medium</span></option>
-        <option value="larger"><span style="font-size: larger; float: left;">Larger</span></option>
-        <option value="large"><span style="font-size: large; float: left;">Large</span></option>
+    <fieldset>
+      <legend>Structure</legend>
+      <label for="toolbar-style">Style</label>
+      <select id="toolbar-style" [(ngModel)]="block" class="gm-style" (change)="tag(block)">
+        <option value="p">Paragraph</option>
+        <option value="pre">Pre</option>
+        <option value="h1">Header 1</option>
+        <option value="h2">Header 2</option>
+        <option value="h3">Header 3</option>
+        <option value="h4">Header 4</option>
+        <option value="h5">Header 5</option>
+        <option value="h6">Header 6</option>
+        <option value="blockquote">Blockquote</option>
       </select>
-    </label>
-    <div class="editor-multiple-buttons">
-      <button class="gm-subscript" (click)="tag('sub')" title="subscript">
-      </button>
-      <button class="gm-superscript" (click)="tag('sup')" title="superscript">
-      </button>
-    </div>
-    <div class="editor-multiple-buttons">
-      <button class="gm-format_list_bulleted" (click)="transformToList()" title="Bullet list">
-      </button>
-      <button class="gm-format_list_numbered" (click)="transformToList(true)" title="Number list">
-      </button>
-    </div>
+      <div class="editor-multiple-buttons">
+        <button class="gm-format_list_bulleted" (click)="transformToList()" title="Bullet list">
+        </button>
+        <button class="gm-format_list_numbered" (click)="transformToList(true)" title="Number list">
+        </button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Format</legend>
+      <div class="editor-multiple-buttons">
+        <button class="gm-format_bold" [ngClass]="{'editor-button-active': bTag}" (click)="tag('b')" title="Bold">
+        </button>
+        <button class="gm-format_underline" [ngClass]="{'editor-button-active': uTag}" (click)="tag('u')" title="Underline">
+        </button>
+        <button class="gm-format_italic" [ngClass]="{'editor-button-active': iTag}" (click)="tag('i')" title="Italic">
+        </button>
+      </div>
+      <label>
+        <span>Font size</span>
+        <select [(ngModel)]="fSize" (change)="tag('span', {'font-size': fSize})">
+          <option value="smaller"><span style="font-size: smaller; float: left;">Smaller</span></option>
+          <option value="small"><span style="font-size: small; float: left;">Small</span></option>
+          <option value="medium"><span style="font-size: medium; float: left;">Medium</span></option>
+          <option value="larger"><span style="font-size: larger; float: left;">Larger</span></option>
+          <option value="large"><span style="font-size: large; float: left;">Large</span></option>
+        </select>
+      </label>
+      <div class="editor-multiple-buttons">
+        <button class="gm-subscript" (click)="tag('sub')" title="subscript">
+        </button>
+        <button class="gm-superscript" (click)="tag('sup')" title="superscript">
+        </button>
+      </div>
 
-    <div class="editor-multiple-buttons">
-      <button class="gm-format_align_left" [ngClass]="[alignPressed === 1 ? 'editor-button-active' : '']" (click)="align('left')" title="Align left">
+      <div class="editor-multiple-buttons">
+        <button class="gm-format_align_left" [ngClass]="[alignPressed === 1 ? 'editor-button-active' : '']" (click)="align('left')" title="Align left">
+        </button>
+        <button class="gm-format_align_center" [ngClass]="[alignPressed === 2 ? 'editor-button-active' : '']" (click)="align('center')" title="Align center">
+        </button>
+        <button class="gm-format_align_right" [ngClass]="[alignPressed === 3 ? 'editor-button-active' : '']" (click)="align('right')" title="Align right">
+        </button>
+        <button class="gm-format_align_justify" [ngClass]="[alignPressed === 4 ? 'editor-button-active' : '']" (click)="align('justify')" title="Justify">
+        </button>
+        <button class="gm-format_clear" (click)="clearFormatting()" title="Clear formatting">
+        </button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Tools</legend>
+      <button class="editor-single-button" (click)="insertPlugin()" title="Insert plugin">
+        <img class="editor-icon-img" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjUxMnB0IiB2aWV3Qm94PSItOTYgMCA1MTIgNTEyIiB3aWR0aD0iNTEycHQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTE2MCA1MTJjLTg4LjIzNDM3NSAwLTE2MC03MS43NjU2MjUtMTYwLTE2MHYtMjI0YzAtMTEuNzk2ODc1IDkuNTU4NTk0LTIxLjMzMjAzMSAyMS4zMzIwMzEtMjEuMzMyMDMxIDExLjc3NzM0NCAwIDIxLjMzNTkzOCA5LjUzNTE1NiAyMS4zMzU5MzggMjEuMzMyMDMxdjIyNGMwIDY0LjY4MzU5NCA1Mi42Mjg5MDYgMTE3LjMzMjAzMSAxMTcuMzMyMDMxIDExNy4zMzIwMzFzMTE3LjMzMjAzMS01Mi42NDg0MzcgMTE3LjMzMjAzMS0xMTcuMzMyMDMxdi0yMzQuNjY3OTY5YzAtNDEuMTcxODc1LTMzLjQ5MjE4Ny03NC42NjQwNjItNzQuNjY0MDYyLTc0LjY2NDA2Mi00MS4xNzU3ODEgMC03NC42Njc5NjkgMzMuNDkyMTg3LTc0LjY2Nzk2OSA3NC42NjQwNjJ2MjEzLjMzNTkzOGMwIDE3LjY0MDYyNSAxNC4zNTU0NjkgMzIgMzIgMzJzMzItMTQuMzU5Mzc1IDMyLTMydi0yMDIuNjY3OTY5YzAtMTEuNzk2ODc1IDkuNTU4NTk0LTIxLjMzMjAzMSAyMS4zMzIwMzEtMjEuMzMyMDMxIDExLjc3NzM0NCAwIDIxLjMzNTkzOCA5LjUzNTE1NiAyMS4zMzU5MzggMjEuMzMyMDMxdjIwMi42Njc5NjljMCA0MS4xNzE4NzUtMzMuNDk2MDk0IDc0LjY2NDA2Mi03NC42Njc5NjkgNzQuNjY0MDYycy03NC42Njc5NjktMzMuNDkyMTg3LTc0LjY2Nzk2OS03NC42NjQwNjJ2LTIxMy4zMzU5MzhjMC02NC42Nzk2ODcgNTIuNjI4OTA3LTExNy4zMzIwMzEgMTE3LjMzNTkzOC0xMTcuMzMyMDMxIDY0LjcwMzEyNSAwIDExNy4zMzIwMzEgNTIuNjUyMzQ0IDExNy4zMzIwMzEgMTE3LjMzMjAzMXYyMzQuNjY3OTY5YzAgODguMjM0Mzc1LTcxLjc2NTYyNSAxNjAtMTYwIDE2MHptMCAwIi8+PC9zdmc+" />
       </button>
-      <button class="gm-format_align_center" [ngClass]="[alignPressed === 2 ? 'editor-button-active' : '']" (click)="align('center')" title="Align center">
-      </button>
-      <button class="gm-format_align_right" [ngClass]="[alignPressed === 3 ? 'editor-button-active' : '']" (click)="align('right')" title="Align right">
-      </button>
-      <button class="gm-format_align_justify" [ngClass]="[alignPressed === 4 ? 'editor-button-active' : '']" (click)="align('justify')" title="Justify">
-      </button>
-      <button class="gm-format_clear" (click)="clearFormatting()" title="Clear formatting">
-      </button>
-    </div>
 
-    <div class="editor-multiple-buttons">
-      <input type="number" class="editor-table-input" placeholder="Cells" #cells min="1" value="1">
-      <input type="number" class="editor-table-input" placeholder="Rows" #rows min="1" value="1">
-      <button class="editor-single-button" (click)="insertTable(cells.value * 1, rows.value * 1)" title="Insert table">
-        <img class="editor-icon-img" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjUxMnB0IiB2aWV3Qm94PSIwIC0yMSA1MTIgNTEyIiB3aWR0aD0iNTEycHQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTQ0OCAwaC0zODRjLTM1LjI4NTE1NiAwLTY0IDI4LjcxNDg0NC02NCA2NHYzNDEuMzMyMDMxYzAgMzUuMjg1MTU3IDI4LjcxNDg0NCA2NCA2NCA2NGgzODRjMzUuMjg1MTU2IDAgNjQtMjguNzE0ODQzIDY0LTY0di0zNDEuMzMyMDMxYzAtMzUuMjg1MTU2LTI4LjcxNDg0NC02NC02NC02NHptLTI4OCAxNDkuMzMyMDMxaDc0LjY2Nzk2OXY2NGgtNzQuNjY3OTY5em0tNDIuNjY3OTY5IDY0aC03NC42NjQwNjJ2LTY0aDc0LjY2NDA2MnptMTYwLTY0aDc0LjY2Nzk2OXY2NGgtNzQuNjY3OTY5em0xMTcuMzM1OTM4IDBoNzQuNjY0MDYydjY0aC03NC42NjQwNjJ6bS0zNTIgMTA2LjY2Nzk2OWg3NC42NjQwNjJ2NjRoLTc0LjY2NDA2MnptMTE3LjMzMjAzMSAwaDc0LjY2Nzk2OXY2NGgtNzQuNjY3OTY5em03NC42Njc5NjkgMTA2LjY2Nzk2OXY2NGgtNzQuNjY3OTY5di02NHptNDIuNjY0MDYyIDBoNzQuNjY3OTY5djY0aC03NC42Njc5Njl6bTAtNDIuNjY3OTY5di02NGg3NC42Njc5Njl2NjR6bTExNy4zMzU5MzgtNjRoNzQuNjY0MDYydjY0aC03NC42NjQwNjJ6bS0zNTIgMTQ5LjMzMjAzMXYtNDIuNjY0MDYyaDc0LjY2NDA2MnY2NGgtNTMuMzMyMDMxYy0xMS43NTM5MDYgMC0yMS4zMzIwMzEtOS41NzgxMjUtMjEuMzMyMDMxLTIxLjMzNTkzOHptNDA1LjMzMjAzMSAyMS4zMzU5MzhoLTUzLjMzMjAzMXYtNjRoNzQuNjY0MDYydjQyLjY2NDA2MmMwIDExLjc1NzgxMy05LjU3ODEyNSAyMS4zMzU5MzgtMjEuMzMyMDMxIDIxLjMzNTkzOHptMCAwIi8+PC9zdmc+" />
-      </button>
-    </div>
-
-    <button class="editor-single-button" (click)="insertPlugin()" title="Insert plugin">
-      <img class="editor-icon-img" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjUxMnB0IiB2aWV3Qm94PSItOTYgMCA1MTIgNTEyIiB3aWR0aD0iNTEycHQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTE2MCA1MTJjLTg4LjIzNDM3NSAwLTE2MC03MS43NjU2MjUtMTYwLTE2MHYtMjI0YzAtMTEuNzk2ODc1IDkuNTU4NTk0LTIxLjMzMjAzMSAyMS4zMzIwMzEtMjEuMzMyMDMxIDExLjc3NzM0NCAwIDIxLjMzNTkzOCA5LjUzNTE1NiAyMS4zMzU5MzggMjEuMzMyMDMxdjIyNGMwIDY0LjY4MzU5NCA1Mi42Mjg5MDYgMTE3LjMzMjAzMSAxMTcuMzMyMDMxIDExNy4zMzIwMzFzMTE3LjMzMjAzMS01Mi42NDg0MzcgMTE3LjMzMjAzMS0xMTcuMzMyMDMxdi0yMzQuNjY3OTY5YzAtNDEuMTcxODc1LTMzLjQ5MjE4Ny03NC42NjQwNjItNzQuNjY0MDYyLTc0LjY2NDA2Mi00MS4xNzU3ODEgMC03NC42Njc5NjkgMzMuNDkyMTg3LTc0LjY2Nzk2OSA3NC42NjQwNjJ2MjEzLjMzNTkzOGMwIDE3LjY0MDYyNSAxNC4zNTU0NjkgMzIgMzIgMzJzMzItMTQuMzU5Mzc1IDMyLTMydi0yMDIuNjY3OTY5YzAtMTEuNzk2ODc1IDkuNTU4NTk0LTIxLjMzMjAzMSAyMS4zMzIwMzEtMjEuMzMyMDMxIDExLjc3NzM0NCAwIDIxLjMzNTkzOCA5LjUzNTE1NiAyMS4zMzU5MzggMjEuMzMyMDMxdjIwMi42Njc5NjljMCA0MS4xNzE4NzUtMzMuNDk2MDk0IDc0LjY2NDA2Mi03NC42Njc5NjkgNzQuNjY0MDYycy03NC42Njc5NjktMzMuNDkyMTg3LTc0LjY2Nzk2OS03NC42NjQwNjJ2LTIxMy4zMzU5MzhjMC02NC42Nzk2ODcgNTIuNjI4OTA3LTExNy4zMzIwMzEgMTE3LjMzNTkzOC0xMTcuMzMyMDMxIDY0LjcwMzEyNSAwIDExNy4zMzIwMzEgNTIuNjUyMzQ0IDExNy4zMzIwMzEgMTE3LjMzMjAzMXYyMzQuNjY3OTY5YzAgODguMjM0Mzc1LTcxLjc2NTYyNSAxNjAtMTYwIDE2MHptMCAwIi8+PC9zdmc+" />
-    </button>
-
-    <button class="gm-web" (click)="showDesigner()" title="Show designer"></button>
-    <button class="gm-code" (click)="showSource()" title="Show source"></button>
-    <button class="gm-help" (click)="showHelp()" title="Help"></button>
-    <button class="gm-multiple_stop" (click)="switchMove()" title="Move by text"></button>
-    <button class="gm-badge" (click)="showPlugins()" title="Show plugins"></button>
+      <button class="gm-web" (click)="showDesigner()" title="Show designer"></button>
+      <button class="gm-code" (click)="showSource()" title="Show source"></button>
+      <button class="gm-help" (click)="showHelp()" title="Help"></button>
+      <button class="gm-multiple_stop" (click)="switchMove()" title="Move by text"></button>
+      <button class="gm-badge" (click)="showPlugins()" title="Show plugins"></button>
+    </fieldset>
   </div>
 </div>

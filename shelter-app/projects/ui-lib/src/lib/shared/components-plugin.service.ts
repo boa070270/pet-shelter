@@ -3,6 +3,7 @@ import {SwaggerObject} from './swagger-object';
 import {TitleType} from './language';
 import {createCustomElement} from '@angular/elements';
 import {HtmlElementContent, HtmlRules} from './html-rules';
+import {Attributes} from "./html-helper";
 
 export interface PluginDescription {
   selectorName?: string; // this field is set by system
@@ -10,7 +11,7 @@ export interface PluginDescription {
   caption?: string | TitleType[]; // to show on plugin panel
   description?: string | TitleType[]; // to show on plugin panel
   tag?: string; // if this is present this tag would be published by ui-element module
-  attr?: {[key: string]: string}; // the default attributes that will be added to on drag preview and in editor
+  attr?: Attributes; // the default attributes that will be added to on drag preview and in editor
   elementContent?: HtmlElementContent[]; // if absent or empty, this element belong Flow content and can have children from Flow content
 }
 export interface ComponentPlugin {

@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {BaseComponent} from './base.component';
-import {TitleType} from '../shared';
+import {Attributes, TitleType} from '../shared';
 
 export const CHECKBOX_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -24,7 +24,7 @@ export interface CheckboxParameters {
   direction?: CheckboxDirection;
   cols?: number;
   options?: any[];
-  titles?: {[key: string]: string} | TitleType[];
+  titles?: Attributes | TitleType[];
   optionAsTitle?: boolean;
   tooltips?: string[] | TitleType[];
   indeterminate?: boolean;
@@ -74,10 +74,10 @@ export class CheckboxControlComponent extends BaseComponent implements OnInit, O
     return this.extraParams.options;
   }
   @Input()
-  set titles(p: {[key: string]: string} | TitleType[]) {
+  set titles(p: Attributes | TitleType[]) {
     this.extraParams.titles = p;
   }
-  get titles(): {[key: string]: string} | TitleType[] {
+  get titles(): Attributes | TitleType[] {
     return this.extraParams.titles || null;
   }
   @Input()
@@ -102,8 +102,8 @@ export class CheckboxControlComponent extends BaseComponent implements OnInit, O
     return this.extraParams.indeterminate || null;
   }
   values: {[key: string]: any} = {};
-  pTitles: {[id: string]: string};
-  tips: {[id: string]: string};
+  pTitles: Attributes;
+  tips: Attributes;
 
   constructor(protected _view: ViewContainerRef,
               protected changeDetect: ChangeDetectorRef) {

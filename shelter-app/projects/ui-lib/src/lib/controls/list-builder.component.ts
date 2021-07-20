@@ -14,7 +14,7 @@ import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {coerceArray} from '@angular/cdk/coercion';
 import {ListSelectComponent} from './list-select.component';
 import {BaseComponent} from './base.component';
-import {I18N_CFG, TitleType} from '../shared';
+import {Attributes, I18N_CFG, TitleType} from '../shared';
 import {CheckboxParameters} from './checkbox-control.component';
 
 export const LIST_BUILDER_VALUE_ACCESSOR: any = {
@@ -69,10 +69,10 @@ export class ListBuilderComponent extends BaseComponent implements OnInit, OnCha
     return this.extraParams.options;
   }
   @Input()
-  set titles(p: {[key: string]: string} | TitleType[]) {
+  set titles(p: Attributes | TitleType[]) {
     this.extraParams.titles = p;
   }
-  get titles(): {[key: string]: string} | TitleType[] {
+  get titles(): Attributes | TitleType[] {
     return this.extraParams.titles || null;
   }
   @Input()

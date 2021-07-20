@@ -9,7 +9,7 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import {ExtendedData, I18N_CFG, SwaggerNative, SwaggerObject, swaggerUI, TitleType} from '../shared';
+import {Attributes, ExtendedData, I18N_CFG, SwaggerNative, SwaggerObject, swaggerUI, TitleType} from '../shared';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {BaseComponent} from './base.component';
 import {CheckboxParameters} from './checkbox-control.component';
@@ -84,10 +84,10 @@ export class EditableListComponent extends BaseComponent implements OnInit, OnCh
     return this.extraParams.options;
   }
   @Input()
-  set titles(p: {[key: string]: string} | TitleType[]) {
+  set titles(p: Attributes | TitleType[]) {
     this.extraParams.titles = p;
   }
-  get titles(): {[key: string]: string} | TitleType[] {
+  get titles(): Attributes | TitleType[] {
     return this.extraParams.titles || null;
   }
   @Input()

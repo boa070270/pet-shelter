@@ -1,5 +1,17 @@
 // tslint:disable:max-line-length
-
+export type Attributes = {[key: string]: string};
+export class FilterNode {
+  constructor(public nodeNames: Array<string | {nodeName: string, attr: Attributes}>) {
+  }
+  allowed(nw: NodeWrapper): boolean {
+    return !!this.nodeNames.find(v => {
+      if (typeof v === 'string') {
+        return v === nw.nodeName;
+      }
+      return v.nodeName === nw.nodeName && nw.containAttributes(v.attr);
+    });
+  }
+}
 export abstract class NodeWrapper {
   get errors(): string[] {
     return this._errors;
@@ -18,8 +30,8 @@ export abstract class NodeWrapper {
   abstract prev: NodeWrapper;
   // 0, undefined, null - without change, -1 - deleted, 1 - modified, 2 - new, 3 - attr modified
   protected abstract state: number;
-  private readonly _errors = [];
-  private readonly _warnings = [];
+  private _errors = [];
+  private _warnings = [];
   static isDescOf(n: NodeWrapper, parent: string): boolean {
     while (n.nodeName !== 'body') {
       if (n.nodeName === parent) {
@@ -28,6 +40,10 @@ export abstract class NodeWrapper {
       n = n.parent;
     }
     return false;
+  }
+  protected clearError(): void {
+    this._errors = [];
+    this._warnings = [];
   }
   setError(s: string): void {
     this._errors.push(s);
@@ -39,7 +55,7 @@ export abstract class NodeWrapper {
   abstract equal(n: NodeWrapper): boolean;
   abstract addChild(n: NodeWrapper): void;
   abstract getText(): string;
-  containAttributes(attr?: {[key: string]: string}): boolean {
+  containAttributes(attr?: Attributes): boolean {
     let res = true;
     if (attr) {
       Object.keys(attr).forEach(k => {
@@ -94,15 +110,10 @@ export abstract class NodeWrapper {
     });
     return next;
   }
-  hasParent<T extends NodeWrapper>(nodeNames: Array<string | {nodeName: string, attr: {[key: string]: string}}>): T {
+  hasParent<T extends NodeWrapper>(filter: FilterNode): T {
     let p = this.parent;
     while (p) {
-      if (nodeNames.find(v => {
-        if (typeof v === 'string') {
-          return v === p.nodeName;
-        }
-        return v.nodeName === p.nodeName && p.containAttributes(v.attr);
-      })) {
+      if (filter.allowed(p)) {
         return p as T;
       }
       p = p.parent;
@@ -116,21 +127,21 @@ export abstract class NodeWrapper {
     }
     return w ? w.index : -1;
   }
+  isDescendant(parent: NodeWrapper): boolean {
+    let c: NodeWrapper = this;
+    while (c !== null) {
+      if (c === parent) {
+        return true;
+      }
+      c = c.parent;
+    }
+    return false;
+  }
   abstract validate(correct?: boolean): void;
   toString(): string {
     return `${this.nodeName}, parent:${this.parent ? this.parent.nodeName : 'null'}, index:${this.index}`;
   }
 }
-export function isDescendant(p: NodeWrapper, c: NodeWrapper): boolean {
-  while (c !== null) {
-    if (c === p) {
-      return true;
-    }
-    c = c.parent;
-  }
-  return false;
-}
-
 export function treeWalkerR<T extends NodeWrapper>(from: T, enter: (n: T) => void = () => null, exit: (s: T) => any = () => null, root?: T): void {
   let r = from;
   while (r) {

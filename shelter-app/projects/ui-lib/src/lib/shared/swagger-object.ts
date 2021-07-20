@@ -1,4 +1,4 @@
-import {TitleType} from './index';
+import {Attributes, TitleType} from './index';
 import {AsyncValidatorFn, FormGroup, ValidatorFn} from '@angular/forms';
 
 /**
@@ -34,7 +34,7 @@ export interface NativeConstrictions extends BaseConstrictions {
   writeOnly?: boolean; // Maybe will be removed, has not any sense on client-side
   nullable?: boolean; // TODO Make a decision how to use it (maybe always required if true)
   enum?: number[] | string[];
-  enumDescriptions?: {[key: string]: string} | TitleType[];
+  enumDescriptions?: Attributes | TitleType[];
   enumTooltips?: string[] | TitleType[];
   enumMulti?: boolean; // TODO This can be used in case swagger property has type array and simple type as item (with option uniqueItems)
   default?: boolean | number | string;

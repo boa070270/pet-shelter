@@ -2,6 +2,7 @@ import {CollectionViewer, DataSource, ListRange} from '@angular/cdk/collections'
 import {BehaviorSubject, ConnectableObservable, merge, Observable, of, Subject, Subscription, zip} from 'rxjs';
 import {map, publishLast, reduce, takeLast, tap} from 'rxjs/operators';
 import {equals as eqLstRange, sortOut} from './paging';
+import {Attributes} from "./html-helper";
 
 export interface IOrder {
   p: string;
@@ -14,8 +15,8 @@ export interface IOrder {
  * external is used to give parameters to the external query
  */
 export interface IFilter {
-  internal?: {[key: string]: string};
-  external?: {[key: string]: string};
+  internal?: Attributes;
+  external?: Attributes;
 }
 export function simpleCompare(p1: any, p2: any): number {
   if (p1 === p2 || typeof p1 !== typeof p2 || typeof p1 === 'function' || typeof p2 === 'function') {
