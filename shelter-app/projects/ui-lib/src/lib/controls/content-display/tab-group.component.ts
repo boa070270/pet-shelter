@@ -1,18 +1,21 @@
 import {
-  AfterViewInit, ChangeDetectorRef,
+  AfterViewInit,
+  ChangeDetectorRef,
   Component,
   Directive,
   ElementRef,
-  HostBinding, Inject,
-  Input, OnChanges,
-  OnInit, SimpleChanges,
+  HostBinding,
+  Inject,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import {AbstractIteratorComponent, IteratorDirective} from "../abstract-iterator.component";
-import {AbstractComponent} from "../abstract.component";
-import {ROOT_PAGE_DATA, RootPageService, RootPageServiceImpl} from "../../shared";
-import {deepCloneNode} from "../../editor/clone-node";
+import {AbstractIteratorComponent, IteratorDirective} from '../abstract-iterator.component';
+import {AbstractComponent} from '../abstract.component';
+import {deepCloneNode, ROOT_PAGE_DATA, RootPageService} from '../../shared';
 
 export interface TabType {
   label: string;

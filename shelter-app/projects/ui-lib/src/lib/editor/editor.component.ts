@@ -17,7 +17,6 @@ import {
   ComponentsPluginService,
   ExtendedData,
   HtmlRules,
-  HtmlWrapper,
   LibNode,
   SimpleParser,
   SNode,
@@ -56,7 +55,11 @@ interface PasteData {
   type: string; // mime type
   data: any;
 }
-
+interface PagePluginData {
+  id: number;
+  selectorName: string;
+  data: any;
+}
 @Component({
   selector: 'lib-editor',
   templateUrl: './editor.component.html',
@@ -65,6 +68,7 @@ interface PasteData {
 export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   private _source = DEF_TEMPLATE;
   private _initParser = false;
+  private pagePlugins: Array<PagePluginData> = [];
   @Input()
   set source(s: string) {
     this._source = s;
@@ -152,6 +156,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           this.addElement(e.opt.tag, e.opt.attr);
           break;
         case 'toList':
+          this.parser.insList(e.opt.numberList ? 'ol' : 'ul', e.opt.attr);
           break;
         case 'align':
           break;
@@ -254,6 +259,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       // console.log('drag over range:', r);
       window.getSelection().removeAllRanges();
       window.getSelection().addRange(r);
+      window.getSelection().collapseToStart();
       this.parser.initFromSelection(window.getSelection());
     }
     if (this.parser.range) {
@@ -339,11 +345,20 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   drop(e: DragEvent): void {
     console.log('drop', e);
     e.preventDefault();
-    this.processPasteData({type: 'text/plain', data: e.dataTransfer.getData('text/plain')});
+    this.processPasteData({type: 'plugin/json', data: e.dataTransfer.getData('plugin/json')});
   }
   onPaste(event: ClipboardEvent): void {
     console.log('onPaste', event);
     event.preventDefault();
+  }
+  private nextPluginNumber(): number {
+    let max = 0;
+    this.pagePlugins.forEach(p => {
+      if (max < p.id) {
+        max = p.id;
+      }
+    });
+    return ++max;
   }
   private paste(dataTransfer: Observable<DataTransfer>): Observable<PasteData> {
     return new Observable<any>(subscriber => {
@@ -381,7 +396,27 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
   private processPasteData(pd: PasteData): void {
-      if (pd.type === 'text/plain') { // TODO process files info and plugins
+      if (pd.type === 'plugin/json') {
+        const plugin = this.pluginService.getPlugin(pd.data);
+        const data: PagePluginData = {id: this.nextPluginNumber(), selectorName: plugin.description.selectorName, data: {}};
+        if (plugin.schema) {
+          const desc = plugin.description || {caption: 'Plugin'};
+          const extData = ExtendedData.create({}, false, plugin.schema, 'ok_cancel',
+            typeof desc.caption === 'string' ? desc.caption : this.systemLang.getTitle(desc.caption),
+            'gm-paste', 'info-color', null);
+          const ref = this.dialogService.infoExtDialog(extData, true);
+          ref.afterClosed().subscribe(v => {
+            if (typeof v === 'object' && v !== null) {
+              data.data = v;
+              this.parser.addElement(plugin.description.tag, plugin.description.attr);
+              this.pagePlugins.push(data);
+            }
+          });
+        } else {
+          this.parser.addElement(plugin.description.tag, plugin.description.attr);
+          this.pagePlugins.push(data);
+        }
+      } else if (pd.type === 'text/plain') { // TODO process files info and plugins
         this.parser.insString(pd.data);
       } else if (pd.type === 'text/html') {
         this.parser.insHTML(this.sanitizer.sanitize(SecurityContext.HTML, pd.data));

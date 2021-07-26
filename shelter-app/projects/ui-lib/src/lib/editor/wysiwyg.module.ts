@@ -8,7 +8,6 @@ import {ControlsModule} from '../controls';
 import { EditorToolbarComponent } from './editor-toolbar.component';
 import { PluginsPanelComponent } from './plugins-panel.component';
 import {DragDropModule} from '@angular/cdk/drag-drop';
-import { ExtCdkDragDirective, WhateverComponent } from './ext-cdk-drag.directive';
 
 @NgModule({
   declarations: [
@@ -16,8 +15,6 @@ import { ExtCdkDragDirective, WhateverComponent } from './ext-cdk-drag.directive
       EditorPluginComponent,
       EditorToolbarComponent,
       PluginsPanelComponent,
-      ExtCdkDragDirective,
-      WhateverComponent
   ],
     imports: [
         CommonModule,
@@ -35,8 +32,6 @@ import { ExtCdkDragDirective, WhateverComponent } from './ext-cdk-drag.directive
     EditorComponent,
     EditorToolbarComponent,
     PluginsPanelComponent,
-    ExtCdkDragDirective,
-    WhateverComponent
   ]
 })
 export class WysiwygModule { }

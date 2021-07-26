@@ -14,7 +14,7 @@ import {ComponentsPluginService, PluginDescription} from '../shared';
 import {DIALOG_DATA, DialogRef} from '../dialog-service';
 import {CdkDrag, CdkDragStart, CdkDropList, DragDrop, DragRef} from '@angular/cdk/drag-drop';
 import {DOCUMENT} from '@angular/common';
-import {deepCloneNode} from './clone-node';
+import {deepCloneNode} from '../shared/clone-node';
 
 @Component({
   selector: 'lib-plugins-panel',
@@ -67,8 +67,8 @@ export class PluginsPanelComponent implements OnInit, AfterViewInit {
   }
 
   dragStart(e: DragEvent, selectorName: string): void {
-    const plugin = this.componentsPlugin.getPlugin(selectorName);
-    e.dataTransfer.setData('text/plain', JSON.stringify(plugin));
+    // const plugin = this.componentsPlugin.getPlugin(selectorName);
+    e.dataTransfer.setData('plugin/json', selectorName);
     console.log('PluginsPanelComponent.dragStart', e.dataTransfer);
     const preview = this._createPreviewElement(selectorName, e);
     // e.dataTransfer.setDragImage(preview, 0, 0);

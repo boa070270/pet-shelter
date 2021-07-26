@@ -790,7 +790,16 @@ export class SimpleParser {
       if (errors.length > 0) {
         throw new Error('This is invalid html: ' + errors);
       }
-      this.deleteRange();
+      if (root.children.length > 0) {
+        this.deleteRange();
+        const sn = root.children[0];
+        this.insSNodes(root.children);
+        this.currentRange.focus = new SPosition(sn, sn.index);
+      }
+    });
+  }
+  insSNodes(nodes: Array<SNode>): void {
+    this.wrapEditing(() => {
       const f = this.currentRange.focus.sNode;
       let ixn = f.index;
       if (f.typeNode === Node.TEXT_NODE && f.getText()) {
@@ -798,17 +807,40 @@ export class SimpleParser {
       }
       const cnt = HtmlRules.contentOfNode(f.parent);
       if (!cnt.cnt.includes('Flow')) {
-        for (const ch of root.children) {
+        for (const ch of nodes) {
           if (HtmlRules.isElementParentContent('Flow', ch)) {
             throw new Error('Cannot be placed here');
           }
         }
       }
-      for (const ch of root.children) {
+      for (const ch of nodes) {
         f.parent.newChild(ch, ixn++);
       }
     });
   }
+  insList(tag: 'ul' | 'ol', attr?: Attributes): void {
+    this.wrapEditing(() => {
+      // if (this.currentRange.collapsed) {
+        const list = SNode.elementNode(tag, attr);
+        const f = list.addChild(SNode.elementNode('li'));
+        f.validate();
+        this.insSNodes([list]);
+        this.currentRange.focus = new SPosition(f.firstChild, 0);
+      // } else {
+      //   this.convertToList(tag, attr);
+      // }
+    });
+  }
+  // convertToList(tag: 'ul' | 'ol', attr?: Attributes): void {
+  //   this.wrapEditing(() => {
+  //     const p = this.extractRange(this.currentRange);
+  //     const list = SNode.elementNode(tag, attr);
+  //     const f = list.addChild(SNode.elementNode('li'));
+  //     if (HtmlRules.isContent('Sectioning', p)) {
+  //       // TODO
+  //     }
+  //   });
+  // }
   backspace(): void {
     this.wrapEditing(() => {
       if (this.currentRange.collapsed) {

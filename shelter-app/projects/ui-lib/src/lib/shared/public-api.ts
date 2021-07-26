@@ -20,3 +20,4 @@ export * from './pipes/plain-html.pipe';
 export * from './html-helper';
 export * from './html-rules';
 export * from './html-validator';
+export * from './clone-node';
