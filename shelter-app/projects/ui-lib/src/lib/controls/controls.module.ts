@@ -195,51 +195,57 @@ export class ControlsModule {
     ]});
 
     componentsPlugin.addPlugin(['lib-boolean-control'], {component: BooleanControlComponent, schema: null,
-      description: {tag: 'ui-boolean'}}, injector);
+      description: {tag: 'ui-boolean', elementContent: [{cnt: ['Flow']}]}}, injector);
     componentsPlugin.addPlugin(['lib-checkbox-control'],
       {
         component: CheckboxControlComponent,
         schema: new SwaggerObject([], {value: SwaggerNative.asString()}),
-        description: {tag: 'ui-checkbox'}
+        description: {tag: 'ui-checkbox', elementContent: [{cnt: ['Flow']}]}
       }, injector);
     componentsPlugin.addPlugin(['lib-input-control'], {component: InputControlComponent, schema: null,
-      description: {tag: 'ui-input'}}, injector);
-    componentsPlugin.addPlugin(['lib-list-builder'], {component: ListBuilderComponent, schema: null});
-    componentsPlugin.addPlugin(['lib-list-select'], {component: ListSelectComponent, schema: null});
+      description: {tag: 'ui-input', elementContent: [{cnt: ['Flow']}]}}, injector);
+    componentsPlugin.addPlugin(['lib-list-builder'], {component: ListBuilderComponent, schema: null,
+      description: {tag: 'ui-list-builder', elementContent: [{cnt: ['Flow']}]}});
+    componentsPlugin.addPlugin(['lib-list-select'], {component: ListSelectComponent, schema: null,
+      description: {tag: 'ui-list-select', elementContent: [{cnt: ['Flow']}]}});
     componentsPlugin.addPlugin(['lib-radio-control'], {component: RadioControlComponent, schema: null,
-      description: {tag: 'ui-radio'}}, injector);
+      description: {tag: 'ui-radio', elementContent: [{cnt: ['Flow']}]}}, injector);
     componentsPlugin.addPlugin(['lib-select-control'], {component: SelectControlComponent, schema: null,
-      description: {tag: 'ui-select'}}, injector);
+      description: {tag: 'ui-select', elementContent: [{cnt: ['Flow']}]}}, injector);
     componentsPlugin.addPlugin(['lib-title-type-control'], {component: TitleTypeControlComponent, schema: null,
-      description: {tag: 'ui-title'}}, injector);
+      description: {tag: 'ui-title', elementContent: [{cnt: ['Flow']}]}}, injector);
     componentsPlugin.addPlugin(['lib-table'], {component: TableComponent, schema: null,
-      description: {tag: 'ui-table'}}, injector);
-    componentsPlugin.addPlugin(['lib-upload-files'], {component: UploadFilesComponent, schema: null});
-    componentsPlugin.addPlugin(['lib-simple-dialog'], {component: SimpleDialogComponent, schema: null});
-    componentsPlugin.addPlugin(['lib-snake-bar'], {component: SnakeBarComponent, schema: null});
+      description: {tag: 'ui-table', elementContent: [{cnt: ['Flow']}]}}, injector);
+    componentsPlugin.addPlugin(['lib-upload-files'], {component: UploadFilesComponent, schema: null,
+      description: {tag: 'ui-upload-file', elementContent: [{cnt: ['Flow']}]}});
+    componentsPlugin.addPlugin(['lib-simple-dialog'], {component: SimpleDialogComponent, schema: null,
+      description: {tag: 'ui-dialog', elementContent: [{cnt: ['Flow']}]}});
+    componentsPlugin.addPlugin(['lib-snake-bar'], {component: SnakeBarComponent, schema: null,
+      description: {tag: 'ui-snake-bar', elementContent: [{cnt: ['Flow']}]}});
     componentsPlugin.addPlugin(['lib-app-bar'], {component: AppBarComponent, schema: null,
-      description: {tag: 'app-bar'}}, injector);
-    componentsPlugin.addPlugin(['lib-editable-list'], {component: EditableListComponent, schema: null});
+      description: {tag: 'ui-app-bar', elementContent: [{cnt: ['Flow']}]}}, injector);
+    componentsPlugin.addPlugin(['lib-editable-list'], {component: EditableListComponent, schema: null,
+      description: {tag: 'ui-editable-list', elementContent: [{cnt: ['Flow']}]}});
 
     componentsPlugin.addPlugin([], {component: SwaggerFormComponent,
-      description: {tag: 'ui-swagger-form'}}, injector);
+      description: {tag: 'ui-swagger-form', elementContent: [{cnt: ['Flow']}]}}, injector);
     componentsPlugin.addPlugin([], {component: GeneratorFormComponent,
-      description: {tag: 'ui-generator-form'}}, injector);
+      description: {tag: 'ui-generator-form', elementContent: [{cnt: ['Flow']}]}}, injector);
     componentsPlugin.addPlugin([], {component: SwaggerArrayComponent,
-      description: {tag: 'ui-swagger-array'}}, injector);
+      description: {tag: 'ui-swagger-array', elementContent: [{cnt: ['Flow']}]}}, injector);
     componentsPlugin.addPlugin([], {component: SwaggerNativeComponent,
-      description: {tag: 'ui-swagger-native'}}, injector);
+      description: {tag: 'ui-swagger-native', elementContent: [{cnt: ['Flow']}]}}, injector);
     componentsPlugin.addPlugin([], {component: LinkComponent,
-      description: {tag: 'ui-link'}}, injector);
+      description: {tag: 'ui-link', elementContent: [{cnt: ['Phrasing']}]}}, injector);
     componentsPlugin.addPlugin([], {component: CardComponent,
-      description: {tag: 'ui-card'}}, injector);
+      description: {tag: 'ui-card', elementContent: [{cnt: ['Flow']}]}}, injector);
     componentsPlugin.addPlugin([], {component: TabGroupComponent,
-      description: {tag: 'ui-tab-group'}}, replaceInjector);
+      description: {tag: 'ui-tab-group', elementContent: [{cnt: ['Flow']}]}}, replaceInjector);
     componentsPlugin.addPlugin([], {component: AccordionComponent,
-      description: {tag: 'ui-accordion'}}, replaceInjector);
+      description: {tag: 'ui-accordion', elementContent: [{cnt: ['Flow']}]}}, replaceInjector);
     componentsPlugin.addPlugin([], {component: CarouselComponent,
-      description: {tag: 'ui-carousel'}}, replaceInjector);
+      description: {tag: 'ui-carousel', elementContent: [{cnt: ['Flow']}]}}, replaceInjector);
     componentsPlugin.addPlugin([], {component: SpanComponent,
-      description: {tag: 'ui-span'}}, injector);
+      description: {tag: 'ui-span', elementContent: [{cnt: ['Phrasing']}]}}, injector);
   }
 }

@@ -17,6 +17,7 @@ import {
   ComponentsPluginService,
   ExtendedData,
   HtmlRules,
+  HtmlWrapper,
   LibNode,
   SimpleParser,
   SNode,
@@ -55,6 +56,7 @@ interface PasteData {
   type: string; // mime type
   data: any;
 }
+
 @Component({
   selector: 'lib-editor',
   templateUrl: './editor.component.html',
@@ -144,30 +146,37 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   private onToolbar(e: CmdEditorToolbox): void {
     console.log('onToolbar', e);
-    switch (e.cmd) {
-      case 'tag':
-        this.addElement(e.opt.tag, e.opt.attr);
-        break;
-      case 'toList':
-        break;
-      case 'align':
-        break;
-      case 'clearFormat':
-        break;
-      case 'insPlugin':
-        break;
-      case 'showDesigner':
-        this.showDesigner();
-        break;
-      case 'showSource':
-        this.showSlide = VIEW_SOURCE;
-        break;
-      case 'showHelp':
-        this.showSlide = VIEW_HELP;
-        break;
-      case 'switchMove':
-        this.moveByText = e.opt.moveByText;
-        break;
+    try {
+      switch (e.cmd) {
+        case 'tag':
+          this.addElement(e.opt.tag, e.opt.attr);
+          break;
+        case 'toList':
+          break;
+        case 'align':
+          break;
+        case 'clearFormat':
+          this.parser.clearFormat();
+          break;
+        case 'insPlugin':
+          break;
+        case 'showDesigner':
+          this.showDesigner();
+          break;
+        case 'showSource':
+          this.showSlide = VIEW_SOURCE;
+          break;
+        case 'showHelp':
+          this.showSlide = VIEW_HELP;
+          break;
+        case 'switchMove':
+          this.moveByText = e.opt.moveByText;
+          break;
+        case 'save':
+          break;
+      }
+    } catch (e) {
+      this.dialogService.snakeError(e);
     }
   }
   showDesigner(): void {
@@ -240,46 +249,97 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this._sourceModified = true;
   }
   dragOver(e: DragEvent): void {
-    window.getSelection().removeAllRanges();
-    window.getSelection().addRange(this.defineRange(e));
-    this.parser.initFromSelection(window.getSelection());
+    const r = this.defineRange(e);
+    if (r) {
+      // console.log('drag over range:', r);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(r);
+      this.parser.initFromSelection(window.getSelection());
+    }
     if (this.parser.range) {
       e.preventDefault();
     }
   }
-  defineRange(e: DragEvent): Range {
-    function shift(x: number, y: number, rect: DOMRect): number {
-      return Math.min(Math.abs(x - rect.right), Math.abs(x - rect.left))
-        + Math.min(Math.abs(y - rect.top), Math.abs(y - rect.bottom));
+  defineRange(event: DragEvent): Range {
+    const editorClientRect = this.editor.getBoundingClientRect();
+    const n = event.target as HTMLElement;
+    if (!n && typeof n.getBoundingClientRect !== 'function') {
+      return null;
     }
-    const cx = e.clientX;
-    const cy = e.clientY;
-    const n = e.target as Node;
-    const r = this._document.createRange();
-    r.selectNodeContents(e.target as Node);
-    if (LibNode.getAttribute(n, DESIGNER_ATTR_NAME)) {
-      if (n.nodeType === Node.TEXT_NODE) {
-        let calc = Number.MAX_SAFE_INTEGER;
-        let offset = 0;
-        for (let i = 0; i < n.textContent.length; ++i) {
-          r.setStart(n, i);
-          r.setEnd(n, i);
-          const c = shift(cx, cy, r.getBoundingClientRect());
-          if (calc > c) {
-            calc = c;
-            offset = i;
+    const cx = event.pageX - this.editor.offsetLeft;
+    const cy = event.pageY - this.editor.offsetTop;
+    console.log(`x: ${cx}, y: ${cy}`);
+    function isIn(chr: DOMRect): boolean {
+      const result = chr && chr.top + window.scrollY <= Math.ceil(cy) + 1
+        && chr.bottom + window.scrollY >= Math.floor(cy) - 1
+        && chr.left + window.scrollX <= Math.ceil(cx) + 1
+        && chr.right + window.scrollX >= Math.floor(cx) - 1;
+      console.log(`editorClientRect top:${editorClientRect.top}, bottom:${editorClientRect.bottom}, left:${editorClientRect.left}, right:${editorClientRect.right},
+      cx: ${cx}, cy: ${cy},
+      chr top:${chr.top + window.scrollY}, bottom:${chr.bottom + window.scrollY}, left:${chr.left + window.scrollX}, right:${chr.right + window.scrollX},
+      result: ${result}`);
+      return result;
+    }
+    function filter(e: HTMLElement, r: Range): Range {
+      let c = e.firstChild;
+      while (c) {
+        let chr = null;
+        if (c.nodeType === Node.ELEMENT_NODE) {
+          chr = (c as HTMLElement).getBoundingClientRect();
+          if (isIn(chr)) {
+            // return filter(c as HTMLElement, r);
+            r.selectNodeContents(c);
+            return r;
+          }
+        } else if (c.nodeType === Node.TEXT_NODE) {
+          r.selectNode(e);
+          chr = r.getBoundingClientRect();
+          if (isIn(chr)) {
+            return tailoring(c, 0, c.textContent.length, r);
           }
         }
-        r.setStart(n, offset); r.setEnd(n, offset);
+        c = c.nextSibling;
+      }
+      return null;
+    }
+    function tailoring(t: Node, from: number, to: number, r: Range): Range {
+      if (to - from > 1) {
+        const half = Math.floor((from + to) / 2);
+        r.setStart(t, from);
+        r.setEnd(t, half);
+        const left = isIn(r.getBoundingClientRect());
+        r.setStart(t, half);
+        r.setEnd(t, to);
+        const right = isIn(r.getBoundingClientRect());
+        if (left) {
+          return tailoring(t, from, half, r);
+        } else if (right) {
+          return tailoring(t, half, to, r);
+        }
+        r.setStart(t, from);
+        r.setEnd(t, to);
         return r;
+      }
+      r.setStart(t, from);
+      r.setEnd(t, to);
+      return r;
+    }
+    const a = LibNode.getAttribute(n, DESIGNER_ATTR_NAME);
+    if (a) {
+      const r = this._document.createRange();
+      if (n.hasChildNodes()) {
+        return filter(n, r);
       } else {
-        console.log(`defineRange cx: ${cx}, cy: ${cy}`);
+        r.selectNode(n);
+        return r;
       }
     }
+    return null;
   }
   drop(e: DragEvent): void {
     console.log('drop', e);
     e.preventDefault();
+    this.processPasteData({type: 'text/plain', data: e.dataTransfer.getData('text/plain')});
   }
   onPaste(event: ClipboardEvent): void {
     console.log('onPaste', event);
@@ -424,4 +484,3 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   gag(e: Event): void { e.preventDefault(); }
 }
-

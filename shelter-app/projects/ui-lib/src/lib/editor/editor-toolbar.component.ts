@@ -54,13 +54,15 @@ export interface CmdEditorToolbox {
   styleUrls: ['./editor-toolbar.component.scss']
 })
 export class EditorToolbarComponent extends AbstractComponent implements OnDestroy {
-  block: string;
-  bTag: boolean;
-  uTag: boolean;
-  iTag: boolean;
-  fSize: string;
-  alignPressed: number;
-  moveByText = true;
+  state = {
+    aTag: false, abbrTag: false, dataTag: false, dfnTag: false, qTag: false, timeTag: false, bTag: false, bdiTag: false,
+    bdoTag: false, citeTag: false, codeTag: false, delTag: false, emTag: false, iTag: false, insTag: false, kbdTag: false, markTag: false,
+    sTag: false, sampTag: false, smallTag: false, spanTag: false, strongTag: false, subTag: false, supTag: false, uTag: false, varTag: false,
+    moveByText: true,
+    fSize: '',
+    alignPressed: 1,
+    block: ''
+  };
   @Input() fCdkDropList: () => CdkDropList;
   private pluginEmitter: EventEmitter<string>;
   @Output() emitter = new EventEmitter<CmdEditorToolbox>();
@@ -111,8 +113,8 @@ export class EditorToolbarComponent extends AbstractComponent implements OnDestr
     }
   }
   private isModified(what: any, name: string): boolean {
-    if (!!what[name] !== this[name]) {
-      this[name] = !!what[name];
+    if (what[name] !== this.state[name]) {
+      this.state[name] = what[name];
       return true;
     }
   }
@@ -153,12 +155,16 @@ export class EditorToolbarComponent extends AbstractComponent implements OnDestr
   }
 
   switchMove(): void {
-    this.moveByText = !this.moveByText;
-    this.emitter.emit({cmd: 'switchMove', opt: {moveByText: this.moveByText}});
+    this.state.moveByText = !this.state.moveByText;
+    this.emitter.emit({cmd: 'switchMove', opt: {moveByText: this.state.moveByText}});
   }
 
   showPlugins(): void {
     this.dialogService.open(PluginsPanelComponent,
       {data: {emitter: this.pluginEmitter, fCdkDropList: this.fCdkDropList}, hasBackdrop: false});
+  }
+
+  save(): void {
+    this.emitter.emit({cmd: 'save'});
   }
 }

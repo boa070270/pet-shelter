@@ -11,8 +11,8 @@ import {PageTableComponent} from './page-table.component';
 import {UserTableComponent} from './user-table.component';
 import { AdminComponent } from './admin.component';
 import {AuthGuard} from '../auth.guard';
-import {DsComponent} from "./ds.component";
-import {DsDataComponent} from "./ds-data.component";
+import {DsComponent} from './ds.component';
+import {DsDataComponent} from './ds-data.component';
 
 const routes: Routes = [
   {path: 'lang-table', component: LangTableComponent, canActivate: [AuthGuard]},

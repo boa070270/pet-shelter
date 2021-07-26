@@ -86,6 +86,17 @@ export abstract class SNode extends NodeWrapper {
   }
   abstract clone(cp?: (attr: Attributes) => Attributes): SNode;
   abstract source(onlyBody?: boolean): string;
+
+  /**
+   * this define nesting only. There isn't present any validation
+   * @param sn SNode that can be equal to this, nested in this, or be out to this
+   */
+  nesting(sn: SNode): 'in' | 'out' | 'equal' {
+    if (HtmlRules.isContent('Phrasing', sn)) {
+      return 'equal';
+    }
+    return 'out';
+  }
   modified(): void {
     if (!this.state) {
       this.state = 1;
@@ -111,7 +122,9 @@ export abstract class SNode extends NodeWrapper {
   insert(sn: SNode, cp: (a: Attributes) => Attributes, from: number, to?: number): {sn: SNode, after: SNode} {
     return {sn: this, after: null};
   }
-
+  canBeParent(children: SNode[]): boolean {
+    return false;
+  }
   /**
    * split node to two or three nodes.
    * For text node, cdata and comment nodes we split text than we call node splitting
@@ -205,11 +218,15 @@ export class SNodeText extends SNode {
       this.parent.newChild(sn, this.index + 1);
       this.setText(txt.substring(0, from));
     }
-    sn.addChild(SNode.textNode(txt.substring(from, to)));
-    if (to < txt.length) {
-      after = this.parent.newChild(SNode.textNode(txt.substring(to)), sn.index + 1);
+    if (HtmlRules.enableTxt(sn)) {
+      sn.addChild(SNode.textNode(txt.substring(from, to)));
+      if (to < txt.length) {
+        after = this.parent.newChild(SNode.textNode(txt.substring(to)), sn.index + 1);
+      }
+    } else {
+      this.parent.newChild(SNode.textNode(txt.substring(from, to)), sn.index + 1);
     }
-    return {sn, after};
+    return {sn, after: sn.next};
   }
 }
 export class SNodeComment extends SNode {
@@ -291,6 +308,35 @@ export class SNodeElement extends SNode {
     this.children.forEach( c => s += c.source());
     return s + (this.isRoot || onlyBody ? '' : `</${this.nodeName}>`);
   }
+  nesting(sn: SNode): 'in' | 'out' | 'equal' {
+    if (this.nodeName === 'main' || sn.typeNode === Node.TEXT_NODE) {
+      return 'in';
+    }
+    const oSectioning = HtmlRules.isContent('Sectioning', sn);
+    if (HtmlRules.isContent('Sectioning', this)) {
+      if (oSectioning) {
+        return 'equal';
+      }
+      return 'in';
+    }
+    if (HtmlRules.isContent('Grouping', this)) {
+      if (oSectioning) {
+        return 'out';
+      }
+      if (HtmlRules.isContent('Grouping', sn)) {
+        return 'equal';
+      }
+      return 'in';
+    }
+    if (HtmlRules.isContent('Phrasing', this)) {
+      if (HtmlRules.isContent('Phrasing', sn)) {
+        return 'equal';
+      }
+      return 'out';
+    }
+    return null;
+  }
+
   addChild(n: SNode): SNode {
     n.parent = this;
     if (n.typeNode === Node.TEXT_NODE && this.lastChild && this.lastChild.typeNode === Node.TEXT_NODE) {
@@ -315,7 +361,7 @@ export class SNodeElement extends SNode {
           }
         });
       }
-      if (content.cnt.includes('Flow') || content.cnt.includes('Phrasing')) {
+      if (content.cnt && (content.cnt.includes('Flow') || content.cnt.includes('Phrasing'))) {
         if (correct && (this instanceof SNode) && (!this.lastChild || this.lastChild.typeNode !== Node.TEXT_NODE)) {
           this.addChild(SNode.textNode(''));
         }
@@ -362,14 +408,22 @@ export class SNodeElement extends SNode {
   }
   insert(sn: SNode, cp: (a: Attributes) => Attributes, from: number, to?: number): {sn: SNode, after: SNode} {
     to = Math.min(this.numChildren, to || Number.MAX_VALUE);
-    const ixn = sn.numChildren;
-    for (let i = from; i < to; ++i) {
-      const ch = this.children.splice(from, 1);
-      sn.newChild(ch[0], ixn);
+    if (sn.canBeParent(this.children.slice(from, to - 1))) {
+      const ixn = sn.numChildren;
+      for (let i = from; i < to; ++i) {
+        const ch = this.children.splice(from, 1);
+        sn.newChild(ch[0], ixn);
+      }
     }
+    sn.validate();
     this.newChild(sn, from);
     return {sn, after: sn.next};
-    // return this.split(cp, from, to, sn);
+  }
+  canBeParent(children: SNode[]): boolean {
+    if (HtmlRules.contentOfNode(this)) {
+      return children.length === 0 || !children.find(c => this.nesting(c) !== 'out');
+    }
+    return false;
   }
   /**
    * split node to two or three nodes.
@@ -413,6 +467,7 @@ export class SNodeElement extends SNode {
       if (sn !== this) {
         this.validate();
       }
+      this.parent.validate();
     }
     return {sn, after};
   }
@@ -574,20 +629,29 @@ export class SimpleParser {
     }
   }
   private toNode(s: SNode): Node {
-    if (s === this.root || s === this._tmpRoot) {
+    if (s.attribute(this.mark) === this.baseMark) {
       return this.editor;
     }
     if (s.typeNode === Node.ELEMENT_NODE) {
       return this.editor.querySelector(`[${this.mark}="${s.attribute(this.mark)}"]`);
     } else {
-      const n = this.editor.querySelector(`[${this.mark}="${s.parent.attribute(this.mark)}"]`);
+      const n = this.toNode(s.parent);
       return n.childNodes.item(s.index);
     }
   }
   // Selection
   initFromSelection(selection: Selection): void {
-    const anchor = this.createSPotion(selection.anchorNode, selection.anchorOffset);
-    const focus = this.createSPotion(selection.focusNode, selection.focusOffset);
+    if (!selection.isCollapsed) {
+      const r = selection.getRangeAt(0);
+      if (r) {
+        const chr = r.getBoundingClientRect();
+        console.log(`window.scrollX: ${window.scrollX}, window.scrollY: ${window.scrollY},
+          chr top:${chr.top + window.scrollY}, bottom:${chr.bottom + window.scrollY}, left:${chr.left + window.scrollX}, right:${chr.right + window.scrollX}
+        `);
+      }
+    }
+    const anchor = this.createSPosition(selection.anchorNode, selection.anchorOffset);
+    const focus = this.createSPosition(selection.focusNode, selection.focusOffset);
     if (anchor && focus) {
       this.range = new SRange(anchor, focus);
     } else {
@@ -599,7 +663,7 @@ export class SimpleParser {
       this.collapse(this.range.focus);
     }
   }
-  createSPotion(n: Node, offset: number): SPosition {
+  createSPosition(n: Node, offset: number): SPosition {
     const sn = this.toSNode(n);
     if (sn) {
       return new SPosition(sn, offset);
@@ -703,12 +767,20 @@ export class SimpleParser {
   insString(s: string): void {
     this.wrapEditing(() => {
       this.deleteRange();
-      const f = this.currentRange.focus;
-      if (f.n.typeNode === Node.TEXT_NODE) {
-        const txt = f.n.getText();
-        f.n.setText(txt.substring(0, f.offset) + s + txt.substring(f.offset));
-        this.currentRange.focus = new SPosition(f.n, f.offset + s.length);
+      let f = this.currentRange.focus;
+      let offset = f.offset;
+      if (f.n.typeNode !== Node.TEXT_NODE) {
+        if (f.sNode.typeNode !== Node.TEXT_NODE) {
+          f = this.nextDown(this.currentRange.focus);
+          if (!f) {
+            return;
+          }
+        }
+        offset = 0;
       }
+      const txt = f.sNode.getText();
+      f.sNode.setText(txt.substring(0, offset) + s + txt.substring(offset));
+      this.currentRange.focus = new SPosition(f.sNode, offset + s.length);
     });
   }
   insHTML(s: string): void {
@@ -907,11 +979,19 @@ export class SimpleParser {
       } else if (newSection) {
         nodeName = 'section';
       }
-      const r = focus.n.split((a) => this.copyAttr(a), focus.offset, undefined, SNode.elementNode(nodeName, this.copyAttr()));
+      const sn = SNode.elementNode(nodeName, this.copyAttr({}));
+      let r;
+      switch (focus.n.nesting(sn)) {
+        case 'out':
+          r = focus.n.split((a) => this.copyAttr(a), focus.offset, undefined, sn);
+          break;
+        default:
+          r = focus.n.insert(sn, (a) => this.copyAttr(a), focus.offset);
+      }
       if (r.sn.numChildren > 0) {
         this.currentRange.focus = new SPosition(r.sn, 0);
       } else {
-        this.currentRange.focus = new SPosition(r.after, 0);
+        this.currentRange.focus = new SPosition(r.sn.parent, r.sn.index);
       }
       this.currentRange.collapse();
     });
@@ -964,7 +1044,11 @@ export class SimpleParser {
           // address, aside, blockquote, details, dialog, div, dl, fieldset, figcaption, figure, footer, form, header, hr, menu, nav, ol, p, prem section, table, ul
           if (this.currentRange.isCoverFully(top)) {
             if (top.parent) {
-              top.replace(nodeName, this.copyAttr(attr));
+              if (top.typeNode === Node.TEXT_NODE) {
+                top.parent.replace(nodeName, this.copyAttr(attr));
+              } else {
+                top.replace(nodeName, this.copyAttr(attr));
+              }
             } else {
               sn.children = top.children;
               top.children = [];
@@ -1071,7 +1155,10 @@ export class SimpleParser {
   }
   clearFormat(): void {
     this.wrapEditing(() => {
-      const en = this.currentRange.end.sNode;
+      let en = this.currentRange.end.sNode;
+      if (en.numChildren > 0) {
+        en = en.firstChild;
+      }
       const sn = this.currentRange.start.sNode;
       treeWalker(sn, w => w === en, w => {
         if (HtmlRules.isContent('PhrasingFormat', w)) {

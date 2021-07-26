@@ -77,7 +77,7 @@ export class PluginsPanelComponent implements OnInit, AfterViewInit {
     // });
   }
   dragEnd(event: DragEvent, selectorName: string): void {
-    event.dataTransfer.setData('text', selectorName);
+    event.dataTransfer.setData('text/plain', selectorName);
     console.log('PluginsPanelComponent.dragEnd', event.dataTransfer);
   }
   private _createPreviewElement(selectorName: string, e: DragEvent): HTMLElement {

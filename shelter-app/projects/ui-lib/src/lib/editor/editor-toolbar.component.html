@@ -3,7 +3,7 @@
     <fieldset>
       <legend>Structure</legend>
       <label for="toolbar-style">Style</label>
-      <select id="toolbar-style" [(ngModel)]="block" class="gm-style" (change)="tag(block)">
+      <select id="toolbar-style" [(ngModel)]="state.block" class="gm-style" (change)="tag(state.block)">
         <option value="p">Paragraph</option>
         <option value="pre">Pre</option>
         <option value="h1">Header 1</option>
@@ -23,17 +23,35 @@
     </fieldset>
     <fieldset>
       <legend>Format</legend>
+      <!-- 'bdi', 'bdo' -->
       <div class="editor-multiple-buttons">
-        <button class="gm-format_bold" [ngClass]="{'editor-button-active': bTag}" (click)="tag('b')" title="Bold">
-        </button>
-        <button class="gm-format_underline" [ngClass]="{'editor-button-active': uTag}" (click)="tag('u')" title="Underline">
-        </button>
-        <button class="gm-format_italic" [ngClass]="{'editor-button-active': iTag}" (click)="tag('i')" title="Italic">
-        </button>
+        <button class="gm-format_bold" [ngClass]="{'editor-button-active': state.bTag}" (click)="tag('b')" title="Bold"></button>
+        <button class="gm-format_underline" [ngClass]="{'editor-button-active': state.uTag}" (click)="tag('u')" title="Underline"></button>
+        <button class="gm-format_italic" [ngClass]="{'editor-button-active': state.iTag}" (click)="tag('i')" title="Italic"></button>
+        <button class="gm-strikethrough_s" [ngClass]="{'editor-button-active': state.sTag}" (click)="tag('s')" title="strikethrough"></button>
+        <button class="gm-subscript" [ngClass]="{'editor-button-active': state.subTag}" (click)="tag('sub')" title="subscript"></button>
+        <button class="gm-superscript" [ngClass]="{'editor-button-active': state.supTag}" (click)="tag('sup')" title="superscript"></button>
+        <button class="gm-add" [ngClass]="{'editor-button-active': state.insTag}" (click)="tag('ins')" title="inserted"></button>
+        <button class="gm-format_strikethrough" [ngClass]="{'editor-button-active': state.delTag}" (click)="tag('del')" title="deleted"></button>
+        <button class="gm-code" [ngClass]="{'editor-button-active': state.codeTag}" (click)="tag('code')" title="code"></button>
+        <button class="gm-4k" [ngClass]="{'editor-button-active': state.citeTag}" (click)="tag('cite')" title="cite"></button>
+        <button class="gm-emoji_emotions" [ngClass]="{'editor-button-active': state.emTag}" (click)="tag('em')" title="emotional"></button>
+        <button class="gm-keyboard" [ngClass]="{'editor-button-active': state.kbdTag}" (click)="tag('kbd')" title="superscript"></button>
+        <button class="gm-mark_as_unread" [ngClass]="{'editor-button-active': state.markTag}" (click)="tag('mark')" title="mark"></button>
+        <button class="gm-3k" [ngClass]="{'editor-button-active': state.sampTag}" (click)="tag('samp')" title="sample"></button>
+        <button class="gm-format_size" [ngClass]="{'editor-button-active': state.smallTag}" (click)="tag('small')" title="small"></button>
+        <button class="gm-hdr_strong" [ngClass]="{'editor-button-active': state.strongTag}" (click)="tag('strong')" title="strong"></button>
+        <button class="gm-1k" [ngClass]="{'editor-button-active': state.varTag}" (click)="tag('var')" title="variable"></button>
+        <button class="gm-add_link" [ngClass]="{'editor-button-active': state.aTag}" (click)="tag('a')" title="link"></button>
+        <button class="gm-ac_unit" [ngClass]="{'editor-button-active': state.abbrTag}" (click)="tag('abbr')" title="acronym"></button>
+        <button class="gm-data_usage" [ngClass]="{'editor-button-active': state.dataTag}" (click)="tag('data')" title="data"></button>
+        <button class="gm-2k" [ngClass]="{'editor-button-active': state.dfnTag}" (click)="tag('dfn')" title="definition"></button>
+        <button class="gm-format_quote" [ngClass]="{'editor-button-active': state.dfnTag}" (click)="tag('q')" title="quotation"></button>
+        <button class="gm-access_time" [ngClass]="{'editor-button-active': state.dfnTag}" (click)="tag('time')" title="time"></button>
       </div>
       <label>
         <span>Font size</span>
-        <select [(ngModel)]="fSize" (change)="tag('span', {'font-size': fSize})">
+        <select [(ngModel)]="state.fSize" (change)="tag('span', {'font-size': state.fSize})">
           <option value="smaller"><span style="font-size: smaller; float: left;">Smaller</span></option>
           <option value="small"><span style="font-size: small; float: left;">Small</span></option>
           <option value="medium"><span style="font-size: medium; float: left;">Medium</span></option>
@@ -41,24 +59,13 @@
           <option value="large"><span style="font-size: large; float: left;">Large</span></option>
         </select>
       </label>
-      <div class="editor-multiple-buttons">
-        <button class="gm-subscript" (click)="tag('sub')" title="subscript">
-        </button>
-        <button class="gm-superscript" (click)="tag('sup')" title="superscript">
-        </button>
-      </div>
 
       <div class="editor-multiple-buttons">
-        <button class="gm-format_align_left" [ngClass]="[alignPressed === 1 ? 'editor-button-active' : '']" (click)="align('left')" title="Align left">
-        </button>
-        <button class="gm-format_align_center" [ngClass]="[alignPressed === 2 ? 'editor-button-active' : '']" (click)="align('center')" title="Align center">
-        </button>
-        <button class="gm-format_align_right" [ngClass]="[alignPressed === 3 ? 'editor-button-active' : '']" (click)="align('right')" title="Align right">
-        </button>
-        <button class="gm-format_align_justify" [ngClass]="[alignPressed === 4 ? 'editor-button-active' : '']" (click)="align('justify')" title="Justify">
-        </button>
-        <button class="gm-format_clear" (click)="clearFormatting()" title="Clear formatting">
-        </button>
+        <button class="gm-format_align_left" [ngClass]="[state.alignPressed === 1 ? 'editor-button-active' : '']" (click)="align('left')" title="Align left"></button>
+        <button class="gm-format_align_center" [ngClass]="[state.alignPressed === 2 ? 'editor-button-active' : '']" (click)="align('center')" title="Align center"></button>
+        <button class="gm-format_align_right" [ngClass]="[state.alignPressed === 3 ? 'editor-button-active' : '']" (click)="align('right')" title="Align right"></button>
+        <button class="gm-format_align_justify" [ngClass]="[state.alignPressed === 4 ? 'editor-button-active' : '']" (click)="align('justify')" title="Justify"></button>
+        <button class="gm-format_clear" (click)="clearFormatting()" title="Clear formatting"></button>
       </div>
     </fieldset>
     <fieldset>
@@ -68,10 +75,11 @@
       </button>
 
       <button class="gm-web" (click)="showDesigner()" title="Show designer"></button>
-      <button class="gm-code" (click)="showSource()" title="Show source"></button>
+      <button class="gm-source" (click)="showSource()" title="Show source"></button>
       <button class="gm-help" (click)="showHelp()" title="Help"></button>
       <button class="gm-multiple_stop" (click)="switchMove()" title="Move by text"></button>
       <button class="gm-badge" (click)="showPlugins()" title="Show plugins"></button>
+      <button class="gm-save" (click)="save()" title="Save"></button>
     </fieldset>
   </div>
 </div>

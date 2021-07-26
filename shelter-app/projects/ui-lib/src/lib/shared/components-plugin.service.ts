@@ -3,7 +3,7 @@ import {SwaggerObject} from './swagger-object';
 import {TitleType} from './language';
 import {createCustomElement} from '@angular/elements';
 import {HtmlElementContent, HtmlRules} from './html-rules';
-import {Attributes} from "./html-helper";
+import {Attributes} from './html-helper';
 
 export interface PluginDescription {
   selectorName?: string; // this field is set by system
@@ -35,7 +35,7 @@ export class ComponentsPluginService {
     if (plugin.description && plugin.description.tag && injector) {
       const ce = plugin.description;
       const component = createCustomElement(plugin.component, {injector});
-      customElements.define(ce.tag, component);
+      customElements.define(ce.tag.toLowerCase(), component);
       HtmlRules.elements[ce.tag.toLowerCase()] = ce.elementContent || HtmlRules.defCustomContent;
     }
   }

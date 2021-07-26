@@ -93,7 +93,7 @@ function createParser(main: HTMLElement): SimpleParser {
   return sp;
 }
 describe('html-validator', () => {
-  const main = document.createElement('main' );
+  const main = document.createElement('main');
   main.setAttribute(DESIGN_ATTR, '0');
   document.body.appendChild(main);
 
@@ -141,7 +141,7 @@ describe('html-validator', () => {
       expect(selection.focusNode).toBe(selection.anchorNode);
       expect(selection.getRangeAt(0)).toEqual(range);
     });
-    it ('initFromSelection', () => {
+    it('initFromSelection', () => {
       const sp = init('<section><h1>Header</h1><p>First paragraph</p></section>');
       const selection = window.getSelection();
       const h1 = main.querySelector('h1');
@@ -154,7 +154,7 @@ describe('html-validator', () => {
     });
   });
   describe('Moving', () => {
-    it ('move right by text', () => {
+    it('move right by text', () => {
       const sp = init('<section><h1>Header</h1><p>First paragraph</p></section>');
       const h1 = main.querySelector('h1');
       expect(window.getSelection().focusNode).toBe(h1.firstChild);
@@ -183,13 +183,13 @@ describe('html-validator', () => {
       expect(window.getSelection().focusNode).toBe(main);
       expect(window.getSelection().focusOffset).toBe(1);
     });
-    it ('move left by text', () => {
+    it('move left by text', () => {
       const sp = init('<section><h1>Header</h1><p>First paragraph</p></section>');
       const h1 = main.querySelector('h1');
       const p = main.querySelector('p');
       window.getSelection().collapse(main, 1);
       sp.initFromSelection(window.getSelection());
-      for (let i = 'First paragraph'.length; i >= 0 ; i--) {
+      for (let i = 'First paragraph'.length; i >= 0; i--) {
         sp.movePrev();
         expect(window.getSelection().focusNode).toBe(p.firstChild);
         expect(window.getSelection().focusOffset).toBe(i);
@@ -203,7 +203,7 @@ describe('html-validator', () => {
       expect(window.getSelection().focusNode).toBe(h1.firstChild);
       expect(window.getSelection().focusOffset).toBe(0);
     });
-    it ('move right by node', () => {
+    it('move right by node', () => {
       const sp = init('<section><h1>Header</h1><p>First paragraph</p></section>');
       const section = main.firstChild;
       const h1 = main.querySelector('h1');
@@ -226,7 +226,7 @@ describe('html-validator', () => {
       expect(window.getSelection().focusNode).toBe(main);
       expect(window.getSelection().focusOffset).toBe(1);
     });
-    it ('move left by node', () => {
+    it('move left by node', () => {
       const sp = init('<section><h1>Header</h1><p>First paragraph</p></section>');
       const section = main.firstChild;
       const h1 = main.querySelector('h1');
@@ -251,7 +251,7 @@ describe('html-validator', () => {
     });
   });
   describe('Delete', () => {
-    it ('delete range', () => {
+    it('delete range', () => {
       const sp = init('<section><h1>Header</h1><p>First paragraph</p></section>');
       let p = main.querySelector('p');
       sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 1).end(p.firstChild, 14).selection);
@@ -260,7 +260,7 @@ describe('html-validator', () => {
       expect(p.innerText).toBe('Fh');
       expect(sp.source).toBe('<section><h1>Header</h1><p>Fh</p></section>');
     });
-    it ('backspace range', () => {
+    it('backspace range', () => {
       const sp = init('<section><h1>Header</h1><p>First paragraph</p></section>');
       let p = main.querySelector('p');
       sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 1).end(p.firstChild, 14).selection);
@@ -269,7 +269,7 @@ describe('html-validator', () => {
       expect(p.innerText).toBe('Fh');
       expect(sp.source).toBe('<section><h1>Header</h1><p>Fh</p></section>');
     });
-    it ('delete symbol', () => {
+    it('delete symbol', () => {
       const sp = init('<section><h1>Header</h1><p>First paragraph</p></section>');
       const h1 = main.querySelector('h1');
       sp.initFromSelection(RangeBuilder.buildRange().start(h1.firstChild, 0).end(h1.firstChild, 0).selection);
@@ -285,7 +285,7 @@ describe('html-validator', () => {
       expect(section.firstChild).toBe(pN);
       expect(sp.source).toBe('<section><p>First paragraph</p></section>');
     });
-    it ('backspace symbol', () => {
+    it('backspace symbol', () => {
       const sp = init('<section><h1>Header</h1><p>First paragraph</p></section>');
       const h1 = main.querySelector('h1');
       sp.initFromSelection(RangeBuilder.buildRange().start(h1.firstChild, 6).end(h1.firstChild, 6).selection);
@@ -403,5 +403,102 @@ describe('html-validator', () => {
       sp.addElement('section', {});
       expect(sp.source).toBe('<p>Header</p><section><p id="1"><u><i><strong>First</strong> paragraph</i></u></p></section><p id="2"><code>Second</code> paragraph</p>');
     });
+  });
+  describe('press Enter and input text', () => {
+    it('br 0', () => {
+      const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+      const p = document.getElementById('1');
+      sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 0).end(p.firstChild, 0).selection);
+      sp.br(false, false, false);
+      sp.insString('a');
+      expect(sp.source).toBe('<section><h1>Header</h1><p id="1"><br>aFirst paragraph</p><p id="2">Second paragraph</p></section>');
+    });
+    it('br 1', () => {
+      const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+      const p = document.getElementById('1');
+      sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 1).end(p.firstChild, 1).selection);
+      sp.br(false, false, false);
+      sp.insString('a');
+      expect(sp.source).toBe('<section><h1>Header</h1><p id="1">F<br>airst paragraph</p><p id="2">Second paragraph</p></section>');
+    });
+    it('br to element', () => {
+      const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+      sp.initFromSelection(RangeBuilder.buildRange().start(main.firstChild, 1).end(main.firstChild, 1).selection);
+      sp.br(false, false, false);
+      sp.insString('a');
+      expect(sp.source).toBe('<section><h1>Header</h1><br><p id="1">aFirst paragraph</p><p id="2">Second paragraph</p></section>');
+    });
+    it('wbr 0', () => {
+      const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+      const p = document.getElementById('1');
+      sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 0).end(p.firstChild, 0).selection);
+      sp.br(true, false, false);
+      sp.insString('a');
+      expect(sp.source).toBe('<section><h1>Header</h1><p id="1"><wbr>aFirst paragraph</p><p id="2">Second paragraph</p></section>');
+    });
+    it('wbr 1', () => {
+      const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+      const p = document.getElementById('1');
+      sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 1).end(p.firstChild, 1).selection);
+      sp.br(true, false, false);
+      sp.insString('a');
+      expect(sp.source).toBe('<section><h1>Header</h1><p id="1">F<wbr>airst paragraph</p><p id="2">Second paragraph</p></section>');
+    });
+    it('wbr to element work as br', () => {
+      const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+      sp.initFromSelection(RangeBuilder.buildRange().start(main.firstChild, 1).end(main.firstChild, 1).selection);
+      sp.br(true, false, false);
+      sp.insString('a');
+      expect(sp.source).toBe('<section><h1>Header</h1><br><p id="1">aFirst paragraph</p><p id="2">Second paragraph</p></section>');
+    });
+
+    it('p 0', () => {
+      const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+      const p = document.getElementById('1');
+      sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 0).end(p.firstChild, 0).selection);
+      sp.br(false, true, false);
+      sp.insString('a');
+      expect(sp.source).toBe('<section><h1>Header</h1><p id="1"></p><p>aFirst paragraph</p><p id="2">Second paragraph</p></section>');
+    });
+    it('p 1', () => {
+      const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+      const p = document.getElementById('1');
+      sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 1).end(p.firstChild, 1).selection);
+      sp.br(false, true, false);
+      sp.insString('a');
+      expect(sp.source).toBe('<section><h1>Header</h1><p id="1">F</p><p>airst paragraph</p><p id="2">Second paragraph</p></section>');
+    });
+    it('p to element', () => {
+      const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+      sp.initFromSelection(RangeBuilder.buildRange().start(main.firstChild, 1).end(main.firstChild, 1).selection);
+      sp.br(false, true, false);
+      sp.insString('a');
+      expect(sp.source).toBe('<section><h1>Header</h1><p>a</p><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+    });
+
+    it('section 0', () => {
+      const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+      const p = document.getElementById('1');
+      sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 0).end(p.firstChild, 0).selection);
+      sp.br(false, false, true);
+      sp.insString('a');
+      expect(sp.source).toBe('<section><h1>Header</h1><p id="1"></p><section>aFirst paragraph</section><p id="2">Second paragraph</p></section>');
+    });
+    it('section 1', () => {
+      const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+      const p = document.getElementById('1');
+      sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 1).end(p.firstChild, 1).selection);
+      sp.br(false, false, true);
+      sp.insString('a');
+      expect(sp.source).toBe('<section><h1>Header</h1><p id="1">F</p><section>airst paragraph</section><p id="2">Second paragraph</p></section>');
+    });
+    it('section to element', () => {
+      const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+      sp.initFromSelection(RangeBuilder.buildRange().start(main.firstChild, 1).end(main.firstChild, 1).selection);
+      sp.br(false, false, true);
+      sp.insString('a');
+      expect(sp.source).toBe('<section><h1>Header</h1><section>a</section><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+    });
+
   });
 });
