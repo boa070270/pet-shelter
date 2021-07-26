@@ -1,27 +1,30 @@
 import {
   AfterViewInit,
   Component,
-  ElementRef, EmbeddedViewRef,
+  ElementRef,
+  EmbeddedViewRef,
   EventEmitter,
   Inject,
-  Input, NgZone,
+  Input,
+  NgZone, OnDestroy,
   OnInit,
-  Optional, QueryList, TemplateRef,
+  Optional,
+  TemplateRef,
   ViewChild,
-  ViewChildren, ViewContainerRef
+  ViewContainerRef
 } from '@angular/core';
-import {ComponentsPluginService, PluginDescription} from '../shared';
+import {ComponentsPluginService, PluginDescription, SYSTEM_LANG_TOKEN, SystemLang, deepCloneNode} from '../shared';
 import {DIALOG_DATA, DialogRef} from '../dialog-service';
-import {CdkDrag, CdkDragStart, CdkDropList, DragDrop, DragRef} from '@angular/cdk/drag-drop';
+import {CdkDropList} from '@angular/cdk/drag-drop';
 import {DOCUMENT} from '@angular/common';
-import {deepCloneNode} from '../shared/clone-node';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'lib-plugins-panel',
   templateUrl: './plugins-panel.component.html',
   styleUrls: ['./plugins-panel.component.scss']
 })
-export class PluginsPanelComponent implements OnInit, AfterViewInit {
+export class PluginsPanelComponent implements OnInit, AfterViewInit, OnDestroy {
   showIcons: boolean;
   list: PluginDescription[];
   @Input()
@@ -31,13 +34,18 @@ export class PluginsPanelComponent implements OnInit, AfterViewInit {
   @ViewChild('vc', {read: ViewContainerRef, static: true}) viewContainerRef: ViewContainerRef;
   cdkDropListDest: CdkDropList;
   private _previewRef: EmbeddedViewRef<any>;
+  private subs: Subscription;
 
-  constructor(private element: ElementRef<HTMLElement>, private componentsPlugin: ComponentsPluginService,
+  constructor(private element: ElementRef<HTMLElement>,
+              @Inject(SYSTEM_LANG_TOKEN) private systemLang: SystemLang,
+              private componentsPlugin: ComponentsPluginService,
               @Optional() @Inject(DIALOG_DATA) protected dialogData: any,
               @Optional() public dialogRef: DialogRef<any>,
               @Inject(DOCUMENT) private _document: Document,
               private _ngZone: NgZone) {
     this.list = componentsPlugin.listPlugins();
+    this.subs = this.systemLang.onChange().subscribe(() => this.changeLang());
+    this.changeLang();
     if (dialogData && dialogData.emitter) {
       this.emitter = dialogData.emitter;
       this.cdkDropListDest = dialogData.fCdkDropList();
@@ -48,6 +56,9 @@ export class PluginsPanelComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+  }
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 
   close(): void {
@@ -109,6 +120,16 @@ export class PluginsPanelComponent implements OnInit, AfterViewInit {
     e.dataTransfer.setDragImage(img, 0, 0);
   }
 
+  private changeLang(): void {
+    this.list.forEach(v => {
+      if (v.caption && typeof v.caption !== 'string') {
+        v.caption = this.systemLang.getTitle(v.caption);
+      }
+      if (v.description && typeof v.description !== 'string') {
+        v.description = this.systemLang.getTitle(v.description);
+      }
+    });
+  }
 }
 function removeNodes(viewRef: EmbeddedViewRef<any>): void {
   for (const n of viewRef.rootNodes) { // TODD what is node here

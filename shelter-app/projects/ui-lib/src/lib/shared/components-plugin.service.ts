@@ -51,7 +51,7 @@ export class ComponentsPluginService {
         res.push({
           selectorName: k,
           description: d.description,
-          caption: d.caption,
+          caption: d.caption || k,
           icon: d.icon,
           attr: d.attr,
           tag: d.tag,
