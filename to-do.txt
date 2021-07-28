@@ -1,3 +1,40 @@
+Errors:
+html-validator.ts:759 TypeError: Cannot read property 'typeNode' of undefined
+    at new SPosition (html-validator.ts:1218)
+    at SimpleParser.commit (html-validator.ts:586)
+    at SimpleParser.wrapEditing (html-validator.ts:756)
+    at SimpleParser.backspace (html-validator.ts:845)
+    at EditorComponent.editingKey (editor.component.ts:510)
+    at EditorComponent.onKeyDown (editor.component.ts:231)
+    at EditorComponent_Template_main_keydown_4_listener (editor.component.html:6)
+    at executeListenerWithErrorHandling (core.js:14994)
+    at wrapListenerIn_markDirtyAndPreventDefault (core.js:15029)
+    at HTMLElement.<anonymous> (platform-browser.js:582)
+
+html-validator.ts:759 TypeError: Cannot read property 'newChild' of null
+    at SNodeElement.split (html-validator.ts:455)
+    at SimpleParser.extractRange (html-validator.ts:897)
+    at html-validator.ts:872
+    at SimpleParser.wrapEditing (html-validator.ts:752)
+    at SimpleParser.deleteRange (html-validator.ts:865)
+    at html-validator.ts:851
+    at SimpleParser.wrapEditing (html-validator.ts:752)
+    at SimpleParser.backspace (html-validator.ts:845)
+    at EditorComponent.editingKey (editor.component.ts:510)
+    at EditorComponent.onKeyDown (editor.component.ts:231)
+
+html-validator.ts:759 TypeError: Cannot read property 'newChild' of null
+    at SNodeElement.split (html-validator.ts:455)
+    at SimpleParser.extractRange (html-validator.ts:897)
+    at html-validator.ts:872
+    at SimpleParser.wrapEditing (html-validator.ts:752)
+    at SimpleParser.deleteRange (html-validator.ts:865)
+    at html-validator.ts:851
+    at SimpleParser.wrapEditing (html-validator.ts:752)
+    at SimpleParser.backspace (html-validator.ts:845)
+    at EditorComponent.editingKey (editor.component.ts:510)
+    at EditorComponent.onKeyDown (editor.component.ts:231)
+
 1. Task! We have a lot of controls, we can define form through swagger object that can be used to collect data.
 But what do we do with the presentation? For presentation we "have": table, custom pages.
 For the table we provide datasource (we need to make configuration to it), for  custom pages we have editor that allow us to "make" page.

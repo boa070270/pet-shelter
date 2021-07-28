@@ -438,6 +438,9 @@ export class SNodeElement extends SNode {
    */
   split(cp: (a: Attributes) => Attributes, from: number, to?: number, sn?: SNode): {sn: SNode, after: SNode} {
     let after = null;
+    if (this.parent === null) {
+      throw new Error('Impossible split root node');
+    }
     if (!to || to > this.numChildren) { to = this.numChildren; }
     from = Math.max(0, from);
     sn = sn || (from !== 0 ? SNode.elementNode(this.nodeName, cp(this.attr)) : this);
@@ -821,8 +824,8 @@ export class SimpleParser {
   insList(tag: 'ul' | 'ol', attr?: Attributes): void {
     this.wrapEditing(() => {
       // if (this.currentRange.collapsed) {
-        const list = SNode.elementNode(tag, attr);
-        const f = list.addChild(SNode.elementNode('li'));
+        const list = SNode.elementNode(tag, this.copyAttr(attr));
+        const f = list.addChild(SNode.elementNode('li', this.copyAttr()));
         f.validate();
         this.insSNodes([list]);
         this.currentRange.focus = new SPosition(f.firstChild, 0);
@@ -834,8 +837,8 @@ export class SimpleParser {
   // convertToList(tag: 'ul' | 'ol', attr?: Attributes): void {
   //   this.wrapEditing(() => {
   //     const p = this.extractRange(this.currentRange);
-  //     const list = SNode.elementNode(tag, attr);
-  //     const f = list.addChild(SNode.elementNode('li'));
+  //     const list = SNode.elementNode(tag, this.copyAttr(attr));
+  //     const f = list.addChild(SNode.elementNode('li', this.copyAttr()));
   //     if (HtmlRules.isContent('Sectioning', p)) {
   //       // TODO
   //     }
@@ -882,6 +885,15 @@ export class SimpleParser {
       }
     });
   }
+  private extractFromRoot(from: number, to?: number, root?: SNode): SNode {
+    root = root || this.currentRoot;
+    to = to || root.numChildren;
+    const sn = root.newChild(SNode.elementNode('div', this.copyAttr()), to);
+    root.moveChildren(sn, from, to);
+    sn.validate();
+    root.validate();
+    return sn;
+  }
   extractRange(range: SRange): SNode {
     if (range.collapsed) {
       if (range.start.sNode.typeNode === Node.TEXT_NODE) {
@@ -889,20 +901,28 @@ export class SimpleParser {
       } else {
         return range.start.sNode;
       }
-    } else if (range.commonAncestor.typeNode === Node.TEXT_NODE || range.anchor.n === range.focus.n) {
-       return range.commonAncestor.split(a => this.copyAttr(a), range.start.offset, range.end.offset).sn;
+    } else if (range.anchor.n === range.focus.n) {
+      if (range.commonAncestor.parent) {
+        return range.commonAncestor.split(a => this.copyAttr(a), range.start.offset, range.end.offset).sn;
+      } else {
+        return this.extractFromRoot(range.start.offset, range.end.offset, range.commonAncestor);
+      }
     }
     let start = range.start;
-    while (start.n !== range.commonAncestor) {
+    while (start.sNode.parent !== range.commonAncestor) {
       const r = start.n.split(a => this.copyAttr(a), start.offset);
       start = new SPosition(r.sn.parent, r.sn.index);
     }
     let end = range.end;
-    while (end.n !== range.commonAncestor) {
+    while (end.sNode.parent !== range.commonAncestor) {
       const r = end.n.split(a => this.copyAttr(a), 0, end.offset);
       end = new SPosition(r.sn.parent, r.sn.index + 1);
     }
-    return range.commonAncestor.split(a => this.copyAttr(a), start.offset, end.offset).sn;
+    if (range.commonAncestor.parent) {
+      return range.commonAncestor.split(a => this.copyAttr(a), start.offset, end.offset).sn;
+    } else {
+      return this.extractFromRoot(start.offset, end.offset, range.commonAncestor);
+    }
   }
   private hasHeading(sn: SNode): boolean {
     let res = false;
