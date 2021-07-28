@@ -174,7 +174,7 @@ export abstract class SNode extends NodeWrapper {
   }
   moveChildren(dest: SNode, from: number, to?: number, destInx = 0): SNode[] {
     let m = [];
-    to = to || this.numChildren;
+    to = typeof to === 'number' ? to : this.numChildren;
     if (this.children) {
       this.modified();
       m = this.children.splice(from, to - from);
@@ -407,7 +407,7 @@ export class SNodeElement extends SNode {
     return s;
   }
   insert(sn: SNode, cp: (a: Attributes) => Attributes, from: number, to?: number): {sn: SNode, after: SNode} {
-    to = Math.min(this.numChildren, to || Number.MAX_VALUE);
+    to = Math.min(this.numChildren, typeof to === 'number' ? to : Number.MAX_VALUE);
     if (sn.canBeParent(this.children.slice(from, to - 1))) {
       const ixn = sn.numChildren;
       for (let i = from; i < to; ++i) {
@@ -441,7 +441,8 @@ export class SNodeElement extends SNode {
     if (this.parent === null) {
       throw new Error('Impossible split root node');
     }
-    if (!to || to > this.numChildren) { to = this.numChildren; }
+    to = typeof to === 'number' ? to : this.numChildren;
+    if (to > this.numChildren) { to = this.numChildren; }
     from = Math.max(0, from);
     sn = sn || (from !== 0 ? SNode.elementNode(this.nodeName, cp(this.attr)) : this);
     if (sn.typeNode === Node.TEXT_NODE) {
@@ -916,7 +917,7 @@ export class SimpleParser {
     let end = range.end;
     while (end.sNode.parent !== range.commonAncestor) {
       const r = end.n.split(a => this.copyAttr(a), 0, end.offset);
-      end = new SPosition(r.sn.parent, r.sn.index + 1);
+      end = new SPosition(r.after.parent, r.after.index);
     }
     if (range.commonAncestor.parent) {
       return range.commonAncestor.split(a => this.copyAttr(a), start.offset, end.offset).sn;
@@ -1026,10 +1027,14 @@ export class SimpleParser {
       let nodeName = 'br';
       if (wbr && focus.n.typeNode === Node.TEXT_NODE) {
         nodeName = 'wbr';
-      } else if (HtmlRules.isHeading(focus.n.parent) || newParagraph) {
+      } else if (HtmlRules.isHeading(focus.n.parent)) {
         nodeName = 'p';
+      } else if (newParagraph) {
+        nodeName = (focus.sNode.parent.nodeName === 'li') ? 'li' : 'p';
       } else if (newSection) {
-        nodeName = 'section';
+        const fn = new FilterNode(['li']);
+        const li: SNode = focus.sNode.hasParent(fn);
+        nodeName = (li) ? 'li' : 'section';
       }
       const sn = SNode.elementNode(nodeName, this.copyAttr({}));
       let r;

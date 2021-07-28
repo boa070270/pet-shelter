@@ -405,7 +405,15 @@ describe('html-validator', () => {
     });
   });
   describe('press Enter and input text', () => {
-    it('br 0', () => {
+    it('br to text begin', () => {
+      const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
+      const p = document.getElementById('1');
+      sp.initFromSelection(RangeBuilder.buildRange().start(p, 0).end(p, 0).selection);
+      sp.br(false, false, false);
+      sp.insString('a');
+      expect(sp.source).toBe('<section><h1>Header</h1><p id="1"><br>aFirst paragraph</p><p id="2">Second paragraph</p></section>');
+    });
+    it('br in text begin', () => {
       const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
       const p = document.getElementById('1');
       sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 0).end(p.firstChild, 0).selection);
@@ -413,7 +421,7 @@ describe('html-validator', () => {
       sp.insString('a');
       expect(sp.source).toBe('<section><h1>Header</h1><p id="1"><br>aFirst paragraph</p><p id="2">Second paragraph</p></section>');
     });
-    it('br 1', () => {
+    it('br  in text', () => {
       const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
       const p = document.getElementById('1');
       sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 1).end(p.firstChild, 1).selection);
@@ -428,7 +436,7 @@ describe('html-validator', () => {
       sp.insString('a');
       expect(sp.source).toBe('<section><h1>Header</h1><br><p id="1">aFirst paragraph</p><p id="2">Second paragraph</p></section>');
     });
-    it('wbr 0', () => {
+    it('wbr in text begin', () => {
       const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
       const p = document.getElementById('1');
       sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 0).end(p.firstChild, 0).selection);
@@ -436,7 +444,7 @@ describe('html-validator', () => {
       sp.insString('a');
       expect(sp.source).toBe('<section><h1>Header</h1><p id="1"><wbr>aFirst paragraph</p><p id="2">Second paragraph</p></section>');
     });
-    it('wbr 1', () => {
+    it('wbr in text', () => {
       const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
       const p = document.getElementById('1');
       sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 1).end(p.firstChild, 1).selection);
@@ -451,8 +459,7 @@ describe('html-validator', () => {
       sp.insString('a');
       expect(sp.source).toBe('<section><h1>Header</h1><br><p id="1">aFirst paragraph</p><p id="2">Second paragraph</p></section>');
     });
-
-    it('p 0', () => {
+    it('br as new paragraph (ctrlKey) in text begin', () => {
       const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
       const p = document.getElementById('1');
       sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 0).end(p.firstChild, 0).selection);
@@ -460,7 +467,7 @@ describe('html-validator', () => {
       sp.insString('a');
       expect(sp.source).toBe('<section><h1>Header</h1><p id="1"></p><p>aFirst paragraph</p><p id="2">Second paragraph</p></section>');
     });
-    it('p 1', () => {
+    it('br as new paragraph (ctrlKey) in text', () => {
       const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
       const p = document.getElementById('1');
       sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 1).end(p.firstChild, 1).selection);
@@ -468,7 +475,7 @@ describe('html-validator', () => {
       sp.insString('a');
       expect(sp.source).toBe('<section><h1>Header</h1><p id="1">F</p><p>airst paragraph</p><p id="2">Second paragraph</p></section>');
     });
-    it('p to element', () => {
+    it('br as new paragraph (ctrlKey) in element', () => {
       const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
       sp.initFromSelection(RangeBuilder.buildRange().start(main.firstChild, 1).end(main.firstChild, 1).selection);
       sp.br(false, true, false);
@@ -476,7 +483,7 @@ describe('html-validator', () => {
       expect(sp.source).toBe('<section><h1>Header</h1><p>a</p><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
     });
 
-    it('section 0', () => {
+    it('br as new section (ctrlKey) in text begin', () => {
       const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
       const p = document.getElementById('1');
       sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 0).end(p.firstChild, 0).selection);
@@ -484,7 +491,7 @@ describe('html-validator', () => {
       sp.insString('a');
       expect(sp.source).toBe('<section><h1>Header</h1><p id="1"></p><section>aFirst paragraph</section><p id="2">Second paragraph</p></section>');
     });
-    it('section 1', () => {
+    it('br as new section (ctrlKey) in text', () => {
       const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
       const p = document.getElementById('1');
       sp.initFromSelection(RangeBuilder.buildRange().start(p.firstChild, 1).end(p.firstChild, 1).selection);
@@ -492,7 +499,7 @@ describe('html-validator', () => {
       sp.insString('a');
       expect(sp.source).toBe('<section><h1>Header</h1><p id="1">F</p><section>airst paragraph</section><p id="2">Second paragraph</p></section>');
     });
-    it('section to element', () => {
+    it('br as new section (ctrlKey) in element', () => {
       const sp = init('<section><h1>Header</h1><p id="1">First paragraph</p><p id="2">Second paragraph</p></section>');
       sp.initFromSelection(RangeBuilder.buildRange().start(main.firstChild, 1).end(main.firstChild, 1).selection);
       sp.br(false, false, true);
