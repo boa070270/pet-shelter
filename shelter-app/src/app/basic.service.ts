@@ -3,7 +3,7 @@ import {HttpClient, HttpEvent, HttpHeaders, HttpResponse} from '@angular/common/
 import {Observable, Subscription} from 'rxjs';
 import {
   BROWSER_STORAGE,
-  CommentResponse,
+  CommentResponse, DsDataType, DsType,
   LanguageType as UILanguageType,
   ObtainSystemLanguage,
   StorageService,
@@ -33,7 +33,6 @@ import {
   UserType,
 } from './common';
 import {AuthorizationService} from './authorization.service';
-import {DsDataType, DsType} from "./admin/ds.service";
 
 const API_URL = '/api/v1';
 
@@ -645,9 +644,9 @@ export class BasicService implements ObtainSystemLanguage, OnDestroy {
       tap(r => this.setClientId(r.headers.get('x-client-id')))
     );
   }
-  getDsData(ds): Observable<HttpResponse<Response<DsType>>> {
+  getDsData(ds): Observable<HttpResponse<Response<{ds: string, data: DsDataType[]}>>> {
     this.logger.debug('getDsFields');
-    return this.http.get<HttpResponse<Response<DsType>>>(API_URL + `/ds-data/${ds}`, this.httpOptions(true)).pipe(
+    return this.http.get<HttpResponse<Response<{ds: string, data: DsDataType[]}>>>(API_URL + `/ds-data/${ds}`, this.httpOptions(true)).pipe(
       tap(r => this.setClientId(r.headers.get('x-client-id')))
     );
   }

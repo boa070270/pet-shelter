@@ -3,6 +3,11 @@ import {BROWSER_STORAGE, StorageService, SwaggerSchema} from '../../shared';
 
 const FORM_KEYS = 'ui-lib-swagger-form-keys';
 const KEY_PREFIX = 'ui-lib-swagger-form-key-';
+
+/**
+ * This service stores/restores SwaggerObjects to/from Browser storage
+ * TODO If I need it?
+ */
 @Injectable({
   providedIn: 'root'
 })

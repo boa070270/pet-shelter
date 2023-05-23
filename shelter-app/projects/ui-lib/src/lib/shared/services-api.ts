@@ -3,6 +3,8 @@
  */
 import {InjectionToken} from '@angular/core';
 import {I18NType, ObtainSystemLanguage, SystemLang} from './language';
+import {AbstractDataSource, DataService} from './cdk-data-source';
+import {Observable} from "rxjs";
 
 /**** Logger ****/
 // tslint:disable-next-line:variable-name
@@ -70,11 +72,60 @@ export const BROWSER_STORAGE = new InjectionToken<StorageService>('Browser Local
 /**
  * RootPage service. Allow translate data to dynamic page
  */
-export interface RootPageService {
+export interface HierarchyPageService {
   getPageData(key: string): string;
   savePageData(key): void;
   getData(key: string): any;
   setData(key: string, value): void;
   flushPageData(): void;
 }
-export const ROOT_PAGE_DATA = new InjectionToken<RootPageService>('RootPageService');
+export const ROOT_PAGE_DATA = new InjectionToken<HierarchyPageService>('HierarchyPageService');
+/**
+ * DataSource service
+ */
+export const CUSTOM_DS_SERVICE = new InjectionToken<CustomDSService>('Providing Custom DataSource');
+export interface DsType {
+  ds: string;
+  description?: object;
+  fields?: DsFieldType[];
+}
+export interface DsFieldType {
+  ds: string;
+  field: string;
+  pk: boolean;
+  type: DsFldTypeEnum;
+}
+
+export enum DsFldTypeEnum {
+  string = 'string',
+  number = 'number',
+  date = 'date'
+}
+export function removeNull(obj): any {
+  const replacer = (key, value) =>
+    String(value) === 'null' ? undefined : value;
+  const str = JSON.stringify(obj, replacer);
+  if (!str) {
+    return undefined;
+  }
+  return JSON.parse(str);
+}
+export interface DsDataType {
+  [key: string]: string | number;
+}
+export interface CustomDSService {
+  knownDS(): Array<DsType>;
+  obtainDS<T extends AbstractDataSource<any>>(name: string): T;
+}
+
+/**
+ * EngineModel
+ */
+export interface EngineModelService {
+  loadModel(id: string): Observable<any>;
+  storeModel(id: string, model: any): Observable<any>;
+  deleteModel(id: string): Observable<any>;
+}
+/**
+ * DynamicPage
+ */

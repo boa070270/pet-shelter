@@ -5,7 +5,7 @@ import {Subscription} from 'rxjs';
 @Component({
   selector: 'lib-navbar',
   template: `
-      <lib-app-bar position="Up" [sticky]="true">
+<!--      <lib-app-bar position="Up" [sticky]="true">-->
           <div class="ui-navbar">
               <button class="gm-more_vert" (click)="emitter.emit({who: 'sidebar'})"></button>
               <a [routerLink]="'/'">
@@ -31,7 +31,7 @@ import {Subscription} from 'rxjs';
                   <lib-menu [menu]="menu" [bottom]="true"></lib-menu>
               </div>
           </div>
-      </lib-app-bar>`,
+<!--      </lib-app-bar>-->`,
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent implements OnDestroy {
@@ -41,7 +41,7 @@ export class NavbarComponent implements OnDestroy {
   // get menu(): UIMenu[] {
   //   return this.menuService.menu;
   // }
-  @Input() menu: UIMenu[];
+  @Input() menu: UIMenu[] = [];
   set lang(l: string) {
     this.systemLang.setLocale(l);
   }

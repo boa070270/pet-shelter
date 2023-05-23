@@ -12,7 +12,7 @@ import {
   TitleType,
 } from 'ui-lib';
 import {BasicService} from './basic.service';
-import {Validators} from "@angular/forms";
+import {Validators} from '@angular/forms';
 
 @Component({
   selector: 'app-test-dynamic',

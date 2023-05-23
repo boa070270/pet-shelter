@@ -1,12 +1,12 @@
-import {Component, Directive, ElementRef, Host, Inject, Input, OnInit, Self, SkipSelf} from '@angular/core';
-import {ROOT_PAGE_DATA, RootPageService, RootPageServiceImpl} from '../shared';
+import {Directive, ElementRef, Host, Inject, Input, OnInit, Self, SkipSelf} from '@angular/core';
+import {ROOT_PAGE_DATA, HierarchyPageService, HierarchyPageServiceImpl} from '../shared';
 import {IteratorDirective} from './abstract-iterator.component';
-import {deepCloneNode} from '../shared/clone-node';
+import {deepCloneNode} from '../shared';
 
 @Directive({
   selector: '[switch-page-data]',
   providers: [
-    {provide: ROOT_PAGE_DATA, useClass: RootPageServiceImpl}
+    {provide: ROOT_PAGE_DATA, useClass: HierarchyPageServiceImpl}
   ]
 })
 export class SwitchPageDataDirective implements OnInit {
@@ -15,8 +15,8 @@ export class SwitchPageDataDirective implements OnInit {
   @Input('index') index: number;
   constructor(private element: ElementRef,
               @Host() private iterator: IteratorDirective,
-              @Self() @Inject(ROOT_PAGE_DATA) private root: RootPageService,
-              @SkipSelf() @Inject(ROOT_PAGE_DATA) protected parentRoot: RootPageService) {
+              @Self() @Inject(ROOT_PAGE_DATA) private root: HierarchyPageService,
+              @SkipSelf() @Inject(ROOT_PAGE_DATA) protected parentRoot: HierarchyPageService) {
   }
 
   ngOnInit(): void {
@@ -32,7 +32,7 @@ export class SwitchPageDataDirective implements OnInit {
   }
   private setData(): void {
     if (this.data && this.prefix) {
-      this.root = RootPageServiceImpl.fromRoot(this.parentRoot as RootPageServiceImpl);
+      this.root = HierarchyPageServiceImpl.fromRoot(this.parentRoot as HierarchyPageServiceImpl);
       Object.keys(this.data || {}).forEach(k => {
         const key = (this.prefix ? this.prefix + '.' : '') + k;
         this.root.setData(key, this.data[k]);

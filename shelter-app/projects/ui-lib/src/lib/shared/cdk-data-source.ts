@@ -2,7 +2,7 @@ import {CollectionViewer, DataSource, ListRange} from '@angular/cdk/collections'
 import {BehaviorSubject, ConnectableObservable, merge, Observable, of, Subject, Subscription, zip} from 'rxjs';
 import {map, publishLast, reduce, takeLast, tap} from 'rxjs/operators';
 import {equals as eqLstRange, sortOut} from './paging';
-import {Attributes} from "./html-helper";
+import {Attributes} from './html-helper';
 
 export interface IOrder {
   p: string;

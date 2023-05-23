@@ -1,4 +1,4 @@
-import {Component, OnChanges, OnDestroy, SimpleChanges, ViewContainerRef} from '@angular/core';
+import {Component, InjectFlags, OnChanges, OnDestroy, SimpleChanges, ViewContainerRef} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {
   distinctTitleId,
@@ -6,7 +6,7 @@ import {
   I18NType,
   isTitleType,
   ROOT_PAGE_DATA,
-  RootPageService,
+  HierarchyPageService,
   SYSTEM_LANG_TOKEN,
   SystemLang,
   TitleType
@@ -20,12 +20,12 @@ export class AbstractComponent implements OnDestroy, OnChanges {
   private subs: Subscription;
   i18n: any;
   public systemLang: SystemLang;
-  protected rootPage: RootPageService;
+  protected rootPage: HierarchyPageService;
   public i18NCfg?: I18NType;
 
   constructor(protected _view: ViewContainerRef) {
     this.systemLang = _view.injector.get(SYSTEM_LANG_TOKEN);
-    this.i18NCfg = _view.injector.get(I18N_CFG, null);
+    this.i18NCfg = _view.injector.get(I18N_CFG, {}, InjectFlags.Optional);
     this.rootPage = _view.injector.get(ROOT_PAGE_DATA, null);
     this.subs = this.systemLang.onChange().subscribe( l => {
       if (typeof l === 'string') {

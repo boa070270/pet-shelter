@@ -709,12 +709,19 @@ export class SimpleParser {
     }
   }
   private nextDown(p: SPosition, stepText = true): SPosition {
+    if (p.sNode.typeNode === Node.TEXT_NODE && p.n.typeNode !== Node.TEXT_NODE) {
+      p = new SPosition(p.sNode, 0);
+    }
     if (stepText && p.n.typeNode === Node.TEXT_NODE && p.offset < p.n.getText().length && p.n.state >= 0) {
       return new SPosition(p.n, p.offset + 1);
     }
     return SPosition.findPosition(this.currentRoot, p, editorNode(stepText), true);
   }
   private nextUp(p: SPosition, stepText = true): SPosition {
+    if (p.sNode.typeNode === Node.TEXT_NODE && p.n.typeNode !== Node.TEXT_NODE) {
+      const n = p.sNode;
+      p = new SPosition(n, n.getText().length);
+    }
     if (stepText && p.n.typeNode === Node.TEXT_NODE && p.n.getText() && p.offset > 0 && p.n.state >= 0) {
       return new SPosition(p.n, Math.min(p.offset - 1, p.n.getText().length));
     }

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {ArrayDataSource} from './cdk-data-source';
 import {AccordionData, PeriodicElement} from '../controls';
 import {SwaggerNative, SwaggerObject, swaggerUI} from './swagger-object';
-import {RootPageService} from './services-api';
+import {HierarchyPageService} from './services-api';
 
 /*
  {
@@ -18,7 +18,7 @@ import {RootPageService} from './services-api';
  */
 
 @Injectable()
-export class RootPageServiceImpl implements RootPageService {
+export class HierarchyPageServiceImpl implements HierarchyPageService {
   // accData: AccordionData[] = [{label: 'AAAAaaa', data: 'a data'}, {label: 'BBBBBbbbb', data: 'b data'}];
   private dbData = {
     'test-dynamic': {
@@ -55,8 +55,8 @@ export class RootPageServiceImpl implements RootPageService {
   private data;
   constructor() {
   }
-  static fromRoot(root: RootPageServiceImpl): RootPageService {
-    const r = new RootPageServiceImpl();
+  static fromRoot(root: HierarchyPageServiceImpl): HierarchyPageService {
+    const r = new HierarchyPageServiceImpl();
     r.data = root.data;
     return r;
   }

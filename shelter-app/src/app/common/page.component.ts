@@ -2,8 +2,6 @@ import {Component, Inject, Input, OnInit} from '@angular/core';
 import {
   AbstractDataSource,
   ArrayDataSource,
-  DynamicHTMLOptions,
-  DynamicHTMLRenderer,
   ShowMediaType, SYSTEM_LANG_TOKEN,
   SystemLang,
 } from 'ui-lib';
@@ -15,22 +13,22 @@ import {PetComponent} from './pet.component';
 import {CarouselComponent} from './plugins/carousel.component';
 import {LengthenListComponent} from './plugins/lengthen-list.component';
 
-const COMPONENTS_TO_EDITOR: DynamicHTMLOptions = {
-  components: [
-    {component: PetComponent},
-    {component: CarouselComponent},
-    {component: LengthenListComponent}
-  ]
-};
+// const COMPONENTS_TO_EDITOR: DynamicHTMLOptions = {
+//   components: [
+//     {component: PetComponent},
+//     {component: CarouselComponent},
+//     {component: LengthenListComponent}
+//   ]
+// };
 
 @Component({
   selector: 'app-page',
   templateUrl: './page.component.html',
   styleUrls: ['./page.component.sass'],
-  providers: [
-    {provide: DynamicHTMLOptions, useValue: COMPONENTS_TO_EDITOR},
-    {provide: DynamicHTMLRenderer, useClass: DynamicHTMLRenderer}
-  ]
+  // providers: [
+  //   {provide: DynamicHTMLOptions, useValue: COMPONENTS_TO_EDITOR},
+  //   {provide: DynamicHTMLRenderer, useClass: DynamicHTMLRenderer}
+  // ]
 })
 export class PageComponent implements OnInit {
   @Input() data: PageType;

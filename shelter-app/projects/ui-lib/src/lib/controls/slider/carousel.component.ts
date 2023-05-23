@@ -1,7 +1,6 @@
 import {
   ChangeDetectorRef,
   Component,
-  EventEmitter,
   Input,
   OnDestroy,
   OnInit,
@@ -9,12 +8,10 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import {CdkDataSource, IntervalObservableService} from '../../shared';
-import {AbstractComponent} from '../abstract.component';
+import {IntervalObservableService} from '../../shared';
 import {SlideContainerDirective} from './slide-container.directive';
-import {ListRange} from '@angular/cdk/collections';
 import {Subscription} from 'rxjs';
-import {AbstractIteratorComponent, IteratorDirective} from "../abstract-iterator.component";
+import {AbstractIteratorComponent, IteratorDirective} from '../abstract-iterator.component';
 
 
 @Component({

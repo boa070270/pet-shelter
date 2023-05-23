@@ -1,9 +1,9 @@
-import {Component, Inject, Input, OnDestroy, OnInit} from '@angular/core';
-import {FieldValueType, PageType, PetType, ReferenceType} from './types';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {FieldValueType, PetType} from './types';
 import {BasicService} from '../basic.service';
 import {ActivatedRoute} from '@angular/router';
 import {Subscription} from 'rxjs';
-import { IntervalObservableService } from 'ui-lib';
+import {IntervalObservableService} from 'ui-lib';
 import {FieldsService} from '../fields.service';
 
 @Component({

@@ -1,6 +1,17 @@
-br(wbr: boolean, newParagraph: boolean, newSection: boolean): void {
-parser.br(shiftKey, ctrlKey, altKey);
+Review:
+SwaggerBuilderComponent, ObjectLinkService
+SwaggerFormService - stores/restores SwaggerObject to/from Browser storage
+TableProviderService - is used only in tests?
+MenuService
 
+SwitchPageDataDirective, RootPageServiceImpl - ?
+
+They are published as root:
+DialogService, ComponentsPluginService, DictionaryService, IntervalObservableService,
+ScrollEventService, VisibilityChangeService
+
+Is ok:
+LoggerService, UIErrorHandler, BrowserStorageService, SystemLangImpl
 
 1. Task! We have a lot of controls, we can define form through swagger object that can be used to collect data.
 But what do we do with the presentation? For presentation we "have": table, custom pages.

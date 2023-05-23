@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {ROOT_PAGE_DATA, RootPageService} from './services-api';
+import {ROOT_PAGE_DATA, HierarchyPageService} from './services-api';
 
 @Component({
   selector: 'lib-root-page',
@@ -13,7 +13,7 @@ export class RootPageComponent implements OnInit, AfterViewInit, OnDestroy {
   private pageId: string;
   private html: string;
 
-  constructor(@Inject(ROOT_PAGE_DATA) private rootPage: RootPageService,
+  constructor(@Inject(ROOT_PAGE_DATA) private rootPage: HierarchyPageService,
               private route: ActivatedRoute) { }
 
   ngOnInit(): void {

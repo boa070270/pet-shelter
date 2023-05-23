@@ -5,8 +5,8 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
 import {
-  ControlsModule,
-  DialogServiceModule,
+  ControlsModule, CUSTOM_DS_SERVICE,
+  DialogServiceModule, EditorStoreToken,
   EXT_SYSTEM_LANG,
   LoggerModule,
   SharedModule,
@@ -27,6 +27,8 @@ import {BasicService} from './basic.service';
 import {TestDynamicComponent} from './test-dynamic.component';
 import {LogWriterService} from './log-writer.service';
 import {TestEditorComponent} from './test-editor.component';
+import {CustomDSServiceMock} from './mock/custom-dsservice-mock';
+import {EditorStoreMock} from './mock/EditorStoreMock';
 
 @NgModule({
   declarations: [
@@ -56,7 +58,9 @@ import {TestEditorComponent} from './test-editor.component';
   ],
   providers: [
     {provide: EXT_SYSTEM_LANG, useClass: BasicService},
-    {provide: UILoggerWriterToken, useClass: LogWriterService}
+    {provide: UILoggerWriterToken, useClass: LogWriterService},
+    {provide: CUSTOM_DS_SERVICE, useClass: CustomDSServiceMock},
+    {provide: EditorStoreToken, useClass: EditorStoreMock}
   ],
   bootstrap: [AppComponent]
 })

@@ -158,3 +158,7 @@ export function camelToDashCase(input: string): string {
 export function kebabToCamelCase(input: string): string {
   return input.replace(/-([a-z\d])/g, (_, char) => char.toUpperCase());
 }
+
+export function CombineProperty(target: any, propertyKey: string, descriptor: PropertyDescriptor): any {
+
+}

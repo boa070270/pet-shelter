@@ -1,6 +1,10 @@
 import {ComponentFactory, ComponentFactoryResolver, Injectable, Injector, Type} from '@angular/core';
 import {AbstractIteratorComponent} from './abstract-iterator.component';
 
+/**
+ * This is workaround for restriction of ngContentSelector
+ * By default, if template of component doesn't have <ng-content>, Angular doesn't process content for custom elements
+ */
 @Injectable()
 export class ExtComponentFactory extends ComponentFactoryResolver {
   private readonly original: ComponentFactoryResolver;

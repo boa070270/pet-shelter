@@ -1,8 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import {FieldTypeUI, SwaggerFieldType} from '../common';
-import {AbstractDataSource, SwaggerArray, SwaggerNative, SwaggerObject, swaggerUI} from 'ui-lib';
-import {DsType} from './ds.service';
-import {DataSources} from '../datasources';
+import {Component} from '@angular/core';
+import {AbstractDataSource, DsType, SwaggerArray, SwaggerNative, SwaggerObject, swaggerUI} from '../shared';
 
 const I18N = {
   ds: [{ lang: 'en', title: 'Datasource name' }, { lang: 'ua', title: 'Назва джерела даних' }],
@@ -41,9 +38,5 @@ export class DsComponent {
         }, undefined, ['field', 'type']), {control: 'lib-editable-list'})
     }, undefined, ['ds']
   );
-
-  constructor(datasources: DataSources) {
-    this.dataSource = datasources.Ds;
-  }
 
 }

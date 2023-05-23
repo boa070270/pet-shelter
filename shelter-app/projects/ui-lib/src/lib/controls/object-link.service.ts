@@ -1,21 +1,21 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
-  ArrayConstrictions,
   BaseConstrictions,
   coerceToSwaggerArray,
   coerceToSwaggerNative,
   coerceToSwaggerObject,
-  NativeConstrictions,
-  NumberConstrictions,
-  ObjectConstrictions,
-  StringConstrictions,
   SwaggerArray,
   SwaggerNative,
   SwaggerNativeTypes,
   SwaggerObject,
-  SwaggerSchema, SwaggerUI, TitleType
+  SwaggerSchema,
+  SwaggerUI
 } from '../shared';
 
+/**
+ * It's used by SwaggerBuilderComponent
+ * TODO is it need, it can be used as cache of SwaggerObject
+ */
 @Injectable({
   providedIn: 'root'
 })

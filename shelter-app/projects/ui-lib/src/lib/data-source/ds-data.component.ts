@@ -1,6 +1,14 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {DsDataService, DsDataType, DsFldTypeEnum, DsService, DsType} from "./ds.service";
-import {AbstractDataSource, MainDataSource, SwaggerNative, SwaggerObject, SelectControlComponent, TableComponent} from 'ui-lib';
+import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import {
+  AbstractDataSource,
+  CdkDataSource,
+  CUSTOM_DS_SERVICE,
+  CustomDSService,
+  DsDataType,
+  DsFldTypeEnum,
+  DsType, SwaggerNative, SwaggerObject
+} from '../shared';
+import {SelectControlComponent, TableComponent} from '../controls';
 
 @Component({
   selector: 'app-ds-data',
@@ -11,22 +19,21 @@ import {AbstractDataSource, MainDataSource, SwaggerNative, SwaggerObject, Select
   styleUrls: ['./ds-data.component.sass']
 })
 export class DsDataComponent implements OnInit {
-  ds: DsType[];
+  ds: AbstractDataSource<DsType>;
   dsNames: string[] = [''];
   dataSource: AbstractDataSource<DsDataType>;
   swagger: SwaggerObject;
   @ViewChild(SelectControlComponent, {static: true}) select: SelectControlComponent;
   @ViewChild('table') table: TableComponent<any, any>;
   display = [];
+  private cdk: CdkDataSource<DsType, any>;
 
-  constructor(protected dsService: DsService, protected dsDataService: DsDataService) {
-    dsService.obtainData().subscribe(value => {
-      this.ds = value.data;
-      this.ds.forEach(v => {
-        this.dsNames.push(v.ds);
-      });
-    });
-    this.dataSource = new MainDataSource(this.dsDataService, 20, 100, ALL_EQUAL, ALL_EQUAL);
+  constructor(@Inject(CUSTOM_DS_SERVICE) private customDSRepo: CustomDSService){
+    this.ds = customDSRepo.obtainDS('ds');
+    if (this.ds) {
+      // this.cdk = this.ds.registerDS();
+    }
+    this.dataSource = customDSRepo.obtainDS('dsDataType');
   }
   ngOnInit(): void {
     this.select.registerOnChange(c => {
@@ -38,9 +45,9 @@ export class DsDataComponent implements OnInit {
     if (!ds) {
       return;
     }
-    const fields = this.ds.find(d => d.ds === ds).fields;
-    this.dsDataService.ds = ds;
-    this.dsDataService.fields = fields;
+    const fields = []; // this.ds.find(d => d.ds === ds).fields;
+    // this.dsDataService.ds = ds;
+    // this.dsDataService.fields = fields;
     const orderCtrl = [];
     const properties = {};
     const required = [];

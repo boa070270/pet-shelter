@@ -45,6 +45,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     this.menuTree = systemMenu.menuTree();
     this.menu = this.menuTree2UIMenu(this.menuTree);
     this.languages = this.systemLang.getLanguages();
+    router.events.subscribe((e) => console.log('router', e));
+    console.log('constructor router.url', router.url);
     this.subscriptionLang = this.systemLang.onChange().subscribe(next => this.onLangChange(next));
     breakpointObserver.observe([
       Breakpoints.XSmall,
@@ -72,6 +74,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     console.log('app-routing.OnInit');
+    console.log('onInit router.url', this.router.routerState);
   }
   ngAfterViewInit(): void {
     // this.snav.closedStart.subscribe(next => {

@@ -10,13 +10,11 @@ import {auditTime} from 'rxjs/operators';
 export class EndPageComponent implements OnDestroy, AfterViewInit {
   @ViewChild(IsVisibleDirective) divElement: IsVisibleDirective;
   private subject = new Subject<boolean>();
-  private subs: Subscription;
+  private subs: Subscription = Subscription.EMPTY;
 
   constructor() {}
   ngOnDestroy(): void {
-    if (this.subs) {
-      this.subs.unsubscribe();
-    }
+    this.subs.unsubscribe();
   }
   ngAfterViewInit(): void {
     this.subs = this.divElement.change(0).subscribe(v => this.subject.next(v));

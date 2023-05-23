@@ -13,8 +13,10 @@ import {SystemMenuService} from './system-menu.service';
 import {TestDynamicComponent} from './test-dynamic.component';
 import {TestEditorComponent} from './test-editor.component';
 import {TestSyncComponent} from './admin/test-sync.component';
+import {AppComponent} from './app.component';
 
 const routes: Routes = [
+  { path: '**', component: AppComponent},
   { path: '', component: MainPageComponent },
   { path: 'page/:id', component: PageComponent },
   { path: 'pet/:id', component: PetComponent },

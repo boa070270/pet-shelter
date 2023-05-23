@@ -64,6 +64,7 @@ import {IsVisibleDirective} from './is-visible.directive';
 import {MasonryListComponent} from './content-display/masonry-list.component';
 import {AdvertComponent} from './content-display/advert.component';
 import {ExtComponentFactory} from './ext-component-factory';
+import { AnchorComponent } from './anchor.component';
 
 @NgModule({
   declarations: [
@@ -119,6 +120,7 @@ import {ExtComponentFactory} from './ext-component-factory';
     IsVisibleDirective,
     MasonryListComponent,
     AdvertComponent,
+    AnchorComponent,
   ],
     imports: [
         CommonModule,
@@ -247,5 +249,8 @@ export class ControlsModule {
       description: {tag: 'ui-carousel', elementContent: [{cnt: ['Flow']}]}}, replaceInjector);
     componentsPlugin.addPlugin([], {component: SpanComponent,
       description: {tag: 'ui-span', elementContent: [{cnt: ['Phrasing']}]}}, injector);
+
+    componentsPlugin.addPlugin(['lib-navbar'], {component: NavbarComponent,
+      description: {tag: 'ui-navbar', elementContent: [{cnt: ['Flow']}]}}, injector);
   }
 }

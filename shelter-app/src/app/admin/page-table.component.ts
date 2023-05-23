@@ -1,8 +1,8 @@
 import {Component} from '@angular/core';
 import {AbstractDataSource} from 'ui-lib';
 // from x-payload
-import {PageType} from '../common/types';
-import {SwaggerPageType} from '../common/swagger-objects';
+import {PageType} from '../common';
+import {SwaggerPageType} from '../common';
 import {DataSources} from '../datasources';
 
 @Component({

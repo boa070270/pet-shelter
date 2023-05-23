@@ -1,10 +1,8 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {BasicService} from './basic.service';
-import {ActivatedRoute, NavigationEnd, Router, RouterState, UrlSegment} from '@angular/router';
-import {SystemLang} from 'ui-lib';
+import {NavigationEnd, Router} from '@angular/router';
 import {PageType} from './common/types';
-import {BreadcrumbsComponent} from './common/breadcrumbs.component';
-import {Observable, Subscription} from 'rxjs';
+import {Subscription} from 'rxjs';
 import {filter, tap} from 'rxjs/operators';
 
 @Component({

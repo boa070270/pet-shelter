@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --host=0.0.0.0 --proxy-config proxy.js",
+    "start": "ng serve --host=0.0.0.0 --proxy-config proxy.cjs",
     "build": "ng build",
     "build:scss": "scss-bundle -p scss-bundle.config.json",
     "build:lib": "ng build ui-lib && npm run build:scss",
@@ -11,6 +11,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
+  "type": "module",
   "private": true,
   "dependencies": {
     "@angular/animations": "~11.0.9",

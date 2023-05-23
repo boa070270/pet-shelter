@@ -1,5 +1,5 @@
 import {EventEmitter, Injectable} from '@angular/core';
-import {Response, UserType} from './common/types';
+import {Response, UserType} from './common';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {map, tap} from 'rxjs/operators';
 import {Observable, of} from 'rxjs';

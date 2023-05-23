@@ -1,6 +1,5 @@
-import {ChangeDetectorRef, Directive, HostBinding, OnDestroy} from '@angular/core';
+import {Directive, HostBinding} from '@angular/core';
 import {IntervalObservableService} from '../../shared';
-import {Subscription} from 'rxjs';
 
 @Directive({
   selector: '[libSlideContainer]'

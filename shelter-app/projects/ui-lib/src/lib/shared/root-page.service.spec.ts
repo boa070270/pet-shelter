@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 
-import { RootPageServiceImpl } from './root-page.service';
-import {ROOT_PAGE_DATA, RootPageService} from './services-api';
+import { HierarchyPageServiceImpl } from './root-page.service';
+import {ROOT_PAGE_DATA, HierarchyPageService} from './services-api';
 
 describe('RootPageService', () => {
-  let service: RootPageService;
+  let service: HierarchyPageService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});

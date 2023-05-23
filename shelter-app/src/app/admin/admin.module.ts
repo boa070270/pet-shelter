@@ -16,8 +16,6 @@ import {ShelterCommonModule} from '../common';
 import {FormsModule} from '@angular/forms';
 import { TestSyncComponent } from './test-sync.component';
 import {DragDropModule} from '@angular/cdk/drag-drop';
-import { DsComponent } from './ds.component';
-import { DsDataComponent } from './ds-data.component';
 
 @NgModule({
   declarations: [
@@ -31,8 +29,6 @@ import { DsDataComponent } from './ds-data.component';
     PageTableComponent,
     UserTableComponent,
     TestSyncComponent,
-    DsComponent,
-    DsDataComponent,
   ],
   imports: [
     CommonModule,

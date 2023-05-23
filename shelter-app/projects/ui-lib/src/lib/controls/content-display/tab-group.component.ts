@@ -15,7 +15,7 @@ import {
 } from '@angular/core';
 import {AbstractIteratorComponent, IteratorDirective} from '../abstract-iterator.component';
 import {AbstractComponent} from '../abstract.component';
-import {deepCloneNode, ROOT_PAGE_DATA, RootPageService} from '../../shared';
+import {deepCloneNode, ROOT_PAGE_DATA, HierarchyPageService} from '../../shared';
 
 export interface TabType {
   label: string;
@@ -52,7 +52,7 @@ export class TabGroupComponent<T extends TabType> extends AbstractIteratorCompon
 
   constructor(protected _view: ViewContainerRef,
               protected changeDetector: ChangeDetectorRef,
-              @Inject(ROOT_PAGE_DATA) protected root: RootPageService) {
+              @Inject(ROOT_PAGE_DATA) protected root: HierarchyPageService) {
     super(_view, changeDetector);
   }
 

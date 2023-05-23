@@ -1,6 +1,6 @@
 import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewContainerRef} from '@angular/core';
 import {Subscription} from 'rxjs';
-import {RootPageService, TitleType} from '../shared';
+import {I18N_CFG, HierarchyPageService, TitleType} from '../shared';
 import {ControlValueAccessor} from '@angular/forms';
 import {Directionality} from '@angular/cdk/bidi';
 import {AbstractComponent} from './abstract.component';
@@ -19,7 +19,7 @@ export interface CommonParameters {
 @Component({
   selector: 'lib-base',
   template: '',
-  providers: [{provide: 'i18NCfg', useValue: null}]
+  providers: [{provide: I18N_CFG, useValue: null}]
 })
 export class BaseComponent extends AbstractComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor {
 
@@ -89,11 +89,10 @@ export class BaseComponent extends AbstractComponent implements OnInit, OnDestro
   pHint: string;
   pCaption: string;
   pError: string[];
-  private subsDir: Subscription;
+  private subsDir: Subscription = Subscription.EMPTY;
   protected change: (_: any) => {};
   protected touch: () => {};
   protected directionality: Directionality;
-  protected rootPage: RootPageService;
 
   constructor(protected _view: ViewContainerRef) {
     super(_view);

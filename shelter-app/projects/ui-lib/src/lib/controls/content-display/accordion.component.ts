@@ -9,7 +9,7 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import {AbstractIteratorComponent, IteratorDirective} from '../abstract-iterator.component';
-import {AbstractComponent} from "../abstract.component";
+import {AbstractComponent} from '../abstract.component';
 
 export interface AccordionData {
   label: string;

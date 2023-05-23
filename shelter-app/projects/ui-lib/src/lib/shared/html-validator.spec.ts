@@ -159,6 +159,8 @@ describe('html-validator', () => {
       const h1 = main.querySelector('h1');
       expect(window.getSelection().focusNode).toBe(h1.firstChild);
       expect(window.getSelection().focusOffset).toBe(0);
+      window.getSelection().collapse(h1, 0);
+      sp.initFromSelection(window.getSelection());
       for (let i = 0; i < 'Header'.length; ++i) {
         sp.moveNext();
         expect(window.getSelection().focusNode).toBe(h1.firstChild);
